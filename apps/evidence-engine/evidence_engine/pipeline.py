@@ -22,7 +22,7 @@ from . import contract as C
 from . import dates as D
 from . import dedupe, entity as E, excerpt as X, extract, registry
 from .fetch import canonical_url, host_of, url_key
-from .textnorm import sha256_text
+from .textnorm import normalise, sha256_text
 from .types import Document, EntityRef, FetchResult
 
 _ABBR: dict | None = None
@@ -127,7 +127,7 @@ async def fetch_document(url: str, fetcher, store, *, hits=None, today: _dt.date
 
 
 def source_name_for(doc: Document, info: dict) -> str:
-    host = host_of(doc.final_url or doc.url)
+    host = host_of(doc.original_url or doc.final_url or doc.url)
     publisher = info.get("publisher") or host
     title = (doc.title or "").strip()
     title = re.sub(r"\s*[|\-–—:]\s*" + re.escape(publisher) + r"\s*$", "", title, flags=re.I)
@@ -165,12 +165,16 @@ def build_cards(docs: list[Document], *, question: str, entity: EntityRef | None
     # Rank order within each entity-match class, confirmed/probable first:
     # measured 2026-10-10, 37 % of cards were `ambiguous` (a namesake's
     # newsroom) and displaced probable ones when max_cards bound.
+    # An archived page is classified and named by the page it is a copy OF
+    # (its original host), never by web.archive.org; a live copy outranks an
+    # archived one of the same standing.
     judged = []
     for doc in docs:
-        info = registry.classify(doc.final_url or doc.url, entity, source_name=doc.title)
+        info = registry.classify(doc.original_url or doc.final_url or doc.url, entity, source_name=doc.title)
         em, em_basis = E.match(doc, entity, info) if entity else ("ambiguous", "no entity supplied")
-        judged.append((_MATCH_ORDER.get(em, 9), doc, info, em, em_basis))
+        judged.append(((_MATCH_ORDER.get(em, 9), doc.url_status == "archived"), doc, info, em, em_basis))
     judged.sort(key=lambda j: j[0])
+    seen_excerpts: set[str] = set()
     for _, doc, info, em, em_basis in judged:
         key = url_key(doc.url)
         cands = X.select(doc.text, doc.verify_text, question, entity_terms=entity_terms(entity),
@@ -190,6 +194,12 @@ def build_cards(docs: list[Document], *, question: str, entity: EntityRef | None
             cid = C.card_id_for(item.source_url, item.excerpt)
             if cid in seen_ids:
                 continue
+            # the same words from a syndicated or archived copy are one card,
+            # not two: syndication is never counted as corroboration
+            if normalise(item.excerpt) in seen_excerpts:
+                dropped.append({"url": doc.url, "reason": "same excerpt already carded from another copy (syndication is not corroboration)"})
+                continue
+            seen_excerpts.add(normalise(item.excerpt))
             seen_ids.add(cid)
             prov = C.Provenance(
                 url_status=doc.url_status, original_url=doc.original_url,

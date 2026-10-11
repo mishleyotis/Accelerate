@@ -75,13 +75,15 @@ def sentences(text: str) -> list[tuple[int, int]]:
     covering every non-blank character run. A boundary is a terminal mark
     followed by whitespace and an upper-case/digit/quote opener, unless the
     token before the mark is a known abbreviation or a single initial.
-    Paragraph breaks (two newlines) always split."""
+    A newline always splits: the extractors emit one line per block, so a
+    heading and the dateline under it are two spans, never one excerpt
+    (measured 2026-10-10 on the fixture site)."""
     spans: list[tuple[int, int]] = []
     if not text:
         return spans
     # paragraphs first
     pos = 0
-    for para in re.finditer(r"[^\n]+(?:\n(?!\n)[^\n]+)*", text):
+    for para in re.finditer(r"[^\n]+", text):
         p_start, p_end = para.start(), para.end()
         cur = p_start
         for m in _SENT_END.finditer(text, p_start, p_end):

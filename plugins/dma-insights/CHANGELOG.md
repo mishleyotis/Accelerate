@@ -30,5 +30,12 @@
   research-layer section, RESEARCH-PROTOCOL § Tools rung 3, the production
   evidence doctrine, `enrichment_sources.json` search connectors +
   `_free_chain`.
+- **Measured** (`apps/evidence-engine/docs/EVAL-REPORT.md`, golden v1 from the
+  repo's own corpus, Logix held out): excerpt fidelity 100 %, URL liveness
+  100 %, boilerplate 0, syndication inflation 0, token reduction 82.6 % on
+  re-found pages; source recall 37.1 % after the two tuning iterations the
+  brief allows (fetchability-bound: WAF 403s and one client's own site; one
+  free discovery source) — escalated, not tuned further. `tests/` in the
+  engine: 302 offline tests; no client string in engine code (CI grep).
 - **Not deployed**: every resource-creating step waits on
   `apps/evidence-engine/docs/DEPLOY-PLAN.md` approval.

@@ -37,6 +37,10 @@ OTHER = """<html><head><title>Example Regulator — Quarterly data</title>
 <meta property="article:published_time" content="2026-09-01"></head><body><article>
 <p>Example Federal Credit Union reported total assets of $3.1 billion and 212,000 members at June 30, 2026, according to the quarterly call report.</p>
 <p>Its net worth ratio stood at 10.8 percent for the period.</p></article></body></html>"""
+ARCHIVED = """<html><head><title>Example Federal Credit Union — 2023 annual results</title>
+<meta property="article:published_time" content="2024-02-20"></head><body><article>
+<p>Example Federal Credit Union said membership grew 4 percent to 180,000 members during 2023, its earlier annual results show.</p>
+</article></body></html>"""
 CONFLICT = """<html><head><title>Example Herald — Credit union grows</title>
 <meta property="article:published_time" content="2026-08-15"></head><body><article>
 <p>Example Federal Credit Union now serves 198,000 members across 14 branches, the Anytown lender said on Friday.</p></article></body></html>"""
@@ -84,7 +88,7 @@ def make_transport(st: State):
                     "url": f"http://web.archive.org/web/20260101000000/{orig}"}}})
             return httpx.Response(200, json={"archived_snapshots": {}})
         if host == "web.archive.org":
-            return httpx.Response(200, text=PRESS, headers={"content-type": "text/html"})
+            return httpx.Response(200, text=ARCHIVED, headers={"content-type": "text/html"})
         if host in ("example-fcu.test", "www.example-fcu.test"):
             if path.startswith("/dead/"):
                 return httpx.Response(404)
@@ -175,19 +179,22 @@ def test_research_brief_returns_contract_clean_verified_cards(engine):
 
 
 def test_syndicated_copies_collapse_into_one_origin_cluster(engine):
+    """Three copies of one release (own site, trade press, wire) are ONE
+    origin cluster; the same words are carded once and the other copies are
+    reported as drops — syndication is never counted as corroboration."""
     out = run(engine.research_brief(run_id="R-2", entity=ENTITY, questions=["membership grew percent members"],
                                     max_cards=10, token_budget=20000, reference_date="2026-10-10"))
-    by_host = {}
-    for c in out["cards"]:
-        by_host.setdefault(c["provenance"]["host"], c)
-    copies = [by_host[h] for h in ("www.example-fcu.test", "example-press.test", "www.prnewswire.com") if h in by_host]
-    assert len(copies) >= 2, sorted(by_host)
-    clusters = {c["provenance"]["origin_cluster"] for c in copies}
-    assert len(clusters) == 1
+    copy_hosts = ("www.example-fcu.test", "example-press.test", "www.prnewswire.com")
+    copies = [c for c in out["cards"] if c["provenance"]["host"] in copy_hosts and c["provenance"]["url_status"] == "live"]
+    assert copies, [c["provenance"]["host"] for c in out["cards"]]
+    assert len({c["item"]["excerpt"] for c in copies}) == len(copies), "one excerpt, one card"
+    assert len({c["provenance"]["origin_cluster"] for c in copies}) == 1
     assert copies[0]["provenance"]["syndication_count"] >= 2
+    assert copies[0]["provenance"]["host"] == "www.example-fcu.test", "the entity's own copy outranks the wire's"
+    assert any("syndication is not corroboration" in d["reason"] for d in out["search"]["dropped"])
     # the regulator page is its own origin
     reg = [c for c in out["cards"] if c["provenance"]["host"] == "regulator.example.test"]
-    assert reg and reg[0]["provenance"]["origin_cluster"] not in clusters
+    assert reg and reg[0]["provenance"]["origin_cluster"] != copies[0]["provenance"]["origin_cluster"]
     assert reg[0]["item"]["tier"] == "T3"      # regulator.example.test is NOT a registered regulator
 
 
@@ -210,6 +217,11 @@ def test_dead_url_is_archived_or_absent_never_unsourced(engine):
         assert c["provenance"]["archive_timestamp"] == "20260101000000"
         assert c["provenance"]["original_url"].startswith("https://www.example-fcu.test/dead/")
         assert c["provenance"]["host"] == "www.example-fcu.test"
+        # classified and named by the page it is a copy OF, never by the archive:
+        # the entity's own site, outside a disclosure path ⇒ entity_owned, T5
+        assert c["item"]["tier"] == "T5" and c["provenance"]["source_type_hint"] == "entity_owned"
+        assert not c["item"]["source_name"].startswith("web.archive.org")
+        assert c["provenance"]["entity_match"] == "confirmed"
     for c in out["cards"]:
         assert c["item"]["source_url"].startswith("http")
 
