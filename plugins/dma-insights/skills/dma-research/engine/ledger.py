@@ -528,6 +528,71 @@ def attach_evidence(wb: RunWorkbook, eid: str, subcaps, *,
             "now_names": named, "minted": False}
 
 
+DETACH_STEP = "detach"
+
+
+def detach_evidence(wb: RunWorkbook, eid: str, subcap: str, *,
+                    why: str, actor: str | None = None) -> dict:
+    """Take back a citation a repair wave put on a DECLARED ABSENCE, when the
+    row does not bear on the cell, so the absence stands again.
+
+    R-INTERAC-20261010: collectors repairing absence_single_tool cells
+    attached rows that answered another question (an ad brand-lift study on
+    a BI-inventory cell, fraud ML on a content-generation cell). The gate
+    called the cells absence_superseded; the orchestrator judged, correctly,
+    that the rows do not bear on them and wrote no synthesis — and with no
+    write that removes a citation, nothing could ever close them (P4C2: four
+    cells). This is that write, and only that: a cell closed by
+    `declare_absence`, a row it cites, a reason, an actor in scope. A
+    synthesised cell is repaired by re-synthesis, never by detaching the
+    evidence its prose was judged on. Both directions of the link are
+    removed (the cell's citation and the row's SubCap_IDs), and a
+    Provenance 'detach' row records who and why."""
+    eid = str(eid or "").strip()
+    subcap = str(subcap or "").strip()
+    why = str(why or "").strip()
+    if len(why) < 20:
+        raise LedgerRefusal(
+            "detach needs --why (>=20 chars): what the row is about and why "
+            "that does not bear on this cell")
+    if subcap not in declared_absences(wb):
+        raise LedgerRefusal(
+            f"{subcap} is not a declared absence. detach only takes back rows "
+            f"a repair wave attached to an absence; a synthesised cell is "
+            f"repaired by re-synthesis, never by removing the evidence its "
+            f"prose was judged on")
+    sr = wb.scoring_row(subcap) or {}
+    have = [i for i in _split_ids(sr.get("Evidence_IDs")) if i and i != C.NO_EVIDENCE]
+    if eid not in [i.split(":")[0] for i in have]:
+        raise LedgerRefusal(f"{subcap} does not cite {eid}; nothing to detach")
+    assert_actor_scope(actor, "attach", [subcap])
+    register = wb.evidence_index()
+    row = register.get(eid) or {}
+    keep = [i for i in have if i.split(":")[0] != eid]
+    url = str(row.get("Source_URL") or "").strip()
+    still = {str((register.get(i.split(":")[0]) or {}).get("Source_URL") or "").strip()
+             for i in keep}
+    urls = [u for u in _split_ids(sr.get("Source_URLs")) if u and (u != url or u in still)]
+    with wb.transaction("detach_evidence"):
+        wb.set_scoring(subcap, {"Evidence_IDs": ", ".join(keep) or C.NO_EVIDENCE,
+                                "Source_URLs": ", ".join(urls) or None}, save=False)
+        if row:
+            named = [s.split(":")[0].strip() for s in _split_ids(row.get("SubCap_IDs"))
+                     if str(s).strip() and s.split(":")[0].strip() != subcap]
+            wb.update_row("Evidence_Detail", "E_ID", eid,
+                          {"SubCap_IDs": ", ".join(named)}, save=False)
+        wb.append("Provenance", {
+            "SubCap_ID": subcap, "Step": DETACH_STEP,
+            "Actor": str(actor or "unattributed").strip(), "At": _utcnow(),
+            "Detail": f"detached {eid} ({str(row.get('Source_Name') or '')[:80]}): {why}",
+            "Session": _agent_session()}, save=False)
+        if wb.autosave:
+            wb.save()
+        wb.recompute_coverage()
+    return {"e_id": eid, "subcap": subcap, "remaining": keep,
+            "absence_stands": not keep}
+
+
 def decline_evidence(wb: RunWorkbook, eid: str, subcap: str, *,
                      why: str, actor: str | None = None) -> dict:
     """Record that a lane READ a proposal and it does not bear on the cell.
@@ -1434,6 +1499,22 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
     elif band and band not in C.BANDS:
         problems.append(f"Ceiling_Band {band!r} is not in {C.BANDS} — "
                         f"a fifth band must not exist (invariant 6)")
+    if band in C.BANDS and row_eids:
+        # THE BAND MAY NOT OUTRUN THE EVIDENCE (R-INTERAC-20261010: five
+        # challenge FAILs on ceiling_reasoning, a round each — a 5.0 ceiling
+        # on one source identity, 3.0 on T4/T5 rows). `ceiling_for` is the
+        # number `score` refuses above; a band above the band that number
+        # sits in is refused here, where the writer can still fix it.
+        from . import assessment as _A
+        probe = dict(merged); probe["Ceiling_Band"] = ""
+        ceil, why = _A.ceiling_for(wb, probe)
+        top = C.band_of(ceil)
+        if top and C.BANDS.index(band) > C.BANDS.index(top):
+            problems.append(
+                f"Ceiling_Band {band!r} is above what the cited evidence allows: "
+                f"{why} → ceiling {ceil}, band {top}. Conclude Ceiling_Reasoning "
+                f"at {ceil} or below and set Ceiling_Band to {top} or lower "
+                f"(`engine.brief reuse` prints evidence_ceiling per cell)")
     # The hallucination pinpointer: every figure the synthesis asserts must
     # appear in an excerpt registered to this subcap. The excerpts are
     # verbatim spans of fused, cited sources — a number none of them carries

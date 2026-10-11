@@ -556,6 +556,11 @@ def main(argv=None) -> int:
                          "category's cells (engine/scope.py)")
     at.add_argument("--actor", default=None,
                     help="the agent attaching. Defaults to $DMA_ACTOR")
+    at.add_argument("--detach", action="store_true",
+                    help="take back a row a repair wave attached to a DECLARED "
+                         "ABSENCE when it does not bear on the cell (gate term "
+                         "absence_superseded, rows irrelevant), so the absence "
+                         "stands again. Needs --why. Refused on a synthesised cell")
     at.add_argument("--decline", action="store_true",
                     help="the opposite outcome, recorded: you READ the "
                          "proposal and it does not bear on this cell. Needs "
@@ -999,7 +1004,14 @@ def main(argv=None) -> int:
     if a.cmd == "attach":
         cells = [c for c in (a.subcap or []) if str(c).strip()]
         try:
-            if a.decline:
+            if getattr(a, "detach", False):
+                if len(cells) != 1 or not a.why:
+                    print("REFUSED: --detach takes back ONE row from ONE cell "
+                          "and needs --why.", file=sys.stderr)
+                    return 1
+                out = ledger.detach_evidence(wb, a.e_id, cells[0],
+                                             why=a.why, actor=_actor(a))
+            elif a.decline:
                 if len(cells) != 1:
                     print("REFUSED: --decline judges ONE proposal on ONE "
                           "cell. Pass a single --subcap.", file=sys.stderr)

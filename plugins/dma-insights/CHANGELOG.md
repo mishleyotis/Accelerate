@@ -7,9 +7,10 @@ Please diagnose and fix the above to ensure this never recurs."
 
 Twelve of sixteen category workflows returned `AT_STAGE_BUDGET` or handed
 back cells nothing could close, with the envelope $49.77 from its ceiling.
-Seven defects — three in the driver↔governor budget handshake, two in how
-concurrent agents and successive handoffs name their files, two in how a
-gate term reaches the agent that can close it:
+Nine defects — three in the driver↔governor budget handshake, two in how
+concurrent agents and successive handoffs name their files, three in how a
+gate term reaches an agent able to close it, one rule a challenger kept
+having to state that the engine already knew:
 
 - **The share** (`engine/pipeline.py`): with the envelope funding the scope,
   shares were `remaining × cells / total` — blind to the ~$1.40 orchestrator
@@ -57,6 +58,24 @@ gate term reaches the agent that can close it:
   `briefs/wf_challenge_<CAT>_r1` kept packets from earlier handoffs that
   judge text no longer there; the challenge step now clears it first and
   works only the packets it just built.
+- **The ceiling nobody was shown** (`engine/brief.py`, `engine/ledger.py`):
+  five challenge FAILs on `ceiling_reasoning`, a round each — a 5.0 ceiling
+  on one source identity (P3C2.2.CIB1, twice), 3.0 on T4/T5 rows
+  (P1C2.6.2), bands contradicting the stated number. `assessment.ceiling_for`
+  already computed the number `score` refuses above; the writer never saw
+  it. `brief reuse` now prints `evidence_ceiling` {value, band_max, why} per
+  cell, the orchestrator prompt concludes at it, and the ledger refuses a
+  `Ceiling_Band` above the evidence's band at the write.
+- **The citation nobody could take back** (`engine/ledger.py`,
+  `engine/cli.py`): when the rows a repair wave attached to a declared
+  absence answer another question (P4C2: an ad brand-lift study on a
+  BI-inventory cell, fraud ML on a content-generation cell), the orchestrator
+  rightly writes no synthesis — and with no write that removes a citation,
+  `absence_superseded` could never close (four cells). `attach --detach
+  --why` (`ledger.detach_evidence`) takes the row back from a declared
+  absence only — never from a synthesised cell — both directions of the
+  link, a Provenance 'detach' row; the absence then stands. The orchestrator
+  prompt detaches instead of reporting a gap no one can close.
 
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow

@@ -345,3 +345,125 @@ def test_the_challenge_never_works_a_packet_an_earlier_handoff_left():
     step1 = r.stdout[r.stdout.index("1) "):r.stdout.index("2) ")]
     assert step1.index(f"rm -rf {out_dir}") < step1.index("challenge-batch"), step1
     assert "ONLY the packets this command lists" in step1
+
+
+# ── 7. the ceiling is the engine's, at the write ──────────────────────────
+#
+# Five challenge FAILs on ceiling_reasoning in one run, a round each: a 5.0
+# ceiling on one source identity (P3C2.2.CIB1, twice), 3.0 on T4/T5 rows
+# (P1C2.6.2), bands that contradicted the stated number. `ceiling_for` knew
+# the number; the writer never saw it and nothing refused the overstatement.
+
+def _one_identity_rows(wb, cell, n=2):
+    from fixtures import fire_volleys
+    fire_volleys(wb, cell, n=n)
+    return [L.append_evidence(
+        wb, source_name=f"Interac PPS disclosure part {i + 1}",
+        source_url=f"https://pps.example/disclosure-{cell}-{i}",
+        tier="T2", subcaps=[cell], published="2025-06-01",
+        excerpt=(f"The operator maintains an operational risk framework with "
+                 f"scenario analysis reviewed annually by the board, part {i + 1} ({cell}).")
+    ) for i in range(n)]
+
+
+def test_the_evidence_pack_prints_the_cells_ceiling(tmp_path):
+    from engine import brief
+    run = new_run(tmp_path, n=6)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    _one_identity_rows(wb, cell)
+    ec = brief.reusable(wb, cell)["evidence_ceiling"]
+    assert ec["value"] == 3.0 and ec["band_max"] == "Competing", ec
+    assert "single source" in ec["why"]
+
+
+def test_a_band_above_the_evidence_ceiling_is_refused_at_the_write(tmp_path):
+    run = new_run(tmp_path, n=6)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    eids = _one_identity_rows(wb, cell)
+    rec = good_synthesis(cell, eids)
+    rec["Claim_Label"] = "INFERENCE"
+    rec["Triangulation"] = (f"Two parts of one disclosure [{eids[0]}:F1] [{eids[1]}:F1] "
+                            "imply a board-reviewed framework; one identity, so it suggests "
+                            "rather than proves maturity.")
+    rec["Ceiling_Band"] = "Differentiating"
+    with pytest.raises(L.LedgerRefusal, match=r"above what the cited evidence allows.*ceiling 3\.0, band Competing"):
+        L.append_synthesis(wb, cell, rec, actor="research-p1c1-producer")
+    rec["Ceiling_Band"] = "Competing"
+    try:
+        L.append_synthesis(wb, cell, rec, actor="research-p1c1-producer")
+    except L.LedgerRefusal as e:
+        assert "above what the cited evidence allows" not in str(e), e
+
+
+@needs_node
+def test_the_orchestrator_concludes_at_the_printed_ceiling():
+    wf = HERE.parents[2] / "plugins" / "dma-insights" / "workflows" / "dma-pillar-research.js"
+    src = wf.read_text()
+    body = src[src.index("function synthPrompt"):src.index("function challengePrompt")]
+    assert "evidence_ceiling.value" in body and "band_max" in body
+
+
+# ── 8. a superseded absence whose rows do not bear on it ──────────────────
+#
+# P4C2: the orchestrator judged, correctly, that the rows a repair wave
+# attached to four declared absences answered other questions (an ad
+# brand-lift study on a BI-inventory cell) and wrote no synthesis — and with
+# no write that removes a citation, the cells could never close.
+
+def test_detaching_irrelevant_rows_lets_the_declared_absence_stand(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path, n=6, absent=1)
+    cell = cells[-1]
+    wrong = bank_evidence(wb, cell, n=2)
+    v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert "absence_superseded" in v["blocking"]
+    with pytest.raises(L.LedgerRefusal, match="needs --why"):
+        L.detach_evidence(wb, wrong[0], cell, why="nope", actor="research-p1c1-producer")
+    for e in wrong:
+        out = L.detach_evidence(wb, e, cell, actor="research-p1c1-producer",
+                                why="the row is about another capability's adoption figures")
+    assert out["absence_stands"] is True
+    row = {str(r["SubCap_ID"]): r for r in wb.scoring_rows()}[cell]
+    assert L.is_declared_absent(row, wb)
+    reg = wb.evidence_index()
+    assert all(cell not in str(reg[e].get("SubCap_IDs") or "") for e in wrong)
+    assert [p for p in wb.rows("Provenance")
+            if p.get("SubCap_ID") == cell and p.get("Step") == "detach"]
+    v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert v["gate"] == "PASS", v["blocking"]
+
+
+def test_detach_never_strips_a_synthesised_cell(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path, n=6, absent=1)
+    cell = cells[0]
+    with pytest.raises(L.LedgerRefusal, match="not a declared absence"):
+        L.detach_evidence(wb, ev[cell][0], cell, actor="research-p1c1-producer",
+                          why="trying to remove evidence from a synthesised cell")
+
+
+def test_detach_is_a_cli_and_batch_write(tmp_path):
+    import sys
+    run, wb, cells, _ = researched_run(tmp_path, n=6, absent=1)
+    cell = cells[-1]
+    wrong = bank_evidence(wb, cell, n=1)
+    eng = HERE.parents[2] / "plugins" / "dma-insights" / "skills" / "dma-research"
+    ops = tmp_path / "detach.ops"
+    ops.write_text(f'attach --detach --e-id {wrong[0]} --subcap {cell} '
+                   f'--why "the row is about another capability entirely" '
+                   f'--actor research-p1c1-producer\n')
+    r = subprocess.run([sys.executable, "-m", "engine.cli", "batch", "--run", run.run_id,
+                        "--root", str(run.root), "--file", str(ops)],
+                       cwd=eng, capture_output=True, text=True, timeout=300)
+    assert r.returncode == 0, r.stdout + r.stderr
+    wb2 = run.open()
+    row = {str(x["SubCap_ID"]): x for x in wb2.scoring_rows()}[cell]
+    assert L.is_declared_absent(row, wb2), row.get("Evidence_IDs")
+
+
+@needs_node
+def test_the_orchestrator_detaches_rather_than_reporting_a_dead_gap():
+    wf = HERE.parents[2] / "plugins" / "dma-insights" / "workflows" / "dma-pillar-research.js"
+    body = wf.read_text()
+    body = body[body.index("function synthPrompt"):body.index("function challengePrompt")]
+    assert "attach --detach --e-id" in body and "never report it as a gap" in body
