@@ -268,16 +268,24 @@ def _holders(prefix: str) -> set:
     ("mcp__Quartr__", set()),
     ("mcp__Google_Drive__", set()),
     # 2026-10-10 (the research layer): the engine is PRIMARY on the search
-    # tier; the verifiers and the two assemblers hold its verify slice; the
-    # raw fallbacks stay with the servicing tier only.
+    # tier; the verifiers and the two assemblers hold its verify slice.
+    # 2026-10-11 (owner: "ensure all six are mapped to the agents and well
+    # orchestrated"): the collector and the technographic scanner hold the
+    # engine AND the raw fallbacks beside the servicing tier; alphaxiv is
+    # mapped to the research tier but lists no tool until a signed-in
+    # listing is captured (401 anonymously), so no manifest carries one.
     ("mcp__plugin_dma-insights_evidence__", {"research-conductor", "enrichment-web-specialist",
-                                             "research-evidence-collector", "adversarial-verifier",
-                                             "finding-challenger", "page-consolidator",
-                                             "surface-producer"}),
-    ("mcp__plugin_dma-insights_searxng__", {"research-conductor", "enrichment-web-specialist"}),
-    ("mcp__plugin_dma-insights_fetch__", {"research-conductor", "enrichment-web-specialist"}),
-    ("mcp__plugin_dma-insights_edgar__", {"research-conductor", "enrichment-web-specialist"}),
-    ("mcp__plugin_dma-insights_parallel__", {"research-conductor", "enrichment-web-specialist"}),
+                                             "research-evidence-collector", "technographic-scanner",
+                                             "adversarial-verifier", "finding-challenger",
+                                             "page-consolidator", "surface-producer"}),
+    ("mcp__plugin_dma-insights_searxng__", {"research-conductor", "enrichment-web-specialist",
+                                            "research-evidence-collector", "technographic-scanner"}),
+    ("mcp__plugin_dma-insights_fetch__", {"research-conductor", "enrichment-web-specialist",
+                                          "research-evidence-collector", "technographic-scanner"}),
+    ("mcp__plugin_dma-insights_edgar__", {"research-conductor", "enrichment-web-specialist",
+                                          "research-evidence-collector", "technographic-scanner"}),
+    ("mcp__plugin_dma-insights_parallel__", {"research-conductor", "enrichment-web-specialist",
+                                             "research-evidence-collector", "technographic-scanner"}),
     ("mcp__plugin_dma-insights_alphaxiv__", set()),
 ])
 def test_only_the_connector_tier_holds_a_connector(prefix, expected):
