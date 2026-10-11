@@ -2485,15 +2485,42 @@ class Pipeline:
                              "raise_with": f"--stage-budget RESEARCH=<usd>"}
             doc["estimate"]["fits_envelope"] = fits_env
             total_cells = max(1, cells + rcells)
+
+            # A CATEGORY HAS FIXED COSTS, NOT ONLY PER-CELL ONES (2026-10-11).
+            # Its orchestrator pass and its challenge are paid once whatever
+            # its size, and its first wave is whole batches. A share cut by
+            # cells alone gave a small category — a three-cell repair round —
+            # less than one batch plus that reserve, so the workflow's governor
+            # refused its first wave and it closed AT_STAGE_BUDGET with the
+            # envelope still holding money. Each invocation is now floored at
+            # its fixed costs (one orchestrator + one challenge per category,
+            # every first-wave batch: never less than one full wave) and the
+            # rest of what is left is split by cells. Floors that do not fit
+            # fall back to the cell split; whole-category allocation above
+            # already covers an envelope too small for the scope.
+            def _floor(i) -> float:
+                nb = sum(len(b) for b in i["batches"].values()) + sum(
+                    -(-len(r) // max(1, limit)) for r in i["repairs"].values() if r)
+                return (len(i["cats"]) * (float(price.get("per_category_orchestrator") or 0.0)
+                                          + float(price.get("per_category_challenge") or 0.0))
+                        + max(1, nb) * float(price.get("per_batch") or 0.0))
+            floors = {id(i): _floor(i) for i in inv}
+            spare = (None if remaining is None
+                     else float(remaining) - sum(floors.values()))
             for i in inv:
                 mine = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
                            for c in i["cats"])
                 # A handed category's share is ITS OWN end-to-end estimate when
-                # categories were allocated whole; otherwise the remainder is
-                # partitioned by cells.
-                share = (None if remaining is None
-                         else (i.get("_est") if i.get("_est") is not None
-                               else round(float(remaining) * mine / total_cells, 4)))
+                # categories were allocated whole; otherwise its fixed floor
+                # plus the spare partitioned by cells.
+                if remaining is None:
+                    share = None
+                elif i.get("_est") is not None:
+                    share = i["_est"]
+                elif spare is not None and spare >= 0:
+                    share = round(floors[id(i)] + spare * mine / total_cells, 4)
+                else:
+                    share = round(float(remaining) * mine / total_cells, 4)
                 i.pop("_est", None)
                 # EVERY INVOCATION KNOWS ITS SHARE. Sixteen workflows spend
                 # one envelope at once; a per-invocation share, proportional
