@@ -71,15 +71,22 @@ class _SearchCache:
 PER_HOST_CAP = 3
 
 
-def _host_diverse_order(hits: list[dict], entity: EntityRef | None = None) -> list[dict]:
-    """Hit order for the fetch slice: hits that NAME the entity (legal name
-    or an alias in title/snippet, or the entity's own host) come before hits
-    that do not — measured 2026-10-11: a metasearch for one credit union's
-    questions returned 128 hits, the top of the fused list a pharmaceutical
-    namesake's catalogue, and the twelve-slot slice fetched nothing the
-    question was about. Within a band the fused order holds, and no host
-    takes more than PER_HOST_CAP of the leading slots; the overflow
-    follows, still in order, as back-fill."""
+def _host_diverse_order(hits: list[dict], entity: EntityRef | None = None,
+                        question: str | None = None) -> list[dict]:
+    """Hit order for the fetch slice.
+
+    Measured 2026-10-11 (eval v1 iteration 3): with 18 queries over two
+    backends a brief fuses ~140 hits, and 17 of 35 golden URLs were in the
+    list — at rank 1 of SOME list in most cases — yet never fetched: a
+    twelve-slot slice in fused order fetches one rank-1 page per list and
+    the entity-name band no longer discriminates once every query names
+    the entity. The order is therefore: the entity's own host, then hits
+    naming the entity ranked by how many of the question's terms their
+    title + snippet carry, then the rest; within a band the fused order
+    holds, and no host takes more than PER_HOST_CAP of the leading slots
+    (the overflow back-fills, still in order)."""
+    qterms = X.terms(question or "")
+
     def names_entity(h: dict) -> int:
         if entity is None:
             return 1
@@ -88,7 +95,14 @@ def _host_diverse_order(hits: list[dict], entity: EntityRef | None = None) -> li
         hay = normalise(" ".join(str(h.get(k) or "") for k in ("title", "snippet", "url")))
         names = [entity.legal_name] + list(entity.aliases or [])
         return 1 if any(normalise(n) and normalise(n) in hay for n in names) else 0
-    banded = sorted(enumerate(hits), key=lambda ih: (-names_entity(ih[1]), ih[0]))
+
+    def overlap(h: dict) -> float:
+        if not qterms:
+            return 0.0
+        hay = X.terms(" ".join(str(h.get(k) or "") for k in ("title", "snippet")))
+        return len(hay & qterms) / len(qterms)
+
+    banded = sorted(enumerate(hits), key=lambda ih: (-names_entity(ih[1]), -round(overlap(ih[1]), 2), ih[0]))
     seen: dict[str, int] = {}
     head, tail = [], []
     for _, h in banded:
@@ -154,7 +168,7 @@ class Engine:
                         "(owner decision) or wait for a free source's breaker to close."}
 
     async def _documents_for_hits(self, hits: list[dict], *, limit: int, reference, hits_by_key,
-                                  entity: EntityRef | None = None) -> tuple[list[Document], list[dict]]:
+                                  entity: EntityRef | None = None, question: str | None = None) -> tuple[list[Document], list[dict]]:
         """Fetch up to `limit` ATTEMPTED documents from the hit list, in hit order.
 
         Measured 2026-10-10 (eval v1): the own-domain `site:` query floods the top
@@ -166,7 +180,7 @@ class Engine:
         (robots, an open breaker, a never-fetch host) refunds its slot."""
         docs: list[Document] = []
         failures: list[dict] = []
-        queue = _host_diverse_order(hits, entity)
+        queue = _host_diverse_order(hits, entity, question)
         counted = 0
         lock = asyncio.Lock()
 
@@ -220,7 +234,7 @@ class Engine:
                              token_budget: int = 2400, provenance: str = "standard",
                              reference_date: str | None = None,
                              allow_names_from_cards: dict | None = None,
-                             fetch_limit: int = 12) -> dict:
+                             fetch_limit: int = 20) -> dict:
         t0 = time.monotonic()
         ent = entity_ref(entity)
         if ent is None or not ent.legal_name:
@@ -259,7 +273,7 @@ class Engine:
         hits_by_key = {h["url_key"]: h.get("hits", []) for h in hits}
         t_fetch = time.monotonic()
         docs, failures = await self._documents_for_hits(hits, limit=fetch_limit, reference=ref,
-                                                        hits_by_key=hits_by_key, entity=ent)
+                                                        hits_by_key=hits_by_key, entity=ent, question=question)
         t_rank = time.monotonic()
         ranked = R.rank_chunks(question, docs, top_k=max_cards * 3, facet_text=facet or "")
         order = []

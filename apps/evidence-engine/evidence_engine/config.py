@@ -67,6 +67,7 @@ class Settings:
     #: the 403→snapshot path calls them far more often than any one site,
     #: and eval v1 iteration 2 opened web.archive.org's breaker once.
     archive_rps: float = field(default_factory=lambda: _float("EE_ARCHIVE_RPS", 0.5))
+    archive_timeout_s: float = field(default_factory=lambda: _float("EE_ARCHIVE_TIMEOUT_S", 30.0))
     #: Parallel: measured ceiling × 0.7. The 2026-10-10 ramp (90 calls, 1/s
     #: then 2/s, p50 1.9 s) recorded no 429 up to 2/s ⇒ 2 × 0.7.
     parallel_rps: float = field(default_factory=lambda: _float("EE_PARALLEL_RPS", 1.4))

@@ -334,7 +334,11 @@ class HttpFetcher:
         t0 = self._clock()
         self.requests_made += 1
         try:
-            async with self._client.stream("GET", url, headers=self._headers(host, accept_pdf)) as r:
+            # Wayback serves a snapshot slowly and honestly; a 12 s clock reads
+            # it as dead and opens its breaker (eval v1 iteration 3).
+            req_timeout = httpx.Timeout(settings().archive_timeout_s) if ratelimit._is_archive_host(host) else None
+            async with self._client.stream("GET", url, headers=self._headers(host, accept_pdf),
+                                           timeout=req_timeout) as r:
                 res.status = r.status_code
                 res.final_url = str(r.url)
                 res.content_type = r.headers.get("content-type", "")

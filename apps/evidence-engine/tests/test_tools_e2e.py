@@ -431,3 +431,14 @@ def test_fetch_slice_puts_hits_naming_the_entity_first():
     assert order[0] == "k4", "the entity's own host first"
     assert order[1:3] == ["k3", "k5"], "then hits naming the entity, in fused order"
     assert order[3:] == ["k1", "k2"], "the namesake last"
+
+
+def test_fetch_slice_ranks_question_overlap_inside_the_entity_band():
+    from evidence_engine.tools import _host_diverse_order
+    from evidence_engine.types import EntityRef
+    ent = EntityRef(legal_name="Example Federal Credit Union", domains=["example-fcu.test"], aliases=["Example FCU"])
+    hits = [{"url": "https://a.test/1", "url_key": "a1", "title": "Example FCU annual gala photos", "snippet": ""},
+            {"url": "https://b.test/2", "url_key": "b2", "title": "Example FCU mobile banking app adds fingerprint login", "snippet": "biometric"},
+            {"url": "https://c.test/3", "url_key": "c3", "title": "Example FCU", "snippet": "fingerprint login for mobile banking members"}]
+    order = [h["url_key"] for h in _host_diverse_order(hits, ent, "Does the credit union offer fingerprint login in its mobile banking app?")]
+    assert order[0] in ("b2", "c3") and order[-1] == "a1", order
