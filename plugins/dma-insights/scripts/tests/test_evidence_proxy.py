@@ -62,3 +62,29 @@ def test_headers_helper_is_a_sibling_with_exit_zero_semantics():
     assert "mcp_auth_headers.sh" in src                        # documents the relationship
     orig = (SCRIPTS / "mcp_auth_headers.sh").read_text()
     assert "evidence" not in orig.lower()                      # the original is untouched by this work
+
+
+def test_a_down_service_degrades_to_an_empty_tool_list_not_a_failed_server(monkeypatch):
+    """The service answers 404 (not deployed) or is unreachable: the proxy
+    completes the handshake itself with no tools and a reason, answers
+    tools/list with [], and refuses a tool call with the recorded reason."""
+    def fake_forward(url, msg):
+        if msg.get("id") is None:
+            return []
+        return [{"jsonrpc": "2.0", "id": msg["id"], "error": {"code": -32000, "message": "connector HTTP 404: Not Found"}}]
+    monkeypatch.setattr(mcp_proxy, "forward", fake_forward)
+    evidence_proxy._cfg.update(secret=EVIDENCE_SECRET)
+    init = evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                                                         "params": {"protocolVersion": "2025-06-18"}})
+    assert init[0]["result"]["serverInfo"]["version"] == "unavailable"
+    assert "404" in init[0]["result"]["instructions"] and "doctor" in init[0]["result"]["instructions"]
+    assert evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "method": "notifications/initialized"}) == []
+    tl = evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+    assert tl[0]["result"] == {"tools": []}
+    call = evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+                                                         "params": {"name": "research_brief", "arguments": {}}})
+    assert "unavailable" in call[0]["error"]["message"]
+    # a later successful initialize clears the degraded state
+    monkeypatch.setattr(mcp_proxy, "forward", lambda url, msg: [{"jsonrpc": "2.0", "id": msg.get("id"), "result": {"ok": True}}])
+    ok = evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "id": 4, "method": "initialize", "params": {}})
+    assert ok[0]["result"] == {"ok": True} and evidence_proxy._degraded["reason"] is None

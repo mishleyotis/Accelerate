@@ -97,10 +97,55 @@ def main(argv=None) -> int:
             msg = json.loads(line)
         except json.JSONDecodeError:
             continue
-        for reply in mcp_proxy.forward(endpoint(base), msg):
+        for reply in serve(endpoint(base), msg):
             sys.stdout.write(json.dumps(reply) + "\n")
             sys.stdout.flush()
     return 0
+
+
+#: Set when the service refused or could not be reached at `initialize`:
+#: the proxy then answers the handshake itself with NO tools, so a plugin
+#: whose research service is down still loads cleanly (doctor reports the
+#: outage; an agent sees no tool rather than a failed server), and every
+#: later call answers with the recorded reason instead of a retry storm.
+_degraded = {"reason": None}
+
+
+def _is_error(replies: list, msg: dict) -> str | None:
+    for r in replies:
+        if isinstance(r, dict) and r.get("id") == msg.get("id") and r.get("error"):
+            return str(r["error"].get("message") or "error")
+    return None
+
+
+def serve(url: str, msg: dict) -> list:
+    """forward(), degrading to an empty tool list when the service is down."""
+    method = msg.get("method")
+    if method == "initialize":
+        _degraded["reason"] = None
+        replies = mcp_proxy.forward(url, msg)
+        why = _is_error(replies, msg)
+        if why is None:
+            return replies
+        _degraded["reason"] = why
+        print(f"evidence_proxy: {_cfg['secret']}: service unavailable ({why}); "
+              f"serving an empty tool list until the next initialize", file=sys.stderr)
+        return [{"jsonrpc": "2.0", "id": msg.get("id"), "result": {
+            "protocolVersion": (msg.get("params") or {}).get("protocolVersion", "2025-06-18"),
+            "capabilities": {"tools": {}},
+            "serverInfo": {"name": _cfg["secret"].replace("-path-token", ""), "version": "unavailable"},
+            "instructions": f"This research-layer service is unavailable: {why}. No tools are served; "
+                            f"run /dma-insights:doctor. The connector and the other services are unaffected."}}]
+    if _degraded["reason"] is not None:
+        if msg.get("id") is None:                       # notifications: nothing to answer
+            return []
+        if method == "tools/list":
+            return [{"jsonrpc": "2.0", "id": msg.get("id"), "result": {"tools": []}}]
+        if method in ("ping",):
+            return [{"jsonrpc": "2.0", "id": msg.get("id"), "result": {}}]
+        return [{"jsonrpc": "2.0", "id": msg.get("id"),
+                 "error": {"code": -32000, "message": f"service unavailable: {_degraded['reason']}"}}]
+    return mcp_proxy.forward(url, msg)
 
 
 if __name__ == "__main__":

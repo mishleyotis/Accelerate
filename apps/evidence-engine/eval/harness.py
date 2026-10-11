@@ -207,8 +207,15 @@ def entity_tokens(ent: dict) -> set[str]:
 
 
 def question_for(row: dict, ent: dict, max_terms: int = 7) -> dict:
-    """The derived question for one positive row, and what was removed."""
+    """The question for one positive row: the golden row's OWN question when
+    the set carries one (golden v2: the subcap's diagnostic question from
+    the pillar toolkits), else one derived from the excerpt's vocabulary
+    (golden v1), and what was removed."""
     from evidence_engine import query as Q
+    if row.get("question"):
+        names = Q.find_names(row["question"])
+        return {"question": row["question"], "terms": [], "platform_names_stripped": names,
+                "question_source": row.get("question_source") or "row"}
     excerpt = row.get("excerpt") or ""
     names = Q.find_names(excerpt)
     name_tokens = {t.lower() for n in names for t in _TOKEN.findall(n)}
@@ -470,8 +477,9 @@ async def run_research(engine, samples: list[dict], entities: dict, *, max_cards
         # What the AGENT reads: the whole answer as the tool returns it (cards
         # in the requested provenance + coverage + search block), not just the
         # cards — the figure token consumption is judged on (owner, 2026-10-11).
-        rec["answer_tokens"] = C.estimate_tokens(out)
-        rec["answer_tokens_cards_only"] = C.estimate_tokens(cards)
+        from evidence_engine import contract as _C
+        rec["answer_tokens"] = _C.estimate_tokens(out)
+        rec["answer_tokens_cards_only"] = _C.estimate_tokens(cards)
         rec["rerank"] = out.get("rerank")
         s = out.get("search") or {}
         rec["search"] = {"queries": len(s.get("queries") or []), "hits": s.get("hits"), "fetched": s.get("fetched"),
