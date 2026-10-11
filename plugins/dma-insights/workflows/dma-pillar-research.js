@@ -276,11 +276,18 @@ log(`${A.pillar} · ${A.cats.map(c => `${c}×${(BATCHES[c] || []).length} batch(
 // RESERVES the orchestrator and the challenge before it spends a dollar on a
 // collector, and a share that cannot carry one batch plus that reserve hands
 // the whole category back untouched (no spend) rather than half-collected.
+// EVERY wave holds that reserve, not only the first (R-INTERAC-20261010): a
+// gap or round-2 wave bought evidence with the money the next synthesis and
+// the challenge needed, so P1C3 and P3C1 ended "syntheses written, challenge
+// not affordable" with their repair evidence unsynthesised and no gate run.
+// Evidence collected is owed a synthesis and a challenge, whichever wave
+// collected it; a wave that cannot also fund both does not start, and the
+// category goes straight to its challenge with what it already has.
 const RESERVE = TIER_USD.orchestrator + TIER_USD.challenge
 async function collectWave(cat, jobs, wave) {
   // Price the wave; run the batches that fit, in order; name the rest.
   const runnable = []
-  const reserve = wave === 1 ? RESERVE : 0
+  const reserve = RESERVE
   for (const j of jobs) {
     if (affordable(TIER_USD.collector_batch + reserve, `${cat} collector wave ${wave} batch ${j.caps[0]} (+ the orchestrator and challenge reserve)`)) { runnable.push(j); est += TIER_USD.collector_batch }
     else unreached.push(...(j.cells || j.caps))
@@ -294,7 +301,8 @@ async function collectWave(cat, jobs, wave) {
 }
 
 async function synthesise(cat, wave, collected, cells) {
-  if (!affordable(TIER_USD.orchestrator, `${cat} orchestrator pass ${wave}`)) return null
+  // the challenge always follows a synthesis: never write one it cannot pay for
+  if (!affordable(TIER_USD.orchestrator + TIER_USD.challenge, `${cat} orchestrator pass ${wave} (+ the challenge reserve)`)) return null
   est += TIER_USD.orchestrator
   return spawn(synthPrompt(cat, wave, collected, cells), {
     label: `${cat} p${wave} orchestrate`, phase: wave === 1 ? 'Synthesise' : 'Repair',
@@ -319,6 +327,12 @@ const results = await pipeline(A.cats, async (cat) => {
       // nothing is synthesised, challenged or retried; the driver re-hands it.
       log(`${cat} r${round}: every collector failed — stopping; the driver re-hands it`)
       return { category: cat, still_open: -1, gate: 'AGENT_ERROR', blocking_terms: ['agent_error: no collector returned'], unreached_cells: unreached, spent_est_usd: est }
+    }
+    if (!ran.length && prev) {
+      // a challenge already ran: its gate verdict is the truth to hand back,
+      // not a bare AT_STAGE_BUDGET that hides which cells block
+      log(`${cat} r${round}: no further wave fits the share — handing back the r${round - 1} gate verdict`)
+      break
     }
     if (!ran.length) {
       log(`${cat} r${round}: no collector wave fit the envelope — handing back`)
@@ -348,6 +362,9 @@ const results = await pipeline(A.cats, async (cat) => {
       if (rran.length && rgot.length) {
         const s2 = await synthesise(cat, 2, rgot, cells)
         if (s2) log(`${cat} p2: ${s2.cells_synthesised || 0} synthesised, ${s2.declared_absent || 0} declared absent, ${(s2.gaps || []).length} gap(s) remain`)
+        else if (s2 === null) log(`${cat} p2: gap evidence collected but its synthesis did not fit — the reserve rule above should make this unreachable`)
+      } else if (!rran.length) {
+        log(`${cat}: gap wave not started (it could not also fund its synthesis and the challenge) — challenging what round 1 wrote`)
       }
     }
     if (!affordable(TIER_USD.challenge, `${cat} challenge r${round}`)) {

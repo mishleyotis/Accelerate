@@ -1,5 +1,40 @@
 # dma-insights — plugin changelog
 
+## 1.24.1 — 2026-10-11 — a research share always funds a whole round
+
+Owner, R-INTERAC-20261010: "I see workflows failing and being restarted.
+Please diagnose and fix the above to ensure this never recurs."
+
+Seven of sixteen category workflows returned `AT_STAGE_BUDGET` with the
+envelope $49.77 from its ceiling. Three defects in the driver↔governor
+handshake:
+
+- **The share** (`engine/pipeline.py`): with the envelope funding the scope,
+  shares were `remaining × cells / total` — blind to the ~$1.40 orchestrator
+  and challenge every category pays whatever its size. P3C2/P3C4 got $0.81,
+  P1C3 $1.22, P4C1 $1.49 against a $1.74 first wave: refused in
+  milliseconds, no agent run. A share is now never below one whole round at
+  the governor's own `tier_usd` (`_round_floor_usd`: every first-wave batch
+  + orchestrator + challenge), plus a cells-proportional part of any
+  surplus; when the floors do not all fit, whole categories are allocated
+  cheapest first (the existing deferral), never undersized shares.
+- **The spend order** (`workflows/dma-pillar-research.js`): only wave 1 held
+  the orchestrator-and-challenge reserve, so the gap wave and round 2 spent
+  it on collectors — P1C3, P3C1, P3C2, P4C4 ended "syntheses written,
+  challenge not affordable", repair evidence bought and never synthesised.
+  Every wave now holds the reserve; a synthesis is written only when its
+  challenge is funded; an unfunded gap wave is skipped and the category goes
+  to its challenge with what it has.
+- **The verdict**: a round-2 wave that did not fit replaced the round-1 gate
+  verdict (FAIL with its cells) with a bare `AT_STAGE_BUDGET`; it now hands
+  back the verdict.
+
+Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
+— the driver's shares swept across envelope sizes, and the real workflow
+source run under node (`research_governor_harness.mjs`) at every share from
+$0 to $7: a category either runs no agent or its last collector is followed
+by a synthesis and a challenge, and never spends past its share.
+
 ## 1.24.0 — 2026-10-11 — the six connectors, batched and ordered
 
 Owner: "There were 6 connectors mentioned … Ensure all are mapped to the

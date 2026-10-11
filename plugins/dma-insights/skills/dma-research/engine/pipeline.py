@@ -753,6 +753,32 @@ def _repair_batches(repairs: dict[str, list[str]],
     return out
 
 
+def _governor_tiers(price: dict) -> dict[str, float]:
+    """The per-wave prices the research workflow's governor checks every wave
+    against (`budget.tier_usd`). One source, so the share the driver hands and
+    the waves the workflow can afford are priced by the same numbers."""
+    return {"collector_batch": float(price.get("per_batch") or 0.0),
+            "orchestrator": float(price.get("per_category_orchestrator") or 0.0),
+            "challenge": float(price.get("per_category_challenge") or 0.0)}
+
+
+def _round_floor_usd(inv: dict, tier: dict[str, float]) -> float:
+    """The least an invocation's share can be and still produce a gate verdict:
+    for each category, every first-wave batch (open and repair; a category
+    with neither runs one gate-only batch), plus the orchestrator pass and
+    the challenge the workflow reserves before it buys a collector. A share
+    below this is refused by the governor before any agent runs
+    (R-INTERAC-20261010: P3C2 and P3C4 at $0.81, P1C3 $1.22, P4C1 $1.49,
+    against a $1.74 first wave)."""
+    total = 0.0
+    for c in inv["cats"]:
+        nb = len((inv.get("batches") or {}).get(c) or []) \
+            + len((inv.get("repair_batches") or {}).get(c) or [])
+        total += (max(1, nb) * tier["collector_batch"]
+                  + tier["orchestrator"] + tier["challenge"])
+    return round(total, 4)
+
+
 class Pipeline:
     def __init__(self, run: runstate.Run, opts: Options):
         self.run, self.opts = run, opts
@@ -2415,21 +2441,35 @@ class Pipeline:
             # AT_STAGE_BUDGET before any agent is paid for — a decision for a
             # person, not a wave the governor refuses one batch at a time.
             deferred = []
+            tier = _governor_tiers(price)
+
+            def _est(i):
+                # what this invocation needs end to end: its own priced shape,
+                # never less than ONE ROUND at the governor's own wave prices
+                # (R-INTERAC-20261010: a cells-proportional share handed
+                # P3C4 $0.81 against a $1.74 first wave; the workflow
+                # refused every wave and four categories came back
+                # AT_STAGE_BUDGET with no agent run)
+                cs = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
+                         for c in i["cats"])
+                cp = sum(len(open_caps.get(c, {})) for c in i["cats"])
+                pr = cost_mod.research_price(
+                    cs, categories=len(i["cats"]), capabilities=cp or None,
+                    batch_cells=limit, collector_model=self.opts.collector_model,
+                    synthesis_model=self.opts.synthesis_model)
+                ratio = float((self.state.get("workflow_calibration") or {}).get("ratio") or 1.0)
+                return round(max(pr["usd"] * max(1.0, ratio), _round_floor_usd(i, tier)), 4)
+            need = {id(i): _est(i) for i in inv}
+            if remaining is not None and fits_env and sum(need.values()) > float(remaining) + 1e-9:
+                # the scope estimate fits, but not once every category is
+                # funded for at least one whole round: allocate whole
+                # categories instead of handing shares no wave fits in
+                fits_env = False
             if not fits_env and remaining is not None:
-                def _est(i):
-                    cs = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
-                             for c in i["cats"])
-                    cp = sum(len(open_caps.get(c, {})) for c in i["cats"])
-                    pr = cost_mod.research_price(
-                        cs, categories=len(i["cats"]), capabilities=cp or None,
-                        batch_cells=limit, collector_model=self.opts.collector_model,
-                        synthesis_model=self.opts.synthesis_model)
-                    ratio = float((self.state.get("workflow_calibration") or {}).get("ratio") or 1.0)
-                    return round(pr["usd"] * max(1.0, ratio), 4)
                 left = float(remaining)
                 handed = []
-                for i in sorted(inv, key=_est):
-                    e_i = _est(i)
+                for i in sorted(inv, key=lambda i: need[id(i)]):
+                    e_i = need[id(i)]
                     if e_i <= left + 1e-9:
                         handed.append(i); left -= e_i
                         i.setdefault("_est", e_i)
@@ -2479,21 +2519,25 @@ class Pipeline:
                              "usd_per_runtime_token": price.get("usd_per_runtime_token"),
                              # the per-wave prices the workflow's governor
                              # checks a wave against before starting it
-                             "tier_usd": {"collector_batch": price.get("per_batch"),
-                                          "orchestrator": price.get("per_category_orchestrator"),
-                                          "challenge": price.get("per_category_challenge")},
+                             "tier_usd": tier,
                              "raise_with": f"--stage-budget RESEARCH=<usd>"}
             doc["estimate"]["fits_envelope"] = fits_env
             total_cells = max(1, cells + rcells)
+            surplus = (0.0 if remaining is None
+                       else max(0.0, float(remaining) - sum(need[id(i)] for i in inv)))
             for i in inv:
                 mine = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
                            for c in i["cats"])
-                # A handed category's share is ITS OWN end-to-end estimate when
-                # categories were allocated whole; otherwise the remainder is
-                # partitioned by cells.
+                # A handed category's share is ITS OWN end-to-end need — at
+                # least one whole round at the governor's wave prices — when
+                # categories were allocated whole; when the envelope funds
+                # every category, each gets its need plus a cells-proportional
+                # part of the surplus. Never the cells-proportional part
+                # alone: a category's orchestrator and challenge are a fixed
+                # cost a 6-cell category pays like a 45-cell one.
                 share = (None if remaining is None
                          else (i.get("_est") if i.get("_est") is not None
-                               else round(float(remaining) * mine / total_cells, 4)))
+                               else round(need[id(i)] + surplus * mine / total_cells, 4)))
                 i.pop("_est", None)
                 # EVERY INVOCATION KNOWS ITS SHARE. Sixteen workflows spend
                 # one envelope at once; a per-invocation share, proportional
