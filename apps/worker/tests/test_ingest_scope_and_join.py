@@ -40,6 +40,12 @@ def _engine_workbook(tmp_path, *, n=6, synthesise=2):
                      "47 percent member adoption within ninety days, restated "
                      "at 52 percent in the 2025 annual report."),
             subcaps=[cell], published="2025-03-01") for i in range(3)]
+        # A facet is answered only by a search that ran (the ledger refuses
+        # an answered DQ field with no Search_Log row behind it, 2026-10-11).
+        for facet in ("works", "value", "corroborates"):
+            L.append_search(wb, subcap=cell, facet=facet,
+                            query=f'"Acme Credit Union" {cell} {facet} digital banking',
+                            tool="searxng", hits=3, kept=1, outcome="kept 1")
         L.append_synthesis(wb, cell, {
             "Dominant_Claim": (
                 "Acme Credit Union runs member-facing digital banking on "
