@@ -76,7 +76,7 @@ class Settings:
     fetch_timeout_s: float = field(default_factory=lambda: _float("EE_FETCH_TIMEOUT_S", 12.0))
     #: Wall-clock budget for the fetch phase of ONE research_brief; stragglers
     #: are cancelled and reported, never waited for (measured 2026-10-10).
-    fetch_phase_budget_s: float = field(default_factory=lambda: _float("EE_FETCH_PHASE_BUDGET_S", 45.0))
+    fetch_phase_budget_s: float = field(default_factory=lambda: _float("EE_FETCH_PHASE_BUDGET_S", 30.0))
     max_bytes: int = field(default_factory=lambda: _int("EE_MAX_BYTES", 20_000_000))
     breaker_min_s: float = field(default_factory=lambda: _float("EE_BREAKER_MIN_S", 30.0))
     breaker_max_s: float = field(default_factory=lambda: _float("EE_BREAKER_MAX_S", 600.0))

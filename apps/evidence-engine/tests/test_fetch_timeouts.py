@@ -79,3 +79,21 @@ def test_fetch_phase_budget_cancels_stragglers(monkeypatch):
     assert [d.url for d in docs] == ["https://ok.example.test/p"]
     assert any("fetch_phase_budget" in f["reason"] for f in failures)
     config.reset_settings()
+
+
+def test_a_refused_connection_counts_like_a_timeout_and_is_dead_at_page_level(monkeypatch):
+    """eval v1 iteration 4: one site answered "Server disconnected" 45 times;
+    neither the breaker nor the snapshot path had treated that as dead."""
+    import httpx
+    from evidence_engine import ratelimit as RL
+    from evidence_engine.fetch import HttpFetcher, FetchResult
+    RL.reset()
+    def handler(req):
+        raise httpx.ConnectError("Server disconnected without sending a response.", request=req)
+    f = HttpFetcher(transport=httpx.MockTransport(handler), http2=False)
+    r1 = asyncio.run(f.get("https://down.example.test/a"))
+    assert r1.error.startswith("could not connect") and f._is_dead(r1, "down.example.test")
+    assert RL.breakers().get("down.example.test").snapshot()["streak_timeout"] == 1
+    r2 = asyncio.run(f.get("https://down.example.test/b"))
+    assert RL.breakers().get("down.example.test").state == "open"
+    RL.reset()

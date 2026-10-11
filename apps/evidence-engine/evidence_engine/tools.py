@@ -69,6 +69,8 @@ class _SearchCache:
 
 #: Hits per host admitted before the rest of the list is considered.
 PER_HOST_CAP = 3
+#: Concurrent fetches in a brief's slice (per-host politeness still 1/s).
+FETCH_WORKERS = 12
 
 
 def _host_diverse_order(hits: list[dict], entity: EntityRef | None = None,
@@ -211,7 +213,7 @@ class Engine:
 
         if not hits:
             return docs, failures
-        tasks = [asyncio.ensure_future(worker()) for _ in range(min(6, max(1, limit)))]
+        tasks = [asyncio.ensure_future(worker()) for _ in range(min(FETCH_WORKERS, max(1, limit)))]
         done, pending = await asyncio.wait(tasks, timeout=settings().fetch_phase_budget_s)
         for tk in pending:
             tk.cancel()

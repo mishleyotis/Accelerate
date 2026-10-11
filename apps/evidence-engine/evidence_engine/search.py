@@ -40,7 +40,10 @@ import httpx
 from .types import SearchHit
 
 RRF_K = 60
-CONCURRENCY = 4
+#: Measured 2026-10-11 (eval v1 iteration 4): 18 queries over two backends at
+#: concurrency 4 took 20 s a brief; the backends pace themselves through
+#: their own buckets, so the fan-out may be wide.
+CONCURRENCY = 12
 PARALLEL_BATCH = 3
 
 _TRACKING_PREFIX = ("utm_",)

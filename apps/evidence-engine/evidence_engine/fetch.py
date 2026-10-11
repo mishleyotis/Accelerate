@@ -258,7 +258,7 @@ class HttpFetcher:
         use_http2 = http2 if http2 is not None else _http2_available()
         self._client = httpx.AsyncClient(
             http2=use_http2, follow_redirects=True,
-            timeout=httpx.Timeout(s.fetch_timeout_s), transport=transport,
+            timeout=httpx.Timeout(s.fetch_timeout_s, connect=min(5.0, s.fetch_timeout_s)), transport=transport,
             max_redirects=10, verify=trust_context())
         self.requests_made = 0
 
@@ -381,8 +381,13 @@ class HttpFetcher:
                 breaker.record_success()
                 return res
             if status is None:
-                if res.error and res.error.startswith("timed out"):
-                    breaker.record_failure("timeout")        # the 2nd opens the host
+                # a host that times out, refuses or drops the connection is
+                # the same host for the breaker: the 2nd opens it (eval v1
+                # iteration 4: 45 "Server disconnected" answers from one site
+                # spent the slice, call after call)
+                if res.error and (res.error.startswith("timed out") or res.error.startswith("could not connect")
+                                  or res.error.startswith("dns failure")):
+                    breaker.record_failure("timeout")
                 return res                                   # transport failure, described
             if 200 <= status < 400:
                 breaker.record_success()
@@ -469,7 +474,7 @@ class HttpFetcher:
             return True
         if res.status is None:
             return (res.error.startswith("dns failure") or res.error.startswith("timed out")
-                    or res.error.startswith("breaker_open"))
+                    or res.error.startswith("could not connect") or res.error.startswith("breaker_open"))
         return False
 
     async def get_or_archive(self, url: str, *, accept_pdf: bool = True) -> FetchResult:
