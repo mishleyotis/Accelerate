@@ -42,6 +42,16 @@
         ]
       },
       {
+        "matcher": "WebSearch|mcp__Exa__web_search_exa|mcp__Tavily__tavily_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/search_order.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: search_order.py is MISSING from the installed plugin, so the free-chain order is NOT enforced: a research agent can fire WebSearch severally before batching its questions into one research_brief. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "Agent|Task",
         "hooks": [
           {
@@ -219,6 +229,16 @@
           {
             "type": "command",
             "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/source_health.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\"; else printf '%s' '{\"systemMessage\": \"dma-insights: source_health.py is MISSING from the installed plugin, so research-layer calls are NOT logged to source_health.jsonl and no 429/403 streak is visible to the doctor. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose: a hook that blocks every invocation leaves a session unable to run the very check that would diagnose it.\"}'; exit 0; fi",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_dma-insights_evidence__research_brief|WebSearch|mcp__Exa__web_search_exa|mcp__Tavily__tavily_search",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "H=\"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/search_order.py\"; if [ -f \"$H\" ]; then exec python3 \"$H\" --post; else printf '%s' '{\"systemMessage\": \"dma-insights: search_order.py is MISSING from the installed plugin, so research_brief and WebSearch calls are NOT counted per agent and the free-chain order cannot be enforced. That is a stale or partial install \\u2014 run plugins/dma-insights/scripts/doctor.py --heal. The call is ALLOWED on purpose.\"}'; exit 0; fi",
             "timeout": 10
           }
         ]

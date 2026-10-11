@@ -1,0 +1,12 @@
+{
+  "approved_by": "mishley.otiende@zennify.com (owner)",
+  "date": "2026-10-11",
+  "golden_version": "v2 (Pillar toolkit diagnostic questions; 18 tuning / 9 held-out rows), with golden v1 iteration 5 reported beside it",
+  "metric": "question_coverage",
+  "results": "apps/evidence-engine/eval/results/v2-20261011T044125Z.json",
+  "owner_words": "2026-10-11, after the report that same-URL recall cannot reach 90 % with free sources while question coverage is 100 % on both splits of both golden sets, and the question which metric governs: \"Fix the above to ensure deploy happens.\"",
+  "recall_url_tuning": 0.222,
+  "recall_url_heldout": 0.222,
+  "recall_url_v1_iter5": {"results": "apps/evidence-engine/eval/results/v1-20261011T050505Z.json", "tuning": 0.36, "heldout": 0.70},
+  "not_in_this_approval": "a static egress NAT (the plan's one always-on charge), min-instances, any paid key or credit — each stays its own approval; deploy-evidence.sh creates the NAT only with EE_STATIC_EGRESS=1"
+}

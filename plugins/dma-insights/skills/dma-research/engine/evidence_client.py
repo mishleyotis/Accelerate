@@ -146,12 +146,17 @@ def search_line(question: str, facet: str | None, subcaps: list[str], hits: int,
     return argv
 
 
-def brief(*, run_id: str, legal_name: str, domains: list[str], questions: list[str],
+def brief(*, run_id: str, legal_name: str, domains: list[str], questions: list,
           facet: str | None = None, sub_vertical: str | None = None, subcaps: list[str] | None = None,
           max_cards: int = 8, token_budget: int = 2400, reference_date: str | None = None,
           aliases: list[str] | None = None, charter: str | None = None, cik: str | None = None,
           actor: str | None = None, base: str | None = None, headers: dict | None = None,
           opener=None) -> dict:
+    """One brief, and the batch lines it earns. `questions` are plain strings
+    (one combined brief; every card cites `subcaps`) or objects
+    `{question, subcap_ids, facet}` — the batched capability call (owner,
+    2026-10-11): one search line per question with ITS cells, one evidence
+    line per card with the cells the engine echoed for it."""
     args = {"run_id": run_id, "entity": {"legal_name": legal_name, "domains": domains,
                                          "aliases": aliases or [], "charter": charter, "cik": cik},
             "questions": questions, "sub_vertical": sub_vertical, "facet": facet,
@@ -161,7 +166,17 @@ def brief(*, run_id: str, legal_name: str, domains: list[str], questions: list[s
     if "error" in out or out.get("needs_spend_approval"):
         return out
     cells = list(subcaps or [])
-    out["batch_lines"] = [search_line(" ".join(questions), facet, cells,
-                                      out.get("search", {}).get("hits", 0), len(out.get("cards", [])))]
-    out["batch_lines"] += [evidence_line(c, cells, actor) for c in out.get("cards", [])]
+    rows = out.get("by_question") or []
+    if rows:
+        out["batch_lines"] = [search_line(r["question"], r.get("facet") or facet, r.get("subcap_ids") or cells,
+                                          len(r.get("query_ids") or []), len(r.get("card_ids") or []))
+                              for r in rows]
+    else:
+        texts = [q["question"] if isinstance(q, dict) else str(q) for q in questions]
+        out["batch_lines"] = [search_line(" ".join(texts), facet, cells,
+                                          out.get("search", {}).get("hits", 0), len(out.get("cards", [])))]
+    out["batch_lines"] += [evidence_line(c, c["item"].get("linked_subcap_ids") or cells, actor)
+                           for c in out.get("cards", [])]
+    out["unanswered"] = [{"subcap_ids": r.get("subcap_ids") or [], "question": r["question"],
+                          "queries": r.get("query_ids") or []} for r in rows if not r.get("answered")]
     return out

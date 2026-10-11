@@ -33,8 +33,10 @@ for sa in dmai-evidence dmai-searxng dmai-fetch dmai-edgar; do
   else
     run gcloud iam service-accounts create "$sa" --project="$PROJECT_ID" --display-name="DMA Insights $sa"
   fi
-  # The project-level binding needs projectIamAdmin, which the CI deployer
-  # deliberately lacks: grant-deployer.sh (owner, one-time) makes it.
+  # The project-level binding needs projectIamAdmin. The CI deployer holds
+  # it (infra/grants-for-admin.sh, stage 0.1), so ci_gate.sh sets
+  # EE_GRANT_PROJECT_ROLES=1; a hand run without the role leaves it off and
+  # grant-deployer.sh (owner, one-time) makes the binding instead.
   if [ "${EE_GRANT_PROJECT_ROLES:-0}" = "1" ]; then
     run gcloud projects add-iam-policy-binding "$PROJECT_ID" \
       --member="serviceAccount:${sa}@${SA_DOMAIN}" --role=roles/logging.logWriter --condition=None --quiet
@@ -77,9 +79,15 @@ for suffix in dmai-evidence-text dmai-evidence-cache; do
     --member="serviceAccount:dmai-evidence@${SA_DOMAIN}" --role=roles/storage.objectAdmin --quiet
 done
 
-say "3 · static egress (new): VPC connector + Cloud NAT with a reserved address"
-# Measured before/after by searxng/health.sh (brief §6b). Cost: the connector
-# bills per instance-hour; stated in DEPLOY-PLAN.md.
+say "3 · static egress: VPC egress + Cloud NAT with a reserved address (EE_STATIC_EGRESS=1 only)"
+# The plan's ONE always-on charge (the NAT bills per hour), so it is its own
+# approval: off by default, and without it the services keep Cloud Run's
+# default egress (dynamic IPs; no VPC flags, or they would lose the internet).
+# searxng/health.sh measures engine health before and after; turn it on
+# with EE_STATIC_EGRESS=1 when fewer than three general-web engines answer.
+VPC_FLAGS=()
+if [ "${EE_STATIC_EGRESS:-0}" = "1" ]; then
+VPC_FLAGS=(--network=default --subnet=default --vpc-egress=all-traffic)
 if gcloud compute addresses describe dmai-evidence-egress --region="$REGION" --project="$PROJECT_ID" >/dev/null 2>&1; then
   echo "exists: address dmai-evidence-egress"
 else
@@ -96,6 +104,9 @@ else
   run gcloud compute routers nats create dmai-evidence-nat --router=dmai-evidence-router --region="$REGION" \
     --project="$PROJECT_ID" --nat-all-subnet-ip-ranges --nat-external-ip-pool=dmai-evidence-egress
 fi
+else
+  echo "skipped: static egress is off (EE_STATIC_EGRESS != 1); default Cloud Run egress, no always-on charge"
+fi
 
 say "4 · the three backends (new services)"
 deploy_backend() { # name dir sa extra-env
@@ -104,8 +115,7 @@ deploy_backend() { # name dir sa extra-env
     --project="$PROJECT_ID" --region="$REGION" \
     --service-account="${sa}@${SA_DOMAIN}" \
     --no-allow-unauthenticated --cpu-boost --max-instances=2 --concurrency=10 \
-    --memory=1Gi --timeout=120 \
-    --network=default --subnet=default --vpc-egress=all-traffic \
+    --memory=1Gi --timeout=120 "${VPC_FLAGS[@]}" \
     --set-secrets="MCP_PATH_TOKEN=${name}-path-token:latest${extra}" --quiet
   # the engine and the plugin's identity may invoke it
   for member in dmai-evidence dmai-routine; do
@@ -131,8 +141,7 @@ run gcloud run deploy dmai-evidence --source="$ROOT/apps/evidence-engine" \
   --project="$PROJECT_ID" --region="$REGION" \
   --service-account="dmai-evidence@${SA_DOMAIN}" \
   --no-allow-unauthenticated --cpu-boost --max-instances=2 \
-  --concurrency="${EE_CONCURRENCY:-8}" --memory=2Gi --cpu=2 --timeout=300 \
-  --network=default --subnet=default --vpc-egress=all-traffic \
+  --concurrency="${EE_CONCURRENCY:-8}" --memory=2Gi --cpu=2 --timeout=300 "${VPC_FLAGS[@]}" \
   --set-env-vars="^;^SEARXNG_URL=${SEARXNG_URL};EE_GCS_BUCKET=${PROJECT_ID}-dmai-evidence-text;SEC_EDGAR_USER_AGENT=${SEC_UA};PARALLEL_MCP_URL=https://search.parallel.ai/mcp" \
   --set-secrets="EE_PATH_TOKEN=dmai-evidence-path-token:latest,SEARXNG_PATH_TOKEN=dmai-searxng-path-token:latest" --quiet
 run gcloud run services add-iam-policy-binding dmai-evidence --project="$PROJECT_ID" --region="$REGION" \

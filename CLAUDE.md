@@ -225,6 +225,22 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   each search under the tool that ran it. The relay brief and
   `enrichment_sources.json` `_free_chain` say the same; tests:
   `test_connector_contract.py`.
+- **The six research connectors are mapped and ordered** (user, 2026-10-11:
+  "avoid calling web search severally and batch queries to the open source
+  connectors first … results in schemas that align with the gold standard
+  scoring workbook"): the collector and the technographic scanner hold all
+  six (`evidence`, `searxng`, `fetch`, `edgar`, `parallel`, `alphaxiv`);
+  `research_brief` is called ONCE per capability with every cell question as
+  `{question, subcap_ids, facet}` and returns cards grouped by cell
+  (`item.linked_subcap_ids` = the caller's cells, `by_question[]` the
+  unanswered ones) — the gold evidence row, one `engine.cli evidence` line
+  per card; the chain is brief → searxng/parallel → Exa/Tavily → WebSearch and
+  `hooks/search_order.py` refuses WebSearch before the first brief and past
+  three per brief while the engine is up. **The engine deploy gate governs on
+  question coverage** (user, same day: "Fix the above to ensure deploy
+  happens"; same-URL recall stayed 36/70 % and 22/22 % against the 90 %
+  wording while coverage read 100/100 %): `approval_check.py` recomputes it
+  from the results file and prints recall beside it; the NAT stays opt-in.
 - **The research phase enforces /workflows** (user, 2026-10-11: "the research
   phase should still enforce /workflows"; supersedes the 2026-10-09 AUTO rule
   that sent a DEGRADED run to lean headless tiers): `--research-mode auto`

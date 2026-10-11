@@ -84,8 +84,15 @@ def test_dates_must_be_iso():
     assert C.item_problems(_item(published_date=None)) == []
 
 
-def test_engine_never_links_cells_or_changes_origin():
-    assert any("linked_subcap_ids" in p for p in C.item_problems(_item(linked_subcap_ids=["P1C1.1.1"])))
+def test_engine_echoes_the_callers_cells_and_never_invents_one():
+    """A card's cells are the caller's own (`questions[].subcap_ids`): clean
+    when the caller named them, a problem when the engine would be the
+    first to name one, required as a list either way."""
+    assert C.item_problems(_item(linked_subcap_ids=["P1C1.1.1"])) == []
+    assert C.item_problems(_item(linked_subcap_ids=["P1C1.1.1"]), allowed_cells={"P1C1.1.1", "P1C1.1.2"}) == []
+    assert any("not named by the caller" in p
+               for p in C.item_problems(_item(linked_subcap_ids=["P9C9.9.9"]), allowed_cells={"P1C1.1.1"}))
+    assert any("linked_subcap_ids" in p for p in C.item_problems(_item(linked_subcap_ids=None)))
     assert any("origin" in p for p in C.item_problems(_item(origin="connector")))
 
 

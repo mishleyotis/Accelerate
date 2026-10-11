@@ -574,7 +574,11 @@ def main(argv=None) -> int:
     eb.add_argument("--legal-name", required=True, dest="legal_name")
     eb.add_argument("--domain", action="append", default=[], help="the entity's own domain(s)")
     eb.add_argument("--alias", action="append", default=[])
-    eb.add_argument("--question", action="append", required=True)
+    eb.add_argument("--question", action="append", default=[],
+                    help="a facet-wide question; every card cites --subcap")
+    eb.add_argument("--cell", action="append", default=[], metavar="CELL=QUESTION",
+                    help="a cell's own question, batched into the same brief (repeat per cell); "
+                         "its cards come back with that cell in linked_subcap_ids")
     eb.add_argument("--facet", default=None, choices=list(contract.FACETS))
     eb.add_argument("--sub-vertical", default=None, dest="sub_vertical")
     eb.add_argument("--subcap", action="append", default=[],
@@ -766,8 +770,19 @@ def main(argv=None) -> int:
     # registers the cards through `batch` afterwards.
     if a.cmd == "evidence-brief":
         from . import evidence_client as _ec
+        questions: list = []
+        for spec in a.cell:
+            cell, _, q = spec.partition("=")
+            if not cell.strip() or not q.strip():
+                print(f"--cell wants CELL=QUESTION, got {spec!r}", file=sys.stderr); return 2
+            questions.append({"question": q.strip(), "subcap_ids": [cell.strip()], "facet": "primary"})
+        for q in a.question:
+            questions.append({"question": q, "subcap_ids": list(a.subcap), "facet": a.facet} if questions
+                             else q)
+        if not questions:
+            print("evidence-brief wants at least one --question or --cell", file=sys.stderr); return 2
         out = _ec.brief(run_id=a.run, legal_name=a.legal_name, domains=a.domain,
-                        questions=a.question, facet=a.facet, sub_vertical=a.sub_vertical,
+                        questions=questions, facet=a.facet, sub_vertical=a.sub_vertical,
                         subcaps=a.subcap, max_cards=a.max_cards, token_budget=a.token_budget,
                         reference_date=a.reference_date, aliases=a.alias, charter=a.charter,
                         cik=a.cik, actor=a.actor or _actor(a))

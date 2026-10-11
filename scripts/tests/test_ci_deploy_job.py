@@ -67,25 +67,67 @@ def test_deploy_runs_the_evidence_gate_after_the_release_script():
     assert gate.get("if") == "steps.cfg.outputs.ready == 'true'"
 
 
-def test_the_evidence_approval_gate_refuses_until_recall_clears_the_threshold(tmp_path):
+def _gate():
     import importlib.util
-    import json
     spec = importlib.util.spec_from_file_location("approval_check", ROOT / "infra" / "evidence-engine" / "approval_check.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    return mod
+
+
+def test_the_evidence_approval_gate_refuses_until_the_metric_clears_the_threshold(tmp_path):
+    """Two metrics, one bar. `recall_url` is the morning's rule (figures in
+    the file); `question_coverage` is the owner's afternoon choice
+    (2026-10-11, "Fix the above to ensure deploy happens") and is RECOMPUTED
+    from the results file's per-call rows, never read from the approval."""
+    import json
+    mod = _gate()
     ok, why = mod.check(tmp_path / "APPROVAL.json")
     assert not ok and "absent" in why
     results = tmp_path / "r.json"; results.write_text("{}")
     base = {"approved_by": "owner", "date": "2026-10-11", "golden_version": "v1", "results": str(results)}
-    low = dict(base, recall_url_tuning=0.95, recall_url_heldout=0.60)
+    (tmp_path / "APPROVAL.json").write_text(json.dumps(dict(base, recall_url_tuning=0.95, recall_url_heldout=0.95)))
+    assert not mod.check(tmp_path / "APPROVAL.json")[0], "no metric named: refused"
+    low = dict(base, metric="recall_url", recall_url_tuning=0.95, recall_url_heldout=0.60)
     (tmp_path / "APPROVAL.json").write_text(json.dumps(low))
     ok, why = mod.check(tmp_path / "APPROVAL.json")
     assert not ok and "held-out 60.0%" in why
-    good = dict(base, recall_url_tuning=0.92, recall_url_heldout=0.91)
+    good = dict(base, metric="recall_url", recall_url_tuning=0.92, recall_url_heldout=0.91)
     (tmp_path / "APPROVAL.json").write_text(json.dumps(good))
     ok, why = mod.check(tmp_path / "APPROVAL.json")
     assert ok and why.startswith("APPROVED")
-    # the committed tree carries no approval unless it clears the bar
+    # coverage: recomputed from the rows, the figure in the file is ignored
+    def rows(t_ok, t_n, h_ok, h_n):
+        calls = []
+        for split, k, n in (("tuning", t_ok, t_n), ("heldout", h_ok, h_n)):
+            for i in range(n):
+                em = {"confirmed": 1} if i < k else {"ambiguous": 2}
+                calls.append({"split": split, "entity_match": em})
+        return {"calls": calls}
+    cov = dict(base, metric="question_coverage", recall_url_tuning=0.2, recall_url_heldout=0.2)
+    results.write_text(json.dumps(rows(9, 10, 9, 10)))
+    (tmp_path / "APPROVAL.json").write_text(json.dumps(cov))
+    ok, why = mod.check(tmp_path / "APPROVAL.json")
+    assert not ok and "90.0%" in why, why                       # 9/10 is AT the bar, not above it
+    results.write_text(json.dumps(rows(10, 10, 9, 9)))
+    ok, why = mod.check(tmp_path / "APPROVAL.json")
+    assert ok and "question coverage tuning 100.0% (10/10)" in why and "same-URL recall reported 20.0%" in why
+    results.write_text(json.dumps(rows(10, 10, 0, 0)))
+    assert not mod.check(tmp_path / "APPROVAL.json")[0], "a split with no calls cannot clear anything"
+
+
+def test_the_committed_approval_is_the_owners_and_clears_the_gate_it_names():
+    """The tree carries an approval only while it clears the bar, and the
+    one it carries names the owner's words and a results file in the tree."""
+    import json
+    mod = _gate()
     live = ROOT / "infra" / "evidence-engine" / "APPROVAL.json"
-    if live.exists():
-        assert mod.check(live)[0], "an APPROVAL.json that does not clear the threshold must not be committed"
+    if not live.exists():
+        return
+    ok, why = mod.check(live)
+    assert ok, why
+    d = json.loads(live.read_text())
+    assert d["metric"] in mod.METRICS and "owner" in d["approved_by"]
+    assert (ROOT / d["results"]).exists()
+    if d["metric"] == "question_coverage":
+        assert "owner_words" in d and "recall_url_tuning" in d, "the deviation from the 90 % wording is recorded"

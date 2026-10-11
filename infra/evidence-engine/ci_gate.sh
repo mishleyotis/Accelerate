@@ -9,6 +9,9 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 if out="$(python3 "$HERE/approval_check.py")"; then
   echo "evidence engine: $out"
   export EE_DEPLOY_APPROVED=1
+  # the CI deployer holds projectIamAdmin (infra/grants-for-admin.sh), so the
+  # service identities' logging binding is made here, not by a person
+  export EE_GRANT_PROJECT_ROLES="${EE_GRANT_PROJECT_ROLES:-1}"
   bash "$HERE/deploy-evidence.sh"
   rc=$?
   if [ $rc -ne 0 ]; then

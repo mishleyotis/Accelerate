@@ -15,7 +15,7 @@ Project `digital-maturity-assessor`, region `us-central1`.
 | Service accounts | `dmai-evidence`, `dmai-searxng`, `dmai-fetch`, `dmai-edgar` | one identity per service, least privilege (`logging.logWriter` only at project level) | none |
 | Secrets | `dmai-evidence-path-token`, `dmai-searxng-path-token`, `dmai-fetch-path-token`, `dmai-edgar-path-token`, `dmai-searxng-secret-key` | capability tokens (random, 48 hex) and SearXNG's session key; each readable only by its service, the evidence token also by `dmai-routine` (the plugin's identity rung) | Secret Manager access calls (negligible) |
 | Buckets | `${PROJECT_ID}-dmai-evidence-text`, `-dmai-evidence-cache` | cleaned text by content hash; search/card caches with TTL | storage, small |
-| Static egress | address `dmai-evidence-egress`, router `dmai-evidence-router`, NAT `dmai-evidence-nat` (all-traffic VPC egress on the engine and SearXNG) | one stable IP so SearXNG engine health can be measured and a block is diagnosable; the NAT bills per hour plus data | **the one always-on charge in this plan**; stated here for approval |
+| Static egress (**opt-in, `EE_STATIC_EGRESS=1`**) | address `dmai-evidence-egress`, router `dmai-evidence-router`, NAT `dmai-evidence-nat` (all-traffic VPC egress on the engine and SearXNG) | one stable IP so SearXNG engine health can be measured and a block is diagnosable; the NAT bills per hour plus data | **the one always-on charge in this plan**; NOT created by the default deploy — its own approval |
 | Cloud Run `dmai-searxng` | SearXNG + mcp-searxng + door proxy; 1Gi, cpu-boost, max 2, concurrency 10 | search backend + raw fallback | per request |
 | Cloud Run `dmai-fetch` | mcp-server-fetch via Supergateway; 1Gi, max 2, concurrency 10 | raw fallback | per request |
 | Cloud Run `dmai-edgar` | sec-edgar-mcp (AGPL-3.0, unmodified) via Supergateway; `SEC_EDGAR_USER_AGENT` set | raw fallback | per request |
@@ -47,18 +47,25 @@ Paid keys (Brave API, Mojeek API, Tavily/Exa credit), any proxy, `--min-instance
    as before — the last default-branch run did exactly that, 27 minutes).
 2. The same job then runs `infra/evidence-engine/ci_gate.sh`. It reads
    `infra/evidence-engine/APPROVAL.json` through `approval_check.py`; with no
-   file, or figures at or below 90 percent, it prints why and passes (the
-   release of the existing services is never held). With an approval that
-   clears the bar — same-URL source recall **above 90 percent on tuning AND
-   held-out**, naming the results file the numbers come from — it runs
+   file, or a metric at or below 90 percent, it prints why and passes (the
+   release of the existing services is never held). The metric the owner
+   chose (2026-10-11, "Fix the above to ensure deploy happens", after
+   same-URL recall stayed at 36 % / 70 % and 22 % / 22 % while question
+   coverage read 100 % on both splits of both golden sets) is **question
+   coverage — the share of briefs answered by at least one entity-confirmed
+   or probable card, recomputed from the per-call rows of the results file
+   the approval names, above 90 percent on tuning AND held-out**; the gate
+   prints the same-URL recall beside it. With a clearing approval it runs
    `deploy-evidence.sh` with `EE_DEPLOY_APPROVED=1` and the smoke test.
-3. Prerequisite, once, by a project owner: `CONFIRM=1 bash
-   infra/evidence-engine/grant-deployer.sh` — the deployer's roles for Cloud
-   Run, Secret Manager, Storage, the NAT and Cloud Build, plus the four
-   service identities and their logging binding (so the deployer never
-   needs project IAM admin). Without it the gate step fails loudly after
-   web/api/mcp shipped; nothing partial is left behind that the next merge
-   does not converge (every step is idempotent).
+3. No prerequisite by hand for the default plan: the CI deployer already
+   holds `iam.serviceAccountAdmin` and `resourcemanager.projectIamAdmin`
+   (`infra/grants-for-admin.sh`), so the gate sets
+   `EE_GRANT_PROJECT_ROLES=1` and makes the four identities and their
+   logging binding itself. The static egress (address + router + NAT, the
+   plan's one always-on charge) is **opt-in** (`EE_STATIC_EGRESS=1`, which
+   also needs `compute.networkAdmin` from `grant-deployer.sh`); without it the
+   services use Cloud Run's default egress. `searxng/health.sh` decides
+   whether it is worth turning on. Every step is idempotent.
 4. The approval file is written by the person who approves, with the run
    id; a file that does not clear the bar cannot be committed
    (`scripts/tests/test_ci_deploy_job.py`).

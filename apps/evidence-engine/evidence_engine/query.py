@@ -35,6 +35,19 @@ from .types import EntityRef
 _NAMES_PATH = Path(__file__).resolve().parent.parent / "registry" / "platform_names.txt"
 
 MAX_QUERIES = 18
+#: Batch mode (several questions in one call): the fan-out is capped per
+#: CALL, and each question gets an equal share no smaller than its facet
+#: lens, alias and tail variants — a batch of twelve cells still searches
+#: in one pass (48 queries at 12-way concurrency is four rounds).
+MAX_QUERIES_PER_CALL = 48
+MIN_QUERIES_PER_QUESTION = 4
+
+
+def per_question_budget(n_questions: int) -> int:
+    """Queries each question may contribute to one fan-out."""
+    if n_questions <= 1:
+        return MAX_QUERIES
+    return max(MIN_QUERIES_PER_QUESTION, min(MAX_QUERIES, MAX_QUERIES_PER_CALL // n_questions))
 
 #: One lens word per facet. Measured 2026-10-11 on golden v1 (15 misses):
 #: the former OR-chains ("launched OR offers OR deployed OR implemented")

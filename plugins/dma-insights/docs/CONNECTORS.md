@@ -461,13 +461,23 @@ Agents go to the **evidence engine** first; the other five are escape hatches
 | `parallel` | `web_search` (and a whole-page read tool the lanes are denied) | vendor, `https://search.parallel.ai/mcp`, anonymous free tier | `type: http`, no key | vendor terms (free for exploration and light use; rate limits unpublished — measured in Phase D) |
 | `alphaxiv` | unlisted (401 anonymously) | vendor, `https://api.alphaxiv.org/mcp/v1`, OAuth per user | `type: http`; the session signs in | vendor terms |
 
-**Who holds what** (`scripts/provision_agent_tools.py`): the engine is held
-by `research-conductor`, `enrichment-web-specialist`,
-`research-evidence-collector` (all six tools), by `adversarial-verifier` and
-`finding-challenger` (`verify_cards`, `expand_context`, one independent
-`research_brief`) and by `page-consolidator` and `surface-producer`
-(`verify_cards`, `expand_context`). The raw fallbacks are held by the
-servicing tier only. **Per-page producers are unchanged**: the owner's
+**Who holds what** (`scripts/provision_agent_tools.py`; owner 2026-10-11,
+"ensure all six are mapped to the agents and well orchestrated"): the engine
+is held by `research-conductor`, `enrichment-web-specialist`,
+`research-evidence-collector` and `technographic-scanner` (all six tools),
+by `adversarial-verifier` and `finding-challenger` (`verify_cards`,
+`expand_context`, one independent `research_brief`) and by
+`page-consolidator` and `surface-producer` (`verify_cards`,
+`expand_context`). The raw fallbacks (`searxng`, `fetch`, `edgar`,
+`parallel`) are held by the same four searching agents; `alphaxiv` is
+mapped to the collector, the conductor and the web specialist and grants a
+tool the day its listing is captured. **The order is enforced**: one
+batched `research_brief` per capability (every cell question as a
+`{question, subcap_ids, facet}` object; cards come back grouped by cell),
+the raw layer for what it left, Exa/Tavily after, WebSearch last —
+`hooks/search_order.py` refuses a research actor's WebSearch before its
+first brief and past three per brief while the engine is up.
+**Per-page producers are unchanged**: the owner's
 2026-09-14 decision that producers hold no search tool and emit
 `search_requests` stands — the brief's table would have given them the
 engine directly; that deviation is recorded here for the owner to overturn.

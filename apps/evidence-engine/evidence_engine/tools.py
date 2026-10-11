@@ -115,6 +115,33 @@ def _host_diverse_order(hits: list[dict], entity: EntityRef | None = None,
     return head + tail
 
 
+#: A `questions[]` entry: a plain string, or an object naming the cells the
+#: question is asked for. `facet` on an object is the caller's label (the
+#: plugin's primary|works|fails|value|contradicts|corroborates); only the
+#: five engine lenses narrow the query expansion — `primary` and anything
+#: else widen to every lens, as a call-wide `facet=None` does.
+def _question_specs(questions, call_facet: str | None) -> tuple[list[dict], str | None]:
+    specs: list[dict] = []
+    for i, q in enumerate(questions or []):
+        if isinstance(q, dict):
+            text = str(q.get("question") or q.get("text") or "").strip()
+            cells = [str(c).strip() for c in (q.get("subcap_ids") or q.get("cells") or []) if str(c).strip()]
+            label = q.get("facet")
+            label = str(label).strip().lower() if label else None
+        elif isinstance(q, str):
+            text, cells, label = q.strip(), [], None
+        else:
+            return [], f"questions[{i}] must be a string or an object with `question`"
+        if not text:
+            continue
+        if any(len(c) > 40 or " " in c for c in cells):
+            return [], f"questions[{i}].subcap_ids must be short cell ids (no spaces, <= 40 chars)"
+        lens = label if label in C.FACETS else call_facet
+        specs.append({"index": i, "question": text, "subcap_ids": cells,
+                      "facet": label or call_facet, "lens": lens})
+    return specs, None
+
+
 @dataclass
 class Engine:
     fetcher: HttpFetcher | None = None
@@ -230,13 +257,23 @@ class Engine:
         return docs, failures
 
     # ── 1 · research_brief ───────────────────────────────────────────────
-    async def research_brief(self, *, run_id: str, entity: dict, questions: list[str],
+    async def research_brief(self, *, run_id: str, entity: dict, questions: list,
                              sub_vertical: str | None = None, facet: str | None = None,
                              subcap_labels: list[str] | None = None, max_cards: int = 8,
                              token_budget: int = 2400, provenance: str = "standard",
                              reference_date: str | None = None,
                              allow_names_from_cards: dict | None = None,
                              fetch_limit: int = 20) -> dict:
+        """One call for a whole capability batch. `questions` is a list of
+        plain strings (one combined brief, as before) or of objects
+        `{question, subcap_ids[], facet?}` — one per cell question. With
+        objects the engine fans every question's queries out in ONE search
+        pass, fetches ONE slice, then ranks and cards PER QUESTION, so each
+        card comes back with `item.linked_subcap_ids` = the cells the caller
+        named for the question it answered, and `by_question` says which
+        questions got no card (the collector's `nothing_found` material).
+        `max_cards` and `token_budget` are per question in that mode. The
+        engine never invents a cell: the ids are the caller's, echoed."""
         t0 = time.monotonic()
         ent = entity_ref(entity)
         if ent is None or not ent.legal_name:
@@ -244,13 +281,26 @@ class Engine:
         if facet is not None and facet not in C.FACETS:
             return {"error": f"facet must be one of {C.FACETS}", "cards": []}
         ref = _ref_date(reference_date)
-        question = " ".join(q for q in questions if q).strip()
-        if not question:
+        specs, bad = _question_specs(questions, facet)
+        if bad:
+            return {"error": bad, "cards": []}
+        if not specs:
             return {"error": "at least one question is required", "cards": []}
-        # queries, guarded
-        queries = []
-        for q in questions:
-            queries += Q.expand(q, ent, facet, sub_vertical, self.registry_pack or registry.site_pack(sub_vertical))
+        batched = len(specs) > 1 or any(s["subcap_ids"] for s in specs)
+        question = " ".join(s["question"] for s in specs).strip()
+        # queries, guarded: one pass over every question, each question's
+        # share capped so a batch of twelve cells still fits one fan-out
+        pack = self.registry_pack or registry.site_pack(sub_vertical)
+        per_q = Q.per_question_budget(len(specs))
+        queries, seen_text = [], set()
+        for spec in specs:
+            for q in Q.expand(spec["question"], ent, spec["lens"], sub_vertical, pack)[:per_q]:
+                if q["text"] in seen_text:
+                    continue
+                seen_text.add(q["text"])
+                q["query_id"] = f"Q-{len(queries) + 1:02d}"
+                q["question_index"] = spec["index"]
+                queries.append(q)
         queries, violations = Q.guard(queries, allow_names_from_cards)
         free = self._free_sources_available()
         if not free:
@@ -277,23 +327,63 @@ class Engine:
         docs, failures = await self._documents_for_hits(hits, limit=fetch_limit, reference=ref,
                                                         hits_by_key=hits_by_key, entity=ent, question=question)
         t_rank = time.monotonic()
-        ranked = R.rank_chunks(question, docs, top_k=max_cards * 3, facet_text=facet or "")
-        order = []
-        for r in ranked["ranked"]:
-            if r["url_key"] not in order:
-                order.append(r["url_key"])
-        by_key = {url_key(d.url): d for d in docs}
-        ordered_docs = [by_key[k] for k in order if k in by_key] + [d for k, d in by_key.items() if k not in order]
         qids = {h["url_key"]: h.get("query_ids", []) for h in hits}
         facets = {h["url_key"]: h.get("facets", []) for h in hits}
         via = {h["url_key"]: ",".join(h.get("sources", [])) for h in hits}
-        cards, dropped = P.build_cards(ordered_docs, question=question, entity=ent, facet=facet,
-                                       query_ids_by_key=qids, facets_by_key=facets, via_by_key=via,
-                                       reference=ref, today=self.today, max_cards=max_cards,
-                                       rerouted=fan.get("rerouted") or [])
+        by_key = {url_key(d.url): d for d in docs}
+
+        def _cards_for(text: str, lens: str | None):
+            rk = R.rank_chunks(text, docs, top_k=max_cards * 3, facet_text=lens or "")
+            order = []
+            for r in rk["ranked"]:
+                if r["url_key"] not in order:
+                    order.append(r["url_key"])
+            ordered = [by_key[k] for k in order if k in by_key] + [d for k, d in by_key.items() if k not in order]
+            cs, dr = P.build_cards(ordered, question=text, entity=ent, facet=lens,
+                                   query_ids_by_key=qids, facets_by_key=facets, via_by_key=via,
+                                   reference=ref, today=self.today, max_cards=max_cards,
+                                   rerouted=fan.get("rerouted") or [])
+            return rk, cs, dr
+
+        by_question = []
+        if not batched:
+            ranked, cards, dropped = _cards_for(question, facet)
+        else:
+            # Rank and card per question over the ONE fetched slice; a card
+            # that answers two questions is one card carrying both cells.
+            ranked, cards, dropped, index_of = None, [], [], {}
+            for spec in specs:
+                rk, cs, dr = _cards_for(spec["question"], spec["lens"])
+                ranked = ranked or rk
+                dropped += dr
+                ids = []
+                for c in cs:
+                    cid = c["card_id"]
+                    if cid in index_of:
+                        c = cards[index_of[cid]]
+                    else:
+                        index_of[cid] = len(cards)
+                        cards.append(c)
+                        c["provenance"]["answers"] = []
+                    for cell in spec["subcap_ids"]:
+                        if cell not in c["item"]["linked_subcap_ids"]:
+                            c["item"]["linked_subcap_ids"].append(cell)
+                    if spec["index"] not in c["provenance"]["answers"]:
+                        c["provenance"]["answers"].append(spec["index"])
+                    ids.append(cid)
+                by_question.append({"index": spec["index"], "question": spec["question"],
+                                    "subcap_ids": list(spec["subcap_ids"]), "facet": spec["facet"],
+                                    "query_ids": [q["query_id"] for q in queries
+                                                  if q.get("question_index") == spec["index"]],
+                                    "card_ids": ids, "answered": bool(ids)})
         projected = [self._project(c, provenance) for c in cards]
-        kept, tokens = P.trim_to_budget(projected, token_budget)
+        kept, tokens = P.trim_to_budget(projected, token_budget * (len(specs) if batched else 1))
         cards = cards[:len(kept)]
+        if by_question:
+            kept_ids = {c["card_id"] for c in cards}
+            for row in by_question:
+                row["card_ids"] = [i for i in row["card_ids"] if i in kept_ids]
+                row["answered"] = bool(row["card_ids"])
         for c in cards:
             self.store.put_card(run_id, c)
         state = self.store.run_state(run_id)
@@ -320,6 +410,9 @@ class Engine:
                        "dropped": dropped[:10]},
             "guard_violations": violations,
             "ambiguous_cards": [c["card_id"] for c in cards if c["provenance"].get("entity_match") == "ambiguous"],
+            # per-question outcome in batch mode: the cells each question named,
+            # its queries, its cards; `answered: false` is nothing_found material
+            "by_question": by_question,
             "elapsed_ms": int((time.monotonic() - t0) * 1000),
             # where the time went: search (fan-out), fetch (the slice), the rest
             # (rank, excerpt, cards, store). An agent reads this to judge a

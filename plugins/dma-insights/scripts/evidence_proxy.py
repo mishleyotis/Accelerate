@@ -42,6 +42,26 @@ DEFAULTS = {
 
 _cfg = {"aud": "", "secret": "", "segment": False, "path_token": None}
 
+#: Where this proxy records whether its service answered `initialize`, one
+#: small file per service, read by hooks/search_order.py (the free-chain
+#: order steps aside when the engine is down) and by the doctor. Never a
+#: token: service, available, reason, ts.
+LAYER_STATE_DIR = Path(os.environ.get("DMA_RESEARCH_LAYER_STATE") or "/root/.dma/research_layer")
+
+
+def mark_available(available: bool, reason: str | None) -> None:
+    """Best effort; a marker that cannot be written costs nothing."""
+    try:
+        service = str(_cfg.get("secret") or "").replace("dmai-", "").replace("-path-token", "") or "unknown"
+        LAYER_STATE_DIR.mkdir(parents=True, exist_ok=True)
+        path = LAYER_STATE_DIR / f"{service}.json"
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps({"service": service, "available": bool(available),
+                                   "reason": (reason or "")[:200] or None, "ts": time.time()}))
+        os.replace(tmp, path)
+    except Exception:                                           # noqa: BLE001
+        pass
+
 
 def _mint_headers() -> dict:
     """The one function swapped: same shape as mcp_proxy._mint_headers."""
@@ -125,6 +145,7 @@ def serve(url: str, msg: dict) -> list:
         _degraded["reason"] = None
         replies = mcp_proxy.forward(url, msg)
         why = _is_error(replies, msg)
+        mark_available(why is None, why)
         if why is None:
             return replies
         _degraded["reason"] = why

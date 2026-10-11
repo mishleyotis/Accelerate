@@ -71,7 +71,7 @@ sent to either write path.
 | `claim_type` | `FACT` when `tier` ∈ {T1, T2}, else `INFERENCE` — the label the tier *licenses*. The agent may **lower** it (INFERENCE / HYPOTHESIS / CEILING_ESTIMATE); raising it is refused downstream | `contract.claim_label_for`; `register.py fact_tier`; ET-10 |
 | `tier` | The registry hint `T1…T5`; never `T1` on the entity's own domain; `T1` for a named machine scan source; `T5` for vendor collateral path shapes | `source_rules.py`; `ledger.is_own_host`; `contract.SCAN_TIER` |
 | `published_date` | ISO `YYYY-MM-DD` the **page states** (publication metadata, JSON-LD, `<time>`, dateline, URL path), else `null`. Never the retrieval date, a modified date or a copyright year; never in the future | `fetch.published_date`; `ledger._refuse_retrieval_date_as_published`; invariant 9 |
-| `linked_subcap_ids` | Always `[]` from the engine | Division of labour |
+| `linked_subcap_ids` | The cells the caller named for the question this card answered (`questions[].subcap_ids`, echoed, never invented); `[]` for a plain-string question | Division of labour: the agent names the cells, the engine groups the cards |
 | `origin` | Always `"producer"` (the connector enum) — the engine never emits `connector`, `internal` or `package` rows | `register._ORIGINS` |
 
 The ERS, the recency band and the identifiers are the server's; the card
@@ -107,7 +107,7 @@ never carries an `e_id`, an `ers` or a band in `item`.
 | `recency: CURRENT|RECENT|LEGACY|UNVERIFIED` | the six-word ladder | repo vocabulary (QA Report B-09) |
 | `tier_hint` | `item.tier` + `provenance.tier_basis` | the item needs a tier; the hint is labelled as one by its basis |
 | (none) | `item.claim_type` (licensed default) | the connector requires it; derivation is the ledger's own |
-| (none) | `item.linked_subcap_ids: []`, `item.origin: "producer"` | required by the connector; both deliberately inert |
+| (none) | `item.linked_subcap_ids` (the caller's cells per question, `[]` otherwise), `item.origin: "producer"` | required by the connector; origin is inert, the cells are the batch's own |
 | `excerpt ≤ 25 words` | 50–500 chars, sentence-complete, ≤ 40-word target | the connector's refusals; see DISCOVERY §1 |
 | `archive_url` | `original_url` + `archive_timestamp`, with the snapshot in `source_url` | the connector fetches `source_url`; a dead original there would be refused |
 | `entity_match` | + `entity_match_basis` | a verdict a challenger can check |

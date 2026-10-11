@@ -16,6 +16,7 @@ import httpx
 import pytest
 
 from evidence_engine import contract as C
+from evidence_engine import query as Q
 from evidence_engine import ratelimit as RL
 from evidence_engine import search as S
 from evidence_engine.fetch import HttpFetcher
@@ -176,6 +177,62 @@ def test_research_brief_returns_contract_clean_verified_cards(engine):
     assert out["coverage"]["novelty"] == 1.0 and out["coverage"]["saturation"] is False
     assert "news" in out["coverage"]["ladder_searched"]
     assert out["tokens"] > 0
+
+
+def test_a_capability_batch_is_one_call_with_cards_grouped_by_cell(engine):
+    """Owner, 2026-10-11: batch a capability's cell questions to the open-source
+    layer in ONE call and get the results back in the gold row's shape. Three
+    cell questions -> one search pass, one fetch slice, cards per question,
+    each card carrying the cells the CALLER named, and `by_question` naming
+    the question nothing answered (the collector's nothing_found)."""
+    qs = [{"question": "How many members does the credit union serve and how fast is membership growing?",
+           "subcap_ids": ["P2C1.1.1"], "facet": "primary"},
+          {"question": "What are its total assets and net worth ratio?", "subcap_ids": ["P1C2.3.1", "P1C2.3.2"],
+           "facet": "primary"},
+          {"question": "Does it operate a quantum computing research lab in Antarctica?",
+           "subcap_ids": ["P4C2.9.9"], "facet": "works"}]
+    out = run(engine.research_brief(run_id="R-B", entity=ENTITY, questions=qs, max_cards=4, token_budget=4000,
+                                    reference_date="2026-10-10"))
+    assert "error" not in out, out
+    assert len(out["by_question"]) == 3
+    byq = {r["index"]: r for r in out["by_question"]}
+    # one fan-out: every question contributed queries, none above its share
+    per_q = Q.per_question_budget(3)
+    for i in range(3):
+        assert 0 < len(byq[i]["query_ids"]) <= per_q, byq[i]
+    assert len(out["search"]["queries"]) <= Q.MAX_QUERIES_PER_CALL
+    # the two answerable questions got cards; each card carries ITS question's cells
+    assert byq[0]["answered"] and byq[1]["answered"]
+    cards = {c["card_id"]: c for c in out["cards"]}
+    for i, cells in ((0, {"P2C1.1.1"}), (1, {"P1C2.3.1", "P1C2.3.2"})):
+        for cid in byq[i]["card_ids"]:
+            assert cells <= set(cards[cid]["item"]["linked_subcap_ids"]), cards[cid]["item"]
+            assert C.item_problems(cards[cid]["item"],
+                                   allowed_cells={"P2C1.1.1", "P1C2.3.1", "P1C2.3.2", "P4C2.9.9"}) == []
+    # a card is one card however many questions it answers
+    assert len(out["cards"]) == len(cards)
+    # the stored card keeps the cells too (verify_cards reads the store)
+    full = engine.store.get_card("R-B", byq[0]["card_ids"][0])
+    assert full["item"]["linked_subcap_ids"] and "answers" in full["provenance"]
+    # a plain-string question still comes back unlinked
+    plain = run(engine.research_brief(run_id="R-B2", entity=ENTITY, questions=["membership grew members"],
+                                      max_cards=3, reference_date="2026-10-10"))
+    assert plain["by_question"] == [] and all(c["item"]["linked_subcap_ids"] == [] for c in plain["cards"])
+
+
+def test_a_batch_refuses_a_malformed_question_object(engine):
+    out = run(engine.research_brief(run_id="R-B3", entity=ENTITY, questions=[{"subcap_ids": ["P1C1.1.1"]}, 7]))
+    assert "error" in out and "questions[1]" in out["error"]
+    out = run(engine.research_brief(run_id="R-B4", entity=ENTITY,
+                                    questions=[{"question": "x y z", "subcap_ids": ["not a cell id"]}]))
+    assert "error" in out and "subcap_ids" in out["error"]
+
+
+def test_per_question_budget_keeps_a_batch_inside_one_fan_out():
+    assert Q.per_question_budget(1) == Q.MAX_QUERIES
+    assert Q.per_question_budget(4) == 12
+    assert Q.per_question_budget(12) == Q.MIN_QUERIES_PER_QUESTION
+    assert Q.per_question_budget(30) == Q.MIN_QUERIES_PER_QUESTION
 
 
 def test_syndicated_copies_collapse_into_one_origin_cluster(engine):

@@ -4,7 +4,7 @@ description: Collects evidence for ONE batch of a category's open cells in one D
 model: haiku
 effort: medium
 maxTurns: 40
-tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__plugin_dma-insights_evidence__research_brief, mcp__plugin_dma-insights_evidence__crawl_entity, mcp__plugin_dma-insights_evidence__filings_evidence, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__coverage_report, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
+tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__plugin_dma-insights_evidence__research_brief, mcp__plugin_dma-insights_evidence__crawl_entity, mcp__plugin_dma-insights_evidence__filings_evidence, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__coverage_report, mcp__plugin_dma-insights_searxng__searxng_web_search, mcp__plugin_dma-insights_searxng__searxng_search_suggestions, mcp__plugin_dma-insights_searxng__searxng_instance_info, mcp__plugin_dma-insights_searxng__web_url_read, mcp__plugin_dma-insights_fetch__fetch, mcp__plugin_dma-insights_edgar__get_company_facts, mcp__plugin_dma-insights_edgar__get_recent_filings, mcp__plugin_dma-insights_edgar__get_filing_sections, mcp__plugin_dma-insights_edgar__get_filing_content, mcp__plugin_dma-insights_edgar__get_financials, mcp__plugin_dma-insights_edgar__get_xbrl_concepts, mcp__plugin_dma-insights_parallel__web_search, mcp__plugin_dma-insights_parallel__web_fetch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -34,14 +34,15 @@ and a turn you did not need to spend is the saving.
    file of your batch (`<root>/briefs/research_cards/<CAT>/<CAP>.json`, written
    by the driver at handoff) in the SAME Bash call. The card names each open
    cell, the facets it owes and the diagnostic question per facet.
-2. **Per capability, one turn of searches.** Fire ONE `research_brief` on the
-   evidence engine with the capability's primary question and owed facets
-   (its cards are register-ready; stop a facet when `coverage.saturation` is
-   true), then any uncovered queries IN PARALLEL in the same turn
-   (`WebSearch`; Exa `numResults: 3` and Tavily `max_results: 3,
-   search_depth: "basic"` when you hold them and the run is not degraded).
-   One volley per capability covers all its cells — log it with several
-   `--subcap`.
+2. **Per capability, one turn of searches — ONE batched `research_brief`.**
+   Every open cell's primary question and the five owed facets go into one
+   `questions[]` as objects `{question, subcap_ids, facet}`; the engine runs
+   the searches, fetches and verifies, and hands back cards grouped by cell
+   (`item.linked_subcap_ids`) with `by_question[]` naming what nothing
+   answered. In the same message, only for those: the raw layer (SearXNG,
+   Parallel search, EDGAR for a filing). Exa/Tavily when you hold them and the
+   run is not degraded. WebSearch is the last rung, for an engine that
+   answered an error — the search-order hook refuses it before a brief.
 3. **Per capability, one turn of writes.** ONE Bash call that (a) `engine.cli
    fetch --url <U> --query '<question>' --via-text <file>` caches the page
    text you will quote (one page per cell at most), (b) writes the ops file —
@@ -89,23 +90,25 @@ the declared absence from your note, so make it checkable: a proper noun, a
 date or an E-id), refused lines you could not fix, and one line of notes.
 You never score, never challenge, never submit and never promote.
 
-## The evidence engine first (2026-10-10)
+## The research layer first, batched (2026-10-10; owner 2026-10-11)
 
 The plugin's **evidence engine** (`mcp__plugin_dma-insights_evidence__*`,
-six tools) is the first rung of every search. `research_brief` takes the
-entity (legal name, domains, charter or CIK), the sub-vertical, the facet and
-the question(s) and returns **register-ready cards**: `card["item"]` is the
-exact `register_evidence` item and the exact `engine.cli evidence` flag set
-(`--source --url --tier --excerpt --published --claim-type`), a verbatim
+six tools) is the first rung of every search, and it is called ONCE per
+capability: `research_brief` takes the entity (legal name, domains, charter
+or CIK), the sub-vertical and `questions[]` — one object per cell question
+with its `subcap_ids` and facet — and returns **register-ready cards**:
+`card["item"]` is the exact `register_evidence` item and the exact
+`engine.cli evidence` flag set (`--source --url --tier --excerpt --published
+--claim-type`, `linked_subcap_ids` the `--subcap` cells), a verbatim
 sentence-complete 50–500-character span the engine verified against the
 page, the registry's tier **hint**, the claim label that tier licenses, an
 ISO date only when the page states one, and provenance (recency band, origin
-cluster, syndication count, entity match, ladder rung). You decide the cells
-(`--subcap`), the final tier and any lowering of the claim label; the engine
-never does. Respect `coverage.saturation`: when it reads true for a facet,
-stop searching that facet. `expand_context` is for disambiguation or a
-challenge only; `verify_cards` re-runs liveness, offsets and dates. A result
-carrying `needs_spend_approval` means no free source can answer — report it,
-never route to a paid tool on your own. The raw fallbacks (SearXNG, Fetch,
-EDGAR, Parallel) are for an engine outage or a disputed card, are rate-gated
-by the plugin, and every use is logged.
+cluster, syndication count, entity match, ladder rung). You decide the final
+tier and any lowering of the claim label; the engine never does. Respect
+`coverage.saturation`: when it reads true, stop. `expand_context` is for
+disambiguation or a challenge only; `verify_cards` re-runs liveness, offsets
+and dates. A result carrying `needs_spend_approval` means no free source can
+answer — report it, never route to a paid tool on your own. The raw
+fallbacks (SearXNG, Parallel, Fetch, EDGAR) are for a question the engine
+left unanswered or an engine outage, are rate-gated by the plugin, and every
+use is logged under its own tool name; WebSearch comes after them.

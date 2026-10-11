@@ -170,9 +170,10 @@ EXTERNAL = {
     "parallel": ["mcp__plugin_dma-insights_parallel__web_search",
                  "mcp__plugin_dma-insights_parallel__web_fetch"],
     # alphaXiv is OAuth per user; its tool names cannot be listed without a
-    # signed-in session (401 anonymously, DISCOVERY §4), so the family is
-    # declared and granted to no role until a live listing is captured —
-    # the doctor reports it as a WARNING, never a stop.
+    # signed-in session (401 anonymously, DISCOVERY §4). The family is
+    # mapped to the research tier (collector, conductor, web specialist) so
+    # a captured listing flows to them by adding names HERE; until then the
+    # grant contributes no tool and the doctor reports a WARNING, never a stop.
     "alphaxiv": [],
 }
 
@@ -301,13 +302,17 @@ RESEARCH_LANE = row(
 #: holds no Agent tool and no connector write; the actor scope refuses a
 #: synthesis or an absence from `research-pXcY-collector` at the write.
 RESEARCH_COLLECTOR = row(
-    web=WEB, external=["evidence", "exa", "tavily"], reads="floor",
-    why="collects evidence for one batch of a category's open cells — the "
-        "evidence engine's research_brief FIRST (register-ready cards, the "
-        "saturation stop rule), WebSearch (Exa and Tavily when the session "
-        "holds them) as the fallback, reads a page as engine.cli fetch windows, "
-        "registers verbatim spans through the ledger's refusals — and writes no "
-        "judgement; the category orchestrator synthesises")
+    web=WEB, external=["evidence", "searxng", "fetch", "edgar", "parallel", "alphaxiv",
+                       "exa", "tavily"], reads="floor",
+    why="collects evidence for one batch of a category's open cells in the "
+        "free-chain order (owner, 2026-10-11): ONE research_brief per capability "
+        "with every cell's question (register-ready cards grouped by cell), the "
+        "raw open-source fallbacks (SearXNG, Parallel search; Fetch and EDGAR "
+        "for a filing or a page the engine could not read) when the engine "
+        "answers an error, Exa/Tavily when the session holds them, WebSearch "
+        "last; reads a page as engine.cli fetch windows, registers verbatim "
+        "spans through the ledger's refusals — and writes no judgement; the "
+        "category orchestrator synthesises")
 
 #: The category ORCHESTRATOR is the judgement half: it reads the collectors'
 #: evidence pack and the floors gate's own terms, writes every synthesis and
@@ -370,9 +375,13 @@ PAGE_ASSEMBLER = row(
 #: darkness says nothing about the connector. Exa/Tavily corroboration is
 #: emitted as search_requests; the conductor services it.
 TECHNOGRAPHIC_SCANNER = row(
-    web=WEB, external=["explorium", "clay/company", "indeed/jobs"], reads="floor",
+    web=WEB, external=["explorium", "clay/company", "indeed/jobs",
+                       "evidence", "searxng", "fetch", "parallel", "edgar"], reads="floor",
     why="the scan's spine is Explorium and Clay's company pass; Indeed job "
-        "postings are the DATA/INFRA demand signal only this agent reads")
+        "postings are the DATA/INFRA demand signal only this agent reads; the "
+        "research layer (research_brief first, then SearXNG, Fetch, Parallel and "
+        "EDGAR filings) is how it corroborates a vendor page or a 10-K technology "
+        "mention before WebSearch")
 
 #: The research orchestrator. Dispatches the sixteen lanes, gates, services
 #: their `search_requests` per capability batch through the connectors IT
@@ -382,7 +391,7 @@ TECHNOGRAPHIC_SCANNER = row(
 #: AskUserQuestion is load-bearing: the binding preflight REFUSES a run
 #: whose sub-vertical and evidence mode were not confirmed by a person.
 RESEARCH_CONDUCTOR = row(
-    web=WEB, external=["evidence", "searxng", "fetch", "edgar", "parallel",
+    web=WEB, external=["evidence", "searxng", "fetch", "edgar", "parallel", "alphaxiv",
                        "exa", "tavily", "clay/people"], reads="floor",
     extra=["Agent", "AskUserQuestion"],
     why="holds the evidence engine, its raw fallbacks (SearXNG, Fetch, EDGAR, "
@@ -426,7 +435,7 @@ MARKET_PRODUCER = row(
 #: Services Exa/Tavily batches (the relay drain). Exa is the search; Tavily
 #: is the fallback and the verbatim-extract path.
 WEB_SPECIALIST = row(
-    web=WEB, external=["evidence", "searxng", "fetch", "edgar", "parallel",
+    web=WEB, external=["evidence", "searxng", "fetch", "edgar", "parallel", "alphaxiv",
                        "exa", "tavily"], reads="enrichment",
     writes=LEDGER_TOOLS,
     why="services the search batches the orchestrator hands it through the "

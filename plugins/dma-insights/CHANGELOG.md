@@ -1,5 +1,43 @@
 # dma-insights — plugin changelog
 
+## 1.24.0 — 2026-10-11 — the six connectors, batched and ordered
+
+Owner: "There were 6 connectors mentioned … Ensure all are mapped to the
+agents and well orchestrated. The goal is to avoid calling web search
+severally and batch queries to the open source connectors first … getting
+back the tool results in schemas … that align with gold standard scoring
+workbook requirements."
+
+- **Mapped**: `research-evidence-collector` and `technographic-scanner` now
+  hold the raw research fallbacks (`searxng`, `fetch`, `edgar`, `parallel`)
+  beside the engine; `alphaxiv` is mapped to the research tier (collector,
+  conductor, web specialist) and contributes tools the day its listing is
+  captured (OAuth per user). Per-page producers unchanged (2026-09-14).
+- **Batched**: `research_brief` takes `questions[]` as objects
+  `{question, subcap_ids, facet}` — one search pass and one fetch slice for a
+  whole capability, cards ranked PER QUESTION and returned with
+  `item.linked_subcap_ids` = the caller's cells (echoed, never invented) and
+  `by_question[]` naming what nothing answered; `max_cards`/`token_budget`
+  per question; a per-call query budget (`query.per_question_budget`). The
+  card is the gold evidence row: `engine.cli evidence-brief --cell
+  CELL=QUESTION …` prints one search line per question and one evidence line
+  per card, `--subcap` filled from the cells the engine echoed.
+- **Ordered**: the research workflow's collector prompt and the collector's
+  manifest put ONE batched `research_brief` per capability first, the raw
+  layer next, Exa/Tavily after, WebSearch last; `hooks/search_order.py`
+  (PreToolUse on WebSearch/Exa/Tavily search; PostToolUse counter) refuses a
+  research actor's general search before its first brief and past three per
+  brief while `evidence_proxy.py`'s availability marker
+  (`/root/.dma/research_layer/evidence.json`) says the engine is up; it steps
+  aside when the engine is down or answered an error. FAILS OPEN.
+- **Contract**: `connector_contract` family `evidence` logs as
+  `evidence_engine` (`contract.SEARCH_TOOL_OF_FAMILY`).
+- **Deploy gate** (`infra/evidence-engine`): governs on question coverage
+  recomputed from the results file (owner, same day: "Fix the above to
+  ensure deploy happens"); same-URL recall reported beside it; the static
+  egress NAT is opt-in (`EE_STATIC_EGRESS=1`); CI makes the identities'
+  logging binding itself (the deployer holds projectIamAdmin).
+
 ## 1.23.0 — 2026-10-10 — the research layer
 
 - **Evidence engine** (`apps/evidence-engine`, Cloud Run `dmai-evidence`,

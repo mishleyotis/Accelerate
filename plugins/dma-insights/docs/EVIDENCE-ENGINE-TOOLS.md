@@ -6,7 +6,7 @@ Generated from `apps/evidence-engine/evidence_server.py` by `gen_evidence_tools_
 
 | Tool | Signature |
 |---|---|
-| `research_brief` | `research_brief(run_id: str, entity: dict, questions: list[str], sub_vertical: str | None = None, facet: str | None = None, subcap_labels: list[str] | None = None, max_cards: int = 8, token_budget: int = 2400, provenance: str = 'standard', reference_date: str | None = None, allow_names_from_cards: dict | None = None)` |
+| `research_brief` | `research_brief(run_id: str, entity: dict, questions: list[str | dict], sub_vertical: str | None = None, facet: str | None = None, subcap_labels: list[str] | None = None, max_cards: int = 8, token_budget: int = 2400, provenance: str = 'standard', reference_date: str | None = None, allow_names_from_cards: dict | None = None)` |
 | `crawl_entity` | `crawl_entity(run_id: str, entity: dict, page_budget: int | None = None, depth: int | None = None, path_focus: list[str] | None = None, question: str = '', max_cards: int = 12, token_budget: int = 1500, reference_date: str | None = None)` |
 | `filings_evidence` | `filings_evidence(run_id: str, cik_or_ticker: str, forms: list[str] | None = None, years: list[int] | None = None, topics: list[str] | None = None, max_cards: int = 10, token_budget: int = 1500, reference_date: str | None = None, entity: dict | None = None)` |
 | `expand_context` | `expand_context(context_handle: str, window: int = 2, run_id: str | None = None)` |
@@ -16,12 +16,19 @@ Generated from `apps/evidence-engine/evidence_server.py` by `gen_evidence_tools_
 ## `research_brief`
 
 ```
-research_brief(run_id: str, entity: dict, questions: list[str], sub_vertical: str | None = None, facet: str | None = None, subcap_labels: list[str] | None = None, max_cards: int = 8, token_budget: int = 2400, provenance: str = 'standard', reference_date: str | None = None, allow_names_from_cards: dict | None = None)
+research_brief(run_id: str, entity: dict, questions: list[str | dict], sub_vertical: str | None = None, facet: str | None = None, subcap_labels: list[str] | None = None, max_cards: int = 8, token_budget: int = 2400, provenance: str = 'standard', reference_date: str | None = None, allow_names_from_cards: dict | None = None)
 ```
 
 Ranked evidence cards for one or more questions about an entity, plus
 a coverage block (novelty, saturation, conflict candidates, the ladder
 rungs searched). One call replaces a search → open → read → excerpt loop.
+BATCH A WHOLE CAPABILITY: pass `questions` as objects
+`{"question": "...", "subcap_ids": ["P1C1.1.1"], "facet": "primary"}` —
+one per cell question (and one per owed facet naming every cell it bears
+on). One search pass and one fetch slice serve them all; cards come back
+with `item.linked_subcap_ids` = the cells of the question each answered
+(the caller's ids, echoed, never invented) and `by_question[]` says which
+questions got no card. `max_cards`/`token_budget` are then per question.
 `entity`: {legal_name, domains[], aliases[], location, charter, cik,
 ticker}. `facet` ∈ works|fails|value|contradicts|corroborates (omit for
 all five). `subcap_labels` are opaque labels for logging only. A vendor

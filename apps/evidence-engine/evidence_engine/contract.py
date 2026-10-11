@@ -179,7 +179,8 @@ def context_handle_for(content_hash: str, start: int, end: int) -> str:
 
 
 def item_problems(item: dict, *, own_hosts: set[str] | None = None,
-                  abbreviations: dict | None = None) -> list[str]:
+                  abbreviations: dict | None = None,
+                  allowed_cells: set[str] | None = None) -> list[str]:
     """Every refusal `register_evidence` / `ledger.append_evidence` would
     apply to this item BEFORE fetching, as a list of reasons (empty = clean)."""
     out: list[str] = []
@@ -210,8 +211,15 @@ def item_problems(item: dict, *, own_hosts: set[str] | None = None,
         out.append(f"fact_tier: FACT on a {tier} source (ET-10)")
     if origin != "producer":
         out.append(f"origin: engine emits 'producer' only, got {origin!r}")
-    if item.get("linked_subcap_ids"):
-        out.append("linked_subcap_ids: the engine never links cells")
+    cells = item.get("linked_subcap_ids")
+    if cells is None or not isinstance(cells, list):
+        out.append("linked_subcap_ids: required, a list (empty for a plain-string question)")
+    elif allowed_cells is not None:
+        # the engine never INVENTS a cell: every id must be one the caller
+        # named in `questions[].subcap_ids` for this call
+        foreign = [x for x in cells if x not in allowed_cells]
+        if foreign:
+            out.append(f"linked_subcap_ids: {foreign} were not named by the caller")
     pd = item.get("published_date")
     if pd is not None:
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(pd)) or iso_date(pd) is None:
