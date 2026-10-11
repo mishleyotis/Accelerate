@@ -81,25 +81,48 @@ def _bearer(token, force: bool = False) -> str:
     return token
 
 
+#: Drive answers these when the fault is on its side or the caller is going
+#: too fast; Google's guidance for both is to back off and retry.
+_TRANSIENT = frozenset({429, 500, 502, 503, 504})
+#: Seconds to wait before each retry of a transient answer (four tries in all).
+_BACKOFF_S = (2.0, 4.0, 8.0)
+
+
 def _get(token, url: str, timeout: int) -> bytes:
-    """One authenticated GET, re-minting once on a 401.
+    """One authenticated GET, re-minting once on a 401 and backing off on a
+    transient Drive answer.
 
     A refresh margin removes almost every expiry, but not one that lands
     between the check and the call, and not clock skew. A 401 is the
     server telling us the token is dead: ask for a new one and try once
     more, rather than surfacing it as a failed package.
+
+    A 5xx or 429 is Drive's own fault or its rate limit, not ours. Until
+    2026-10-11 one of them anywhere in a walk killed the whole package
+    scan: executions dmai-worker-mpm6d (10-10 19:00 UTC) and -rpwdv
+    (10-11 09:00 UTC) both exited 1 on `HTTP Error 500` from files.list
+    deep in the intake tree. Retry with backoff; only a fault that
+    outlasts every wait surfaces.
     """
-    for attempt in (0, 1):
+    reminted = force = False
+    waits = iter(_BACKOFF_S)
+    while True:
         req = urllib.request.Request(
-            url, headers={"Authorization": f"Bearer {_bearer(token, bool(attempt))}"})
+            url, headers={"Authorization": f"Bearer {_bearer(token, force)}"})
+        force = False
         try:
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 return r.read()
         except urllib.error.HTTPError as e:
-            if e.code == 401 and attempt == 0 and callable(token):
+            if e.code == 401 and not reminted and callable(token):
+                reminted = force = True
                 continue
+            if e.code in _TRANSIENT:
+                wait = next(waits, None)
+                if wait is not None:
+                    time.sleep(wait)
+                    continue
             raise
-    raise AssertionError("unreachable")
 
 
 def _list_children(token, folder_id: str) -> list:
