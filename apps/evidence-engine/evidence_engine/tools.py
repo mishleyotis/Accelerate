@@ -124,7 +124,7 @@ class Engine:
             from . import registry as REG
             try:
                 reg = REG.load()
-                self.registry_pack = list(reg.get("site_pack") or [])[:8]
+                self.registry_pack = []        # resolved per sub-vertical at brief time (registry.site_pack)
             except Exception:  # noqa: BLE001
                 self.registry_pack = []
 
@@ -232,7 +232,7 @@ class Engine:
         # queries, guarded
         queries = []
         for q in questions:
-            queries += Q.expand(q, ent, facet, sub_vertical, self.registry_pack)
+            queries += Q.expand(q, ent, facet, sub_vertical, self.registry_pack or registry.site_pack(sub_vertical))
         queries, violations = Q.guard(queries, allow_names_from_cards)
         free = self._free_sources_available()
         if not free:

@@ -60,6 +60,29 @@ def _headers(aud: str, secret: str, mode: str) -> dict:
         return {}
 
 
+def trust_context():
+    """System roots PLUS any bundle the environment names. With SSL_CERT_FILE
+    alone OpenSSL drops the system store, and behind a proxy that tunnels
+    rather than terminates TLS every probe then reads as "down" (measured
+    2026-10-11) — a doctor that cannot tell an outage from its own trust
+    store is no doctor."""
+    import os
+    import ssl
+    ctx = ssl.create_default_context()
+    try:
+        ctx.load_default_certs()
+    except Exception:  # noqa: BLE001
+        pass
+    for var in ("SSL_CERT_FILE", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE"):
+        path = os.environ.get(var)
+        if path and os.path.isfile(path):
+            try:
+                ctx.load_verify_locations(cafile=path)
+            except (ssl.SSLError, OSError):
+                pass
+    return ctx
+
+
 def probe(url: str, headers: dict, timeout: float = 10.0) -> tuple[int | None, str]:
     """(status, note) for one initialize POST; tokens never appear in `note`."""
     req = urllib.request.Request(url, data=json.dumps(INIT).encode(), method="POST")
@@ -68,7 +91,7 @@ def probe(url: str, headers: dict, timeout: float = 10.0) -> tuple[int | None, s
     for k, v in headers.items():
         req.add_header(k, v)
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with urllib.request.urlopen(req, timeout=timeout, context=trust_context()) as r:
             body = r.read(4000).decode("utf-8", errors="replace")
             name = ""
             try:

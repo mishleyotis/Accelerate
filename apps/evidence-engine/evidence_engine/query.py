@@ -34,7 +34,7 @@ from .types import EntityRef
 
 _NAMES_PATH = Path(__file__).resolve().parent.parent / "registry" / "platform_names.txt"
 
-MAX_QUERIES = 12
+MAX_QUERIES = 16
 
 #: One lens word per facet. Measured 2026-10-11 on golden v1 (15 misses):
 #: the former OR-chains ("launched OR offers OR deployed OR implemented")
@@ -92,7 +92,8 @@ def _quote(s: str) -> str:
 def expand(question: str, entity: EntityRef, facet: str | None = None,
            sub_vertical: str | None = None, domains_pack: list[str] | None = None,
            ) -> list[dict]:
-    """-> [{query_id, text, facet, kind}] — kind ∈ facet | alias | tail | site_own | site_pack.
+    """-> [{query_id, text, facet, kind}] — kind ∈ facet | alias | tail | site:entity | site:<rung>
+    (the `site:` kinds are what coverage.ladder_searched reads as rungs).
 
     Every query is concise: the entity (quoted legal name, or its short
     alias) plus 2–5 focus words and at most one lens word. Variants differ
@@ -125,10 +126,13 @@ def expand(question: str, entity: EntityRef, facet: str | None = None,
     if tail:
         add(" ".join(x for x in (name, tail) if x), own_facet, "tail")
     for d in sorted({_bare(d) for d in (entity.domains or ()) if _bare(d)}):
-        add(" ".join(x for x in (f"site:{d}", head) if x), own_facet, "site_own")
+        add(" ".join(x for x in (f"site:{d}", head) if x), own_facet, "site:entity")
     pack_facet = facet or "corroborates"
-    for d in [_bare(d) for d in (domains_pack or ()) if _bare(d)]:
-        add(" ".join(x for x in (f"site:{d}", alias or name, " ".join(focus_terms[:2])) if x), pack_facet, "site_pack")
+    for entry in (domains_pack or ()):
+        d = _bare(entry["domain"] if isinstance(entry, dict) else entry)
+        rung = (entry.get("rung") if isinstance(entry, dict) else None) or "news"
+        if d:
+            add(" ".join(x for x in (f"site:{d}", alias or name, " ".join(focus_terms[:2])) if x), pack_facet, f"site:{rung}")
     return out
 
 

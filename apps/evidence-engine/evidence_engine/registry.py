@@ -301,3 +301,33 @@ def classify(url: str | None, entity: EntityRef | None = None, *,
     # 7. unknown
     return out("other", tiers["other"],
                f"unregistered third-party domain {host or '(no host)'} ({tiers['other']})")
+
+
+#: Which site pack a sub-vertical label selects (any spelling: a run's
+#: label, a toolkit sheet name, a code). First match wins; else default.
+_PACK_KEYS = (
+    (("credit", "cu"), "credit_unions"),
+    (("insur",), "insurance"),
+    (("wealth", "ria", "asset", "broker", "advis"), "wealth"),
+    (("lend", "mortgage", "farm", "cl"), "lending"),
+    (("bank", "rb", "cib"), "banks"),
+)
+
+
+def site_pack(sub_vertical: str | None, limit: int = 6) -> list[dict]:
+    """[{domain, rung}] — the proxy-ladder probes for this sub-vertical."""
+    packs = (raw().get("site_pack") or {})
+    label = (sub_vertical or "").strip().lower()
+    key = "default"
+    for needles, name in _PACK_KEYS:
+        if any(n == label or (len(n) > 2 and n in label) for n in needles):
+            key = name
+            break
+    rows = packs.get(key) or packs.get("default") or []
+    out = []
+    for r in rows:
+        if isinstance(r, str):
+            out.append({"domain": r, "rung": "news"})
+        elif isinstance(r, dict) and r.get("domain"):
+            out.append({"domain": str(r["domain"]), "rung": str(r.get("rung") or "news")})
+    return out[:limit]

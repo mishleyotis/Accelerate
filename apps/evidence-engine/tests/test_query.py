@@ -28,19 +28,19 @@ def test_five_facets_with_ids_and_quoted_name():
         assert " OR " not in q["text"], "operators are gone: one lens word per facet"
         assert len(q["text"].replace('"Example Federal Credit Union"', "").split()) <= 6
     assert facet_qs[0]["text"].endswith(" launches") and facet_qs[1]["text"].endswith(" complaint")
-    own = [q for q in qs if q["kind"] == "site_own"]
-    assert len(own) == 2 and not [q for q in qs if q["kind"] == "site_pack"]   # own domains, no pack
+    own = [q for q in qs if q["kind"] == "site:entity"]
+    assert len(own) == 2 and not [q for q in qs if q["kind"].startswith("site:") and q["kind"] != "site:entity"]   # own domains, no pack
     alias = [q for q in qs if q["kind"] == "alias"]
     assert alias and alias[0]["text"].startswith("Example FCU ")
 
 
 def test_site_variants_and_cap():
     qs = query.expand(QUESTION, ENTITY, None, "credit union", PACK)
-    assert len(qs) == query.MAX_QUERIES == 12
-    assert [q["query_id"] for q in qs] == [f"Q-{i:02d}" for i in range(1, 13)]
-    own = [q for q in qs if q["kind"] == "site_own"]
+    assert len(qs) <= query.MAX_QUERIES == 16
+    assert [q["query_id"] for q in qs] == [f"Q-{i:02d}" for i in range(1, len(qs) + 1)]
+    own = [q for q in qs if q["kind"] == "site:entity"]
     assert [q["text"].split()[0] for q in own] == ["site:example-fcu.test", "site:online.example-fcu.test"]
-    pack = [q for q in qs if q["kind"] == "site_pack"]
+    pack = [q for q in qs if q["kind"].startswith("site:") and q["kind"] != "site:entity"]
     assert pack and pack[0]["text"].startswith("site:ncua.gov")
     assert "Example FCU" in pack[0]["text"], "a pack probe names the entity by its short alias"
     assert all(q["facet"] in FACETS for q in qs)
@@ -50,7 +50,7 @@ def test_single_facet_only():
     qs = query.expand(QUESTION, ENTITY, "fails", None, ["ncua.gov"])
     assert {q["facet"] for q in qs} == {"fails"}
     kinds = [q["kind"] for q in qs]
-    assert kinds.count("facet") == 1 and kinds.count("site_own") == 2 and kinds.count("site_pack") == 1
+    assert kinds.count("facet") == 1 and kinds.count("site:entity") == 2 and kinds.count("site:news") == 1
 
 
 def test_unknown_facet_refused():
@@ -103,3 +103,21 @@ def test_platform_list_is_substantial_and_free_of_english_words():
     assert len(names) >= 60
     for word in ("Blend", "Alloy", "Encompass", "Segment"):
         assert word not in names
+
+
+def test_pack_entries_carry_their_ladder_rung_into_the_query_kind():
+    pack = [{"domain": "ncua.gov", "rung": "regulator"}, {"domain": "cutimes.com", "rung": "trade_press"}, "prnewswire.com"]
+    qs = query.expand(QUESTION, ENTITY, None, "credit union", pack)
+    kinds = [q["kind"] for q in qs if q["kind"].startswith("site:") and q["kind"] != "site:entity"]
+    assert kinds == ["site:regulator", "site:trade_press", "site:news"]
+
+
+def test_registry_site_pack_follows_the_sub_vertical():
+    from evidence_engine import registry
+    assert registry.site_pack("Credit Unions")[0] == {"domain": "ncua.gov", "rung": "regulator"}
+    assert registry.site_pack("CU")[0]["domain"] == "ncua.gov"
+    assert registry.site_pack("Regional Banks")[0]["domain"] == "fdic.gov"
+    assert registry.site_pack("Insurance Brokers")[0]["domain"] == "naic.org"
+    assert registry.site_pack("RIAs & Broker-Dealers")[0]["domain"] == "sec.gov"
+    assert registry.site_pack("Commercial Lending")[0]["domain"] == "consumerfinance.gov"
+    assert registry.site_pack(None)[0]["rung"] == "news" and len(registry.site_pack(None)) <= 6

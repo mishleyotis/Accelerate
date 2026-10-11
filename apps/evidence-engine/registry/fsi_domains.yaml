@@ -284,3 +284,52 @@ scan_phrases:
   - tech stack scan
   - webstack scan
   - technographics
+
+# ── site packs: the proxy-ladder probes a brief fires beside its facet
+# queries (regulator → trade press → wire), chosen by the run's sub-vertical.
+# Measured 2026-10-11: with this empty, no absence could claim a regulator
+# or trade-press rung was searched. Each entry names its ladder rung so the
+# coverage block reports the rung, not the host.
+site_pack:
+  default:
+    - {domain: prnewswire.com, rung: news}
+    - {domain: businesswire.com, rung: news}
+    - {domain: americanbanker.com, rung: trade_press}
+    - {domain: thefinancialbrand.com, rung: trade_press}
+    - {domain: bankingdive.com, rung: trade_press}
+    - {domain: pymnts.com, rung: trade_press}
+  credit_unions:
+    - {domain: ncua.gov, rung: regulator}
+    - {domain: cuinsight.com, rung: trade_press}
+    - {domain: creditunions.com, rung: trade_press}
+    - {domain: cutimes.com, rung: trade_press}
+    - {domain: cutoday.info, rung: trade_press}
+    - {domain: prnewswire.com, rung: news}
+  banks:
+    - {domain: fdic.gov, rung: regulator}
+    - {domain: occ.gov, rung: regulator}
+    - {domain: federalreserve.gov, rung: regulator}
+    - {domain: americanbanker.com, rung: trade_press}
+    - {domain: bankingdive.com, rung: trade_press}
+    - {domain: prnewswire.com, rung: news}
+  lending:
+    - {domain: consumerfinance.gov, rung: regulator}
+    - {domain: hud.gov, rung: regulator}
+    - {domain: nationalmortgagenews.com, rung: trade_press}
+    - {domain: housingwire.com, rung: trade_press}
+    - {domain: americanbanker.com, rung: trade_press}
+    - {domain: prnewswire.com, rung: news}
+  insurance:
+    - {domain: naic.org, rung: regulator}
+    - {domain: insurancejournal.com, rung: trade_press}
+    - {domain: insurancebusinessmag.com, rung: trade_press}
+    - {domain: dig-in.com, rung: trade_press}
+    - {domain: businesswire.com, rung: news}
+    - {domain: prnewswire.com, rung: news}
+  wealth:
+    - {domain: sec.gov, rung: regulator}
+    - {domain: finra.org, rung: regulator}
+    - {domain: riabiz.com, rung: trade_press}
+    - {domain: thinkadvisor.com, rung: trade_press}
+    - {domain: investmentnews.com, rung: trade_press}
+    - {domain: wealthmanagement.com, rung: trade_press}
