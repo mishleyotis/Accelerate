@@ -7,10 +7,10 @@ Please diagnose and fix the above to ensure this never recurs."
 
 Twelve of sixteen category workflows returned `AT_STAGE_BUDGET` or handed
 back cells nothing could close, with the envelope $49.77 from its ceiling.
-Nine defects — three in the driver↔governor budget handshake, two in how
+Ten defects — three in the driver↔governor budget handshake, two in how
 concurrent agents and successive handoffs name their files, three in how a
-gate term reaches an agent able to close it, one rule a challenger kept
-having to state that the engine already knew:
+gate term reaches an agent able to close it, two rules a challenger kept
+having to state that the engine could check at the write:
 
 - **The share** (`engine/pipeline.py`): with the envelope funding the scope,
   shares were `remaining × cells / total` — blind to the ~$1.40 orchestrator
@@ -76,6 +76,12 @@ having to state that the engine already knew:
   absence only — never from a synthesised cell — both directions of the
   link, a Provenance 'detach' row; the absence then stands. The orchestrator
   prompt detaches instead of reporting a gap no one can close.
+- **The facet answered with no search behind it** (`engine/ledger.py`):
+  P2C1 failed 12 of 15 cells on `facet_coverage` — the evidence engine
+  timed out, no contradicts volley was logged, and the syntheses answered
+  `DQ_Contradicts` anyway. A `DQ_<facet>` stating a finding now needs a
+  Search_Log row on that cell for that facet, else `NOT_RUN: <why>`; the
+  ledger refuses it at the write and the orchestrator prompt says so.
 
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow

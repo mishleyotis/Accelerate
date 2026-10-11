@@ -467,3 +467,47 @@ def test_the_orchestrator_detaches_rather_than_reporting_a_dead_gap():
     body = wf.read_text()
     body = body[body.index("function synthPrompt"):body.index("function challengePrompt")]
     assert "attach --detach --e-id" in body and "never report it as a gap" in body
+
+
+# ── 9. a facet is answered only by a search that ran ──────────────────────
+#
+# P2C1: 12 of 15 cells failed facet_coverage — the evidence engine timed out,
+# no contradicts volley was logged, and the syntheses answered DQ_Contradicts
+# anyway. The challenger can state the rule in one sentence, so the ledger
+# refuses it at the write.
+
+def _two_identity_rows_unsearched(wb, cell):
+    return [L.append_evidence(
+        wb, source_name=name, source_url=url, tier="T2", subcaps=[cell],
+        published="2025-06-01",
+        excerpt=("Alkami digital banking went live in Q3 2024 and reached 47 percent "
+                 f"member adoption within ninety days, restated at {50 + i} percent "
+                 f"in the 2025 report ({cell})."))
+        for i, (name, url) in enumerate([
+            ("Annual Report 2025 p1", f"https://acme.example/ar25#p1-{cell}"),
+            ("Annual Report 2025 p2", f"https://acme.example/ar25#p2-{cell}"),
+            ("NCUA Call Report 2025", f"https://ncua.example/cr25#{cell}")])]
+
+
+def test_an_answered_facet_with_no_logged_search_is_refused(tmp_path):
+    from fixtures import fire_volleys
+    run = new_run(tmp_path, n=6)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    eids = _two_identity_rows_unsearched(wb, cell)
+    with pytest.raises(L.LedgerRefusal, match=r"DQ_Works answers a facet no search on .* fired"):
+        L.append_synthesis(wb, cell, good_synthesis(cell, eids), actor="research-p1c1-producer")
+    fire_volleys(wb, cell)
+    L.append_synthesis(wb, cell, good_synthesis(cell, eids), actor="research-p1c1-producer")
+
+
+def test_an_unfired_facet_written_as_not_run_is_accepted(tmp_path):
+    from fixtures import fire_volleys
+    run = new_run(tmp_path, n=6)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    eids = _two_identity_rows_unsearched(wb, cell)
+    fire_volleys(wb, cell)
+    rec = good_synthesis(cell, eids)
+    rec["DQ_Contradicts"] = "NOT_RUN: the contradicts volley timed out in the evidence engine twice"
+    L.append_synthesis(wb, cell, rec, actor="research-p1c1-producer")

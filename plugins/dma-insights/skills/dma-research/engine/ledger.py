@@ -1402,6 +1402,30 @@ def label_fit_problems(wb: RunWorkbook, subcap: str, merged: dict,
             "say what the synthesis did with it (>= 20 chars: outweighed by …, "
             "superseded by …, reconciled as …) — an open contradiction fails "
             "contradiction_handling at challenge")
+    # A FACET IS ANSWERED ONLY BY A SEARCH THAT RAN (R-INTERAC-20261010:
+    # P2C1 failed 12 of 15 cells on facet_coverage — the evidence engine timed
+    # out, no contradicts volley was logged, and the syntheses answered
+    # DQ_Contradicts anyway). A DQ field that states a finding needs a
+    # Search_Log row on this cell for that facet; otherwise it says
+    # 'NOT_RUN: <why>', which the challenger accepts and this run's honest
+    # record needs.
+    if not absence:
+        logged = [s for s in wb.rows("Search_Log")
+                  if str(s.get("SubCap_ID") or "").strip() == subcap]
+        for f in C.FACETS:
+            v = str(merged.get(f"DQ_{f.capitalize()}") or "").strip()
+            if not v or v.upper().startswith(("NOT_RUN", "NO_FINDING")):
+                continue
+            fired = any(str(s.get("Facet") or "").strip().lower() == f
+                        or (f == "contradicts"
+                            and Q.probes_contradicts(s.get("Query"), s.get("Facet")))
+                        for s in logged)
+            if not fired:
+                out.append(
+                    f"DQ_{f.capitalize()} answers a facet no search on {subcap} "
+                    f"fired (no Search_Log row with facet '{f}'): write "
+                    f"'NOT_RUN: <why it was not searched>' — the challenger "
+                    f"fails an answered facet nobody searched as facet_coverage")
     return out
 
 
