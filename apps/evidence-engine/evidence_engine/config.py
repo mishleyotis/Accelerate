@@ -63,6 +63,10 @@ class Settings:
     # ── limits (Section 6 of the brief) ─────────────────────────────────
     sec_rps: float = field(default_factory=lambda: _float("EE_SEC_RPS", 8.0))
     host_rps: float = field(default_factory=lambda: _float("EE_HOST_RPS", 1.0))
+    #: The Wayback hosts (archive.org, web.archive.org) take a slower lane:
+    #: the 403→snapshot path calls them far more often than any one site,
+    #: and eval v1 iteration 2 opened web.archive.org's breaker once.
+    archive_rps: float = field(default_factory=lambda: _float("EE_ARCHIVE_RPS", 0.5))
     #: Parallel: measured ceiling × 0.7. The 2026-10-10 ramp (90 calls, 1/s
     #: then 2/s, p50 1.9 s) recorded no 429 up to 2/s ⇒ 2 × 0.7.
     parallel_rps: float = field(default_factory=lambda: _float("EE_PARALLEL_RPS", 1.4))

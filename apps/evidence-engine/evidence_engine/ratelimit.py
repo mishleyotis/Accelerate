@@ -455,6 +455,11 @@ def configure(*, clock: Clock | None = None, sleep: Sleep | None = None) -> None
     _REG.breakers = None
 
 
+def _is_archive_host(host: str) -> bool:
+    h = (host or "").lower()
+    return h == "archive.org" or h.endswith(".archive.org")
+
+
 def limits() -> Limits:
     """The process-wide buckets, built once from settings."""
     if _REG.limits is None:
@@ -462,7 +467,7 @@ def limits() -> Limits:
         sources = {name: TokenBucket(rate, SOURCE_BURST[name], clock=_REG.clock,
                                      sleep=_REG.sleep, name=name)
                    for name, rate in _source_rates().items()}
-        hosts = PerKeyBuckets(lambda _host: (s.host_rps, HOST_BURST),
+        hosts = PerKeyBuckets(lambda host: ((s.archive_rps if _is_archive_host(host) else s.host_rps), HOST_BURST),
                               clock=_REG.clock, sleep=_REG.sleep)
         _REG.limits = Limits(sources=sources, hosts=hosts)
     return _REG.limits
