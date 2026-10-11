@@ -6,12 +6,20 @@ set -euo pipefail
 set +x
 PROJECT_ID="${PROJECT_ID:-digital-maturity-assessor}"
 REGION="${REGION:-us-central1}"
+# shellcheck source=../lib/id_token.sh
+. "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../lib/id_token.sh"
 fail=0
 probe() { # name secret kind
   local name="$1" secret="$2" kind="$3"
   local url tok idt
   url="$(gcloud run services describe "$name" --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')"
-  idt="$(gcloud auth print-identity-token --audiences="$url")"
+  # An identity this run cannot mint is NOT PROBED with the reason, and fails
+  # the smoke: an unprobed door is not a passed one.
+  if ! id_token_into idt "$url"; then
+    echo "NOT PROBED $name: no identity token for its URL ($ID_TOKEN_WHY)"
+    fail=1
+    return 0
+  fi
   tok="$(gcloud secrets versions access latest --secret="$secret" --project="$PROJECT_ID")"
   # 1 · a wrong path is a 404 (the capability path is the second factor)
   code="$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $idt" -X POST "$url/mcp-not-the-token" \

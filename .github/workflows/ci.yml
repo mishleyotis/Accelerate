@@ -918,6 +918,10 @@ jobs:
           python-version: '3.12'
       - name: infra/deploy.sh
         if: steps.cfg.outputs.ready == 'true'
+        env:
+          # the api smoke mints its ID token by impersonating this identity
+          # (infra/lib/id_token.sh) when the WIF credential cannot directly
+          GCP_DEPLOYER_SA: ${{ vars.GCP_DEPLOYER_SA }}
         run: bash infra/deploy.sh
 
   # The evidence engine rides the same release, gated: nothing is created
