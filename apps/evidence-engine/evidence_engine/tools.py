@@ -162,7 +162,10 @@ class Engine:
             self.fetcher = HttpFetcher()
         if self.searx is None and st.searxng_url:
             import httpx
-            self.searx = S.SearxClient(st.searxng_url, httpx.AsyncClient(timeout=20))
+            from . import gcp_auth
+            auth = gcp_auth.MetadataIdTokenAuth(st.searxng_url) if st.searxng_id_token else None
+            self.searx = S.SearxClient(gcp_auth.searxng_base(st.searxng_url, st.searxng_path_token),
+                                       httpx.AsyncClient(timeout=20, auth=auth))
         if self.parallel is None and st.parallel_enabled and st.parallel_mcp_url:
             self.parallel = S.ParallelClient(st.parallel_mcp_url)
         if not self.registry_pack:

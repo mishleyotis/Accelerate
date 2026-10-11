@@ -18,6 +18,9 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 
 say() { printf '\n== %s ==\n' "$*"; }
+# Cloud Build's default for `run deploy --source` is 10 minutes; the engine
+# image installs its wheels and bakes two ONNX models. 30 minutes, per build.
+export CLOUDSDK_BUILDS_TIMEOUT="${CLOUDSDK_BUILDS_TIMEOUT:-1800}"
 # IAM is eventually consistent: a service account created a second ago can
 # read "does not exist" to the policy API (measured 2026-10-11, the first
 # approved run: `projects add-iam-policy-binding` on the new dmai-evidence
@@ -104,6 +107,25 @@ grant_secret dmai-edgar-path-token dmai-edgar
 # The plugin's identity rungs (dmai-routine, and the owner's gcloud account)
 # read the evidence token the way they read dmai-mcp's: through Secret Manager.
 grant_secret dmai-evidence-path-token dmai-routine
+# The engine mounts SearXNG's door token (SEARXNG_PATH_TOKEN) to call
+# /searx-json/<token>/search; without the grant its deploy is refused.
+grant_secret dmai-searxng-path-token dmai-evidence
+# The plugin's raw fallbacks (searxng, fetch, edgar) mint their path tokens
+# from Secret Manager under the plugin identity, exactly as the engine's.
+for t in dmai-searxng-path-token dmai-fetch-path-token dmai-edgar-path-token; do
+  grant_secret "$t" dmai-routine
+done
+# smoke.sh reads each path token to probe the right door; the identity that
+# runs the release (the CI deployer) is granted read on the four it probes.
+DEPLOYER_MEMBER="${GCP_DEPLOYER_SA:-$(gcloud config get-value account 2>/dev/null || true)}"
+if [ -n "$DEPLOYER_MEMBER" ]; then
+  for t in dmai-evidence-path-token dmai-searxng-path-token dmai-fetch-path-token dmai-edgar-path-token; do
+    run gcloud secrets add-iam-policy-binding "$t" --project="$PROJECT_ID" \
+      --member="serviceAccount:${DEPLOYER_MEMBER}" --role=roles/secretmanager.secretAccessor --quiet
+  done
+else
+  echo "warning: no deployer identity known; smoke.sh may not read the path tokens" >&2
+fi
 
 say "2 · buckets (new; engine text + cache, uniform access)"
 for suffix in dmai-evidence-text dmai-evidence-cache; do

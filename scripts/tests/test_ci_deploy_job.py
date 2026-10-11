@@ -22,8 +22,25 @@ def _wf():
 
 def test_deploy_waits_for_every_other_job():
     jobs = _wf()["jobs"]
-    others = set(jobs) - {"deploy"}
+    others = set(jobs) - {"deploy", "deploy-evidence"}
     assert set(jobs["deploy"]["needs"]) == others
+
+
+def test_the_evidence_deploy_is_its_own_job_after_the_release():
+    """2026-10-11: deploy.sh used ~25 of the job's 45 minutes; the four source
+    builds need a clock of their own. The job waits for the release, runs
+    from the default branch only, is never cancelled part-way, and does not
+    share the release's concurrency group (a newer run's pending release
+    would cancel it while it waits)."""
+    jobs = _wf()["jobs"]
+    ev = jobs["deploy-evidence"]
+    assert ev["needs"] == ["deploy"]
+    assert ev["if"] == jobs["deploy"]["if"]
+    assert ev["concurrency"]["cancel-in-progress"] is False
+    assert ev["concurrency"]["group"] != jobs["deploy"]["concurrency"]["group"]
+    assert ev["permissions"]["id-token"] == "write"
+    auth = [s for s in ev["steps"] if str(s.get("uses", "")).startswith("google-github-actions/auth")]
+    assert len(auth) == 1 and set(auth[0]["with"]) == {"workload_identity_provider", "service_account"}
 
 
 def test_deploy_runs_only_on_a_push_to_the_default_branch():
@@ -57,12 +74,12 @@ def test_deploy_runs_the_release_script():
 
 def test_deploy_runs_the_evidence_gate_after_the_release_script():
     """The evidence engine rides the same merge-to-default release, behind
-    its approval file; the gate step follows deploy.sh and runs under the
-    same credential check."""
-    steps = _wf()["jobs"]["deploy"]["steps"]
-    runs = [s.get("run", "").strip() for s in steps]
-    assert "bash infra/evidence-engine/ci_gate.sh" in runs
-    assert runs.index("bash infra/evidence-engine/ci_gate.sh") > runs.index("bash infra/deploy.sh")
+    its approval file, in the job that runs after the release; the gate step
+    runs under the same credential check."""
+    jobs = _wf()["jobs"]
+    release = [s.get("run", "").strip() for s in jobs["deploy"]["steps"]]
+    assert "bash infra/evidence-engine/ci_gate.sh" not in release
+    steps = jobs["deploy-evidence"]["steps"]
     gate = next(s for s in steps if s.get("run", "").strip() == "bash infra/evidence-engine/ci_gate.sh")
     assert gate.get("if") == "steps.cfg.outputs.ready == 'true'"
 
