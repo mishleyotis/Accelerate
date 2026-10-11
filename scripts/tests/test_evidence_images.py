@@ -145,3 +145,15 @@ def test_the_probe_holds_edgar_to_the_six_tools_the_plugin_binds():
     for f in (ROOT / "plugins" / "dma-insights" / "agents").rglob("*.md"):
         bound |= set(re.findall(r"mcp__plugin_dma-insights_edgar__(\w+)", f.read_text()))
     assert bound and bound == image_probe.TOOLS["edgar"]
+
+
+def test_every_gateway_stdio_command_parses_as_sh():
+    """Supergateway runs --stdio through `sh -c`. 2026-10-11: fetch's user
+    agent carried an unquoted "(" and the server never started (image_diag.sh:
+    `sh: syntax error: unexpected "("`, on both gateway bases)."""
+    for b in ("fetch", "edgar"):
+        ep = (EE / b / "entrypoint.sh").read_text()
+        m = re.search(r'--stdio "([^"]+)"', ep)
+        assert m, b
+        r = subprocess.run(["sh", "-n", "-c", m.group(1)], capture_output=True, text=True)
+        assert r.returncode == 0, f"{b}: {r.stderr.strip()}"

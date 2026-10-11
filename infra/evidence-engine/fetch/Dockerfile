@@ -5,10 +5,11 @@
 # Supergateway's uvx image ships uv/uvx so `uvx mcp-server-fetch` runs
 # without a second image. Verified 2026-10-10 (README: "docker run ...
 # supercorp/supergateway:uvx --stdio "uvx mcp-server-fetch"").
-# Pinned by digest (2026-10-11): the bare `uvx` tag moved to Supergateway 4.1.0
-# on 2026-09-30; the entrypoint's flags are 3.4's, the version dmai-searxng
-# pins on npm and image_smoke.sh proves in CI.
-FROM supercorp/supergateway:3.4.0-uvx@sha256:219f3ca136730894ec089350a3cc4c01c0a9dc50103dcb67b8fa7664b0170a22
+# Pinned by digest (2026-10-11) to 4.1.0-uvx, the same image the bare `uvx`
+# tag named that day. Measured by image_diag.sh: on 3.4.0-uvx (uv 0.7.19)
+# sec-edgar-mcp died importing pydantic_core; on 4.1.0-uvx (uv 0.12.15) both
+# servers answer `initialize`. image_smoke.sh proves the gateway in CI.
+FROM supercorp/supergateway:4.1.0-uvx@sha256:660c97d4ee58498f4654e1dc60682f4f4ccab363025c9b8b415d04b4e823025e
 ENV PORT=8000
 # Pre-resolve the package at build time so cold starts do not download it.
 RUN uvx --from mcp-server-fetch==2026.8.18 mcp-server-fetch --help >/dev/null 2>&1 || true

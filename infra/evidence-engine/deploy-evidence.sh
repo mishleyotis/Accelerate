@@ -46,8 +46,40 @@ run() {
   if [ "${EE_DEPLOY_APPROVED:-0}" != "1" ]; then printf 'PLAN: %q ' "$@"; printf '\n'; return 0; fi
   case " $* " in
     *" add-iam-policy-binding "*) retry_bind "$@" ;;
+    *" run deploy "*" --source="*) source_deploy "$@" ;;
     *) "$@" ;;
   esac
+}
+# A failed source build tells this log only "Build failed; check build logs
+# for details" (de59ebe, 2026-10-11: the build's own error was never seen).
+# So a failed `run deploy --source` prints the newest failed Cloud Build's
+# log since the deploy began, read as the identity this script already runs
+# as, then fails exactly as before. A log it cannot read is said, not hidden.
+source_deploy() {
+  local since rc=0
+  since="$(date -u -d '-60 seconds' +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  "$@" || rc=$?
+  [ "$rc" -eq 0 ] && return 0
+  build_log_since "$since" || true
+  return "$rc"
+}
+build_log_since() {
+  local since="$1" id="" created="" where="" w
+  for w in "--region=$REGION" ""; do
+    while read -r id created; do
+      [ -n "$id" ] && [[ "$created" > "$since" || "$created" == "$since" ]] && { where="$w"; break 2; }
+      id=""
+    done < <(gcloud builds list --project="$PROJECT_ID" ${w:+"$w"} --filter="status=FAILURE" \
+               --sort-by=~createTime --limit=5 --format='value(id,createTime)' 2>/dev/null || true)
+  done
+  if [ -z "$id" ]; then
+    echo "build log: no failed Cloud Build since $since is listed for this identity (region $REGION or global)" >&2
+    return 1
+  fi
+  echo "--- Cloud Build $id (failed at $created): last 80 lines ---" >&2
+  gcloud builds log "$id" --project="$PROJECT_ID" ${where:+"$where"} 2>&1 | tail -80 >&2 \
+    || echo "build log: $id could not be read by this identity" >&2
+  echo "--- end of Cloud Build $id ---" >&2
 }
 # A just-created identity is visible to `describe` before the policy API sees
 # it, so this is a floor, not a guarantee — retry_bind is the guarantee.

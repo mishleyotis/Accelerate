@@ -195,3 +195,56 @@ esac
         (state / f).unlink()
     r = subprocess.run(["bash", str(cut)], env=env, capture_output=True, text=True, timeout=60)
     assert r.returncode != 0 and "still refused after 4 attempts" in r.stderr
+
+
+def test_a_failed_source_build_prints_its_own_log_and_still_fails(tmp_path):
+    """2026-10-11, de59ebe: step 4's `run deploy --source` failed with only
+    "Build failed; check build logs for details" — the build's own error never
+    reached the CI log. A failed source deploy now prints the newest failed
+    Cloud Build's log since it began and fails exactly as before; a build
+    list it cannot read is said, never hidden. Driven through a fake gcloud."""
+    import os
+    import subprocess
+    bin_dir = tmp_path / "bin"; bin_dir.mkdir()
+    state = tmp_path / "state"; state.mkdir()
+    fake = bin_dir / "gcloud"
+    fake.write_text(r'''#!/usr/bin/env bash
+echo "$*" >> "$STATE/calls"
+case "$*" in
+  *"run deploy"*)
+    [ -f "$STATE/deploy_ok" ] && exit 0
+    echo "ERROR: (gcloud.run.deploy) Build failed; check build logs for details" >&2; exit 1 ;;
+  *"builds list"*)
+    [ -f "$STATE/no_builds" ] && exit 0
+    case "$*" in *"--region="*) echo "b-older 2020-01-01T00:00:00Z"; echo "b-123 $(date -u +%Y-%m-%dT%H:%M:%S.5Z)" ;; esac
+    exit 0 ;;
+  *"builds log b-123"*)
+    printf 'Step 3/12 : RUN apk add --no-cache nodejs npm curl bash\n/bin/sh: apk: not found\n'; exit 0 ;;
+  *) exit 0 ;;
+esac
+''')
+    fake.chmod(0o755)
+    script = ROOT / "infra" / "evidence-engine" / "deploy-evidence.sh"
+    head = script.read_text().split('say "0 · identities')[0]
+    cut = tmp_path / "deploy_only.sh"
+    cut.write_text(head + '\nrun gcloud run deploy dmai-searxng --source=/src --project=p --region=us-central1 --quiet\n'
+                   'echo "AFTER-DEPLOY"\n')
+    env = dict(os.environ, PATH=f"{bin_dir}:{os.environ['PATH']}", STATE=str(state), EE_DEPLOY_APPROVED="1")
+
+    def go():
+        return subprocess.run(["bash", str(cut)], env=env, capture_output=True, text=True, timeout=60)
+
+    r = go()
+    assert r.returncode == 1 and "AFTER-DEPLOY" not in r.stdout, "the release still stops on a failed build"
+    assert "Cloud Build b-123" in r.stderr and "/bin/sh: apk: not found" in r.stderr
+    assert "b-older" not in r.stderr, "a failure from before this deploy is not reported as this one"
+    (state / "calls").unlink()
+    (state / "no_builds").touch()
+    r = go()
+    assert r.returncode == 1 and "no failed Cloud Build since" in r.stderr
+    assert (state / "calls").read_text().count("builds list") == 2, "regional, then global"
+    (state / "calls").unlink()
+    (state / "deploy_ok").touch()
+    r = go()
+    assert r.returncode == 0 and "AFTER-DEPLOY" in r.stdout
+    assert "builds list" not in (state / "calls").read_text(), "a good deploy reads no build log"

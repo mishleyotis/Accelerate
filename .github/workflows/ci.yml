@@ -854,6 +854,25 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      # TEMPORARY (PR #94): the production build log of de59ebe's failed
+      # dmai-searxng build was never read. Rebuild that exact Dockerfile on
+      # the same base (searxng/searxng:latest has not moved since 2026-10-09
+      # 19:06 UTC, before the 10:27 UTC build) and print the whole output.
+      # Evidence only: it never fails the job. Remove once the cause is
+      # recorded on the PR.
+      - name: Reproduce de59ebe's failed searxng build (evidence only)
+        if: always()
+        run: |
+          git fetch -q --depth=1 origin de59ebe0607d3350083ca7b666f8b7632eb13a97
+          d="$(mktemp -d)"
+          git archive de59ebe0607d3350083ca7b666f8b7632eb13a97 infra/evidence-engine/searxng | tar -x -C "$d"
+          echo "base the old Dockerfile names:"; grep '^FROM' "$d/infra/evidence-engine/searxng/Dockerfile"
+          docker buildx imagetools inspect searxng/searxng:latest 2>&1 | sed -n '1,3p' || true
+          set +e
+          docker build --no-cache --progress=plain "$d/infra/evidence-engine/searxng" > "$d/build.log" 2>&1
+          echo "old build exit: $?"
+          tail -60 "$d/build.log"
+          exit 0
       - name: Build searxng, fetch and edgar; probe each through its door
         run: bash infra/evidence-engine/image_smoke.sh
       - name: On failure, what is inside the gateway images and what their servers print
