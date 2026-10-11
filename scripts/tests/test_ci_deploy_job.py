@@ -131,3 +131,50 @@ def test_the_committed_approval_is_the_owners_and_clears_the_gate_it_names():
     assert (ROOT / d["results"]).exists()
     if d["metric"] == "question_coverage":
         assert "owner_words" in d and "recall_url_tuning" in d, "the deviation from the 90 % wording is recorded"
+
+
+def test_a_new_identity_is_bound_after_iam_sees_it(tmp_path):
+    """2026-10-11, the first approved run: `service-accounts create` succeeded
+    and the role binding one second later read "does not exist" (IAM is
+    eventually consistent), so the release stopped at step 0. A binding is
+    retried with backoff; anything else still runs once and stops the
+    release on a real error. Driven through a fake gcloud on PATH."""
+    import os
+    import subprocess
+    bin_dir = tmp_path / "bin"; bin_dir.mkdir()
+    state = tmp_path / "state"; state.mkdir()
+    fake = bin_dir / "gcloud"
+    fake.write_text(r'''#!/usr/bin/env bash
+echo "$*" >> "$STATE/calls"
+case "$*" in
+  *"service-accounts describe"*)
+    [ -f "$STATE/created" ] && exit 0 || exit 1 ;;
+  *"service-accounts create"*)
+    touch "$STATE/created"; exit 0 ;;
+  *"projects add-iam-policy-binding"*)
+    n=$(cat "$STATE/bind" 2>/dev/null || echo 0); n=$((n+1)); echo $n > "$STATE/bind"
+    [ "$n" -ge 3 ] && exit 0
+    echo "INVALID_ARGUMENT: Service account does not exist." >&2; exit 1 ;;
+  *"secrets describe"*) exit 0 ;;
+  *) exit 0 ;;
+esac
+''')
+    fake.chmod(0o755)
+    script = ROOT / "infra" / "evidence-engine" / "deploy-evidence.sh"
+    env = dict(os.environ, PATH=f"{bin_dir}:{os.environ['PATH']}", STATE=str(state),
+               EE_DEPLOY_APPROVED="1", EE_GRANT_PROJECT_ROLES="1",
+               EE_BIND_SLEEP_S="0", EE_BIND_ATTEMPTS="4", EE_STATIC_EGRESS="0")
+    # stop after the identities: the fake answers the rest, but only step 0 matters here
+    src = script.read_text().split('say "1 · secrets')[0]
+    cut = tmp_path / "step0.sh"; cut.write_text(src)
+    r = subprocess.run(["bash", str(cut)], env=env, capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stderr
+    assert "retrying" in r.stderr, "the refused binding was retried, not fatal"
+    calls = (state / "calls").read_text()
+    assert calls.count("service-accounts create") == 1
+    # a binding that never succeeds still stops the release
+    (state / "bind").write_text("-100")
+    for f in ("created", "calls"):
+        (state / f).unlink()
+    r = subprocess.run(["bash", str(cut)], env=env, capture_output=True, text=True, timeout=60)
+    assert r.returncode != 0 and "still refused after 4 attempts" in r.stderr
