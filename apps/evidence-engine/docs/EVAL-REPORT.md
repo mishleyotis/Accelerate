@@ -22,6 +22,50 @@ one `research_brief` per sampled golden row. Full per-run detail: §A (baseline)
 | research_brief elapsed, mean / p95 / max | — | 34.7 s / 127 s / 171 s | **20.5 s / 41 s / 50 s** | — |
 | Parallel ceiling | measured | no 429 up to 2/s → `EE_PARALLEL_RPS=1.4` adopted as the default | not re-run | — |
 
+### 0.0 Iterations 3–5 and golden v2 (2026-10-11, after the owner raised the target to > 90 %)
+
+Code at each run: iter 3 `514e15a`, iter 4 `bada7f7`, iter 5 and v2 `34e844f`. Backends: local SearXNG
+(Google CSE + Bing answer; Brave, DuckDuckGo, Qwant block this egress) + Parallel. Per-run detail in
+`EVAL-REPORT-iter3.md`, `EVAL-REPORT-iter4.md`, `EVAL-REPORT-iter5.md`, `EVAL-REPORT-v2.md`.
+
+| Run | Questions | Rows (tuning / held-out) | Same-URL recall tuning / held-out | Golden URL in hit list | Brief answered by ≥ 1 independent entity-confirmed card | Brief mean (search / fetch) | Liveness |
+|---|---|---|---|---|---|---|---|
+| iter 2 (ref.) | excerpt-derived (v1) | 25 / 10 | 28.0 % / 60.0 % | — | — | 20.5 s | 100 % |
+| iter 3 | v1 | 25 / 10 | 28.0 % / 40.0 % | 80 % (28/35, replayed from the search cache) | — | 28.5 s | 99.2 % |
+| iter 4 | v1 | 23 / 0 (deadline) | 34.8 % / — | 65 % (live) | 100 % / — | 59.9 s (20 / 38) | 97.4 % |
+| **iter 5** | v1 | 25 / 10 | **36.0 % / 70.0 %** | 64 % / 80 % | **100 % / 100 %** | 45.6 s (16.7 / 26.9) | 98.9 % |
+| **v2** | toolkit diagnostic questions | 18 / 9 | **22.2 % / 22.2 %** (gap 2.5 pts) | 39 % / 33 % | **100 % / 100 %** | 40.9 s (16.8 / 22.7) | 99.4 % |
+
+Hard bars across all four runs: excerpt fidelity 100 %, boilerplate 0, syndication inflation 0, token
+reduction 84–87 % on re-found pages. Liveness fell below 100 % only at RE-CHECK: a host that served
+the page at research time answered 403 (WAF) or refused the connection minutes later; the connector's
+own fetch would refuse those too, so those cards would not register — the report counts them.
+
+What moved recall: concise operator-free queries (iter 3), SearXNG as a backend (iter 3), the fetch
+slice ordered by entity band and question-term overlap and widened to 20 (iter 4), refused connections
+treated as dead hosts with the snapshot path (iter 5). Search-level recall on v1 reached 64–80 %; the
+gap between "in the hit list" and "carded" is now (iter 5, per row): robots.txt (72 refusals), WAF 403
+without a snapshot, a client site that refuses this egress, pages written in fragments that the
+sentence-completeness rule refuses (57 drops), and the 30 s fetch budget (17 cancellations).
+
+**What v2 shows.** Asked the subcap's own diagnostic question, every brief returned at least one
+entity-confirmed card from an independent source (tuning and held-out), but the specific page a
+previous citation used is re-found 22 % of the time: a diagnostic question has many valid evidence
+pages, and same-URL recall then measures agreement with one earlier citation, not whether the question
+was answered. On v1 (questions derived from the golden excerpt) the same engine re-finds 36 % / 70 %.
+
+**Status against the owner's > 90 % condition (2026-10-11).** On same-URL recall — the metric
+`infra/evidence-engine/approval_check.py` is written against — the engine is below the bar on every
+split of every run, after six iterations; no free-source path to 90 % on that metric is visible (the
+remaining losses are fetchability and the one-URL framing). On question coverage it is at 100 % on both
+splits of both golden sets. The metric that governs the deploy approval is the owner's to choose; no
+`APPROVAL.json` exists and the gate is closed.
+
+**Speed.** A brief is 40–46 s on these backends: ~17 s of search (18 queries; SearXNG's engines pace
+themselves) and ~25 s of fetch (20 slots, 1 req/s per host, a 30 s budget). The levers left are fewer
+queries when a facet is named (1 facet query instead of 5), a smaller slice when the hit list is short,
+and the engine's own warm cache (a repeated brief answers in 4–30 s).
+
 ### 0.1 What iteration 1 and 2 changed (commits 1b31c9a, 7ba577c)
 
 1. A transport timeout trips the host breaker (`STREAK_TIMEOUT=2`), `EE_FETCH_TIMEOUT_S` 30 → 12,
