@@ -146,11 +146,23 @@ const REPAIRS = A.repairs || {}
 const REPAIR_BATCHES = A.repair_batches || {}
 const READ_BLOCKERS = (cat) => `python3 -c "import json;from engine import floors_gate as F;print(json.dumps(F.blocking_cells(F.read_verdict('${A.root}/07_qa','${cat}'))))"`
 
+// EVERY AGENT HAS ITS OWN OPS DIRECTORY (R-INTERAC-20261010, 2026-10-11):
+// sixteen category workflows run in one session and the prompts said "ONE ops
+// file" without naming it, so agents wrote generic names into the shared
+// scratchpad — P4C1's challenger re-ran a file P1C3's had overwritten and
+// recorded P1C3's verdicts a second time. The path is named here, under the
+// run root, unique per category, role, wave and batch, and deterministic so a
+// resumed workflow replays the same prompt from cache.
+const opsDir = (cat, role, tag) =>
+  `${A.root}/07_qa/ops/${cat}_${role}_${String(tag).replace(/[^A-Za-z0-9.]+/g, '-').replace(/^-+|-+$/g, '')}`
+const OPS_RULE = (dir) => `OPS DIR: ${dir}
+  Write EVERY ops file (and any JSON or text file a line points at) under that directory — mkdir -p it first, one file per capability or packet (e.g. ${dir}/<CAP>.ops) — and run batch only on files you wrote there in this task. Other categories' agents run beside you in the same session: never write to, read or re-run an ops file anywhere else (not /tmp, not a scratchpad, not another agent's directory).`
+
 function collectPrompt(cat, caps, wave, repairs) {
   const lc = cat.toLowerCase()
   const act = `research-${lc}-collector`
   const repairLines = repairs && Object.keys(repairs).length
-    ? `GAP-ONLY WAVE. Collect for THESE cells and no other — each with the gate term it fails or the facet it owes:\n${Object.entries(repairs).map(([c, t]) => `  ${c}: ${(t || []).join(', ')}`).join('\n')}\nPer term: primary_unfired → fire and log the primary query; volleys_incomplete → fire and log the missing facets; single_source_fact → find a second independent source (a different domain) and register it; absence_undeclared_empty / absence_unsearched → fire the primary volley and report the cell in nothing_found with the exact queries; evidence_smear → register each sibling's own evidence; challenge_failed → the challenger's reason is in floors_${cat}.json: collect the counter-source or the figure it names. THESE CELLS ARE CLOSED (synthesised or declared absent) and are NOT on the open-cell cards: read ${CARDS}/${cat}/_repairs.json instead — it carries, per cell, the gate terms and the diagnostic question per facet. Work them; "not on the cards" is expected, not a scope mismatch.`
+    ? `GAP-ONLY WAVE. Collect for THESE cells and no other — each with the gate term it fails or the facet it owes:\n${Object.entries(repairs).map(([c, t]) => `  ${c}: ${(t || []).join(', ')}`).join('\n')}\nPer term: primary_unfired → fire and log the primary query; volleys_incomplete → fire and log the missing facets; single_source_fact → find a second independent source (a different domain) and register it; absence_undeclared_empty / absence_unsearched → fire the primary volley and report the cell in nothing_found with the exact queries; evidence_smear → register each sibling's own evidence; challenge_failed → the challenger's reason is in floors_${cat}.json: collect the counter-source or the figure it names. absence_superseded → nothing to collect: the cell is a declared absence a repair wave has since attached evidence to, and the orchestrator synthesises it from those rows. THESE CELLS ARE CLOSED (synthesised or declared absent) and are NOT on the open-cell cards: read ${CARDS}/${cat}/_repairs.json instead — it carries, per cell, the gate terms and the diagnostic question per facet. Work them; "not on the cards" is expected, not a scope mismatch.`
     : ''
   return `You are research-evidence-collector for category ${cat} of DMA run ${A.run} (${A.entity || 'the entity'}), wave ${wave}. Work from ${ENG}; set ACT=${act} and pass --actor $ACT on every write (the scope refuses a synthesis or an absence from this actor — you collect, the orchestrator judges).
 YOUR BATCH: capabilities ${caps.join(', ')} of category ${cat} — ONLY their open cells (a cell with a synthesis or a declared absence is done; skip it).
@@ -166,6 +178,7 @@ READ A PAGE THE CHEAP WAY: python3 -m engine.cli fetch ${R} --url <U> --query '<
 Do not read any file under skills/, docs/ or engine/ (the sheet is complete); do not call ToolSearch or Firecrawl.
 
 ${SHEET}
+${OPS_RULE(opsDir(cat, `collect-w${wave}`, caps.join('+')))}
 
 ${A.degraded ? DEGRADED_RULES : SEARCH_RULES}
 
@@ -179,8 +192,15 @@ function synthPrompt(cat, wave, collected, cells) {
   const scope = cells && cells.length
     ? `YOUR CELLS this pass: ${cells.join(', ')} — the gap list of the previous pass, re-collected for. Touch no other cell.`
     : `YOUR CELLS: every open cell of ${cat} the collectors touched, plus every cell they report in nothing_found.`
+  // the gate's own repair findings ride to the orchestrator too: a declared
+  // absence that now carries evidence (absence_superseded) closes ONLY by a
+  // synthesis — no collector or challenger can close it (R-INTERAC-20261010)
+  const superseded = Object.entries(REPAIRS[cat] || {}).filter(([, t]) => (t || []).includes('absence_superseded')).map(([c]) => c)
+  const supersededLine = superseded.length
+    ? `\nDECLARED ABSENCES THAT NOW CARRY EVIDENCE (gate term absence_superseded): ${superseded.join(', ')}. Each is in YOUR scope whatever the line above says: read its attached rows in the evidence pack and write its synthesis from them (a synthesis on an evidenced cell replaces the absence); if no attached row bears on the cell, say so in gaps as "<cell>: absence_superseded — rows do not bear on it". Never leave one as it is: it can be neither challenged nor scored.`
+    : ''
   return `You are research-category-orchestrator for category ${cat} of DMA run ${A.run} (${A.entity || 'the entity'}), pass ${wave}. Work from ${ENG}; set ACT=research-${lc}-producer and pass --actor $ACT on every write (the category's actor, so the challenge's independence is checkable). You hold no search tool: you judge what the collectors registered, and a cell whose evidence does not carry a claim is a GAP you name, never a search you run.
-${scope}
+${scope}${supersededLine}
 TURN 1 (one Bash call): python3 -m engine.cli gate ${R} --category ${cat} --require-synthesis --summary ; then the evidence pack — for each of your cells: python3 -m engine.brief reuse ${R} --subcap <CELL> --json (cites_now = the rows registered on the cell with excerpt, tier, published; names_this_cell and capability_siblings = rows you may attach with 'attach --e-id E --subcap <cell>'; proposed_from_other_categories = PRELIM rows to cite when the excerpt answers the cell). Read the gate exactly: advisory terms never block.
 THE COLLECTORS' ABSENCE NOTES (cells with nothing citable, their queries and the nearest thing found):
 ${notes.length ? notes.map(n => `  - ${n}`).join('\n') : '  (none reported)'}
@@ -191,6 +211,7 @@ DECLARED ABSENCE — the exact command (every flag below is required; do not ope
   --hunted is THIS cell's hunt: its own primary query (from the collectors' notes or the Search_Log), the facet queries that bore on it, and the nearest thing that came back for IT. Never paste one capability-wide text into several cells — the ledger refuses hunted_shared, and a primary_shared refusal means the cell's own question was never asked: name it as "<cell>: primary_unfired — its own question" in gaps, never re-word around it.
   A cell may be declared absent only when EVERY askable facet has a logged search on it (floors_${cat}.json "volleys_incomplete" lists the missing facets per cell): a cell with a missing facet is a GAP — name it as "<cell>: volleys_incomplete — <the missing facets>" so the repair wave fires them — never an absence. ${A.degraded ? 'This run is DEGRADED: every absence carries --enrichment-unavailable.' : 'A connector volley must also be logged on the cell.'}
 WRITES: per capability ONE ops file (attach lines, then synthesise lines — 'synthesise --subcap <CELL> --json <file> --actor $ACT' — then absence lines; the "python3 -m engine.cli" prefix and --run/--root may be omitted), then python3 -m engine.cli batch ${R} --file <ops>. About eight cells a turn. Never run the gate a second time; the challenge step runs it. Do not read any file under skills/, docs/ or engine/: everything the writes need is on this sheet, and the ledger's refusal names the rule when a line is wrong.
+${OPS_RULE(opsDir(cat, 'orchestrate', `p${wave}`))}
 Return: category ${cat}, cells_synthesised, declared_absent, gaps (one string per cell you could neither synthesise nor honestly declare absent: "<cell>: <gate term>, <gate term> — <the facet or source it still owes>" — this list is the repair wave's work, so name only what another search can close), refused, status DONE|PARTIAL|ERROR, one-line notes. Never score, never challenge, never submit, never promote.`
 }
 
@@ -198,6 +219,7 @@ function challengePrompt(cat, round) {
   return `Independent challenge for category ${cat} of DMA run ${A.run} (root ${A.root}), round ${round}. Run commands from ${ENG}, foreground, long timeouts.
 1) python3 -m engine.brief challenge-batch ${R} --only ${cat} --out-dir ${A.root}/briefs/wf_challenge_${cat}_r${round} --json
 2) If it lists packets, work each prompt file exactly as research-challenger: judge every cell on the seven dimensions and record each verdict with python3 -m engine.cli challenge ... --actor research-challenger — put the verdict lines of a packet in ONE ops file and run python3 -m engine.cli batch ${R} --file <ops> (one lock, one save). You never challenge a cell you wrote and never search.
+   ${OPS_RULE(opsDir(cat, 'challenge', `r${round}`))}
 3) python3 -m engine.cli gate ${R} --category ${cat} --require-synthesis --summary
    It prints {gate, blocking: {term: [cells]}, advisory: [terms], repair_cells}. Read it exactly: advisory terms do not block.
 Return gate (as printed), blocking_terms as "term: cell, cell" strings copied from \`blocking\` (never an advisory term), still_open = repair_cells, and one-line notes. Do not compute any other count.`
@@ -357,10 +379,12 @@ const results = await pipeline(A.cats, async (cat) => {
       const cells = Object.keys(gaps)
       const rjobs = chunk(cells, BATCH_CELLS).map(cs => ({ caps: [...new Set(cs.map(c => c.split('.').slice(0, 2).join('.')))], cells: cs,
                                                             repairs: Object.fromEntries(cs.map(c => [c, gaps[c]])) }))
-      const { done: rdone, jobs: rran } = await collectWave(cat, rjobs, 2)
+      // the gap pass is round 1's, tagged '1g' — round 2 is wave 2, and the two
+      // must not share labels or ops directories
+      const { done: rdone, jobs: rran } = await collectWave(cat, rjobs, '1g')
       const rgot = rdone.filter(Boolean)
       if (rran.length && rgot.length) {
-        const s2 = await synthesise(cat, 2, rgot, cells)
+        const s2 = await synthesise(cat, '1g', rgot, cells)
         if (s2) log(`${cat} p2: ${s2.cells_synthesised || 0} synthesised, ${s2.declared_absent || 0} declared absent, ${(s2.gaps || []).length} gap(s) remain`)
         else if (s2 === null) log(`${cat} p2: gap evidence collected but its synthesis did not fit — the reserve rule above should make this unreachable`)
       } else if (!rran.length) {

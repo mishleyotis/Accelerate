@@ -38,7 +38,9 @@ function priceOf (opts) {
 }
 
 async function agent (prompt, opts) {
-  calls.push({ label: opts.label, phase: opts.phase })
+  const ops = (String(prompt).match(/OPS DIR: (\S+)/) || [])[1] || null
+  const superseded = (String(prompt).match(/absence_superseded\): (.+?)\. Each is/) || [])[1] || null
+  calls.push({ label: opts.label, phase: opts.phase, ops, superseded })
   tokens += priceOf(opts) / RATE
   if (/collect/.test(opts.label)) {
     return { category: A.cats[0], cells_touched: 1, evidence_registered: 1, attached: 1,

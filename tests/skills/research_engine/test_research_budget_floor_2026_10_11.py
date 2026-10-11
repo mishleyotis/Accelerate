@@ -27,8 +27,10 @@ from pathlib import Path
 
 import pytest
 
+from engine import floors_gate, ledger as L
 from engine import pipeline as P, pipeline_stub as S, preflight
-from fixtures import new_run, preflight_doc
+from fixtures import (bank_evidence, challenge, good_synthesis, new_run, preflight_doc,
+                      researched_run)
 
 HERE = Path(__file__).resolve().parent
 HARNESS = HERE / "research_governor_harness.mjs"
@@ -135,6 +137,7 @@ needs_node = pytest.mark.skipif(shutil.which("node") is None, reason="node not i
 
 
 def _run(tmp_path, inv, gaps=(), gate="FAIL"):
+    tmp_path.mkdir(parents=True, exist_ok=True)
     f = tmp_path / f"scen_{abs(hash(json.dumps(inv, sort_keys=True) + str(gaps) + gate))}.json"
     f.write_text(json.dumps({"args": inv, "gaps": list(gaps), "gate": gate}))
     r = subprocess.run(["node", str(HARNESS), str(f)], capture_output=True, text=True, timeout=60)
@@ -152,7 +155,7 @@ def test_p1c3_at_its_old_share_challenges_instead_of_buying_unsynthesisable_evid
     d = _run(tmp_path, _inv("P1C3", [], [["P1C3.1.4", "P1C3.3.3"]], share=2.0),
              gaps=["P1C3.1.4: absence_single_tool"])
     assert d["labels"][-1] == "P1C3 challenge r1", d["labels"]
-    assert not any("w2 collect" in l for l in d["labels"]), d["labels"]
+    assert not any("w1g collect" in l for l in d["labels"]), d["labels"]
     assert d["cat"]["gate"] == "FAIL", d["cat"]
 
 
@@ -169,8 +172,8 @@ def test_p3c4_at_the_drivers_floor_runs_both_batches(tmp_path):
 def test_a_funded_gap_wave_is_synthesised_before_the_challenge(tmp_path):
     d = _run(tmp_path, _inv("P2C1", [], [["P2C1.1.4"]], share=6.0),
              gaps=["P2C1.1.4: absence_single_tool"])
-    i_gap = next(i for i, l in enumerate(d["labels"]) if "w2 collect" in l)
-    i_p2 = d["labels"].index("P2C1 p2 orchestrate")
+    i_gap = next(i for i, l in enumerate(d["labels"]) if "w1g collect" in l)
+    i_p2 = d["labels"].index("P2C1 p1g orchestrate")
     i_ch = d["labels"].index("P2C1 challenge r1")
     assert i_gap < i_p2 < i_ch, d["labels"]
 
@@ -181,6 +184,32 @@ def test_a_round_two_that_does_not_fit_hands_back_the_gate_verdict(tmp_path):
     assert "P4C4 challenge r1" in d["labels"]
     assert d["cat"]["gate"] == "FAIL", d["cat"]
     assert d["cat"]["blocking_terms"] == ["challenge_failed: P4C4.1.1"], d["cat"]
+
+
+@needs_node
+def test_every_agent_writes_its_ops_files_in_its_own_directory_under_the_run(tmp_path):
+    """P4C1's challenger re-ran an ops file P1C3's had overwritten in the
+    shared scratchpad and recorded P1C3's verdicts again: the prompts said
+    'ONE ops file' without naming it. Every collector, orchestrator and
+    challenge prompt now names its own directory under the run root."""
+    seen = []
+    for cat in ("P1C3", "P4C1"):
+        inv = _inv(cat, [[f"{cat}.1"], [f"{cat}.2"]], [[f"{cat}.3.1", f"{cat}.4.2"]], share=20.0)
+        d = _run(tmp_path, inv, gaps=[f"{cat}.3.1: absence_single_tool"])
+        for c in d["calls"]:
+            assert c["ops"], f"{c['label']} names no OPS DIR"
+            assert c["ops"].startswith(inv["root"] + "/07_qa/ops/"), c
+            assert f"/{cat}_" in c["ops"], c
+            seen.append(c["ops"])
+    assert len(seen) == len(set(seen)), sorted(seen)
+
+
+@needs_node
+def test_the_ops_directory_is_stable_so_a_resume_replays_from_cache(tmp_path):
+    inv = _inv("P2C2", [["P2C2.1"]], [], share=20.0)
+    a = [c["ops"] for c in _run(tmp_path, inv)["calls"]]
+    b = [c["ops"] for c in _run(tmp_path / "again", inv)["calls"]]
+    assert a == b
 
 
 @needs_node
@@ -204,3 +233,40 @@ def test_whatever_the_share_bought_evidence_is_always_synthesised_and_challenged
         assert any("orchestrate" in l for l in after) and any("challenge" in l for l in after), \
             (share, labels)
         assert d["spent_usd"] <= share + 1e-6, (share, d["spent_usd"], labels)
+
+
+# ── 5. a declared absence that later carries evidence ─────────────────────
+#
+# P1C1 (five cells) and P4C1.4.3: a repair wave collected for an
+# absence_single_tool cell and attached rows, nothing re-synthesised it, and
+# the gate called it challenge_missing — a term only a challenger acts on,
+# and `record_challenge` refuses a cell with no synthesis author. Handed back
+# every round, closable by nobody.
+
+def test_an_evidenced_declared_absence_is_owed_a_synthesis_not_a_challenge(tmp_path):
+    run, wb, cells, _ = researched_run(tmp_path, n=6, absent=1)
+    cell = cells[-1]
+    new = bank_evidence(wb, cell, n=3)            # the repair wave's rows
+    v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert v["gate"] == "FAIL"
+    assert "absence_superseded" in v["blocking"], v["blocking"]
+    assert [e["subcap"] for e in v["absence_superseded"]] == [cell]
+    assert cell not in v["challenge_missing"], v["challenge_missing"]
+    assert floors_gate.blocking_cells(v) == {cell: ["absence_superseded"]}
+    with pytest.raises(L.LedgerRefusal, match="no recorded synthesis author"):
+        challenge(wb, cell)                        # why challenge_missing could never close
+    L.append_synthesis(wb, cell, good_synthesis(cell, new), actor="research-p1c1-producer")
+    challenge(wb, cell)
+    v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
+    assert v["gate"] == "PASS", v["blocking"]
+
+
+@needs_node
+def test_the_orchestrator_is_told_which_absences_it_must_synthesise(tmp_path):
+    inv = _inv("P1C1", [], [["P1C1.1.3", "P1C1.2.3"]], share=20.0)
+    inv["repairs"]["P1C1"] = {"P1C1.1.3": ["absence_superseded"],
+                              "P1C1.2.3": ["absence_single_tool"]}
+    d = _run(tmp_path, inv)
+    orch = [c for c in d["calls"] if "orchestrate" in c["label"]]
+    assert orch and orch[0]["superseded"] == "P1C1.1.3", orch
+    assert all(c["superseded"] is None for c in d["calls"] if "orchestrate" not in c["label"])

@@ -5,9 +5,10 @@
 Owner, R-INTERAC-20261010: "I see workflows failing and being restarted.
 Please diagnose and fix the above to ensure this never recurs."
 
-Seven of sixteen category workflows returned `AT_STAGE_BUDGET` with the
-envelope $49.77 from its ceiling. Three defects in the driver↔governor
-handshake:
+Twelve of sixteen category workflows returned `AT_STAGE_BUDGET` or handed
+back cells nothing could close, with the envelope $49.77 from its ceiling.
+Five defects — three in the driver↔governor budget handshake, one in how
+concurrent agents name their files, one in how the gate routes a cell:
 
 - **The share** (`engine/pipeline.py`): with the envelope funding the scope,
   shares were `remaining × cells / total` — blind to the ~$1.40 orchestrator
@@ -28,6 +29,20 @@ handshake:
 - **The verdict**: a round-2 wave that did not fit replaced the round-1 gate
   verdict (FAIL with its cells) with a bare `AT_STAGE_BUDGET`; it now hands
   back the verdict.
+- **The ops files**: the prompts said "ONE ops file" without naming it, and
+  sixteen workflows share one session — P4C1's challenger re-ran a file
+  P1C3's had overwritten in the scratchpad and recorded P1C3's verdicts
+  again. Every collector, orchestrator and challenge prompt now names its own
+  `OPS DIR` under `<run>/07_qa/ops/`, unique per category, role, pass and
+  batch (the round-1 gap pass is tagged `1g`, so it no longer shares a tag
+  with round 2) and deterministic, so a resume still replays from cache.
+- **The unclosable cell** (`engine/floors_gate.py`): a declared absence a
+  repair wave later attached evidence to is no longer a declared absence and
+  has no synthesis author, so `record_challenge` refuses it — yet the gate
+  reported it `challenge_missing` and handed it back every round (P1C1: five
+  cells; P4C1.4.3). It is now the blocking term `absence_superseded`, and
+  the orchestrator's prompt names those cells as its own: a synthesis from
+  the attached rows closes them.
 
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow

@@ -280,6 +280,9 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # otherwise, because a cell mid-synthesis legitimately has rows it
         # has not yet decided about.
         "absence_over_evidence": [], "evidence_unattached": [],
+        # a declared absence a repair wave has since attached evidence to:
+        # owed a synthesis, not a challenge (see the verdict branch below)
+        "absence_superseded": [],
         # The two volume terms. Populated near the end of `run` from the
         # computed coverage, and ADVISORY since 2026-09-13 — declared here so
         # they appear in `finding_keys` and in `advisory` like every other
@@ -485,6 +488,20 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             # ladder_overstated); demanding a challenge verdict on it would
             # only add a token-costly step with nothing to falsify.
             pass
+        elif (cell in declared_set and eids
+              and str(r.get("Absence_Claimed") or "").strip().upper() in ("YES", "TRUE", "1")
+              and L.actor_for(wb, cell, "synthesis") is None):
+            # A DECLARED ABSENCE THAT NOW CARRIES EVIDENCE (R-INTERAC-20261010,
+            # 2026-10-11): a repair wave collected for an absence_single_tool
+            # cell and attached rows, but nothing re-synthesised it. It is no
+            # longer a declared absence (it has evidence), and it cannot be
+            # challenged (`record_challenge` refuses a cell with no synthesis
+            # author) — so reported as challenge_missing it was handed back
+            # every round to a challenger that could never close it (P1C1:
+            # five cells; P4C1.4.3). The one move that closes it is the
+            # orchestrator's: a synthesis from the attached rows.
+            findings["absence_superseded"].append(
+                {"subcap": cell, "evidence": eids})
         elif verdict == "FAIL":
             # MEM-0441: a FAILED challenge used to read as "challenged" and
             # the gate PASSED the category — 103 of Susser Bank's cells
@@ -566,7 +583,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         "challenge_not_independent", "challenge_failed", "single_source_fact",
         "synthesis_missing", "dq_gaps", "absence_unsearched",
         "volleys_incomplete", "absence_undeclared_empty",
-        "absence_over_evidence",
+        "absence_over_evidence", "absence_superseded",
         # 2026-09-03 (owner issue 1): the primary question is owed on every
         # searched cell, and an empty cell must show an enrichment connector.
         "primary_unfired", "absence_single_tool",
