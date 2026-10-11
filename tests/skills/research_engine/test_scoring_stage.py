@@ -148,6 +148,10 @@ def test_high_confidence_needs_two_source_identities(tmp_path):
                  f"member adoption within ninety days, restated at {50+i} percent "
                  "in the 2025 report.")) for i in range(3)]
     syn = good_synthesis(cell, eids); syn["Claim_Label"] = "INFERENCE"
+    # every row is the entity's own site, so the evidence ceiling is 2.0
+    # (CAP-OWN) and the ledger refuses a band above it at the write
+    # (2026-10-11); the honest band is Building
+    syn["Ceiling_Band"] = "Building"
     # an INFERENCE names its step (claim-label fit at the write, 2026-10-09)
     syn["Triangulation"] += (" Taken together the launch date and the restated "
                              "figure suggest measured adoption, not deployment alone.")
