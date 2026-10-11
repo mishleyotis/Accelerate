@@ -30,3 +30,24 @@ sec-edgar-mcp AGPL-3.0 (run unmodified, source linked).
 ## Images are proved before a release
 
 `image_smoke.sh` builds `searxng`, `fetch` and `edgar` and probes each through its door (`image_probe.py`: healthz, wrong path 404, `tools/list` names the tools the plugin binds, and for SearXNG the engine's JSON door). CI job `evidence-images` runs it on every pull request and `deploy` waits for it. Every `FROM` is digest-pinned; raising a pin is a reviewed change that this job proves (2026-10-11: the first approved release failed building `dmai-searxng` against a floating `latest`).
+
+## SearXNG is paced per upstream engine (2026-10-11)
+
+Measured on the live instance: only Bing answered (0 results about the
+entity); Brave and Google CSE were suspended for *too many requests*,
+DuckDuckGo and Qwant on CAPTCHA, Google on *access denied*. Three causes,
+three fixes:
+
+| cause | fix |
+|---|---|
+| mojeek and startpage — the profile's primary engines — are `inactive` in this SearXNG release (Proof-of-Work CAPTCHA); `use_default_settings: true` then fanned every query to ~57 default engines | `searxng/settings.yml` `keep_only`: Google CSE, Bing, Brave, mwmbl, DuckDuckGo, Qwant, Wikipedia(+data), three news and four academic engines, each explicitly enabled |
+| every upstream engine saw the whole query stream from Cloud Run's shared egress | the evidence engine's `search.EnginePool` sends each query only to engines with budget left (Google CSE 0.2/s, Bing 0.5/s, mwmbl 0.4/s, Brave 0.15/s, …, per instance; `EE_SEARXNG_ENGINES` overrides) and rests an engine SearXNG reports blocked for the cool-off its reason earns; with no engine free the query skips SearXNG instead of waiting. A named engine list is sent WITHOUT `categories` — SearXNG queries the union of the two |
+| `useragent_suffix: "dmai-evidence-engine"` labelled every request automated | removed |
+
+Pacing ends the blocks we caused; it cannot vouch for an egress IP other
+tenants share. The one general engine no CAPTCHA can block is the official
+Brave Search API: store a key as Secret Manager secret
+`dmai-brave-search-api-key` (an owner decision — a paid key, see
+`APPROVAL.json`) and the next deploy mounts it, `searxng/entrypoint.sh`
+activates `braveapi`, and the engine's pool puts it first. Watch the pacing
+live in `coverage_report` → `sources_health.searxng_engines`.

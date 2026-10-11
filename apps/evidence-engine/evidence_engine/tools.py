@@ -165,7 +165,9 @@ class Engine:
             from . import gcp_auth
             auth = gcp_auth.MetadataIdTokenAuth(st.searxng_url) if st.searxng_id_token else None
             self.searx = S.SearxClient(gcp_auth.searxng_base(st.searxng_url, st.searxng_path_token),
-                                       httpx.AsyncClient(timeout=20, auth=auth))
+                                       httpx.AsyncClient(timeout=20, auth=auth),
+                                       pool=S.EnginePool(S.engine_rates_from(st.searxng_engines),
+                                                         per_query=st.searxng_engines_per_query))
         if self.parallel is None and st.parallel_enabled and st.parallel_mcp_url:
             self.parallel = S.ParallelClient(st.parallel_mcp_url)
         if not self.registry_pack:
@@ -611,4 +613,9 @@ class Engine:
         rep["ladder_rungs_searched"] = state.get("ladder_rungs", [])
         rep["queries_run"] = len(state.get("queries", []))
         rep["sources_health"] = RL.health()
+        pool = getattr(self.searx, "pool", None)
+        if pool is not None:
+            # this instance's per-engine pacing behind SearXNG: what was sent,
+            # what is resting and why (search.EnginePool)
+            rep["sources_health"]["searxng_engines"] = pool.snapshot()
         return rep

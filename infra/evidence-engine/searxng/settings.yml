@@ -2,8 +2,35 @@
 #
 # Every key below was verified against docs.searxng.org on 2026-10-10
 # (admin/settings/settings_search.html, settings_outgoing.html,
-# settings_server.html). SearXNG merges this file over its defaults
-# (`use_default_settings: true`), so only the deltas are stated.
+# settings_server.html) and against the pinned image's own
+# searx/settings.yml and searx/engines/ on 2026-10-11.
+#
+# MEASURED 2026-10-11 (live instance + the pinned image run locally): the
+# old profile weighted mojeek and startpage, but this SearXNG release marks
+# both `inactive: true` (Proof-of-Work CAPTCHA) and `disabled: false` does
+# not override that, so neither ran; `use_default_settings: true` without
+# `keep_only` then fanned every query to ~57 default general engines, and
+# from Cloud Run only Bing answered (10 results, 0 about the entity) —
+# Brave and Google CSE suspended for TOO MANY REQUESTS, DuckDuckGo and Qwant
+# on CAPTCHA, Google on ACCESS DENIED. From another egress the same Google
+# CSE returned 20 on-entity results: it is blocked by RATE, not banned.
+#
+# So:
+#   * keep_only: the engines this profile uses and nothing else. Each query
+#     is further narrowed by the evidence engine, which sends it only to
+#     the engines with budget left (apps/evidence-engine search.EnginePool:
+#     per-engine polite rates, back-off on every unresponsive_engines
+#     answer) — no upstream engine ever sees the whole query stream.
+#   * no useragent_suffix: it appended "dmai-evidence-engine" to a browser
+#     User-Agent, which labels every request automated.
+#   * google (access denied at any rate from datacentre egress), mojeek,
+#     startpage and yep (PoW CAPTCHA / access denied) are left out.
+#   * braveapi (the official Brave Search API) is listed inactive: with an
+#     api key it is the one general engine no CAPTCHA can block — an owner
+#     decision (a paid key; infra/evidence-engine/APPROVAL.json).
+#   * suspended_times give a blocked engine a measured cool-off instead of
+#     the default day-long suspension.
+use_default_settings: true`), so only the deltas are stated.
 #
 # Why these choices (brief §6b):
 #   * Google and Bing block datacentre egress within hours; the profile
@@ -16,7 +43,25 @@
 #     regulator sites are slow.
 #   * The JSON format is what the engine consumes; html stays for the
 #     instance's own page behind the gateway.
-use_default_settings: true
+use_default_settings:
+  engines:
+    keep_only:
+      - google cse
+      - bing
+      - brave
+      - duckduckgo
+      - qwant
+      - mwmbl
+      - wikipedia
+      - wikidata
+      - bing news
+      - brave.news
+      - duckduckgo news
+      - arxiv
+      - semantic scholar
+      - openalex
+      - crossref
+      - braveapi
 
 general:
   debug: false
@@ -55,78 +100,53 @@ search:
 outgoing:
   request_timeout: 4.0
   max_request_timeout: 12.0
-  useragent_suffix: "dmai-evidence-engine"
   pool_connections: 50
   pool_maxsize: 20
   enable_http2: true
   # proxies: intentionally absent (brief §6c: a paid proxy is an owner decision)
 
 engines:
-  # ── general web: weighted toward engines that tolerate automated use ──
-  - name: mojeek
-    engine: mojeek
+  # ── general web (rate-paced per engine by the evidence engine) ──
+  - name: google cse
+    disabled: false
     weight: 1.5
-    disabled: false
-  - name: brave
-    engine: brave
-    weight: 1.3
-    disabled: false
-  - name: duckduckgo
-    engine: duckduckgo
-    weight: 1.2
-    disabled: false
-  - name: qwant
-    engine: qwant
-    weight: 1.1
-    disabled: false
-  - name: startpage
-    engine: startpage
-    weight: 1.0
-    disabled: false
-  - name: wikipedia
-    engine: wikipedia
-    weight: 0.5
-  # kept, but they will suspend themselves on datacentre egress; the
-  # profile does not depend on them
-  - name: google
-    engine: google
-    weight: 0.8
-    disabled: false
   - name: bing
-    engine: bing
-    weight: 0.8
     disabled: false
+    weight: 1.0
+  - name: brave
+    disabled: false
+    weight: 1.2
+  - name: mwmbl
+    disabled: false
+    weight: 1.0
+  - name: duckduckgo
+    disabled: false
+    weight: 0.8
+  - name: qwant
+    disabled: false
+    weight: 0.6
+  - name: wikipedia
+    disabled: false
+    weight: 0.5
+  # the official Brave Search API: active only when the owner supplies a key
+  - name: braveapi
+    inactive: true
   # ── news ──
-  - name: duckduckgo news
-    engine: duckduckgo_news
+  - name: bing news
+    disabled: false
     weight: 1.0
-    categories: [news]
   - name: brave.news
-    engine: brave
-    brave_category: news
+    disabled: false
     weight: 1.0
-    categories: [news]
+  - name: duckduckgo news
+    disabled: false
+    weight: 0.8
   # ── academic (brief §6b academic chain) ──
   - name: arxiv
-    engine: arxiv
-    categories: [science]
     disabled: false
   - name: semantic scholar
-    engine: semantic_scholar
-    categories: [science]
     disabled: false
   - name: openalex
-    engine: openalex
-    categories: [science]
     disabled: false
   - name: crossref
-    engine: crossref
-    categories: [science]
     disabled: false
-  # ── noise for FSI evidence: off ──
-  - name: reddit
-    engine: reddit
-    disabled: true
-  - name: youtube
-    engine: youtube_noapi
-    disabled: true

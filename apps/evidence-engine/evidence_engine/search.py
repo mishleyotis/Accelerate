@@ -32,6 +32,7 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+import time
 from dataclasses import asdict
 from urllib.parse import urlsplit
 
@@ -97,17 +98,121 @@ def url_key(url: str) -> str:
 _CAPTCHA = re.compile(r"captcha|access denied|unusual traffic", re.I)
 
 
+# ── per-upstream-engine pacing (2026-10-11) ────────────────────────────────
+#
+# Measured on the live instance: every SearXNG query fanned to every enabled
+# upstream engine, so each of them saw the WHOLE query stream from Cloud
+# Run's shared datacentre egress — Brave and Google CSE suspended for TOO
+# MANY REQUESTS, DuckDuckGo and Qwant on CAPTCHA, Bing alone answering with
+# 0 results about the entity. From another egress the same Google CSE
+# returned 20 on-entity results: blocked by RATE, not banned. So each query
+# goes only to the engines with budget left, each engine is held to a polite
+# rate, and an engine SearXNG reports unresponsive is rested for the cool-off
+# its reason earns. When no engine has budget the query skips SearXNG (it
+# never waits): Parallel carries it and the run keeps its pace.
+
+#: Upstream engine -> requests per second, PER EVIDENCE-ENGINE INSTANCE (two
+#: in production, so the upstream sees twice this). Order is preference: a
+#: query takes the first engines with budget. Override: EE_SEARXNG_ENGINES
+#: "google cse:0.2,bing:0.5,...".
+ENGINE_RATES: dict[str, float] = {
+    "google cse": 0.2, "bing": 0.5, "mwmbl": 0.4, "brave": 0.15,
+    "duckduckgo": 0.1, "qwant": 0.08, "wikipedia": 0.3,
+}
+ENGINE_BURST = 2
+ENGINES_PER_QUERY = 3
+#: Seconds an engine rests after SearXNG reports it unresponsive, by reason.
+COOLDOWN_S = (("too many requests", 900.0), ("captcha", 1800.0), ("access denied", 3600.0),
+              ("timeout", 60.0), ("parsing error", 600.0))
+COOLDOWN_DEFAULT_S = 300.0
+
+
+def engine_rates_from(spec: str | None) -> dict[str, float]:
+    """`"google cse:0.2,bing:0.5"` -> {"google cse": 0.2, "bing": 0.5}; empty -> defaults."""
+    if not spec or not spec.strip():
+        return dict(ENGINE_RATES)
+    out: dict[str, float] = {}
+    for part in spec.split(","):
+        name, _, rate = part.rpartition(":")
+        if name.strip():
+            out[name.strip()] = float(rate)
+    return out
+
+
+class EnginePool:
+    """Token buckets per upstream engine, plus a cool-off per engine."""
+
+    def __init__(self, rates: dict[str, float] | None = None, *, per_query: int = ENGINES_PER_QUERY,
+                 burst: int = ENGINE_BURST, clock=time.monotonic):
+        self.clock = clock
+        self.per_query = max(1, per_query)
+        now = clock()
+        self.state = {name: {"rate": float(rate), "tokens": float(burst), "burst": float(burst),
+                             "at": now, "rest_until": 0.0, "sent": 0, "rested": 0, "reason": None}
+                      for name, rate in (rates or ENGINE_RATES).items() if rate > 0}
+        self.skipped = 0
+
+    def take(self) -> list[str]:
+        """The engines this query may use now (possibly none). Never waits."""
+        now = self.clock()
+        chosen = []
+        for name, st in self.state.items():
+            st["tokens"] = min(st["burst"], st["tokens"] + (now - st["at"]) * st["rate"])
+            st["at"] = now
+            if len(chosen) < self.per_query and now >= st["rest_until"] and st["tokens"] >= 1.0:
+                st["tokens"] -= 1.0
+                st["sent"] += 1
+                chosen.append(name)
+        if not chosen:
+            self.skipped += 1
+        return chosen
+
+    def observe(self, unresponsive) -> None:
+        """Rest every engine SearXNG reported unresponsive, for its reason's cool-off."""
+        now = self.clock()
+        for row in unresponsive or []:
+            try:
+                name, reason = str(row[0]), str(row[1] if len(row) > 1 else "")
+            except (TypeError, IndexError):
+                continue
+            st = self.state.get(name)
+            if st is None:
+                continue
+            low = reason.lower()
+            rest = next((s for key, s in COOLDOWN_S if key in low), COOLDOWN_DEFAULT_S)
+            st["rest_until"] = max(st["rest_until"], now + rest)
+            st["rested"] += 1
+            st["reason"] = reason
+
+    def snapshot(self) -> dict:
+        now = self.clock()
+        return {"skipped_queries": self.skipped,
+                "engines": {n: {"rate_per_s": st["rate"], "sent": st["sent"], "rested": st["rested"],
+                                "resting_s": round(max(0.0, st["rest_until"] - now), 1),
+                                "last_reason": st["reason"]} for n, st in self.state.items()}}
+
+
 class SearxClient:
     source = "searxng"
 
-    def __init__(self, base_url: str, http: httpx.AsyncClient):
+    def __init__(self, base_url: str, http: httpx.AsyncClient, *, pool: EnginePool | None = None):
         self.base_url = base_url.rstrip("/")
         self.http = http
+        self.pool = pool
 
     async def search(self, q: str, *, engines: list[str] | None = None, pageno: int = 1,
                      query_id: str = "", facet: str = "") -> list[SearchHit]:
         params = {"q": q, "format": "json", "categories": "general", "language": "en-US"}
+        if not engines and self.pool is not None:
+            engines = self.pool.take()
+            if not engines:
+                return []           # every engine is at its rate or resting: skip, never wait
         if engines:
+            # NOT beside `categories`: SearXNG queries the UNION of the two,
+            # so a named engine list with categories=general still fanned to
+            # every general engine (measured 2026-10-11, local trial: an
+            # engine sent once returned results from 40 queries).
+            params.pop("categories")
             params["engines"] = ",".join(engines)
         if pageno and pageno > 1:
             params["pageno"] = str(pageno)
@@ -128,6 +233,8 @@ class SearxClient:
             data = r.json()
         except ValueError as e:
             raise SourceError("bad_json", self.source, str(e)) from e
+        if self.pool is not None:
+            self.pool.observe(data.get("unresponsive_engines"))
         hits: list[SearchHit] = []
         for i, item in enumerate(data.get("results") or [], start=1):
             url = str(item.get("url") or "").strip()

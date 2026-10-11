@@ -16,6 +16,23 @@ export SEARXNG_SECRET="$SEARXNG_SECRET_KEY"
 # binds GRANIAN_HOST (default `::`, every interface) and maps SEARXNG_PORT.
 export GRANIAN_HOST=127.0.0.1 GRANIAN_PORT=8080 SEARXNG_PORT=8080
 
+# The official Brave Search API (`braveapi`), when the owner has stored a key
+# (Secret Manager `dmai-brave-search-api-key`, mounted by deploy-evidence.sh
+# only when it exists): the one general engine no CAPTCHA can block. The
+# settings ship it inactive; a runtime copy activates it with the key. awk
+# reads the key from the environment, so it never reaches a command line.
+if [ -n "${BRAVE_SEARCH_API_KEY:-}" ]; then
+  awk '
+    /^  - name: braveapi$/ { print; print "    disabled: false"; print "    inactive: false";
+                             print "    api_key: \"" ENVIRON["BRAVE_SEARCH_API_KEY"] "\""; skip = 1; next }
+    skip && /^    inactive: true$/ { skip = 0; next }
+    { skip = 0; print }
+  ' /etc/searxng/settings.yml > /tmp/searxng-settings.yml
+  chmod 600 /tmp/searxng-settings.yml
+  export SEARXNG_SETTINGS_PATH=/tmp/searxng-settings.yml
+  echo "dmai-searxng: braveapi active (key from Secret Manager)"
+fi
+
 # 1 · SearXNG, through the official image's own entrypoint (SEARXNG_CMD only
 # for image_smoke.sh's off-image wiring check).
 "${SEARXNG_CMD:-/usr/local/searxng/entrypoint.sh}" &

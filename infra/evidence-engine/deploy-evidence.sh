@@ -215,7 +215,21 @@ deploy_backend() { # name dir sa extra-env
       --member="serviceAccount:${member}@${SA_DOMAIN}" --role=roles/run.invoker --quiet
   done
 }
-deploy_backend dmai-searxng searxng dmai-searxng ",SEARXNG_SECRET_KEY=dmai-searxng-secret-key:latest"
+# The official Brave Search API is an OWNER DECISION (a paid key;
+# APPROVAL.json): nothing here creates the secret. When the owner has stored
+# `dmai-brave-search-api-key`, SearXNG gets it (entrypoint.sh activates
+# `braveapi`) and the engine's per-engine pacing puts it first.
+SEARXNG_EXTRA=",SEARXNG_SECRET_KEY=dmai-searxng-secret-key:latest"
+EE_ENGINES=""
+if gcloud secrets describe dmai-brave-search-api-key --project="$PROJECT_ID" >/dev/null 2>&1; then
+  grant_secret dmai-brave-search-api-key dmai-searxng
+  SEARXNG_EXTRA="${SEARXNG_EXTRA},BRAVE_SEARCH_API_KEY=dmai-brave-search-api-key:latest"
+  EE_ENGINES=";EE_SEARXNG_ENGINES=${EE_SEARXNG_ENGINES:-braveapi:1.0,google cse:0.2,bing:0.5,mwmbl:0.4,brave:0.15,duckduckgo:0.1,qwant:0.08,wikipedia:0.3}"
+  echo "braveapi: key present in Secret Manager; SearXNG activates it"
+else
+  echo "braveapi: no dmai-brave-search-api-key secret; scraped engines only (paced)"
+fi
+deploy_backend dmai-searxng searxng dmai-searxng "$SEARXNG_EXTRA"
 deploy_backend dmai-fetch   fetch   dmai-fetch   ""
 EDGAR_ENV="--set-env-vars=SEC_EDGAR_USER_AGENT=${SEC_UA}"
 run gcloud run deploy dmai-edgar --source="$ROOT/infra/evidence-engine/edgar" \
@@ -234,7 +248,7 @@ run gcloud run deploy dmai-evidence --source="$ROOT/apps/evidence-engine" \
   --service-account="dmai-evidence@${SA_DOMAIN}" \
   --no-allow-unauthenticated --cpu-boost --max-instances=2 \
   --concurrency="${EE_CONCURRENCY:-8}" --memory=2Gi --cpu=2 --timeout=300 "${VPC_FLAGS[@]}" \
-  --set-env-vars="^;^SEARXNG_URL=${SEARXNG_URL};EE_GCS_BUCKET=${PROJECT_ID}-dmai-evidence-text;SEC_EDGAR_USER_AGENT=${SEC_UA};PARALLEL_MCP_URL=https://search.parallel.ai/mcp" \
+  --set-env-vars="^;^SEARXNG_URL=${SEARXNG_URL};EE_GCS_BUCKET=${PROJECT_ID}-dmai-evidence-text;SEC_EDGAR_USER_AGENT=${SEC_UA};PARALLEL_MCP_URL=https://search.parallel.ai/mcp${EE_ENGINES}" \
   --set-secrets="EE_PATH_TOKEN=dmai-evidence-path-token:latest,SEARXNG_PATH_TOKEN=dmai-searxng-path-token:latest" --quiet
 run gcloud run services add-iam-policy-binding dmai-evidence --project="$PROJECT_ID" --region="$REGION" \
   --member="serviceAccount:dmai-routine@${SA_DOMAIN}" --role=roles/run.invoker --quiet
