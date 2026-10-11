@@ -330,11 +330,12 @@ jobs:
       # dev box has it; the deck skill declares it), red here on
       # ModuleNotFoundError — the runner was testing a program that cannot
       # render a deck.
-      # The evidence engine's suite (apps/evidence-engine/tests, 2026-10-10) runs
-      # offline — mocked transports, no model download (EE_MODELS_DIR unset) —
-      # but imports fastmcp, trafilatura, htmldate, pypdfium2, datasketch,
-      # rank-bm25 and edgartools, so its requirements install here.
-      - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx python-pptx -r apps/api/requirements.txt -r apps/evidence-engine/requirements.txt
+      # The evidence engine's requirements do NOT install here: fastmcp 4.1
+      # needs starlette >= 1.0 and uvicorn >= 0.35, FastAPI 0.115 needs
+      # starlette < 0.42 and the API pins uvicorn 0.30 — pip answered
+      # ResolutionImpossible on the first run of #92 (2026-10-11). The engine
+      # ships in its own image in production and gets its own venv below.
+      - run: pip install -q pytest openpyxl pg8000 pypdf httpx python-docx python-pptx -r apps/api/requirements.txt
       # Gate G rides in here rather than in the gates job above. That job runs
       # bare `python3 script.py` against the stdlib and installs nothing, so a
       # step shelling out to pytest dies on `No module named pytest` — which
@@ -451,7 +452,7 @@ jobs:
           python -m pytest apps/worker/tests/ apps/mcp/tests/ apps/api/tests/ \
                  packages/shared/tests/ \
                  scripts/tests/ plugins/dma-insights/scripts/tests/ \
-                 infra/jobs/tests/ apps/evidence-engine/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
+                 infra/jobs/tests/ -q -rfs 2>&1 | tee /tmp/pytest.txt
           # `|| true` is load-bearing. This step runs under `bash -e`
           # with pipefail, and pytest prints NO "N skipped" when nothing
           # skipped — so grep exits 1, the pipeline exits 1, and the shell
@@ -492,6 +493,16 @@ jobs:
       # step — so the pytest summary is unreachable from the job's tail and a
       # diagnosis costs three round trips. The step summary is returned with
       # the check itself.
+      # The evidence engine's suite (apps/evidence-engine/tests, 2026-10-10):
+      # offline — mocked transports, no model download (EE_MODELS_DIR unset) —
+      # in a venv of its own because its pins cannot coexist with the API's
+      # (see the install step). Under `bash -e` + pipefail a red suite fails
+      # the step through the tee.
+      - name: Evidence engine suite, in its own interpreter
+        run: |
+          python -m venv /tmp/ee-venv
+          /tmp/ee-venv/bin/pip install -q pytest -r apps/evidence-engine/requirements.txt
+          /tmp/ee-venv/bin/python -m pytest apps/evidence-engine/tests/ -q -rfs 2>&1 | tee /tmp/pytest-ee.txt
       - name: Report the result where the check can show it
         if: always()
         run: |
@@ -502,8 +513,8 @@ jobs:
             # -rf prints, and the "___ test_name ___" headers pytest always
             # emits for a failure even under -q. Either alone has been the
             # empty set on a red build.
-            grep -E '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
-                 /tmp/pytest.txt | tail -40
+            grep -hE '^(FAILED|ERROR|_{3,} .* _{3,}|[0-9]+ (passed|failed))' \
+                 /tmp/pytest.txt /tmp/pytest-ee.txt 2>/dev/null | tail -40
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
