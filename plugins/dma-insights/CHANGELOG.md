@@ -7,10 +7,11 @@ Please diagnose and fix the above to ensure this never recurs."
 
 Twelve of sixteen category workflows returned `AT_STAGE_BUDGET` or handed
 back cells nothing could close, with the envelope $49.77 from its ceiling.
-Ten defects — three in the driver↔governor budget handshake, two in how
+Eleven defects — three in the driver↔governor budget handshake, two in how
 concurrent agents and successive handoffs name their files, three in how a
 gate term reaches an agent able to close it, two rules a challenger kept
-having to state that the engine could check at the write:
+having to state that the engine could check at the write, and one contract
+rule HANDOFF enforced that the write never did:
 
 - **The share** (`engine/pipeline.py`): with the envelope funding the scope,
   shares were `remaining × cells / total` — blind to the ~$1.40 orchestrator
@@ -85,6 +86,21 @@ having to state that the engine could check at the write:
   The challenge packet's `facets_answered` no longer counts a `NOT_RUN` /
   `NO_FINDING` field (it told challengers a volley fired that the record
   says did not); those facets ride in `facets_not_run`.
+
+- **The URL rule 5 asked for at HANDOFF, never at the write**
+  (`engine/ledger.py`): with all sixteen categories passed and $219.61 of
+  RESEARCH spent, HANDOFF refused the workbook — 19 cells cited evidence with
+  no URL in `Source_URLs`. 46 internal rows carried the local `01_intake/`
+  path (38 bare, 8 `file://`) though `intake_manifest.json` holds each
+  document's Drive URL, 5 carried none, and one Clay reading (E-031) was
+  registered with no URL. Now an intake path is verified verbatim against the
+  landed document and recorded as the manifest's source of record; a local
+  path with none, and a connector reading with no URL, are refused at the
+  write. `engine.cli rehome-intake` re-points a register written before the
+  rule (a row moves only when exactly one landed document quotes its span)
+  and `engine.cli cite-record` gives a URL-less connector reading the record
+  it reports on — both Provenance-logged. Tests:
+  `test_intake_source_of_record_2026_10_11.py`.
 
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow

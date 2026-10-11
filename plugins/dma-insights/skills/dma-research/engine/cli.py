@@ -541,6 +541,23 @@ def main(argv=None) -> int:
                          "source actually sits on, and what was mis-filed")
     rt.add_argument("--actor", default=None)
 
+    cr = common(sub.add_parser(
+        "cite-record", help="give a connector reading registered with no URL "
+                            "the URL it reports on, and its cells' Source_URLs"))
+    cr.add_argument("--e-id", required=True)
+    cr.add_argument("--url", required=True)
+    cr.add_argument("--why", required=True)
+    cr.add_argument("--actor", default=None)
+
+    rh = common(sub.add_parser(
+        "rehome-intake", help="re-point internal rows cited by a local "
+                              "01_intake/ path, a file:// URL or no URL to the "
+                              "intake manifest's source of record (matched by "
+                              "the verbatim span), and the cells' Source_URLs "
+                              "with them"))
+    rh.add_argument("--why", required=True)
+    rh.add_argument("--actor", default=None)
+
     at = common(sub.add_parser(
         "attach",
         help="cite an evidence row the run ALREADY holds from one of your "
@@ -996,6 +1013,24 @@ def main(argv=None) -> int:
         try:
             out = ledger.retier_evidence(wb, a.e_id, a.tier, reason=a.reason,
                                          run=run, actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
+        return 0
+    if a.cmd == "cite-record":
+        try:
+            out = ledger.cite_connector_record(wb, a.e_id, a.url, why=a.why,
+                                               actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
+        return 0
+    if a.cmd == "rehome-intake":
+        try:
+            out = ledger.rehome_intake_urls(wb, why=a.why, run=run,
+                                            actor=_actor(a))
         except ledger.LedgerRefusal as exc:
             print(f"REFUSED: {exc}", file=sys.stderr)
             return 1

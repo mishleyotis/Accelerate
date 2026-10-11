@@ -32,6 +32,7 @@ if __package__ in (None, ""):  # noqa: E402  (must precede the relative imports)
 import datetime as _dt
 import json
 import re
+from pathlib import Path
 
 from . import contract as C
 from . import quality as Q
@@ -146,6 +147,142 @@ def retier_evidence(wb: RunWorkbook, e_id: str, tier: str, *, reason: str,
                 if str(r.get("E_ID") or "").strip().upper() == eid), {})
     return {"e_id": eid, "was": was, "tier": tier, "claim_type": new_label,
             "claim_type_was": label, "ers": now.get("ERS")}
+
+
+def rehome_intake_urls(wb: RunWorkbook, *, why: str, run=None,
+                       actor: str | None = None) -> dict:
+    """Re-point internal rows registered before `_intake_source_of_record`
+    (a local `01_intake/` path, a file:// URL, or no URL at all) to the
+    intake manifest's source of record, and every scoring row's Source_URLs
+    with them. A row is re-homed only when its excerpt is found verbatim in
+    exactly ONE landed document — the document is identified by the span it
+    quotes, never by a name that resembles a title. Anything else is
+    reported under `unresolved` and left as it was. A Provenance row records
+    each change; the register is not frozen-exempt (REPORTS freezes it)."""
+    from . import intake as _intake
+    from . import fetch as _fetch
+    _refuse_on_drift(wb)
+    refuse_if_frozen(wb, "re-home intake URLs")
+    why = str(why or "").strip()
+    if len(why) < 20:
+        raise LedgerRefusal("rehome-intake needs --why (>=20 chars)")
+    _run = _run_of(wb, run)
+    root = Path(getattr(_run, "root", None) or wb.path.parent)
+    docs = []
+    for d in _intake.docs(root):
+        record = str(d.get("source_url") or "").strip()
+        if not record.lower().startswith(("http://", "https://")):
+            continue
+        try:
+            body = (root / _intake.INTAKE_DIR / d["file"]).read_text(
+                encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        docs.append((d["file"], record, _fetch.normalise(body)))
+    moved, unresolved = {}, []
+    for r in wb.rows("Evidence_Detail"):
+        if str(r.get("Origin") or "") != "internal":
+            continue
+        url = str(r.get("Source_URL") or "").strip()
+        if url.lower().startswith(("http://", "https://")):
+            continue
+        span = _fetch.normalise(str(r.get("Excerpt") or ""))
+        hits = [(f, rec) for f, rec, body in docs if span and span in body]
+        if len(hits) != 1:
+            unresolved.append({"e_id": r.get("E_ID"), "source_url": url or None,
+                               "documents_quoting_span": [f for f, _ in hits]})
+            continue
+        moved[str(r["E_ID"]).strip()] = (url, hits[0][1], hits[0][0])
+    if not moved:
+        return {"rehomed": [], "cells": [], "unresolved": unresolved}
+    old_to_new = {old: new for old, new, _ in moved.values() if old}
+    register = {**wb.evidence_index()}
+    cells = []
+    with wb.transaction("rehome_intake_urls"):
+        for eid, (old, new, name) in moved.items():
+            wb.update_row("Evidence_Detail", "E_ID", eid, {"Source_URL": new},
+                          save=False)
+            register[eid] = {**(register.get(eid) or {}), "Source_URL": new}
+        for sr in wb.scoring_rows():
+            ids = [i.split(":")[0].strip() for i in _split_ids(sr.get("Evidence_IDs"))
+                   if i and i != C.NO_EVIDENCE]
+            if not any(i in moved for i in ids):
+                continue
+            urls = [old_to_new.get(u, u) for u in _split_ids(sr.get("Source_URLs")) if u]
+            for i in ids:
+                if i in moved and moved[i][1] not in urls:
+                    urls.append(moved[i][1])
+            keep = []
+            for u in urls:
+                if u not in keep:
+                    keep.append(u)
+            if keep == [u for u in _split_ids(sr.get("Source_URLs")) if u]:
+                continue
+            cell = str(sr["SubCap_ID"]).strip()
+            wb.set_scoring(cell, {"Source_URLs": ", ".join(keep)}, save=False)
+            wb.append("Provenance", {
+                "SubCap_ID": cell, "Step": "rehome_intake",
+                "Actor": str(actor or "ledger").strip(), "At": _utcnow(),
+                "Detail": (f"intake citations re-pointed to their source of "
+                           f"record ({', '.join(i for i in ids if i in moved)}): "
+                           f"{why}")[:900],
+                "Session": _agent_session()}, save=False)
+            cells.append(cell)
+        if wb.autosave:
+            wb.save()
+    return {"rehomed": [{"e_id": e, "was": o or None, "now": n, "document": f}
+                        for e, (o, n, f) in moved.items()],
+            "cells": cells, "unresolved": unresolved}
+
+
+def cite_connector_record(wb: RunWorkbook, eid: str, url: str, *, why: str,
+                          actor: str | None = None) -> dict:
+    """Give a connector reading registered with no URL (before the write
+    refused one) the URL it reports on, and every citing cell's Source_URLs
+    with it. Only a connector row with a blank Source_URL — a URL already
+    recorded is never rewritten here — and only an http(s) URL."""
+    _refuse_on_drift(wb)
+    refuse_if_frozen(wb, "cite a connector record")
+    eid = str(eid or "").strip().upper()
+    url = str(url or "").strip()
+    why = str(why or "").strip()
+    if len(why) < 20:
+        raise LedgerRefusal("cite-record needs --why (>=20 chars): what the "
+                            "reading reports on and why this URL is its record")
+    if not url.lower().startswith(("http://", "https://")):
+        raise LedgerRefusal(f"{url!r} is not an http(s) URL")
+    row = next((r for r in wb.rows("Evidence_Detail")
+                if str(r.get("E_ID") or "").strip().upper() == eid), None)
+    if row is None:
+        raise LedgerRefusal(f"{eid} is not in this run's register")
+    if str(row.get("Origin") or "") != "connector":
+        raise LedgerRefusal(f"{eid} is origin {row.get('Origin')!r}; only a "
+                            f"connector reading is given its record URL here")
+    if str(row.get("Source_URL") or "").strip() not in ("", "None"):
+        raise LedgerRefusal(f"{eid} already cites {row.get('Source_URL')}")
+    cells = []
+    with wb.transaction("cite_connector_record"):
+        wb.update_row("Evidence_Detail", "E_ID", row["E_ID"],
+                      {"Source_URL": url}, save=False)
+        for sr in wb.scoring_rows():
+            ids = [i.split(":")[0].strip() for i in _split_ids(sr.get("Evidence_IDs"))]
+            if eid not in ids:
+                continue
+            urls = [u for u in _split_ids(sr.get("Source_URLs")) if u]
+            if url in urls:
+                continue
+            cell = str(sr["SubCap_ID"]).strip()
+            wb.set_scoring(cell, {"Source_URLs": ", ".join(urls + [url])},
+                           save=False)
+            wb.append("Provenance", {
+                "SubCap_ID": cell, "Step": "cite_record",
+                "Actor": str(actor or "ledger").strip(), "At": _utcnow(),
+                "Detail": f"{eid} record URL {url}: {why}"[:900],
+                "Session": _agent_session()}, save=False)
+            cells.append(cell)
+        if wb.autosave:
+            wb.save()
+    return {"e_id": eid, "url": url, "cells": cells}
 
 
 #: THE REGISTER FREEZES WHILE THE REPORTS ARE WRITTEN (B1 Bank, 2026-10-08):
@@ -264,6 +401,26 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         raise LedgerRefusal(
             "a public source with no URL cannot be cited; register it with "
             "origin='internal' and it will be labelled, not laundered")
+    # A CONNECTOR READING CITES THE RECORD IT READ. Measured 2026-10-11
+    # (R-INTERAC-20261010): a Clay Tech Stack reading registered with no URL
+    # (E-031) became a cell's only citation, and HANDOFF's contract rule 5
+    # refused the workbook two stages later — after RESEARCH had spent its
+    # envelope. Every fixture and the enrichment doctrine already pass the
+    # record's URL (or the page the reading reports on); now the write does.
+    if not source_url and origin == "connector":
+        raise LedgerRefusal(
+            "a connector reading with no URL cannot be cited: pass the "
+            "connector record's URL, or the page or domain the reading reports "
+            "on (a web-crawl technographic reading cites the crawled site), "
+            "and name the tool and retrieval date in --source-name")
+    # AN INTAKE DOCUMENT IS CITED BY ITS SOURCE OF RECORD, NOT ITS CACHE.
+    # Measured 2026-10-11 (R-INTERAC-20261010): 46 internal rows carried the
+    # local `01_intake/` path (38 bare, 8 file://) though the intake manifest
+    # holds each document's Drive URL; 18 cells citing only them failed
+    # HANDOFF's contract rule 5. The span is verified against the landed
+    # document, then the row carries the manifest's URL.
+    source_url, intake_checked = _intake_source_of_record(wb, run, source_url,
+                                                         text)
     # THE ENTITY'S OWN SITE IS NEVER T1. The methodology's ladder puts
     # regulatory and audited filings at T1, the entity's official
     # disclosures at T2 and its marketing at T5; a page on the entity's own
@@ -334,9 +491,10 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
         if got and got != _dt.date.today().isoformat():
             published = got
     _refuse_retrieval_date_as_published(wb, published, text, source_url)
-    access_status = _verified_access_status(
-        wb, run, source_url, text, verify_excerpts, unverified_reason,
-        access_status)
+    if not intake_checked:
+        access_status = _verified_access_status(
+            wb, run, source_url, text, verify_excerpts, unverified_reason,
+            access_status)
     # ONE TRANSACTION FOR THE ID AND THE ROWS IT NAMES.
     #
     # `next_evidence_id` reads the highest E-id in the register and adds
@@ -666,6 +824,51 @@ def _run_of(wb: RunWorkbook, run=None):
     from . import runstate as _runstate
     return _runstate.Run(run_id=wb.path.stem, root=wb.path.parent,
                          workbook_path=wb.path)
+
+
+_LOCAL_PREFIXES = ("/", "file://", "./", "~")
+
+
+def _intake_source_of_record(wb, run, source_url, text) -> tuple:
+    """(url, checked): a local `01_intake/` path or file:// URL becomes the
+    intake manifest's `source_url` for that document, after the span is
+    found verbatim in the landed file (checked=True). A URL that is already
+    http(s), or None, passes through unchanged (checked=False). A local path
+    that names no manifest row with a source of record is refused — rule 5
+    would refuse the workbook at HANDOFF, after the spend."""
+    url = str(source_url or "").strip()
+    if not url or not url.startswith(_LOCAL_PREFIXES):
+        return source_url, False
+    from . import intake as _intake
+    from . import fetch as _fetch
+    _run = _run_of(wb, run)
+    root = getattr(_run, "root", None) or wb.path.parent
+    name = url.rstrip("/").rsplit("/", 1)[-1]
+    row = next((r for r in _intake.docs(root) if r.get("file") == name), None)
+    if row is None:
+        raise LedgerRefusal(
+            f"{url} is a local path and names no document in "
+            f"{_intake.INTAKE_DIR}/{_intake.MANIFEST}: land it with `engine."
+            f"intake add --root <ROOT> --file <doc> --source-url <its Drive "
+            f"or web URL>` and cite that document")
+    record = str(row.get("source_url") or "").strip()
+    if not record.lower().startswith(("http://", "https://")):
+        raise LedgerRefusal(
+            f"{name} has no source of record in the intake manifest, and a "
+            f"local path is not a citable URL (contract rule 5): re-land it "
+            f"with `engine.intake add --root <ROOT> --file "
+            f"{_intake.INTAKE_DIR}/{name} --source-url <its Drive or web URL>`")
+    try:
+        doc = (Path(root) / _intake.INTAKE_DIR / name).read_text(
+            encoding="utf-8", errors="replace")
+    except OSError as e:
+        raise LedgerRefusal(f"{name} could not be read to verify the span: {e}")
+    if _fetch.normalise(text) not in _fetch.normalise(doc):
+        raise LedgerRefusal(
+            f"excerpt_not_verbatim: this span is not in the intake document "
+            f"{name} (whitespace and case are normalised; nothing else is). "
+            f"Quote the document; never repair a quote by hand.")
+    return record, True
 
 
 def _verified_access_status(wb, run, source_url, text, verify_excerpts,
