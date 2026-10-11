@@ -68,3 +68,20 @@ cross-encoder stage on.
   identical in-flight queries coalesced, search cached 24 h, text cached by
   recency class. When only paid sources remain the engine returns
   `needs_spend_approval` and spends nothing.
+
+## Knobs added 2026-10-11 (measured, see docs/EVAL-REPORT.md)
+
+| Env | Default | What it does |
+|---|---|---|
+| `EE_PARALLEL_RPS` | 1.4 | Parallel Search MCP bucket: the measured no-429 ceiling (2/s) × 0.7 |
+| `EE_ARCHIVE_RPS` | 0.5 | per-host lane for archive.org / web.archive.org (the 403→snapshot path) |
+| `EE_FETCH_TIMEOUT_S` / `EE_FETCH_PHASE_BUDGET_S` | 12 / 45 | one fetch; the whole fetch slice of a brief (stragglers cancelled, reported) |
+| `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, `CURL_CA_BUNDLE` | — | ADDED to certifi + the platform store (`evidence_engine/tls.py`); verification is never disabled |
+
+Behaviour that is not a knob: queries are concise and operator-free (one lens
+word per facet, `query.FACET_LENS`); the fetch slice takes hits that name the
+entity first, at most three per host, and refunds a slot refused before any
+bytes moved; a 401/403 goes to the Wayback snapshot at page level;
+`registry.site_pack(sub_vertical)` adds regulator → trade-press → wire →
+review-site probes whose rungs the coverage block reports; a brief's answer
+carries `timing_ms` (search / fetch / rank+cards).
