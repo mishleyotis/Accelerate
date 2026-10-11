@@ -107,6 +107,13 @@ SKILL_REL = "plugins/dma-insights/skills/dma-research"
 CONNECTOR_NAMESPACES = (
     "mcp__Clay", "mcp__Exa", "mcp__Tavily", "mcp__Vibe_Prospecting",
     "mcp__Indeed", "mcp__Quartr", "mcp__Google_Drive",
+    # The research layer (2026-10-10): plugin-declared servers, scoped names.
+    "mcp__plugin_dma-insights_evidence",
+    "mcp__plugin_dma-insights_searxng",
+    "mcp__plugin_dma-insights_fetch",
+    "mcp__plugin_dma-insights_edgar",
+    "mcp__plugin_dma-insights_parallel",
+    "mcp__plugin_dma-insights_alphaxiv",
 )
 
 #: What a refused tool call reads as in a child's transcript. Mirrors
@@ -126,6 +133,12 @@ TOOL_OF_NAMESPACE = {
     "mcp__Exa": "exa", "mcp__Tavily": "tavily", "mcp__Clay": "clay",
     "mcp__Vibe_Prospecting": "vibe", "mcp__Indeed": "indeed",
     "mcp__Quartr": "quartr", "mcp__Google_Drive": "drive",
+    "mcp__plugin_dma-insights_evidence": "evidence_engine",
+    "mcp__plugin_dma-insights_searxng": "searxng",
+    "mcp__plugin_dma-insights_fetch": "web_fetch",
+    "mcp__plugin_dma-insights_edgar": "edgar",
+    "mcp__plugin_dma-insights_parallel": "parallel",
+    "mcp__plugin_dma-insights_alphaxiv": "web_search",
 }
 
 #: The heal verdicts, and what each tells the fresh lane instance to do. A

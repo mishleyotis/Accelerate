@@ -444,9 +444,14 @@ SERVER_SURFACES = {
 #: Read-only tools allowed by their FULL name, derived from the table above so
 #: the allowlist and the read/write split cannot drift apart.
 QUALIFIED_TOOLS = frozenset(
-    f"mcp__{server}__{tool}"
+    f"mcp__{spelling}__{tool}"
     for server, surface in SERVER_SURFACES.items()
-    for tool in surface["read"])
+    for tool in surface["read"]
+    # both spellings of the server segment: the delivered one and the
+    # canonical one `_canonical` reduces a call to (hyphens → underscores),
+    # so a plugin-scoped grant (`plugin_dma-insights_evidence`) compares
+    # equal however the host spells it (CI, 2026-10-11)
+    for spelling in {server, server.replace("-", "_")})
 
 #: The other half, kept so "not approved" is a decision on the record rather
 #: than an absence. Nothing reads this at runtime; the roster check does.
