@@ -62,6 +62,8 @@ def test_ci_builds_and_probes_the_images_before_any_deploy():
     job = jobs["evidence-images"]
     assert "if" not in job, "the image job runs on every pull request, not only on release"
     assert any("image_smoke.sh" in (s.get("run") or "") for s in job["steps"])
+    diag = [s for s in job["steps"] if "image_diag.sh" in (s.get("run") or "")]
+    assert diag and diag[0].get("if") == "failure()", "the diagnostics run when the smoke fails, and only then"
     assert "evidence-images" in jobs["deploy"]["needs"]
 
 

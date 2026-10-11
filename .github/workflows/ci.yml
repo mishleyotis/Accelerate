@@ -856,6 +856,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build searxng, fetch and edgar; probe each through its door
         run: bash infra/evidence-engine/image_smoke.sh
+      - name: On failure, what is inside the gateway images and what their servers print
+        if: failure()
+        run: bash infra/evidence-engine/image_diag.sh fetch edgar
 
   # Per-service lint/type/build jobs are added when each service's
   # first code lands (Implementation Plan S.3); the gates above run from
