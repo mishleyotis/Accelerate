@@ -79,6 +79,10 @@ class Settings:
     #: then 2/s, p50 1.9 s) recorded no 429 up to 2/s ⇒ 2 × 0.7.
     parallel_rps: float = field(default_factory=lambda: _float("EE_PARALLEL_RPS", 1.4))
     searxng_rps: float = field(default_factory=lambda: _float("EE_SEARXNG_RPS", 4.0))
+    # Per-upstream-engine rates behind SearXNG ("google cse:0.2,bing:0.5,…";
+    # empty = search.ENGINE_RATES) and how many engines one query may use.
+    searxng_engines: str = field(default_factory=lambda: os.environ.get("EE_SEARXNG_ENGINES", ""))
+    searxng_engines_per_query: int = field(default_factory=lambda: int(os.environ.get("EE_SEARXNG_ENGINES_PER_QUERY", "3")))
     arxiv_rps: float = field(default_factory=lambda: _float("EE_ARXIV_RPS", 1 / 3))
     fetch_timeout_s: float = field(default_factory=lambda: _float("EE_FETCH_TIMEOUT_S", 12.0))
     #: Wall-clock budget for the fetch phase of ONE research_brief; stragglers
