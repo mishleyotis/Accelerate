@@ -253,10 +253,10 @@ def test_breakers_registry_and_health_snapshot():
 
 
 def test_archive_hosts_take_the_slower_lane():
-    RL.reset()
+    ratelimit.reset()
     try:
-        lim = RL.limits()
+        lim = ratelimit.limits()
         assert lim.host("web.archive.org").rate_per_s == 0.5 == lim.host("archive.org").rate_per_s
         assert lim.host("example-fcu.test").rate_per_s == 1.0
     finally:
-        RL.reset()
+        ratelimit.reset()
