@@ -180,6 +180,15 @@ class Engine:
     async def _bucket_wait(self, host: str) -> None:
         await RL.limits().host(host).acquire()
 
+    async def _source_wait(self, source: str) -> None:
+        """A SEARCH call's limiter is its SOURCE's bucket (searxng 4/s burst
+        4, parallel 1.4/s burst 2 — settings). Until 2026-10-11 the fan-out
+        was handed `_bucket_wait`, the per-WEBSITE politeness bucket (1/s,
+        burst 1) keyed by the source's name, and the source buckets were
+        never acquired at all: every brief searched at 1 call/s per backend
+        per instance, and sixteen workflows queued behind it."""
+        await RL.limits().source(source).acquire()
+
     async def _sec_wait(self) -> None:
         await RL.limits().source("sec").acquire()
 
@@ -315,8 +324,9 @@ class Engine:
         t_search = time.monotonic()
         fan = await S.fan_out(queries, searx=self.searx if "searxng" in free else None,
                               parallel=self.parallel if "parallel" in free else None,
-                              run_id=run_id, bucket_wait=self._bucket_wait, cache=_SearchCache(self.store),
-                              breakers=RL.breakers(), question=question)
+                              run_id=run_id, bucket_wait=self._source_wait, cache=_SearchCache(self.store),
+                              breakers=RL.breakers(), question=question,
+                              budget_s=settings().search_phase_budget_s)
         configured = [n for n, c in (("searxng", self.searx), ("parallel", self.parallel)) if c is not None]
         for src in configured:
             if src not in free and f"rerouted_from:{src}" not in fan["rerouted"]:
@@ -410,6 +420,9 @@ class Engine:
             "search": {"queries": [{"query_id": q["query_id"], "text": q["text"], "facet": q["facet"], "kind": q["kind"]} for q in queries],
                        "per_source": fan["per_source"], "rerouted": fan.get("rerouted", []),
                        "hits": len(hits), "fetched": len(docs), "fetch_failures": failures[:10],
+                       # queries cut at the search-phase budget (load): their
+                       # questions may read unanswered — re-ask those rows
+                       "budget_cut": fan.get("budget_cut", 0),
                        "dropped": dropped[:10]},
             "guard_violations": violations,
             "ambiguous_cards": [c["card_id"] for c in cards if c["provenance"].get("entity_match") == "ambiguous"],

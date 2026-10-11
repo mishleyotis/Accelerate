@@ -318,6 +318,40 @@ agent: the client folder and the toolkits land under the run root through
 `drive_fetch.py` over Bash. Clay runs in the correct workspace; a refused
 grant records as not-run — never invented technographics (MEM-0082).
 
+## How the research layer binds — and stays bound (2026-10-11)
+
+**Shadowed servers.** Parallel and alphaXiv are also claude.ai connectors at
+the same URLs as the plugin's `parallel` / `alphaxiv` servers. When the
+account attaches them, Claude Code suppresses the plugin copy and the tools
+bind as `mcp__Parallel_Search__*` / `mcp__alphaXiv__*`. The research tier is
+granted both spellings (`SHADOWED_BY_CLAUDE_AI` in
+`scripts/provision_agent_tools.py`); every hook reads the same alias. Log a
+search under the tool family that ran it (`--tool parallel`) whichever
+spelling bound.
+
+**Cold starts.** The CLI gives a stdio server `MCP_TIMEOUT` (30 s) to answer
+`initialize`, once. `scripts/evidence_proxy.py` answers within 20 s whatever
+the service is doing; a cold or failing service is served from its
+last-known tool list (`/root/.dma/research_layer/<service>.tools.json`, else
+`references/research_layer_tools.json`) and the proxy sends
+`notifications/tools/list_changed` when the service answers. Nothing to do
+at session start or after a container restart; `/dma-insights:doctor` reports
+a service that stays down.
+
+**A whole run at once.** 686 cells is ~136 capability briefs of up to 48
+queries each; the search sources (SearXNG 4/s, Parallel 1.4 calls/s per
+engine instance, two instances) bound the run's search at 11–15 minutes
+(load harness, 2026-10-11: half the run per instance in 14.4 min at 5x
+scale with harness CPU still inflating it, every question answered, 0
+errors) however many briefs are open. So the queue lives in the proxy: every
+agent in a session shares one proxy process, heavy calls pass an admission
+gate (`DMA_RESEARCH_ADMIT`, 12), the rest wait locally with no server clock
+running, a Cloud Run 429/503 is retried, and the evidence server's per-server
+`timeout` (30 min, overriding the environment's `MCP_TOOL_TIMEOUT=60000`)
+lets a queued call be waited for. The engine bounds its own search phase
+(`EE_SEARCH_PHASE_BUDGET_S`, 120 s) inside Cloud Run's 300 s. Measure with
+`apps/evidence-engine/eval/load.py`.
+
 ## Dispatch mode and where the connectors actually live
 
 The claude.ai connector tools are attached to the top session. A headless

@@ -410,6 +410,22 @@ SERVER_SURFACES = {
     # provisioner grants six of them.
     "plugin_dma-insights_edgar": {"read": {'get_segment_data', 'get_filing_sections', 'get_key_metrics', 'get_company_facts', 'get_xbrl_concepts', 'compare_periods', 'discover_company_metrics', 'discover_xbrl_concepts', 'get_insider_summary', 'get_cik_by_ticker', 'get_filing_content', 'analyze_insider_sentiment', 'get_financials', 'search_companies', 'get_insider_transactions', 'get_recommended_tools', 'get_company_info', 'get_recent_filings'}, "withheld": set()},
     "plugin_dma-insights_parallel": {"read": {'web_search', 'web_fetch'}, "withheld": set()},
+    # The same two research servers under the claude.ai connector that
+    # shadows them (Claude Code suppresses the plugin copy when the account
+    # attaches a connector at the same URL — measured 2026-10-11). Parallel
+    # is read-only; alphaXiv's library, folder and follow tools change the
+    # owner's account and stay prompting.
+    "Parallel_Search": {"read": {'web_search', 'web_fetch'}, "withheld": set()},
+    "plugin_dma-insights_alphaxiv": {"read": {'discover_papers', 'get_paper_content', 'answer_pdf_queries'},
+                                     "withheld": {'create_folder', 'delete_folder', 'rename_folder',
+                                                  'save_papers_to_folder', 'remove_papers_from_folder',
+                                                  'move_papers_between_folders', 'edit_private_paper_metadata',
+                                                  'follow_researcher', 'unfollow_researcher'}},
+    "alphaXiv": {"read": {'discover_papers', 'get_paper_content', 'answer_pdf_queries'},
+                 "withheld": {'create_folder', 'delete_folder', 'rename_folder',
+                              'save_papers_to_folder', 'remove_papers_from_folder',
+                              'move_papers_between_folders', 'edit_private_paper_metadata',
+                              'follow_researcher', 'unfollow_researcher'}},
     "github": {
         # Reading a repository, a PR, a check run or a log is how any review
         # or CI diagnosis starts. Everything that changes the repository or

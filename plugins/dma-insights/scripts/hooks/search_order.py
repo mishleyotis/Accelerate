@@ -57,7 +57,8 @@ BUDGET = (
     "research_brief call(s). Batch the remaining questions into one more research_brief (the "
     "unanswered `by_question` rows, with their tail or alias wording), or the raw layer "
     "(mcp__plugin_dma-insights_searxng__searxng_web_search / "
-    "mcp__plugin_dma-insights_parallel__web_search, one message), before another WebSearch. "
+    "mcp__plugin_dma-insights_parallel__web_search — or mcp__Parallel_Search__web_search where the "
+    "claude.ai connector shadows it — one message), before another WebSearch. "
     "{limit} general searches per brief is the ceiling; a brief that answers an error lifts it."
 )
 

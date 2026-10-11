@@ -499,3 +499,22 @@ def test_fetch_slice_ranks_question_overlap_inside_the_entity_band():
             {"url": "https://c.test/3", "url_key": "c3", "title": "Example FCU", "snippet": "fingerprint login for mobile banking members"}]
     order = [h["url_key"] for h in _host_diverse_order(hits, ent, "Does the credit union offer fingerprint login in its mobile banking app?")]
     assert order[0] in ("b2", "c3") and order[-1] == "a1", order
+
+
+def test_search_waits_on_the_source_buckets_not_the_one_per_second_host_bucket(engine):
+    """2026-10-11: the fan-out was handed the per-WEBSITE bucket (1/s, burst
+    1) keyed by the source name, and the source buckets (searxng 4/s burst
+    4, parallel 1.4/s burst 2) were never acquired — every brief searched at
+    1 call/s per backend. A batched capability brief (~40 SearXNG queries)
+    must spend its search phase at the SOURCE rate."""
+    qs = [{"question": f"membership grew members digital channel {i}", "subcap_ids": [f"P1C1.1.{i}"],
+           "facet": "primary"} for i in range(1, 6)]
+    out = run(engine.research_brief(run_id="R-RATE", entity=ENTITY, questions=qs, max_cards=2,
+                                    token_budget=2000, provenance="minimal"))
+    snap = RL.limits().snapshot()
+    assert "searxng" not in snap["hosts"] and "parallel" not in snap["hosts"], \
+        "a search backend must not be throttled as a website"
+    n_searx = out["search"]["per_source"]["searxng"]["calls"]
+    assert snap["sources"]["searxng"]["acquired"] == n_searx > 8
+    # at 4/s burst 4 the bucket costs (n-4)/4 virtual seconds; at the old 1/s, n-1
+    assert out["timing_ms"]["search"] / 1000 <= (n_searx - 4) / 4 + 1.0, out["timing_ms"]

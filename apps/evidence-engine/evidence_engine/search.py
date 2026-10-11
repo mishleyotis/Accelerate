@@ -289,17 +289,28 @@ def _hits_from(dicts: list[dict], *, query_id: str, facet: str) -> list[SearchHi
 async def fan_out(queries: list[dict], *, searx: SearxClient | None = None,
                   parallel: ParallelClient | None = None, run_id: str = "",
                   bucket_wait=None, cache=None, breakers=None,
-                  question: str | None = None, concurrency: int = CONCURRENCY) -> dict:
+                  question: str | None = None, concurrency: int = CONCURRENCY,
+                  budget_s: float | None = None) -> dict:
     """-> {hits: [merged], per_source: {source: {count, calls, cached, error}},
     rerouted: ['rerouted_from:<source>', …], lists: n}.
 
     A merged hit: {url, url_key, title, snippet, score, lists_ranking_it,
-    best_rank, sources, query_ids, facets, published, via, hits: [SearchHit]}."""
+    best_rank, sources, query_ids, facets, published, via, hits: [SearchHit]}.
+
+    `budget_s` bounds the phase (2026-10-11: sixteen workflows briefing at
+    once queued every query behind the shared source buckets and briefs
+    outlived the caller's 60 s). At the budget, a query still waiting for a
+    bucket token or a semaphore slot is cancelled and counted in
+    `budget_cut`; one whose upstream call has STARTED is left to finish in
+    the background (its answer lands in the search cache for the next
+    brief) and never cancelled, because identical queries from other
+    briefs are coalesced onto it and a cancelled leader would cancel them."""
     sem = asyncio.Semaphore(max(1, concurrency))
+    started: set[str] = set()
     per_source: dict[str, dict] = {}
     rerouted: list[str] = []
     lists: dict[tuple[str, str], list[SearchHit]] = {}
-    tasks = []
+    tasks, keys = [], []
 
     def ps(source: str) -> dict:
         return per_source.setdefault(source, {"count": 0, "calls": 0, "cached": 0, "error": None})
@@ -320,6 +331,7 @@ async def fan_out(queries: list[dict], *, searx: SearxClient | None = None,
                     return
             if bucket_wait is not None:
                 await bucket_wait(source)
+            started.add(list_key + "|" + source)
             rec["calls"] += 1
             try:
                 # Request coalescing (brief §6a): identical in-flight queries
@@ -354,6 +366,7 @@ async def fan_out(queries: list[dict], *, searx: SearxClient | None = None,
         if source == "searxng":
             for q in queries:
                 qid, text, facet = q.get("query_id", ""), q["text"], q.get("facet", "")
+                keys.append(qid + "|" + source)
                 tasks.append(run_one(source, qid, f"{source}|{text}", qid, facet,
                                      lambda text=text, qid=qid, facet=facet, client=client:
                                      client.search(text, query_id=qid, facet=facet)))
@@ -369,14 +382,25 @@ async def fan_out(queries: list[dict], *, searx: SearxClient | None = None,
                     texts = [b["text"] for b in batch]
                     qid = "+".join(b.get("query_id", "") for b in batch)
                     objective = question or texts[0]
+                    keys.append(qid + "|" + source)
                     tasks.append(run_one(source, qid, f"{source}|{' || '.join(texts)}", qid, facet,
                                          lambda texts=texts, qid=qid, facet=facet, objective=objective, client=client:
                                          client.search(objective, texts, run_id=run_id,
                                                        query_id=qid, facet=facet)))
+    budget_cut = 0
     if tasks:
-        await asyncio.gather(*tasks)
-    return {"hits": rrf_merge(lists), "per_source": per_source, "rerouted": rerouted,
-            "lists": len(lists)}
+        if budget_s is None or budget_s <= 0:
+            await asyncio.gather(*tasks)
+        else:
+            keyed = [(k, asyncio.ensure_future(t)) for k, t in zip(keys, tasks)]
+            done, pending = await asyncio.wait([f for _, f in keyed], timeout=budget_s)
+            for k, f in keyed:
+                if f in pending and k not in started:
+                    f.cancel()
+                    budget_cut += 1
+    snapshot = dict(lists)
+    return {"hits": rrf_merge(snapshot), "per_source": per_source, "rerouted": rerouted,
+            "lists": len(snapshot), "budget_cut": budget_cut}
 
 
 def rrf_merge(lists: dict[tuple[str, str], list[SearchHit]], *, k: int = RRF_K) -> list[dict]:

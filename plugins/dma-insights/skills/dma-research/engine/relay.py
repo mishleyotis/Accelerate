@@ -114,6 +114,11 @@ CONNECTOR_NAMESPACES = (
     "mcp__plugin_dma-insights_edgar",
     "mcp__plugin_dma-insights_parallel",
     "mcp__plugin_dma-insights_alphaxiv",
+    # The same two under the claude.ai connector that shadows them: Claude
+    # Code suppresses a plugin server when the account attaches a connector
+    # at the same URL (measured 2026-10-11), and the tools bind here instead.
+    "mcp__Parallel_Search",
+    "mcp__alphaXiv",
 )
 
 #: What a refused tool call reads as in a child's transcript. Mirrors
@@ -139,6 +144,8 @@ TOOL_OF_NAMESPACE = {
     "mcp__plugin_dma-insights_edgar": "edgar",
     "mcp__plugin_dma-insights_parallel": "parallel",
     "mcp__plugin_dma-insights_alphaxiv": "web_search",
+    "mcp__Parallel_Search": "parallel",
+    "mcp__alphaXiv": "web_search",
 }
 
 #: The heal verdicts, and what each tells the fresh lane instance to do. A
@@ -1286,8 +1293,9 @@ def drain_brief(run: runstate.Run, wb, reqs: list[dict], category: str | None) -
         "the facet and the question (its cards register as they stand; log "
         "`--tool evidence_engine`); then the raw open-source readers — "
         "`mcp__plugin_dma-insights_searxng__searxng_web_search` (`--tool searxng`) "
-        "or Parallel `mcp__plugin_dma-insights_parallel__web_search` (`--tool "
-        "parallel`); then WebSearch (WebFetch for a named page), the owner's "
+        "or Parallel `mcp__plugin_dma-insights_parallel__web_search` — bound as "
+        "`mcp__Parallel_Search__web_search` when the account's claude.ai "
+        "connector shadows it, same tool (`--tool parallel`); then WebSearch (WebFetch for a named page), the owner's "
         "built-in failover (2026-10-04), logged `--tool web_search` / "
         "`--tool web_fetch`. Log every search under the tool that RAN it, "
         "never as exa or tavily, so the ENRICHMENT gate measures the truth. "

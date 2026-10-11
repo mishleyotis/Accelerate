@@ -4,7 +4,7 @@ description: Collects evidence for ONE batch of a category's open cells in one D
 model: haiku
 effort: medium
 maxTurns: 40
-tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__plugin_dma-insights_evidence__research_brief, mcp__plugin_dma-insights_evidence__crawl_entity, mcp__plugin_dma-insights_evidence__filings_evidence, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__coverage_report, mcp__plugin_dma-insights_searxng__searxng_web_search, mcp__plugin_dma-insights_searxng__searxng_search_suggestions, mcp__plugin_dma-insights_searxng__searxng_instance_info, mcp__plugin_dma-insights_searxng__web_url_read, mcp__plugin_dma-insights_fetch__fetch, mcp__plugin_dma-insights_edgar__get_company_facts, mcp__plugin_dma-insights_edgar__get_recent_filings, mcp__plugin_dma-insights_edgar__get_filing_sections, mcp__plugin_dma-insights_edgar__get_filing_content, mcp__plugin_dma-insights_edgar__get_financials, mcp__plugin_dma-insights_edgar__get_xbrl_concepts, mcp__plugin_dma-insights_parallel__web_search, mcp__plugin_dma-insights_parallel__web_fetch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
+tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__plugin_dma-insights_evidence__research_brief, mcp__plugin_dma-insights_evidence__crawl_entity, mcp__plugin_dma-insights_evidence__filings_evidence, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__coverage_report, mcp__plugin_dma-insights_searxng__searxng_web_search, mcp__plugin_dma-insights_searxng__searxng_search_suggestions, mcp__plugin_dma-insights_searxng__searxng_instance_info, mcp__plugin_dma-insights_searxng__web_url_read, mcp__plugin_dma-insights_fetch__fetch, mcp__plugin_dma-insights_edgar__get_company_facts, mcp__plugin_dma-insights_edgar__get_recent_filings, mcp__plugin_dma-insights_edgar__get_filing_sections, mcp__plugin_dma-insights_edgar__get_filing_content, mcp__plugin_dma-insights_edgar__get_financials, mcp__plugin_dma-insights_edgar__get_xbrl_concepts, mcp__plugin_dma-insights_parallel__web_search, mcp__plugin_dma-insights_parallel__web_fetch, mcp__Parallel_Search__web_search, mcp__Parallel_Search__web_fetch, mcp__alphaXiv__discover_papers, mcp__alphaXiv__get_paper_content, mcp__alphaXiv__answer_pdf_queries, mcp__plugin_dma-insights_alphaxiv__discover_papers, mcp__plugin_dma-insights_alphaxiv__get_paper_content, mcp__plugin_dma-insights_alphaxiv__answer_pdf_queries, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -27,30 +27,38 @@ need, exact, with the run and root filled in. Do not run `--help`, `orient`,
 the shape the price model priced (`engine/cost.py RESEARCH_TIERS["collector"]`),
 and a turn you did not need to spend is the saving.
 
-## The shape — three kinds of turn, nothing else
+## The shape — four kinds of turn, nothing else
 
 1. **One turn to open.** `engine.cli checkpoint` for your category (the
    search-op ceiling is per category per conversation) AND `cat` every card
    file of your batch (`<root>/briefs/research_cards/<CAT>/<CAP>.json`, written
    by the driver at handoff) in the SAME Bash call. The card names each open
    cell, the facets it owes and the diagnostic question per facet.
-2. **Per capability, one turn of searches — ONE batched `research_brief`.**
-   Every open cell's primary question and the five owed facets go into one
-   `questions[]` as objects `{question, subcap_ids, facet}`; the engine runs
-   the searches, fetches and verifies, and hands back cards grouped by cell
+2. **One turn of searches for the WHOLE batch — every capability's batched
+   `research_brief`, all in ONE message.** One call per capability; each
+   carries every open cell's primary question and the five owed facets as
+   `questions[]` objects `{question, subcap_ids, facet}`. The engine runs the
+   searches, fetches and verifies, and hands back cards grouped by cell
    (`item.linked_subcap_ids`) with `by_question[]` naming what nothing
-   answered. In the same message, only for those: the raw layer (SearXNG,
-   Parallel search, EDGAR for a filing). Exa/Tavily when you hold them and the
-   run is not degraded. WebSearch is the last rung, for an engine that
-   answered an error — the search-order hook refuses it before a brief.
-3. **Per capability, one turn of writes.** ONE Bash call that (a) `engine.cli
+   answered. Firing them together puts all of them in the research layer's
+   queue at once (the proxy admits them as the search sources free up — a
+   brief may wait minutes; that wait costs you nothing); firing them one
+   capability at a time put your second and third at the back of a queue
+   sixteen categories share (owner stress test, 2026-10-11).
+3. **At most one turn of fallbacks.** Only for the `by_question` rows left
+   unanswered or answered an error, across all your capabilities, in ONE
+   message: the raw layer (SearXNG, Parallel search, EDGAR for a filing).
+   Exa/Tavily when you hold them and the run is not degraded. WebSearch is the
+   last rung, for an engine that answered an error — the search-order hook
+   refuses it before a brief.
+4. **Per capability, one turn of writes.** ONE Bash call that (a) `engine.cli
    fetch --url <U> --query '<question>' --via-text <file>` caches the page
    text you will quote (one page per cell at most), (b) writes the ops file —
    search logs, then evidence lines, then attach lines, one command per line —
    and (c) runs `engine.cli batch --file <ops>`. Read the batch result; fix
    only the refused lines and re-batch those.
 
-Finish a capability before starting the next. Never sleep, poll, background
+Write one capability before starting the next. Never sleep, poll, background
 a command, or re-run the gate. Foreground, `timeout 600000`.
 
 ## The evidence row — what the gold workbook requires of you
