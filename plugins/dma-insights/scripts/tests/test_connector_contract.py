@@ -108,11 +108,24 @@ def test_a_family_answers_when_any_one_of_its_tools_is_bound():
 
 
 def test_a_missing_required_family_stops_and_says_which():
+    """No open-web reader at all (no Exa, Tavily, evidence engine, SearXNG
+    or Parallel) is a STOP that names every absent search family."""
     fam = cc.families()
-    out = cc.check([fam["exa"][0], fam["clay"][0]], now_families=fam)
+    out = cc.check([fam["clay"][0]], now_families=fam)
     assert not out["ok"] and out["verdict"] == "STOP"
-    assert "tavily" in out["missing"]
-    assert "routines UI" in out["why"], "name the fix, not just the fault"
+    assert "exa" in out["missing"] and "tavily" in out["missing"] and "evidence" in out["missing"]
+
+
+def test_the_research_layer_alone_answers_the_open_web_requirement():
+    """Owner, 2026-10-11: a session that lost Exa and Tavily but holds the
+    plugin's open-source research layer is READY, not degraded."""
+    fam = cc.families()
+    for family in ("evidence", "searxng", "parallel"):
+        out = cc.check([fam[family][0], fam["clay"][0]], now_families=fam)
+        assert out["ok"] and out["verdict"] == "READY", (family, out["missing"])
+        assert family in out["present"]
+    out = cc.check([fam["exa"][0], fam["clay"][0]], now_families=fam)
+    assert out["ok"], "one paid search connector still suffices on its own"
 
 
 def test_either_half_of_the_firmographic_pair_satisfies_it():
@@ -169,7 +182,11 @@ def test_declare_prints_the_derivation_and_json_round_trips():
          "--json"], capture_output=True, text=True, timeout=60)
     assert out.returncode == 0
     c = json.loads(out.stdout)
-    assert c["required"] and c["required_any"]
+    # the flat list is empty since 2026-10-11 (open-web reading is a group);
+    # the groups carry the search families and the firmographic pair
+    assert c["required"] == [] and c["required_any"]
+    assert any("evidence" in g and "exa" in g for g in c["required_any"])
+    assert any("clay" in g for g in c["required_any"])
     human = subprocess.run(
         [sys.executable, str(HERE / "connector_contract.py"), "declare"],
         capture_output=True, text=True, timeout=60).stdout

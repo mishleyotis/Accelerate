@@ -213,6 +213,18 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
     `stats()` without a category). orient, the watchdog and the hooks print
     `search_ops_since_checkpoint` for that scope, never the lifetime count
     against the ceiling (a promoted run read "6332 against 60").
+- **A run is never degraded while the open-source research layer answers**
+  (user, 2026-10-11: "runs will never run degraded due to the open source
+  connectors — ensure agents fall back to them"): the connector contract's
+  open-web requirement is a GROUP — any of `exa`, `tavily`, `evidence`,
+  `searxng`, `parallel` (`connector_contract.SEARCH_ANY`); Explorium/Clay
+  stay their own group. A session that lost Exa and Tavily to a credit
+  refusal but holds the research layer passes preflight, is not
+  `enrichment_degraded`, and its agents fall back in the free-chain order
+  (engine `research_brief` → `searxng` / `parallel` → WebSearch), logging
+  each search under the tool that ran it. The relay brief and
+  `enrichment_sources.json` `_free_chain` say the same; tests:
+  `test_connector_contract.py`.
 - **The research phase enforces /workflows** (user, 2026-10-11: "the research
   phase should still enforce /workflows"; supersedes the 2026-10-09 AUTO rule
   that sent a DEGRADED run to lean headless tiers): `--research-mode auto`

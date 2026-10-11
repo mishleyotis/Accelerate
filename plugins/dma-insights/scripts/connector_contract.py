@@ -66,18 +66,26 @@ from pathlib import Path
 _ROOT = Path(__file__).resolve().parents[3]
 _PROVISIONER = _ROOT / "scripts" / "provision_agent_tools.py"
 
-#: Families a RESEARCH or INTAKE firing cannot honestly run without.
-#: `docs/CONNECTORS.md` § Preflight is the contract these encode: Exa and
-#: Tavily do the open-web reading, and at least one of the firmographic
-#: pair answers "who is this entity" — the question a sub-vertical binding
-#: turns on. Kept deliberately small: every name here is a STOP, and a stop
-#: list that grows by habit is one nobody can satisfy.
-REQUIRED: tuple[str, ...] = ("exa", "tavily")
+#: Families a RESEARCH or INTAKE firing cannot honestly run without — as a
+#: flat "every one of these" list. EMPTY since 2026-10-11: open-web reading
+#: is a GROUP now (SEARCH_ANY below). `docs/CONNECTORS.md` § Preflight is
+#: the contract these encode. Kept deliberately small: every name here is a
+#: STOP, and a stop list that grows by habit is one nobody can satisfy.
+REQUIRED: tuple[str, ...] = ()
+
+#: Open-web reading: ANY of these answers it. Exa and Tavily are the paid
+#: connectors; the evidence engine, SearXNG and Parallel are the plugin's
+#: own open-source research layer (2026-10-10). Owner, 2026-10-11: "runs
+#: will never run degraded due to the open source connectors — ensure
+#: agents fall back to them". A session that lost Exa and Tavily to a
+#: credit refusal but holds the research layer is NOT degraded; the agents'
+#: free chain (`enrichment_sources.json` `_free_chain`) is the fallback.
+SEARCH_ANY: tuple[str, ...] = ("exa", "tavily", "evidence", "searxng", "parallel")
 
 #: At least one of each group must be present. Explorium and Clay both
 #: answer firmographics and technographics; requiring both would stop a
 #: firing that could do the work.
-REQUIRED_ANY: tuple[tuple[str, ...], ...] = (("explorium", "clay"),)
+REQUIRED_ANY: tuple[tuple[str, ...], ...] = (SEARCH_ANY, ("explorium", "clay"))
 
 #: Present-if-attached. Their absence is recorded per facet as NOT_RUN with
 #: the reason (the enrichment ledger's own vocabulary) and never silently
@@ -214,7 +222,13 @@ def check(tool_names, *, now_families=None) -> dict:
     missing = [f for f in c["required"] if not _present(f, fam, held)]
     for group in REQUIRED_ANY:
         if not any(_present(f, fam, held) for f in group):
-            missing.append(" or ".join(group))
+            if group == SEARCH_ANY:
+                # every absent search family, named: a reader (and the
+                # ledger's `missing` list) sees "exa", "tavily", … exactly as
+                # before, and the research layer beside them
+                missing.extend(group)
+            else:
+                missing.append(" or ".join(group))
 
     absent_optional = [f for f in c["optional"] if not _present(f, fam, held)]
     return {
