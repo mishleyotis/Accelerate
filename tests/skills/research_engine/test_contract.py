@@ -197,16 +197,33 @@ def _cc():
 def test_every_required_connector_family_counts_as_enrichment():
     cc = _cc()
     required = set(cc.REQUIRED) | {f for g in cc.REQUIRED_ANY for f in g}
-    assert required <= set(C.ENRICHMENT_TOOLS), (
-        f"the preflight stops a run over {sorted(required - set(C.ENRICHMENT_TOOLS))}, "
+    tokens = {C.search_tool_of_family(f) for f in required}
+    assert tokens <= set(C.ENRICHMENT_TOOLS), (
+        f"the preflight stops a run over {sorted(tokens - set(C.ENRICHMENT_TOOLS))}, "
         f"which no cell can log as enrichment effort")
 
 
 def test_every_optional_family_is_a_tool_the_ledger_accepts():
     cc = _cc()
-    assert set(cc.OPTIONAL) <= set(C.SEARCH_TOOLS), (
+    tokens = {C.search_tool_of_family(f) for f in cc.OPTIONAL}
+    assert tokens <= set(C.SEARCH_TOOLS), (
         "a family the contract calls optional must still be loggable, or a "
         "session that holds it cannot record what it found")
+
+
+def test_a_family_that_logs_under_another_name_maps_to_a_real_token():
+    """The engine is the family `evidence` to the contract and the token
+    `evidence_engine` to the log. The map that joins them names only
+    families the contract knows and only tokens the ledger accepts."""
+    cc = _cc()
+    known = (set(cc.REQUIRED) | {f for g in cc.REQUIRED_ANY for f in g}
+             | set(cc.OPTIONAL))
+    for family, token in C.SEARCH_TOOL_OF_FAMILY.items():
+        assert family in known, f"{family!r} is not a family the contract names"
+        assert token in C.SEARCH_TOOLS, f"{token!r} is not a Search_Log token"
+        assert family not in C.SEARCH_TOOLS, (
+            f"{family!r} is both a family alias and a token — one name")
+    assert C.search_tool_of_family("exa") == "exa"
 
 
 def test_the_gate_counts_more_than_the_preflight_requires():

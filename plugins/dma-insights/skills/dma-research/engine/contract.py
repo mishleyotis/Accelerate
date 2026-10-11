@@ -509,6 +509,20 @@ PRELIM_SHEET_FACETS = ("focus_areas", "issues", "peer_deployments")
 ENRICHMENT_TOOLS = tuple(t for t in SEARCH_TOOLS
                          if t not in ("web_search", "web_fetch"))
 
+#: Connector-contract family → Search_Log token, where the two differ. The
+#: contract (`scripts/connector_contract.py`) names a family after its MCP
+#: server, so the engine is the family `evidence`; the log names it
+#: `evidence_engine` so a reader never mistakes the engine for the evidence
+#: rows it produced. Every other family logs under its own name. The
+#: contract test reads this map, so a family the preflight can stop a run
+#: over is always one a cell can log as enrichment effort.
+SEARCH_TOOL_OF_FAMILY = {"evidence": "evidence_engine"}
+
+
+def search_tool_of_family(family: str) -> str:
+    """The Search_Log token a connector-contract family logs under."""
+    return SEARCH_TOOL_OF_FAMILY.get(family, family)
+
 #: T3, the drilldown. A register row answers "what do they run"; the detail
 #: page a click opens answers "so what" — and it has three content cards, two
 #: of which render from nothing the research run used to capture. The
