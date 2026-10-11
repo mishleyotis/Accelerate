@@ -124,6 +124,25 @@ ADVISORY_TERMS = (
 # `declare_absence` refuses on — so the gate and the writer agree.
 
 
+#: Every term that can fail a category, in report order. One tuple, read by
+#: `run` and by the research workflow's tests: a blocking term the repair
+#: prompts do not tell an agent how to close is a term handed back every round
+#: to agents who cannot act on it (R-INTERAC-20261010: absence_single_tool was
+#: the commonest term on the run and the collector's repair lines never named
+#: it, so every repair wave re-fired WebSearch and re-failed).
+BLOCKING_TERMS = (
+    "unresolved_citations", "boilerplate", "claim_unsupported",
+    "absence_undeclared", "evidence_smear", "challenge_missing",
+    "challenge_not_independent", "challenge_failed", "single_source_fact",
+    "synthesis_missing", "dq_gaps", "absence_unsearched",
+    "volleys_incomplete", "absence_undeclared_empty",
+    "absence_over_evidence", "absence_superseded",
+    # 2026-09-03 (owner issue 1): the primary question is owed on every
+    # searched cell, and an empty cell must show an enrichment connector.
+    "primary_unfired", "absence_single_tool",
+)
+
+
 #: Fallbacks for the two run-level density floors when gold_reference.json
 #: cannot be read — the Golden 1 ratios as measured 2026-09-03 (727 evidence
 #: rows over 690 subcaps; 442 of 690 subcaps evidenced).
@@ -577,17 +596,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     tools_used = sorted({str(s.get("Tool") or "").strip()
                          for s in cat_searches if str(s.get("Tool") or "").strip()})
 
-    blocking = [k for k in (
-        "unresolved_citations", "boilerplate", "claim_unsupported",
-        "absence_undeclared", "evidence_smear", "challenge_missing",
-        "challenge_not_independent", "challenge_failed", "single_source_fact",
-        "synthesis_missing", "dq_gaps", "absence_unsearched",
-        "volleys_incomplete", "absence_undeclared_empty",
-        "absence_over_evidence", "absence_superseded",
-        # 2026-09-03 (owner issue 1): the primary question is owed on every
-        # searched cell, and an empty cell must show an enrichment connector.
-        "primary_unfired", "absence_single_tool",
-    ) if findings[k]]
+    blocking = [k for k in BLOCKING_TERMS if findings[k]]
     # A category whose research has not converged is not challenged yet: the
     # challenge stage runs after the floors gate says the work is done, so
     # asking for the verdict in the same breath as the work is asking the

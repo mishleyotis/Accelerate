@@ -7,8 +7,9 @@ Please diagnose and fix the above to ensure this never recurs."
 
 Twelve of sixteen category workflows returned `AT_STAGE_BUDGET` or handed
 back cells nothing could close, with the envelope $49.77 from its ceiling.
-Five defects — three in the driver↔governor budget handshake, one in how
-concurrent agents name their files, one in how the gate routes a cell:
+Seven defects — three in the driver↔governor budget handshake, two in how
+concurrent agents and successive handoffs name their files, two in how a
+gate term reaches the agent that can close it:
 
 - **The share** (`engine/pipeline.py`): with the envelope funding the scope,
   shares were `remaining × cells / total` — blind to the ~$1.40 orchestrator
@@ -43,6 +44,19 @@ concurrent agents name their files, one in how the gate routes a cell:
   cells; P4C1.4.3). It is now the blocking term `absence_superseded`, and
   the orchestrator's prompt names those cells as its own: a synthesis from
   the attached rows closes them.
+- **The term nobody was told about**: `absence_single_tool` was the commonest
+  blocking term on the run and the collector's repair lines never named it;
+  with the evidence engine timing out under sixteen workflows, collectors
+  fell straight to WebSearch — which is not an enrichment tool — so every
+  repair wave re-failed (P3C2.2.CIB1: 27 searches over three rounds, all
+  `web_search`). The repair lines now route every term in
+  `floors_gate.BLOCKING_TERMS` (hoisted to a module constant, test-asserted
+  against the prompt), `absence_single_tool` through searxng / the engine /
+  edgar, and an engine error or timeout falls to searxng, not WebSearch.
+- **Stale challenge packets**: every handoff restarts its rounds at r1, so
+  `briefs/wf_challenge_<CAT>_r1` kept packets from earlier handoffs that
+  judge text no longer there; the challenge step now clears it first and
+  works only the packets it just built.
 
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow

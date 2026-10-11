@@ -270,3 +270,78 @@ def test_the_orchestrator_is_told_which_absences_it_must_synthesise(tmp_path):
     orch = [c for c in d["calls"] if "orchestrate" in c["label"]]
     assert orch and orch[0]["superseded"] == "P1C1.1.3", orch
     assert all(c["superseded"] is None for c in d["calls"] if "orchestrate" not in c["label"])
+
+
+# ── 6. every blocking term has a repair instruction ───────────────────────
+#
+# absence_single_tool was the commonest blocking term on the run and the
+# collector's repair lines never named it: every repair wave re-fired
+# WebSearch, which proves no enrichment effort, and re-failed (P3C2.2.CIB1:
+# 27 searches over three rounds, all web_search).
+
+_RENDER = r"""
+const fs = require('fs')
+const src = fs.readFileSync(process.argv[1], 'utf8')
+const b = src.indexOf('// --- PROMPTS BEGIN'), e = src.indexOf('// --- PROMPTS END')
+const A = {root: '/r', run: 'R', eng: '/e', repairs: {P1C1: {}}, degraded: JSON.parse(process.argv[2])}
+const P = new Function('A', 'ENG', 'R', 'DOMAIN', 'MODELS', 'CARDS',
+  src.slice(b, e) + '\nreturn {collectPrompt}')(A, '/e', '--run R', 'd', {}, '/c')
+process.stdout.write(P.collectPrompt('P1C1', ['P1C1.1'], 1, {'P1C1.1.1': ['absence_single_tool']}))
+"""
+
+
+def _collect_prompt(degraded: bool) -> str:
+    wf = HERE.parents[2] / "plugins" / "dma-insights" / "workflows" / "dma-pillar-research.js"
+    r = subprocess.run(["node", "-e", _RENDER, str(wf), json.dumps(degraded)],
+                       capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stderr
+    return r.stdout
+
+
+@needs_node
+def test_every_blocking_gate_term_tells_the_repair_wave_who_closes_it():
+    import re
+    text = _collect_prompt(True)
+    per_term = text[text.index("Per term:"):]
+    unrouted = [t for t in floors_gate.BLOCKING_TERMS
+                if not re.search(rf"\b{t}\b[^→]*→", per_term)]
+    assert not unrouted, f"blocking terms with no repair instruction: {unrouted}"
+
+
+@needs_node
+@pytest.mark.parametrize("degraded", [True, False])
+def test_a_single_tool_absence_is_repaired_through_an_enrichment_tool(degraded):
+    text = _collect_prompt(degraded)
+    line = text[text.index("absence_single_tool →"):]
+    line = line[:line.index(". ", line.index("nothing_found"))]
+    assert "searxng" in line and "--tool searxng" in line
+    assert "never closes this term" in line
+
+
+@needs_node
+def test_an_engine_timeout_falls_back_to_searxng_before_websearch():
+    text = _collect_prompt(True)
+    assert "An engine error or TIMEOUT sends you to searxng" in text
+
+
+def test_websearch_is_not_an_enrichment_tool():
+    from engine import contract as CC
+    assert "web_search" not in CC.ENRICHMENT_TOOLS
+    assert {"searxng", "evidence_engine"} <= set(CC.ENRICHMENT_TOOLS)
+
+
+@needs_node
+def test_the_challenge_never_works_a_packet_an_earlier_handoff_left():
+    """P3C4, P4C1 and P3C1's challengers found packets 3-8 from earlier
+    handoffs in wf_challenge_<CAT>_r1 (every handoff restarts at r1); they
+    ignored them, but nothing made them."""
+    wf = HERE.parents[2] / "plugins" / "dma-insights" / "workflows" / "dma-pillar-research.js"
+    render = _RENDER.replace("return {collectPrompt}", "return {collectPrompt, challengePrompt}").replace(
+        "process.stdout.write(P.collectPrompt('P1C1', ['P1C1.1'], 1, {'P1C1.1.1': ['absence_single_tool']}))",
+        "process.stdout.write(P.challengePrompt('P1C1', 1))")
+    r = subprocess.run(["node", "-e", render, str(wf), "true"], capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stderr
+    out_dir = "/r/briefs/wf_challenge_P1C1_r1"
+    step1 = r.stdout[r.stdout.index("1) "):r.stdout.index("2) ")]
+    assert step1.index(f"rm -rf {out_dir}") < step1.index("challenge-batch"), step1
+    assert "ONLY the packets this command lists" in step1
