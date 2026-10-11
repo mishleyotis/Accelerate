@@ -298,6 +298,8 @@ site_pack:
     - {domain: thefinancialbrand.com, rung: trade_press}
     - {domain: bankingdive.com, rung: trade_press}
     - {domain: pymnts.com, rung: trade_press}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
   credit_unions:
     - {domain: ncua.gov, rung: regulator}
     - {domain: cuinsight.com, rung: trade_press}
@@ -305,6 +307,8 @@ site_pack:
     - {domain: cutimes.com, rung: trade_press}
     - {domain: cutoday.info, rung: trade_press}
     - {domain: prnewswire.com, rung: news}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
   banks:
     - {domain: fdic.gov, rung: regulator}
     - {domain: occ.gov, rung: regulator}
@@ -312,6 +316,8 @@ site_pack:
     - {domain: americanbanker.com, rung: trade_press}
     - {domain: bankingdive.com, rung: trade_press}
     - {domain: prnewswire.com, rung: news}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
   lending:
     - {domain: consumerfinance.gov, rung: regulator}
     - {domain: hud.gov, rung: regulator}
@@ -319,6 +325,8 @@ site_pack:
     - {domain: housingwire.com, rung: trade_press}
     - {domain: americanbanker.com, rung: trade_press}
     - {domain: prnewswire.com, rung: news}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
   insurance:
     - {domain: naic.org, rung: regulator}
     - {domain: insurancejournal.com, rung: trade_press}
@@ -326,6 +334,8 @@ site_pack:
     - {domain: dig-in.com, rung: trade_press}
     - {domain: businesswire.com, rung: news}
     - {domain: prnewswire.com, rung: news}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
   wealth:
     - {domain: sec.gov, rung: regulator}
     - {domain: finra.org, rung: regulator}
@@ -333,3 +343,5 @@ site_pack:
     - {domain: thinkadvisor.com, rung: trade_press}
     - {domain: investmentnews.com, rung: trade_press}
     - {domain: wealthmanagement.com, rung: trade_press}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints

@@ -36,7 +36,7 @@ def test_five_facets_with_ids_and_quoted_name():
 
 def test_site_variants_and_cap():
     qs = query.expand(QUESTION, ENTITY, None, "credit union", PACK)
-    assert len(qs) <= query.MAX_QUERIES == 16
+    assert len(qs) <= query.MAX_QUERIES == 18
     assert [q["query_id"] for q in qs] == [f"Q-{i:02d}" for i in range(1, len(qs) + 1)]
     own = [q for q in qs if q["kind"] == "site:entity"]
     assert [q["text"].split()[0] for q in own] == ["site:example-fcu.test", "site:online.example-fcu.test"]
@@ -120,4 +120,5 @@ def test_registry_site_pack_follows_the_sub_vertical():
     assert registry.site_pack("Insurance Brokers")[0]["domain"] == "naic.org"
     assert registry.site_pack("RIAs & Broker-Dealers")[0]["domain"] == "sec.gov"
     assert registry.site_pack("Commercial Lending")[0]["domain"] == "consumerfinance.gov"
-    assert registry.site_pack(None)[0]["rung"] == "news" and len(registry.site_pack(None)) <= 6
+    assert registry.site_pack(None)[0]["rung"] == "news" and len(registry.site_pack(None)) <= 8
+    assert {"domain": "apps.apple.com", "rung": "other"} in registry.site_pack("Credit Unions")

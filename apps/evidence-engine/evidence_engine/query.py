@@ -34,7 +34,7 @@ from .types import EntityRef
 
 _NAMES_PATH = Path(__file__).resolve().parent.parent / "registry" / "platform_names.txt"
 
-MAX_QUERIES = 16
+MAX_QUERIES = 18
 
 #: One lens word per facet. Measured 2026-10-11 on golden v1 (15 misses):
 #: the former OR-chains ("launched OR offers OR deployed OR implemented")

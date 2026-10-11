@@ -314,7 +314,7 @@ _PACK_KEYS = (
 )
 
 
-def site_pack(sub_vertical: str | None, limit: int = 6) -> list[dict]:
+def site_pack(sub_vertical: str | None, limit: int = 8) -> list[dict]:
     """[{domain, rung}] — the proxy-ladder probes for this sub-vertical."""
     packs = (raw().get("site_pack") or {})
     label = (sub_vertical or "").strip().lower()
