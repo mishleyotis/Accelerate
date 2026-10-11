@@ -89,7 +89,12 @@ def test_an_evidenced_cell_still_owes_its_volleys(tmp_path):
         excerpt=("Alkami digital banking went live in Q3 2024 and reached 47 "
                  f"percent member adoption within ninety days, restated at {50+i} "
                  "percent in the 2025 report.")) for i in range(3)]
-    synthesise(wb, cell, good_synthesis(cell, eids))
+    rec = good_synthesis(cell, eids)
+    # the facets never searched are said so (the ledger refuses an answered
+    # facet with no logged search, 2026-10-11) — and the gate still blocks
+    rec["DQ_Value"] = "NOT_RUN: the value volley was never fired on this cell"
+    rec["DQ_Corroborates"] = "NOT_RUN: the corroborates volley was never fired on this cell"
+    synthesise(wb, cell, rec)
     v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
     assert any(x["subcap"] == cell for x in v["volleys_incomplete"])
     assert "volleys_incomplete" in v["blocking"]

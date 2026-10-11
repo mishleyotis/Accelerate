@@ -72,6 +72,8 @@ def test_a_single_document_fact_blocks_the_gate(tmp_path):
     run, wb, sub, _ = _ready(tmp_path)
     # a second subcap whose three rows are all the SAME host
     sub2 = small_selection(2)[1]
+    from fixtures import fire_volleys
+    fire_volleys(wb, sub2)        # an answered facet needs its search logged
     eids2 = [L.append_evidence(
         wb, source_name=f"Annual Report 2025 p{i}",
         source_url=f"https://acme.example/ar25#x{i}", tier="T2",
