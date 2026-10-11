@@ -842,6 +842,21 @@ jobs:
             echo "no served fixture yet; audit runs against production nightly"
           fi
 
+  # The research-layer backends are built and probed through their doors on
+  # every pull request (2026-10-11: the first approved evidence release failed
+  # building dmai-searxng — the official image had become Void Linux, the npm
+  # pin was never published, and the fetch/edgar gateway tag had moved a
+  # major version; none of it was visible before production). The deploy
+  # waits on this job, so an image that does not build never ships.
+  evidence-images:
+    name: Evidence backend images (build + door probe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build searxng, fetch and edgar; probe each through its door
+        run: bash infra/evidence-engine/image_smoke.sh
+
   # Per-service lint/type/build jobs are added when each service's
   # first code lands (Implementation Plan S.3); the gates above run from
   # the first commit so no code was ever merged without them.
@@ -859,7 +874,7 @@ jobs:
   deploy:
     name: Deploy to Cloud Run (default branch)
     if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-    needs: [gates, schema-qa, python-tests, research-engine-tests, acceptance-tests, research-walks, web-tests, promoted-client-audit]
+    needs: [gates, schema-qa, python-tests, research-engine-tests, acceptance-tests, research-walks, web-tests, promoted-client-audit, evidence-images]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: production
