@@ -901,3 +901,10 @@ jobs:
       - name: infra/deploy.sh
         if: steps.cfg.outputs.ready == 'true'
         run: bash infra/deploy.sh
+      # The evidence engine rides the same release, gated: nothing is created
+      # until infra/evidence-engine/APPROVAL.json clears the owner's recall
+      # threshold (approval_check.py); until then the step says so and passes.
+      # A failure HERE never un-ships web/api/mcp (they deployed above).
+      - name: infra/evidence-engine/ci_gate.sh (approved releases only)
+        if: steps.cfg.outputs.ready == 'true'
+        run: bash infra/evidence-engine/ci_gate.sh

@@ -39,3 +39,26 @@ buckets, the Scheduler triggers, `infra/deploy.sh`, `provision.sh`.
 ## Not in this plan (each its own approval)
 
 Paid keys (Brave API, Mojeek API, Tavily/Exa credit), any proxy, `--min-instances 1`, Parallel's keyed tier.
+
+## Routing (owner, 2026-10-11): the deploy is automatic after merge, behind one approval
+
+1. A merge to the default branch runs CI's `deploy` job (every check green,
+   Workload Identity as the CI deployer, `infra/deploy.sh` ships web/api/mcp
+   as before — the last default-branch run did exactly that, 27 minutes).
+2. The same job then runs `infra/evidence-engine/ci_gate.sh`. It reads
+   `infra/evidence-engine/APPROVAL.json` through `approval_check.py`; with no
+   file, or figures at or below 90 percent, it prints why and passes (the
+   release of the existing services is never held). With an approval that
+   clears the bar — same-URL source recall **above 90 percent on tuning AND
+   held-out**, naming the results file the numbers come from — it runs
+   `deploy-evidence.sh` with `EE_DEPLOY_APPROVED=1` and the smoke test.
+3. Prerequisite, once, by a project owner: `CONFIRM=1 bash
+   infra/evidence-engine/grant-deployer.sh` — the deployer's roles for Cloud
+   Run, Secret Manager, Storage, the NAT and Cloud Build, plus the four
+   service identities and their logging binding (so the deployer never
+   needs project IAM admin). Without it the gate step fails loudly after
+   web/api/mcp shipped; nothing partial is left behind that the next merge
+   does not converge (every step is idempotent).
+4. The approval file is written by the person who approves, with the run
+   id; a file that does not clear the bar cannot be committed
+   (`scripts/tests/test_ci_deploy_job.py`).

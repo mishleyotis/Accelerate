@@ -33,8 +33,12 @@ for sa in dmai-evidence dmai-searxng dmai-fetch dmai-edgar; do
   else
     run gcloud iam service-accounts create "$sa" --project="$PROJECT_ID" --display-name="DMA Insights $sa"
   fi
-  run gcloud projects add-iam-policy-binding "$PROJECT_ID" \
-    --member="serviceAccount:${sa}@${SA_DOMAIN}" --role=roles/logging.logWriter --condition=None --quiet
+  # The project-level binding needs projectIamAdmin, which the CI deployer
+  # deliberately lacks: grant-deployer.sh (owner, one-time) makes it.
+  if [ "${EE_GRANT_PROJECT_ROLES:-0}" = "1" ]; then
+    run gcloud projects add-iam-policy-binding "$PROJECT_ID" \
+      --member="serviceAccount:${sa}@${SA_DOMAIN}" --role=roles/logging.logWriter --condition=None --quiet
+  fi
 done
 
 say "1 · secrets (new; values generated, never printed)"
