@@ -305,3 +305,70 @@ def test_fan_out_drives_the_real_per_key_breakers():
     assert first["per_source"]["searxng"]["error"] == "429"
     assert br.get("searxng").state == "open"
     assert second["rerouted"] == ["rerouted_from:searxng"] and second["per_source"]["searxng"]["calls"] == 0
+
+
+class _SlowSearx:
+    """A SearXNG stand-in whose calls take `delay` seconds each."""
+    source = "searxng"
+
+    def __init__(self, delay: float):
+        self.delay, self.calls, self.finished = delay, [], []
+
+    async def search(self, text, *, query_id="", facet=""):
+        self.calls.append(text)
+        await asyncio.sleep(self.delay)
+        self.finished.append(text)
+        return [SearchHit(url=f"https://ex.test/{query_id}", title=text, snippet="s",
+                          rank=1, source="searxng", query_id=query_id, facet=facet)]
+
+
+def _queries(n):
+    return [{"query_id": f"Q-{i:02d}", "text": f"query {i}", "facet": "works"} for i in range(n)]
+
+
+def test_fan_out_search_budget_cuts_only_queries_still_queued():
+    """Sixteen-way load (2026-10-11): a bucket that lets one query through
+    per 0.2 s, ten queries, a 0.3 s budget. The phase returns at the budget
+    with what it has; the queued queries are cut and counted; a call that
+    had already started is not cancelled — it finishes in the background."""
+    sx = _SlowSearx(delay=0.25)
+
+    async def bucket(source):                        # one token per 0.2 s, in arrival order
+        slot, bucket.n = bucket.n, bucket.n + 1
+        await asyncio.sleep(0.2 * slot)
+    bucket.n = 0
+
+    async def go():
+        t0 = asyncio.get_running_loop().time()
+        out = await fan_out(_queries(10), searx=sx, parallel=None, run_id="R",
+                            bucket_wait=bucket, budget_s=0.3)
+        took = asyncio.get_running_loop().time() - t0
+        await asyncio.sleep(0.5)                      # let started calls land
+        return out, took
+    out, took = asyncio.run(go())
+    assert took < 0.45
+    assert out["budget_cut"] >= 7
+    assert len(sx.calls) == len(sx.finished) >= 1    # every started call completed
+
+
+def test_fan_out_without_a_budget_waits_for_every_query():
+    sx = _SlowSearx(delay=0.01)
+    out = asyncio.run(fan_out(_queries(4), searx=sx, parallel=None, run_id="R"))
+    assert out["budget_cut"] == 0 and len(sx.finished) == 4 and len(out["hits"]) == 4
+
+
+def test_a_budget_cut_never_cancels_a_call_another_brief_joined():
+    """Identical queries from two briefs are coalesced onto one upstream call.
+    The first brief's budget expires while that call is in flight: the second
+    brief must still receive the answer, not a CancelledError."""
+    sx = _SlowSearx(delay=0.4)
+
+    async def go():
+        a = asyncio.create_task(fan_out(_queries(1), searx=sx, parallel=None, run_id="A", budget_s=0.1))
+        await asyncio.sleep(0.02)
+        b = asyncio.create_task(fan_out(_queries(1), searx=sx, parallel=None, run_id="B"))
+        return await a, await b
+    first, second = asyncio.run(go())
+    assert first["budget_cut"] == 0                  # started, so not cut
+    assert len(second["hits"]) == 1                  # the joiner got the answer
+    assert len(sx.calls) == 1                        # one upstream call served both

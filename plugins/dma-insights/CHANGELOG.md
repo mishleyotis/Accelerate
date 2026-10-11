@@ -1,5 +1,53 @@
 # dma-insights — plugin changelog
 
+## 1.25.0 — 2026-10-11 — the research connectors bind, stay bound, and answer under load
+
+Owner: "Confirm connector reachability especially the open source ones …
+Fix accessibility issues so these connectors bind always in case sessions
+restart and at the beginning", then, from a live round: "The open-source
+evidence engine timed out twice at 60 seconds in P3C4, with 16 workflows
+hitting it at once."
+
+- **Parallel and alphaXiv were silently unbound.** Both are also claude.ai
+  connectors at the same URL; when the account attaches them Claude Code
+  suppresses the plugin's server ("Suppressing plugin MCP server …
+  duplicates a claude.ai connector") and the tools bind as
+  `mcp__Parallel_Search__*` / `mcp__alphaXiv__*` — names no manifest held,
+  so every research agent ran without Parallel (the IMA session bound 4 of
+  6). The registry now grants both spellings (`SHADOWED_BY_CLAUDE_AI` in
+  `scripts/provision_agent_tools.py`), alphaXiv contributes its three read
+  tools, and the rate gate, source health, page-read guard, auto-approve,
+  relay, `agent_run` and the doctor all read the alias. Tests pin every copy.
+- **A cold start no longer costs a session its tools.** The CLI gives a
+  server 30 s to answer `initialize` and never asks twice; the research
+  services run at min-instances 0 and the proxy could spend a 60 s token
+  mint plus 3×120 s upstream, or answer an empty tool list "until the next
+  initialize" that never came. `evidence_proxy.py` now answers within
+  `DMA_RESEARCH_INIT_BUDGET_S` (20 s), lists the last-known tools (runtime
+  cache, else `references/research_layer_tools.json`), recovers in the
+  background and sends `notifications/tools/list_changed`; a call made while
+  warming waits for the service. Proved end to end against a 25 s cold stub.
+- **Long briefs reach their caller.** The cloud environment sets
+  `MCP_TOOL_TIMEOUT=60000`; a batched `research_brief` runs longer, finished
+  server-side, and its cards were lost (IMA P1C1 probe: 31 cards stored, 0
+  returned). `.mcp.json` gives evidence a per-server `timeout` of 600 s and
+  the raw fallbacks 180 s.
+- **Sixteen workflows no longer queue on one pipe.** Every agent shares one
+  proxy process, which handled one message at a time; tool calls now run on
+  workers (`DMA_RESEARCH_CALL_WORKERS`, 8). The availability marker follows
+  each call's transport outcome, so `search_order.py` lifts brief-first when
+  the engine dies mid-session and restores it when it returns.
+- **The engine answers inside the window under load.** `research_brief`'s
+  search phase has a budget (`EE_SEARCH_PHASE_BUDGET_S`, 25 s) beside the
+  fetch phase's: queries still queued for a source token are cut and counted
+  (`search.budget_cut`), started calls finish into the cache and are never
+  cancelled (coalesced joiners from other briefs ride on them).
+- **A small category gets at least one full wave.** Shares were split by
+  cells alone, so a two-cell category got $0.38 against a $1.84 floor (one
+  batch + orchestrator + challenge) and closed AT_STAGE_BUDGET with money
+  left. Each invocation is now floored at its fixed costs and the rest is
+  split by cells; the shares still partition the envelope.
+
 ## 1.24.0 — 2026-10-11 — the six connectors, batched and ordered
 
 Owner: "There were 6 connectors mentioned … Ensure all are mapped to the

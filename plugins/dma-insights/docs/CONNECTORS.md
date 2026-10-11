@@ -318,6 +318,33 @@ agent: the client folder and the toolkits land under the run root through
 `drive_fetch.py` over Bash. Clay runs in the correct workspace; a refused
 grant records as not-run — never invented technographics (MEM-0082).
 
+## How the research layer binds — and stays bound (2026-10-11)
+
+**Shadowed servers.** Parallel and alphaXiv are also claude.ai connectors at
+the same URLs as the plugin's `parallel` / `alphaxiv` servers. When the
+account attaches them, Claude Code suppresses the plugin copy and the tools
+bind as `mcp__Parallel_Search__*` / `mcp__alphaXiv__*`. The research tier is
+granted both spellings (`SHADOWED_BY_CLAUDE_AI` in
+`scripts/provision_agent_tools.py`); every hook reads the same alias. Log a
+search under the tool family that ran it (`--tool parallel`) whichever
+spelling bound.
+
+**Cold starts.** The CLI gives a stdio server `MCP_TIMEOUT` (30 s) to answer
+`initialize`, once. `scripts/evidence_proxy.py` answers within 20 s whatever
+the service is doing; a cold or failing service is served from its
+last-known tool list (`/root/.dma/research_layer/<service>.tools.json`, else
+`references/research_layer_tools.json`) and the proxy sends
+`notifications/tools/list_changed` when the service answers. Nothing to do
+at session start or after a container restart; `/dma-insights:doctor` reports
+a service that stays down.
+
+**Long calls.** The cloud environment sets `MCP_TOOL_TIMEOUT=60000`. The
+per-server `timeout` in `.mcp.json` (evidence 600 s, raw fallbacks 180 s)
+overrides it, the proxy runs calls concurrently (every agent in a session
+shares one proxy process), and the engine bounds its own search phase
+(`EE_SEARCH_PHASE_BUDGET_S`) so a brief under sixteen-way load returns
+partial cards with `search.budget_cut` instead of nothing.
+
 ## Dispatch mode and where the connectors actually live
 
 The claude.ai connector tools are attached to the top session. A headless

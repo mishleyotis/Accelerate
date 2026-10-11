@@ -12,35 +12,43 @@
       "args": [
         "${CLAUDE_PLUGIN_ROOT}/scripts/evidence_proxy.py",
         "${user_config.evidence_base_url}",
-        "--secret", "dmai-evidence-path-token"
-      ]
+        "--secret",
+        "dmai-evidence-path-token"
+      ],
+      "timeout": 600000
     },
     "searxng": {
       "command": "python3",
       "args": [
         "${CLAUDE_PLUGIN_ROOT}/scripts/evidence_proxy.py",
         "",
-        "--secret", "dmai-searxng-path-token",
+        "--secret",
+        "dmai-searxng-path-token",
         "--segment"
-      ]
+      ],
+      "timeout": 180000
     },
     "fetch": {
       "command": "python3",
       "args": [
         "${CLAUDE_PLUGIN_ROOT}/scripts/evidence_proxy.py",
         "",
-        "--secret", "dmai-fetch-path-token",
+        "--secret",
+        "dmai-fetch-path-token",
         "--segment"
-      ]
+      ],
+      "timeout": 180000
     },
     "edgar": {
       "command": "python3",
       "args": [
         "${CLAUDE_PLUGIN_ROOT}/scripts/evidence_proxy.py",
         "",
-        "--secret", "dmai-edgar-path-token",
+        "--secret",
+        "dmai-edgar-path-token",
         "--segment"
-      ]
+      ],
+      "timeout": 180000
     },
     "parallel": {
       "type": "http",

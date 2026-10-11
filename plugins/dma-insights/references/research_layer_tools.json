@@ -1,0 +1,122 @@
+{
+  "_comment": "Last-known tools/list of each plugin research service, served by scripts/evidence_proxy.py ONLY while its service has not answered `initialize` (cold start, outage) so the tools bind from the first turn; the live listing replaces it the moment the service answers (notifications/tools/list_changed). A session's own runtime cache (<DMA_RESEARCH_LAYER_STATE>/<service>.tools.json) wins over this file. Captured from a bound session on 2026-10-11. tests/test_evidence_proxy.py pins: every tool scripts/provision_agent_tools.py grants for these four families is listed here.",
+  "captured": "2026-10-11",
+  "evidence": [
+    {"name": "research_brief", "description": "Ranked evidence cards for one or more questions about an entity, plus a coverage block (novelty, saturation, conflict candidates, the ladder rungs searched). One call replaces a search → open → read → excerpt loop. BATCH A WHOLE CAPABILITY: pass `questions` as objects `{\"question\": \"...\", \"subcap_ids\": [\"P1C1.1.1\"], \"facet\": \"primary\"}` — one per cell question (and one per owed facet naming every cell it bears on). One search pass and one fetch slice serve them all; cards come back with `item.linked_subcap_ids` = the cells of the question each answered (the caller's ids, echoed, never invented) and `by_question[]` says which questions got no card. `max_cards`/`token_budget` are then per question. `entity`: {legal_name, domains[], aliases[], location, charter, cik, ticker}. `facet` ∈ works|fails|value|contradicts|corroborates (omit for all five). `subcap_labels` are opaque labels for logging only. A vendor name in a question is refused unless `allow_names_from_cards` maps it to the card_id it came from. `provenance` ∈ minimal|standard|full.",
+     "inputSchema": {"type": "object", "additionalProperties": false, "required": ["run_id", "entity", "questions"], "properties": {
+       "allow_names_from_cards": {"anyOf": [{"type": "object", "additionalProperties": true}, {"type": "null"}], "default": null},
+       "entity": {"type": "object", "additionalProperties": true},
+       "facet": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null},
+       "max_cards": {"type": "integer", "default": 8},
+       "provenance": {"type": "string", "default": "standard"},
+       "questions": {"type": "array", "items": {"anyOf": [{"type": "string"}, {"type": "object", "additionalProperties": true}]}},
+       "reference_date": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null},
+       "run_id": {"type": "string"},
+       "sub_vertical": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null},
+       "subcap_labels": {"anyOf": [{"type": "array", "items": {"type": "string"}}, {"type": "null"}], "default": null},
+       "token_budget": {"type": "integer", "default": 2400}}}},
+    {"name": "crawl_entity", "description": "Cards from the institution's OWN pages (sitemap + newsroom, press, careers, investor relations, disclosures; robots honoured; budget and depth capped) with a crawl manifest (seen, fetched, skipped, robots-blocked). `path_focus` ⊆ newsroom|careers|ir|disclosures|about.",
+     "inputSchema": {"type": "object", "additionalProperties": false, "required": ["run_id", "entity"], "properties": {
+       "depth": {"anyOf": [{"type": "integer"}, {"type": "null"}], "default": null},
+       "entity": {"type": "object", "additionalProperties": true},
+       "max_cards": {"type": "integer", "default": 12},
+       "page_budget": {"anyOf": [{"type": "integer"}, {"type": "null"}], "default": null},
+       "path_focus": {"anyOf": [{"type": "array", "items": {"type": "string"}}, {"type": "null"}], "default": null},
+       "question": {"type": "string", "default": ""},
+       "reference_date": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null},
+       "run_id": {"type": "string"},
+       "token_budget": {"type": "integer", "default": 1500}}}},
+    {"name": "filings_evidence", "description": "Cards anchored in 10-K/10-Q/8-K sections and XBRL facts with exact values and filing URLs (edgartools in-process, cached, 8 req/s global).",
+     "inputSchema": {"type": "object", "additionalProperties": false, "required": ["run_id", "cik_or_ticker"], "properties": {
+       "cik_or_ticker": {"type": "string"},
+       "entity": {"anyOf": [{"type": "object", "additionalProperties": true}, {"type": "null"}], "default": null},
+       "forms": {"anyOf": [{"type": "array", "items": {"type": "string"}}, {"type": "null"}], "default": null},
+       "max_cards": {"type": "integer", "default": 10},
+       "reference_date": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null},
+       "run_id": {"type": "string"},
+       "token_budget": {"type": "integer", "default": 1500},
+       "topics": {"anyOf": [{"type": "array", "items": {"type": "string"}}, {"type": "null"}], "default": null},
+       "years": {"anyOf": [{"type": "array", "items": {"type": "integer"}}, {"type": "null"}], "default": null}}}},
+    {"name": "expand_context", "description": "The sentences around a card's span, ON DEMAND only — for disambiguation, a challenger check or a contradiction review.",
+     "inputSchema": {"type": "object", "additionalProperties": false, "required": ["context_handle"], "properties": {
+       "context_handle": {"type": "string"},
+       "run_id": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null},
+       "window": {"type": "integer", "default": 2}}}},
+    {"name": "verify_cards", "description": "Re-run liveness, verbatim-offset integrity, contract and date checks on cards. Used by the adversarial verifier and before promotion. Confidence only moves down.",
+     "inputSchema": {"type": "object", "additionalProperties": false, "required": ["run_id", "card_ids"], "properties": {
+       "card_ids": {"type": "array", "items": {"type": "string"}},
+       "recheck_liveness": {"type": "boolean", "default": true},
+       "run_id": {"type": "string"}}}},
+    {"name": "coverage_report", "description": "Per-facet and per-label card counts, source diversity, single-source concentration (flag > 40%), recency distribution, open conflict candidates, saturation by facet, and the ladder rungs searched.",
+     "inputSchema": {"type": "object", "additionalProperties": false, "required": ["run_id"], "properties": {
+       "run_id": {"type": "string"}}}}
+  ],
+  "searxng": [
+    {"name": "searxng_web_search", "description": "Searches the web using SearXNG and returns a list of results, each with a title, URL, and content snippet. CRITICAL: The required parameter name is exactly `query` (not `prompt`, `q`, or any other name). Use `pageno` to paginate results; combine `time_range` and `language` to narrow scope. To read the full text of a result URL, follow up with `web_url_read`.",
+     "inputSchema": {"type": "object", "required": ["query"], "properties": {
+       "categories": {"type": "string", "description": "Comma-separated SearXNG categories."},
+       "engines": {"type": "string", "description": "Comma-separated SearXNG engine names to query."},
+       "language": {"type": "string", "default": "all"},
+       "min_score": {"type": "number", "minimum": 0, "maximum": 1},
+       "num_results": {"type": "number", "minimum": 1, "maximum": 20},
+       "pageno": {"type": "integer", "minimum": 1, "default": 1},
+       "query": {"type": "string", "description": "The search query string."},
+       "response_format": {"type": "string", "enum": ["text", "json"]},
+       "result_detail": {"type": "string", "enum": ["compact", "full"]},
+       "safesearch": {"type": "string", "enum": ["0", "1", "2"]},
+       "time_range": {"type": "string", "enum": ["day", "week", "month", "year"]}}}},
+    {"name": "searxng_search_suggestions", "description": "Returns autocomplete suggestions from the configured SearXNG instance. Use this to refine vague or partial queries before searching.",
+     "inputSchema": {"type": "object", "required": ["query"], "properties": {
+       "language": {"type": "string", "default": "all"},
+       "query": {"type": "string"}}}},
+    {"name": "searxng_instance_info", "description": "Discovers capabilities from all reachable configured SearXNG instances via /config, including categories, engines, defaults, locales, and plugins.",
+     "inputSchema": {"type": "object", "required": [], "properties": {
+       "category": {"type": "string"},
+       "includeDisabled": {"type": "boolean", "default": false},
+       "includeEngines": {"type": "boolean", "default": false},
+       "refresh": {"type": "boolean", "default": false}}}},
+    {"name": "web_url_read", "description": "Fetches a URL and returns readable content as markdown. Three modes: full content (`startChar`/`maxLength` to paginate), section extraction (`section`), headings only (`readHeadings: true`). Returns an error string if the URL is unreachable or content cannot be extracted.",
+     "inputSchema": {"type": "object", "required": ["url"], "properties": {
+       "maxLength": {"type": "number", "minimum": 1},
+       "paragraphRange": {"type": "string"},
+       "readHeadings": {"type": "boolean"},
+       "section": {"type": "string"},
+       "startChar": {"type": "number", "minimum": 0},
+       "url": {"type": "string"}}}}
+  ],
+  "fetch": [
+    {"name": "fetch", "description": "Fetches a URL from the internet and optionally extracts its contents as markdown.",
+     "inputSchema": {"type": "object", "title": "Fetch", "required": ["url"], "properties": {
+       "max_length": {"type": "integer", "default": 5000, "exclusiveMinimum": 0, "exclusiveMaximum": 1000000},
+       "raw": {"type": "boolean", "default": false},
+       "start_index": {"type": "integer", "default": 0, "minimum": 0},
+       "url": {"type": "string", "format": "uri", "minLength": 1}}}}
+  ],
+  "edgar": [
+    {"name": "search_companies", "description": "Search for companies by name in SEC records. Returns matching companies with CIK and ticker information.",
+     "inputSchema": {"type": "object", "required": ["query"], "properties": {
+       "limit": {"type": "integer", "default": 10}, "query": {"type": "string"}}}},
+    {"name": "get_cik_by_ticker", "description": "Convert a stock ticker symbol to its SEC CIK (Central Index Key).",
+     "inputSchema": {"type": "object", "required": ["ticker"], "properties": {"ticker": {"type": "string"}}}},
+    {"name": "get_company_facts", "description": "XBRL company facts for a ticker or CIK.",
+     "inputSchema": {"type": "object", "required": ["identifier"], "properties": {"identifier": {"type": "string"}}}},
+    {"name": "get_recent_filings", "description": "Get recent SEC filings for a company or across all filers (identifier optional; form_type, days, limit).",
+     "inputSchema": {"type": "object", "properties": {
+       "days": {"type": "integer", "default": 30}, "form_type": {"type": "string", "default": null},
+       "identifier": {"type": "string", "default": null}, "limit": {"type": "integer", "default": 40}}}},
+    {"name": "get_filing_sections", "description": "Extract specific sections (business, risk factors, MD&A) from a 10-K or 10-Q filing.",
+     "inputSchema": {"type": "object", "required": ["identifier", "accession_number", "form_type"], "properties": {
+       "accession_number": {"type": "string"}, "form_type": {"type": "string"}, "identifier": {"type": "string"}}}},
+    {"name": "get_filing_content", "description": "Get the content of a specific SEC filing with paging support (offset, max_chars).",
+     "inputSchema": {"type": "object", "required": ["identifier", "accession_number"], "properties": {
+       "accession_number": {"type": "string"}, "identifier": {"type": "string"},
+       "max_chars": {"type": "integer", "default": 50000}, "offset": {"type": "integer", "default": 0}}}},
+    {"name": "get_financials", "description": "Financial statements for a ticker or CIK (statement_type: all|income|balance|cash).",
+     "inputSchema": {"type": "object", "required": ["identifier"], "properties": {
+       "identifier": {"type": "string"}, "statement_type": {"type": "string", "default": "all"}}}},
+    {"name": "get_xbrl_concepts", "description": "XBRL concept values from a filing (accession_number, concepts, form_type).",
+     "inputSchema": {"type": "object", "required": ["identifier"], "properties": {
+       "accession_number": {"type": "string", "default": null}, "concepts": {"type": "array", "items": {}, "default": null},
+       "form_type": {"type": "string", "default": "10-K"}, "identifier": {"type": "string"}}}}
+  ]
+}

@@ -286,7 +286,16 @@ def _holders(prefix: str) -> set:
                                           "research-evidence-collector", "technographic-scanner"}),
     ("mcp__plugin_dma-insights_parallel__", {"research-conductor", "enrichment-web-specialist",
                                              "research-evidence-collector", "technographic-scanner"}),
-    ("mcp__plugin_dma-insights_alphaxiv__", set()),
+    # alphaXiv and Parallel are also claude.ai connectors at the same URL;
+    # when the account attaches them Claude Code suppresses the plugin copy
+    # and the tools bind under the connector's name (measured 2026-10-11) —
+    # the research tier holds both spellings.
+    ("mcp__plugin_dma-insights_alphaxiv__", {"research-conductor", "enrichment-web-specialist",
+                                             "research-evidence-collector"}),
+    ("mcp__Parallel_Search__", {"research-conductor", "enrichment-web-specialist",
+                                "research-evidence-collector", "technographic-scanner"}),
+    ("mcp__alphaXiv__", {"research-conductor", "enrichment-web-specialist",
+                         "research-evidence-collector"}),
 ])
 def test_only_the_connector_tier_holds_a_connector(prefix, expected):
     """Exact holder sets, by family. Quartr is declared and not wired (every
@@ -439,3 +448,41 @@ def test_the_research_challenger_is_engine_only():
     assert "engine.cli challenge" in body and "--actor research-challenger" in body
     assert "engine.cli fetch" in body
     assert "NOT FOUND IS NOT DISPROVED" in body
+
+
+def test_a_shadowed_research_server_is_granted_under_both_names():
+    """Claude Code drops a plugin MCP server that duplicates an attached
+    claude.ai connector (\"Suppressing plugin MCP server … duplicates a
+    claude.ai connector\", measured 2026-10-11: the session bound 4 of the 6
+    open-source servers). Every holder of a plugin research tool must hold
+    its connector twin, or the agent loses the source on such an account."""
+    for conn_server, fam in prov.SHADOWED_BY_CLAUDE_AI.items():
+        plugin = {t for t in prov.EXTERNAL[fam] if t.startswith("mcp__plugin_dma-insights_")}
+        twins = {t for t in prov.EXTERNAL[fam] if t.startswith(f"mcp__{conn_server}__")}
+        assert plugin and twins, fam
+        assert {t.split("__", 2)[2] for t in plugin} == {t.split("__", 2)[2] for t in twins}, fam
+        for p in AGENT_FILES:
+            t = tools_of(p)
+            if t & plugin:
+                assert twins <= t, f"{rel(p)} holds {fam} only under the plugin name"
+
+
+def test_every_copy_of_the_shadow_table_agrees():
+    """The hooks, the relay and agent_run carry their own copy (they run
+    from a plugin install with no repo on sys.path); they must not drift."""
+    import importlib.util
+    plugin = Path(prov.__file__).resolve().parents[1] / "plugins" / "dma-insights"
+    for rel_path in ("scripts/hooks/rate_gate.py", "scripts/hooks/source_health.py"):
+        spec = importlib.util.spec_from_file_location(Path(rel_path).stem + "_pin", plugin / rel_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        assert mod.SHADOWED_BY_CLAUDE_AI == prov.SHADOWED_BY_CLAUDE_AI, rel_path
+        for conn_server, fam in prov.SHADOWED_BY_CLAUDE_AI.items():
+            for tool in prov.EXTERNAL[fam]:
+                if fam in getattr(mod, "SOURCES", ()):
+                    assert mod.source_of(tool) == fam, (rel_path, tool)
+    agent_run = (plugin / "scripts" / "agent_run.py").read_text()
+    relay = (plugin / "skills" / "dma-research" / "engine" / "relay.py").read_text()
+    for conn_server in prov.SHADOWED_BY_CLAUDE_AI:
+        assert f'"mcp__{conn_server}"' in agent_run
+        assert f'"mcp__{conn_server}"' in relay

@@ -84,6 +84,10 @@ class Settings:
     #: Wall-clock budget for the fetch phase of ONE research_brief; stragglers
     #: are cancelled and reported, never waited for (measured 2026-10-10).
     fetch_phase_budget_s: float = field(default_factory=lambda: _float("EE_FETCH_PHASE_BUDGET_S", 30.0))
+    # The search phase's twin (2026-10-11): queries still queued for a bucket
+    # token at this point are cut and reported, so a brief under sixteen-way
+    # load answers with what it found inside the caller's window.
+    search_phase_budget_s: float = field(default_factory=lambda: _float("EE_SEARCH_PHASE_BUDGET_S", 25.0))
     max_bytes: int = field(default_factory=lambda: _int("EE_MAX_BYTES", 20_000_000))
     breaker_min_s: float = field(default_factory=lambda: _float("EE_BREAKER_MIN_S", 30.0))
     breaker_max_s: float = field(default_factory=lambda: _float("EE_BREAKER_MAX_S", 600.0))

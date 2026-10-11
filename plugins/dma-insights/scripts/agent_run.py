@@ -212,6 +212,11 @@ CONNECTOR_NAMESPACES = (
     "mcp__plugin_dma-insights_edgar",
     "mcp__plugin_dma-insights_parallel",
     "mcp__plugin_dma-insights_alphaxiv",
+    # The same two under the claude.ai connector that shadows them: Claude
+    # Code suppresses a plugin server when the account attaches a connector
+    # at the same URL (measured 2026-10-11), and the tools bind here instead.
+    "mcp__Parallel_Search",
+    "mcp__alphaXiv",
 )
 
 ALLOWED = ",".join([
