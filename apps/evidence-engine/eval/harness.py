@@ -491,6 +491,13 @@ async def run_research(engine, samples: list[dict], entities: dict, *, max_cards
         rec["ambiguous_cards"] = out.get("ambiguous_cards") or []
         rec["entity_match"] = dict(collections.Counter(c["provenance"].get("entity_match") for c in full))
         rec["coverage"] = {k: (out.get("coverage") or {}).get(k) for k in ("novelty", "saturation", "ladder_searched")}
+        # discovery vs fetch: was the golden URL in the fused hit list at all?
+        from evidence_engine.fetch import url_key
+        gk = url_key(row["url"])
+        ranks = [i for i, hh in enumerate(getattr(engine, "last_hits", []) or [], 1) if hh["url_key"] == gk]
+        rec["surfaced_rank"] = ranks[0] if ranks else None
+        rec["surfaced_by"] = next((hh["sources"] for hh in (getattr(engine, "last_hits", []) or []) if hh["url_key"] == gk), [])
+        rec["hits_total"] = len(getattr(engine, "last_hits", []) or [])
         found = [(c["card_id"], _matches(c, row["url"])) for c in full]
         rec["refound_url_key"] = any(m == "url_key" for _, m in found)
         rec["refound_host"] = any(m in ("url_key", "host") for _, m in found)
@@ -743,6 +750,24 @@ def surfaced_but_unreadable(c: dict) -> str | None:
     return None
 
 
+def discovery_table(calls: list[dict]) -> dict:
+    """Search-level recall measured directly: the golden URL was in the fused
+    hit list (any rank), per split, and the fetch-side loss (surfaced but
+    not carded)."""
+    out = {}
+    for split in ("tuning", "heldout"):
+        cs = [c for c in calls if c.get("split") == split and "surfaced_rank" in c]
+        if not cs:
+            continue
+        surfaced = [c for c in cs if c["surfaced_rank"]]
+        out[split] = {"rows": len(cs), "surfaced": len(surfaced), "surfaced_pct": _pct(len(surfaced), len(cs)),
+                      "carded": sum(1 for c in cs if c.get("refound_url_key")),
+                      "surfaced_not_carded": sum(1 for c in surfaced if not c.get("refound_url_key")),
+                      "median_rank": sorted(c["surfaced_rank"] for c in surfaced)[len(surfaced) // 2] if surfaced else None,
+                      "by_source": dict(collections.Counter(s for c in surfaced for s in set(c.get("surfaced_by") or [])))}
+    return out
+
+
 def recall_table(calls: list[dict]) -> dict:
     per = {}
     for c in calls:
@@ -870,6 +895,9 @@ def write_report(res: dict, path: Path = REPORT_PATH) -> None:
     L.append(f"| Generalisation (largest tuning↔held-out gap) | {ge.get('max_gap_points')} points | ≤ 5 points | "
              f"{_verdict(ge.get('max_gap_points'), BARS['generalisation_gap_points'])} | both |")
     rp = m.get("parallel_ramp", {})
+    dis = res["metrics"].get("discovery") or {}
+    for split, d in dis.items():
+        L.append(f"| Search-level recall, measured in the hit list ({split}) | {_fmt_share(d['surfaced_pct'])} ({d['surfaced']}/{d['rows']}); surfaced but not carded {d['surfaced_not_carded']}; median rank {d['median_rank']}; by source {d['by_source']} | (diagnostic) | — | LIVE |")
     at = res["metrics"].get("answer_tokens") or {}
     if at.get("calls"):
         L.append(f"| research_brief answer size an agent reads (tokens, whole answer) | mean {at['mean']} · p95 {at['p95']} · max {at['max']} (cards {_fmt_share(at.get('cards_share'))} of it) | (informational) | — | offline |")
@@ -1202,6 +1230,7 @@ async def _main_async(a) -> dict:
         metrics["card_sizes"] = card_sizes(cards)
         metrics["answer_tokens"] = answer_tokens(calls)
         metrics["source_recall"] = recall_table(calls)
+        metrics["discovery"] = discovery_table(calls)
         metrics["generalisation"] = generalisation(metrics)
         if a.live and a.ramp and engine.parallel is not None:
             t = time.monotonic()

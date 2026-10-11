@@ -108,6 +108,8 @@ class Engine:
     filings_provider: object | None = None
     today: _dt.date | None = None
     registry_pack: list[str] = field(default_factory=list)
+    #: the last brief's fused hit list (diagnostics; not returned by any tool)
+    last_hits: list[dict] = field(default_factory=list)
 
     def __post_init__(self):
         st = settings()
@@ -250,6 +252,9 @@ class Engine:
             if src not in free and f"rerouted_from:{src}" not in fan["rerouted"]:
                 fan["rerouted"].append(f"rerouted_from:{src}")
         hits = fan["hits"]
+        # In-process diagnostics only (the eval harness reads it to tell a
+        # discovery miss from a fetch loss); never part of the tool answer.
+        self.last_hits = [{"url": h["url"], "url_key": h["url_key"], "sources": list(h.get("sources") or [])} for h in hits]
         hits_by_key = {h["url_key"]: h.get("hits", []) for h in hits}
         docs, failures = await self._documents_for_hits(hits, limit=fetch_limit, reference=ref,
                                                         hits_by_key=hits_by_key, entity=ent)
