@@ -243,6 +243,7 @@ class Engine:
             out["queries"] = queries
             out["guard_violations"] = violations
             return out
+        t_search = time.monotonic()
         fan = await S.fan_out(queries, searx=self.searx if "searxng" in free else None,
                               parallel=self.parallel if "parallel" in free else None,
                               run_id=run_id, bucket_wait=self._bucket_wait, cache=_SearchCache(self.store),
@@ -256,8 +257,10 @@ class Engine:
         # discovery miss from a fetch loss); never part of the tool answer.
         self.last_hits = [{"url": h["url"], "url_key": h["url_key"], "sources": list(h.get("sources") or [])} for h in hits]
         hits_by_key = {h["url_key"]: h.get("hits", []) for h in hits}
+        t_fetch = time.monotonic()
         docs, failures = await self._documents_for_hits(hits, limit=fetch_limit, reference=ref,
                                                         hits_by_key=hits_by_key, entity=ent)
+        t_rank = time.monotonic()
         ranked = R.rank_chunks(question, docs, top_k=max_cards * 3, facet_text=facet or "")
         order = []
         for r in ranked["ranked"]:
@@ -302,6 +305,11 @@ class Engine:
             "guard_violations": violations,
             "ambiguous_cards": [c["card_id"] for c in cards if c["provenance"].get("entity_match") == "ambiguous"],
             "elapsed_ms": int((time.monotonic() - t0) * 1000),
+            # where the time went: search (fan-out), fetch (the slice), the rest
+            # (rank, excerpt, cards, store). An agent reads this to judge a
+            # slow backend; the harness reports means per phase.
+            "timing_ms": {"search": int((t_fetch - t_search) * 1000), "fetch": int((t_rank - t_fetch) * 1000),
+                          "rank_and_cards": int((time.monotonic() - t_rank) * 1000)},
         }
         if not cards:
             out["absence"] = {"ladder_searched": block["ladder_searched"],

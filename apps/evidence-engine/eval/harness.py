@@ -391,6 +391,16 @@ def card_sizes(cards: list[dict]) -> dict:
     return out
 
 
+def phase_timing(calls: list[dict]) -> dict:
+    """Mean and p95 of each research_brief phase (ms) over the live calls."""
+    out = {}
+    for phase in ("search", "fetch", "rank_and_cards"):
+        vals = [c["timing_ms"][phase] for c in calls if isinstance(c.get("timing_ms"), dict) and phase in c["timing_ms"]]
+        if vals:
+            out[phase] = {"mean_ms": round(statistics.mean(vals)), "p95_ms": _p95(vals), "max_ms": max(vals)}
+    return out
+
+
 def answer_tokens(calls: list[dict]) -> dict:
     """Per-call size of the whole research_brief answer (heuristic tokens):
     mean, p95, max, and the share the cards take of it."""
@@ -467,6 +477,7 @@ async def run_research(engine, samples: list[dict], entities: dict, *, max_cards
             continue
         rec["elapsed_ms"] = out.get("elapsed_ms", int((time.monotonic() - t0) * 1000))
         rec["wall_ms"] = int((time.monotonic() - t0) * 1000)
+        rec["timing_ms"] = out.get("timing_ms")
         if out.get("error") or out.get("needs_spend_approval"):
             rec["error"] = out.get("error") or f"needs_spend_approval: {out.get('reason')}"
         cards = out.get("cards") or []
@@ -898,6 +909,9 @@ def write_report(res: dict, path: Path = REPORT_PATH) -> None:
     dis = res["metrics"].get("discovery") or {}
     for split, d in dis.items():
         L.append(f"| Search-level recall, measured in the hit list ({split}) | {_fmt_share(d['surfaced_pct'])} ({d['surfaced']}/{d['rows']}); surfaced but not carded {d['surfaced_not_carded']}; median rank {d['median_rank']}; by source {d['by_source']} | (diagnostic) | — | LIVE |")
+    pt = res["metrics"].get("phase_timing") or {}
+    if pt:
+        L.append("| research_brief phases (mean / p95 ms) | " + " · ".join(f"{k} {v['mean_ms']} / {v['p95_ms']}" for k, v in pt.items()) + " | (informational) | — | LIVE |")
     at = res["metrics"].get("answer_tokens") or {}
     if at.get("calls"):
         L.append(f"| research_brief answer size an agent reads (tokens, whole answer) | mean {at['mean']} · p95 {at['p95']} · max {at['max']} (cards {_fmt_share(at.get('cards_share'))} of it) | (informational) | — | offline |")
@@ -1229,6 +1243,7 @@ async def _main_async(a) -> dict:
         metrics["syndication_inflation"] = syndication_inflation(calls)
         metrics["card_sizes"] = card_sizes(cards)
         metrics["answer_tokens"] = answer_tokens(calls)
+        metrics["phase_timing"] = phase_timing(calls)
         metrics["source_recall"] = recall_table(calls)
         metrics["discovery"] = discovery_table(calls)
         metrics["generalisation"] = generalisation(metrics)
