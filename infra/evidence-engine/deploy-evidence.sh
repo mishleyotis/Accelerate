@@ -18,8 +18,48 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 
 say() { printf '\n== %s ==\n' "$*"; }
+# Cloud Build's default for `run deploy --source` is 10 minutes; the engine
+# image installs its wheels and bakes two ONNX models. 30 minutes, per build.
+export CLOUDSDK_BUILDS_TIMEOUT="${CLOUDSDK_BUILDS_TIMEOUT:-1800}"
+# IAM is eventually consistent: a service account created a second ago can
+# read "does not exist" to the policy API (measured 2026-10-11, the first
+# approved run: `projects add-iam-policy-binding` on the new dmai-evidence
+# failed INVALID_ARGUMENT one second after `service-accounts create`). So a
+# role binding is retried with backoff (5 s, 10 s, ... up to ~2.5 min in
+# all), and a freshly created identity is waited for before anything binds
+# it. Everything else runs once: a real error still stops the release.
+BIND_ATTEMPTS="${EE_BIND_ATTEMPTS:-7}"
+BIND_SLEEP_S="${EE_BIND_SLEEP_S:-5}"
+retry_bind() {
+  local n=1
+  until "$@"; do
+    if [ "$n" -ge "$BIND_ATTEMPTS" ]; then
+      echo "binding still refused after ${n} attempts: $*" >&2
+      return 1
+    fi
+    echo "  binding refused (attempt ${n}/${BIND_ATTEMPTS}); IAM may not see a new identity yet — retrying in $((n * BIND_SLEEP_S)) s" >&2
+    sleep $((n * BIND_SLEEP_S))
+    n=$((n + 1))
+  done
+}
 run() {
-  if [ "${EE_DEPLOY_APPROVED:-0}" = "1" ]; then "$@"; else printf 'PLAN: %q ' "$@"; printf '\n'; fi
+  if [ "${EE_DEPLOY_APPROVED:-0}" != "1" ]; then printf 'PLAN: %q ' "$@"; printf '\n'; return 0; fi
+  case " $* " in
+    *" add-iam-policy-binding "*) retry_bind "$@" ;;
+    *) "$@" ;;
+  esac
+}
+# A just-created identity is visible to `describe` before the policy API sees
+# it, so this is a floor, not a guarantee — retry_bind is the guarantee.
+wait_for_sa() {
+  [ "${EE_DEPLOY_APPROVED:-0}" = "1" ] || return 0
+  local i
+  for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+    gcloud iam service-accounts describe "$1" --project="$PROJECT_ID" >/dev/null 2>&1 && return 0
+    sleep "$BIND_SLEEP_S"
+  done
+  echo "service account $1 never became visible" >&2
+  return 1
 }
 EXISTING=(dmai-mcp dmai-api dmai-web dmai-worker dmai-share)
 for s in "${EXISTING[@]}"; do
@@ -32,6 +72,7 @@ for sa in dmai-evidence dmai-searxng dmai-fetch dmai-edgar; do
     echo "exists: ${sa}@${SA_DOMAIN}"
   else
     run gcloud iam service-accounts create "$sa" --project="$PROJECT_ID" --display-name="DMA Insights $sa"
+    wait_for_sa "${sa}@${SA_DOMAIN}"
   fi
   # The project-level binding needs projectIamAdmin. The CI deployer holds
   # it (infra/grants-for-admin.sh, stage 0.1), so ci_gate.sh sets
@@ -66,6 +107,25 @@ grant_secret dmai-edgar-path-token dmai-edgar
 # The plugin's identity rungs (dmai-routine, and the owner's gcloud account)
 # read the evidence token the way they read dmai-mcp's: through Secret Manager.
 grant_secret dmai-evidence-path-token dmai-routine
+# The engine mounts SearXNG's door token (SEARXNG_PATH_TOKEN) to call
+# /searx-json/<token>/search; without the grant its deploy is refused.
+grant_secret dmai-searxng-path-token dmai-evidence
+# The plugin's raw fallbacks (searxng, fetch, edgar) mint their path tokens
+# from Secret Manager under the plugin identity, exactly as the engine's.
+for t in dmai-searxng-path-token dmai-fetch-path-token dmai-edgar-path-token; do
+  grant_secret "$t" dmai-routine
+done
+# smoke.sh reads each path token to probe the right door; the identity that
+# runs the release (the CI deployer) is granted read on the four it probes.
+DEPLOYER_MEMBER="${GCP_DEPLOYER_SA:-$(gcloud config get-value account 2>/dev/null || true)}"
+if [ -n "$DEPLOYER_MEMBER" ]; then
+  for t in dmai-evidence-path-token dmai-searxng-path-token dmai-fetch-path-token dmai-edgar-path-token; do
+    run gcloud secrets add-iam-policy-binding "$t" --project="$PROJECT_ID" \
+      --member="serviceAccount:${DEPLOYER_MEMBER}" --role=roles/secretmanager.secretAccessor --quiet
+  done
+else
+  echo "warning: no deployer identity known; smoke.sh may not read the path tokens" >&2
+fi
 
 say "2 · buckets (new; engine text + cache, uniform access)"
 for suffix in dmai-evidence-text dmai-evidence-cache; do

@@ -901,10 +901,57 @@ jobs:
       - name: infra/deploy.sh
         if: steps.cfg.outputs.ready == 'true'
         run: bash infra/deploy.sh
-      # The evidence engine rides the same release, gated: nothing is created
-      # until infra/evidence-engine/APPROVAL.json clears the owner's recall
-      # threshold (approval_check.py); until then the step says so and passes.
-      # A failure HERE never un-ships web/api/mcp (they deployed above).
+
+  # The evidence engine rides the same release, gated: nothing is created
+  # until infra/evidence-engine/APPROVAL.json clears the owner's bar
+  # (approval_check.py); until then the job says so and passes. Its OWN job
+  # with its own clock (measured 2026-10-11: deploy.sh takes ~25 of the 45
+  # minutes Gate L allows a job, and four Cloud Build source deploys do not
+  # fit in the rest). It runs only after web/api/mcp shipped, and a failure
+  # here never un-ships them.
+  deploy-evidence:
+    name: Deploy evidence engine (default branch, approved only)
+    if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    # Its own group: a second job in `production-deploy` would let a newer
+    # run's pending release cancel this one while it waits.
+    concurrency:
+      group: production-deploy-evidence
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Deploy credentials configured?
+        id: cfg
+        env:
+          WIF: ${{ vars.GCP_WIF_PROVIDER }}
+          SA: ${{ vars.GCP_DEPLOYER_SA }}
+        run: |
+          if [ -n "$WIF" ] && [ -n "$SA" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Evidence deploy skipped::GCP_WIF_PROVIDER / GCP_DEPLOYER_SA are not set."
+          fi
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.ready == 'true'
+      - uses: google-github-actions/auth@v2
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+        if: steps.cfg.outputs.ready == 'true'
+      - uses: actions/setup-python@v5
+        if: steps.cfg.outputs.ready == 'true'
+        with:
+          python-version: '3.12'
       - name: infra/evidence-engine/ci_gate.sh (approved releases only)
         if: steps.cfg.outputs.ready == 'true'
+        env:
+          GCP_DEPLOYER_SA: ${{ vars.GCP_DEPLOYER_SA }}
         run: bash infra/evidence-engine/ci_gate.sh

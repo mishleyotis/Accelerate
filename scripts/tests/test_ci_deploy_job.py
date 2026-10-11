@@ -22,8 +22,25 @@ def _wf():
 
 def test_deploy_waits_for_every_other_job():
     jobs = _wf()["jobs"]
-    others = set(jobs) - {"deploy"}
+    others = set(jobs) - {"deploy", "deploy-evidence"}
     assert set(jobs["deploy"]["needs"]) == others
+
+
+def test_the_evidence_deploy_is_its_own_job_after_the_release():
+    """2026-10-11: deploy.sh used ~25 of the job's 45 minutes; the four source
+    builds need a clock of their own. The job waits for the release, runs
+    from the default branch only, is never cancelled part-way, and does not
+    share the release's concurrency group (a newer run's pending release
+    would cancel it while it waits)."""
+    jobs = _wf()["jobs"]
+    ev = jobs["deploy-evidence"]
+    assert ev["needs"] == ["deploy"]
+    assert ev["if"] == jobs["deploy"]["if"]
+    assert ev["concurrency"]["cancel-in-progress"] is False
+    assert ev["concurrency"]["group"] != jobs["deploy"]["concurrency"]["group"]
+    assert ev["permissions"]["id-token"] == "write"
+    auth = [s for s in ev["steps"] if str(s.get("uses", "")).startswith("google-github-actions/auth")]
+    assert len(auth) == 1 and set(auth[0]["with"]) == {"workload_identity_provider", "service_account"}
 
 
 def test_deploy_runs_only_on_a_push_to_the_default_branch():
@@ -57,12 +74,12 @@ def test_deploy_runs_the_release_script():
 
 def test_deploy_runs_the_evidence_gate_after_the_release_script():
     """The evidence engine rides the same merge-to-default release, behind
-    its approval file; the gate step follows deploy.sh and runs under the
-    same credential check."""
-    steps = _wf()["jobs"]["deploy"]["steps"]
-    runs = [s.get("run", "").strip() for s in steps]
-    assert "bash infra/evidence-engine/ci_gate.sh" in runs
-    assert runs.index("bash infra/evidence-engine/ci_gate.sh") > runs.index("bash infra/deploy.sh")
+    its approval file, in the job that runs after the release; the gate step
+    runs under the same credential check."""
+    jobs = _wf()["jobs"]
+    release = [s.get("run", "").strip() for s in jobs["deploy"]["steps"]]
+    assert "bash infra/evidence-engine/ci_gate.sh" not in release
+    steps = jobs["deploy-evidence"]["steps"]
     gate = next(s for s in steps if s.get("run", "").strip() == "bash infra/evidence-engine/ci_gate.sh")
     assert gate.get("if") == "steps.cfg.outputs.ready == 'true'"
 
@@ -131,3 +148,50 @@ def test_the_committed_approval_is_the_owners_and_clears_the_gate_it_names():
     assert (ROOT / d["results"]).exists()
     if d["metric"] == "question_coverage":
         assert "owner_words" in d and "recall_url_tuning" in d, "the deviation from the 90 % wording is recorded"
+
+
+def test_a_new_identity_is_bound_after_iam_sees_it(tmp_path):
+    """2026-10-11, the first approved run: `service-accounts create` succeeded
+    and the role binding one second later read "does not exist" (IAM is
+    eventually consistent), so the release stopped at step 0. A binding is
+    retried with backoff; anything else still runs once and stops the
+    release on a real error. Driven through a fake gcloud on PATH."""
+    import os
+    import subprocess
+    bin_dir = tmp_path / "bin"; bin_dir.mkdir()
+    state = tmp_path / "state"; state.mkdir()
+    fake = bin_dir / "gcloud"
+    fake.write_text(r'''#!/usr/bin/env bash
+echo "$*" >> "$STATE/calls"
+case "$*" in
+  *"service-accounts describe"*)
+    [ -f "$STATE/created" ] && exit 0 || exit 1 ;;
+  *"service-accounts create"*)
+    touch "$STATE/created"; exit 0 ;;
+  *"projects add-iam-policy-binding"*)
+    n=$(cat "$STATE/bind" 2>/dev/null || echo 0); n=$((n+1)); echo $n > "$STATE/bind"
+    [ "$n" -ge 3 ] && exit 0
+    echo "INVALID_ARGUMENT: Service account does not exist." >&2; exit 1 ;;
+  *"secrets describe"*) exit 0 ;;
+  *) exit 0 ;;
+esac
+''')
+    fake.chmod(0o755)
+    script = ROOT / "infra" / "evidence-engine" / "deploy-evidence.sh"
+    env = dict(os.environ, PATH=f"{bin_dir}:{os.environ['PATH']}", STATE=str(state),
+               EE_DEPLOY_APPROVED="1", EE_GRANT_PROJECT_ROLES="1",
+               EE_BIND_SLEEP_S="0", EE_BIND_ATTEMPTS="4", EE_STATIC_EGRESS="0")
+    # stop after the identities: the fake answers the rest, but only step 0 matters here
+    src = script.read_text().split('say "1 · secrets')[0]
+    cut = tmp_path / "step0.sh"; cut.write_text(src)
+    r = subprocess.run(["bash", str(cut)], env=env, capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stderr
+    assert "retrying" in r.stderr, "the refused binding was retried, not fatal"
+    calls = (state / "calls").read_text()
+    assert calls.count("service-accounts create") == 1
+    # a binding that never succeeds still stops the release
+    (state / "bind").write_text("-100")
+    for f in ("created", "calls"):
+        (state / f).unlink()
+    r = subprocess.run(["bash", str(cut)], env=env, capture_output=True, text=True, timeout=60)
+    assert r.returncode != 0 and "still refused after 4 attempts" in r.stderr

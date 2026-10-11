@@ -36,6 +36,13 @@ class Settings:
     #: SearXNG base URL (its JSON API: GET /search?format=json). Empty
     #: disables the source and the engine says so in `via` / `sources_down`.
     searxng_url: str = field(default_factory=lambda: _env("SEARXNG_URL", ""))
+    #: SearXNG's door capability (`/searx-json/<token>/search`); deploy-evidence.sh
+    #: mounts it from Secret Manager. Empty = a local SearXNG at the bare URL.
+    searxng_path_token: str = field(default_factory=lambda: _env("SEARXNG_PATH_TOKEN", ""))
+    #: Send a Cloud Run ID token to SearXNG (the backend is private). On by
+    #: default on Cloud Run (K_SERVICE is set there), off everywhere else.
+    searxng_id_token: bool = field(default_factory=lambda: _env(
+        "EE_SEARXNG_ID_TOKEN", "1" if _env("K_SERVICE", "") else "0") == "1")
     #: Parallel Search MCP endpoint (free, anonymous, rate-limited).
     parallel_mcp_url: str = field(
         default_factory=lambda: _env("PARALLEL_MCP_URL", "https://search.parallel.ai/mcp"))
