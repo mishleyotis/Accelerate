@@ -27,30 +27,38 @@ need, exact, with the run and root filled in. Do not run `--help`, `orient`,
 the shape the price model priced (`engine/cost.py RESEARCH_TIERS["collector"]`),
 and a turn you did not need to spend is the saving.
 
-## The shape — three kinds of turn, nothing else
+## The shape — four kinds of turn, nothing else
 
 1. **One turn to open.** `engine.cli checkpoint` for your category (the
    search-op ceiling is per category per conversation) AND `cat` every card
    file of your batch (`<root>/briefs/research_cards/<CAT>/<CAP>.json`, written
    by the driver at handoff) in the SAME Bash call. The card names each open
    cell, the facets it owes and the diagnostic question per facet.
-2. **Per capability, one turn of searches — ONE batched `research_brief`.**
-   Every open cell's primary question and the five owed facets go into one
-   `questions[]` as objects `{question, subcap_ids, facet}`; the engine runs
-   the searches, fetches and verifies, and hands back cards grouped by cell
+2. **One turn of searches for the WHOLE batch — every capability's batched
+   `research_brief`, all in ONE message.** One call per capability; each
+   carries every open cell's primary question and the five owed facets as
+   `questions[]` objects `{question, subcap_ids, facet}`. The engine runs the
+   searches, fetches and verifies, and hands back cards grouped by cell
    (`item.linked_subcap_ids`) with `by_question[]` naming what nothing
-   answered. In the same message, only for those: the raw layer (SearXNG,
-   Parallel search, EDGAR for a filing). Exa/Tavily when you hold them and the
-   run is not degraded. WebSearch is the last rung, for an engine that
-   answered an error — the search-order hook refuses it before a brief.
-3. **Per capability, one turn of writes.** ONE Bash call that (a) `engine.cli
+   answered. Firing them together puts all of them in the research layer's
+   queue at once (the proxy admits them as the search sources free up — a
+   brief may wait minutes; that wait costs you nothing); firing them one
+   capability at a time put your second and third at the back of a queue
+   sixteen categories share (owner stress test, 2026-10-11).
+3. **At most one turn of fallbacks.** Only for the `by_question` rows left
+   unanswered or answered an error, across all your capabilities, in ONE
+   message: the raw layer (SearXNG, Parallel search, EDGAR for a filing).
+   Exa/Tavily when you hold them and the run is not degraded. WebSearch is the
+   last rung, for an engine that answered an error — the search-order hook
+   refuses it before a brief.
+4. **Per capability, one turn of writes.** ONE Bash call that (a) `engine.cli
    fetch --url <U> --query '<question>' --via-text <file>` caches the page
    text you will quote (one page per cell at most), (b) writes the ops file —
    search logs, then evidence lines, then attach lines, one command per line —
    and (c) runs `engine.cli batch --file <ops>`. Read the batch result; fix
    only the refused lines and re-batch those.
 
-Finish a capability before starting the next. Never sleep, poll, background
+Write one capability before starting the next. Never sleep, poll, background
 a command, or re-run the gate. Foreground, `timeout 600000`.
 
 ## The evidence row — what the gold workbook requires of you

@@ -118,14 +118,15 @@ def main(argv=None) -> int:
     url_of = lambda: endpoint(base)                   # noqa: E731
     # One proxy process serves EVERY agent in the session, so a tool call
     # handled inline made each collector wait behind the others' briefs (a
-    # brief runs minutes). Calls run on workers, bounded by CALL_WORKERS;
-    # the handshake, listings and notifications stay in order on this thread.
+    # brief runs minutes). Each call runs on its own worker; heavy calls pass
+    # the admission gate (`admitted`); the handshake, listings and
+    # notifications stay in order on this thread.
     mcp_proxy.TIMEOUT_S = CALL_TIMEOUT_S
-    slots = threading.BoundedSemaphore(CALL_WORKERS)
+    slots = threading.BoundedSemaphore(MAX_PENDING_CALLS)
 
     def run(msg: dict) -> None:
         try:
-            for reply in serve(url_of, msg):
+            for reply in admitted(url_of, msg):
                 _write(reply)
         finally:
             slots.release()
@@ -177,8 +178,32 @@ BACKOFF_S = (5.0, 10.0, 20.0, 40.0, 60.0)
 #: environment's 60 s MCP_TOOL_TIMEOUT, finished server-side, and their cards
 #: never reached the caller). `.mcp.json` gives these servers a per-server
 #: `timeout` above this, so the client waits for the answer.
-CALL_TIMEOUT_S = float(os.environ.get("DMA_RESEARCH_CALL_TIMEOUT_S") or 540)
-CALL_WORKERS = int(os.environ.get("DMA_RESEARCH_CALL_WORKERS") or 8)
+CALL_TIMEOUT_S = float(os.environ.get("DMA_RESEARCH_CALL_TIMEOUT_S") or 270)
+
+# ── ADMISSION: THE QUEUE LIVES HERE, NOT IN CLOUD RUN (2026-10-11) ────────
+#
+# The stress test is 686 cells across sixteen categories at once: ~136
+# capability briefs of up to 48 queries each against two search sources
+# (SearXNG 4/s, Parallel 1.4 calls/s, per engine instance). The work is
+# bounded by the sources, not by how many briefs are open — firing all 136
+# at the engine only makes each one slower, past Cloud Run's 300 s request
+# timeout, and past the instances' concurrency (8): a 429 that the collector
+# read as an outage and fell to raw SearXNG for (P3C4, live). So every heavy
+# call passes this gate: at most ADMIT_HEAVY in flight (12 keeps both engine
+# instances busy — Cloud Run fills one instance to its concurrency before it
+# starts the second — and each brief inside ~100 s), the rest wait HERE,
+# first come first served, where no server clock runs. `.mcp.json` gives the
+# evidence server a 30-minute per-server timeout so a queued call is waited
+# for, not abandoned. Light calls (coverage, verify, expand) never queue
+# behind heavy ones.
+HEAVY_TOOLS = frozenset({"research_brief", "crawl_entity", "filings_evidence"})
+ADMIT_HEAVY = int(os.environ.get("DMA_RESEARCH_ADMIT") or 12)
+MAX_PENDING_CALLS = int(os.environ.get("DMA_RESEARCH_MAX_PENDING") or 256)
+#: A 429 or 503 is Cloud Run saying "no instance free yet" (all at their
+#: concurrency, or the second still cold) — the request never reached the
+#: engine, so it is safe to send again. Waits between attempts, seconds.
+CAPACITY_RETRY_S = (2.0, 4.0, 8.0, 15.0, 30.0, 30.0)
+HEARTBEAT_S = 15.0
 SNAPSHOT = HERE.parent / "references" / "research_layer_tools.json"
 
 #: Set when the service refused or could not be reached at `initialize`.
@@ -345,6 +370,69 @@ def _local_handshake(msg: dict, why: str) -> list:
                         f"tools are listed and a call waits for it to come up; run "
                         f"/dma-insights:doctor if it stays down. The connector and the other "
                         f"services are unaffected."}}]
+
+
+_admit = threading.Semaphore(ADMIT_HEAVY)
+_admit_lock = threading.Lock()
+_queue_state = {"waiting": 0, "running": 0}
+
+
+def _progress(msg: dict, note: str, n: int) -> None:
+    """notifications/progress for a call that carries a progressToken: the
+    client's idle clock is reset while the call waits its turn."""
+    token = ((msg.get("params") or {}).get("_meta") or {}).get("progressToken")
+    emit = _live.get("emit")
+    if token is None or not emit:
+        return
+    emit({"jsonrpc": "2.0", "method": "notifications/progress",
+          "params": {"progressToken": token, "progress": n, "message": note}})
+
+
+def _heartbeat(msg: dict, what: str, stop: threading.Event) -> None:
+    n = 0
+    while not stop.wait(HEARTBEAT_S):
+        n += 1
+        _progress(msg, what(), n)
+
+
+def _capacity_refused(replies: list, msg: dict) -> bool:
+    why = _is_error(replies, msg) or ""
+    return "HTTP 429" in why or "HTTP 503" in why
+
+
+def admitted(url, msg: dict) -> list:
+    """serve(), behind the heavy-call gate and the capacity retry."""
+    name = (msg.get("params") or {}).get("name") or ""
+    heavy = msg.get("method") == "tools/call" and name in HEAVY_TOOLS
+    stop = threading.Event()
+    with _admit_lock:
+        _queue_state["waiting"] += heavy
+
+    def status() -> str:
+        return (f"{name}: queued behind {_queue_state['running']} running heavy call(s), "
+                f"{_queue_state['waiting']} waiting" if waiting[0] else f"{name}: running")
+    waiting = [heavy]
+    threading.Thread(target=_heartbeat, args=(msg, status, stop), daemon=True).start()
+    try:
+        if heavy:
+            _admit.acquire()
+            with _admit_lock:
+                _queue_state["waiting"] -= 1
+                _queue_state["running"] += 1
+            waiting[0] = False
+        replies = serve(url, msg)
+        for wait in CAPACITY_RETRY_S:
+            if msg.get("method") != "tools/call" or not _capacity_refused(replies, msg):
+                break
+            time.sleep(wait)
+            replies = serve(url, msg)
+        return replies
+    finally:
+        stop.set()
+        if heavy:
+            with _admit_lock:
+                _queue_state["running"] -= 1
+            _admit.release()
 
 
 def serve(url, msg: dict) -> list:

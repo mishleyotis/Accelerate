@@ -27,21 +27,37 @@ hitting it at once."
   cache, else `references/research_layer_tools.json`), recovers in the
   background and sends `notifications/tools/list_changed`; a call made while
   warming waits for the service. Proved end to end against a 25 s cold stub.
-- **Long briefs reach their caller.** The cloud environment sets
-  `MCP_TOOL_TIMEOUT=60000`; a batched `research_brief` runs longer, finished
-  server-side, and its cards were lost (IMA P1C1 probe: 31 cards stored, 0
-  returned). `.mcp.json` gives evidence a per-server `timeout` of 600 s and
-  the raw fallbacks 180 s.
-- **Sixteen workflows no longer queue on one pipe.** Every agent shares one
-  proxy process, which handled one message at a time; tool calls now run on
-  workers (`DMA_RESEARCH_CALL_WORKERS`, 8). The availability marker follows
-  each call's transport outcome, so `search_order.py` lifts brief-first when
-  the engine dies mid-session and restores it when it returns.
-- **The engine answers inside the window under load.** `research_brief`'s
-  search phase has a budget (`EE_SEARCH_PHASE_BUDGET_S`, 25 s) beside the
-  fetch phase's: queries still queued for a source token are cut and counted
-  (`search.budget_cut`), started calls finish into the cache and are never
-  cancelled (coalesced joiners from other briefs ride on them).
+- **Searches run at the sources' rate, not 1/s.** The engine's fan-out
+  waited on the per-WEBSITE politeness bucket (1/s, burst 1) keyed by the
+  source name, and the configured source buckets (SearXNG 4/s, Parallel
+  1.4/s) were never acquired. Load harness (`apps/evidence-engine/eval/load.py`,
+  the 686-cell IMA volley through the real Engine, simulated sources): the
+  old wiring dropped 2,744 of its queries at the budget and ran 48 Parallel
+  calls; the fixed wiring dropped 11 and ran 1,036, answering all 346 of an
+  instance's questions in 14.4 min (5x scale; 11–15 min projected for the
+  whole run on two instances), 0 errors.
+- **Sixteen workflows share one queue, in the proxy.** Every agent in a
+  session shares one proxy process, which handled one message at a time.
+  Calls now run concurrently; heavy calls (`research_brief`, `crawl_entity`,
+  `filings_evidence`) pass an admission gate (`DMA_RESEARCH_ADMIT`, 12 —
+  both engine instances busy, each brief inside Cloud Run's 300 s) and the
+  rest wait locally where no server clock runs; light calls never wait
+  behind them. A Cloud Run 429/503 (instances full or cold) is retried, not
+  handed to the collector as an outage; a waiting call sends progress when
+  the client gave a token. `.mcp.json` gives evidence a 30-minute per-server
+  `timeout` (it overrides the environment's `MCP_TOOL_TIMEOUT=60000`, which
+  had cut briefs that then finished server-side: IMA P1C1 probe, 31 cards
+  stored, 0 returned) and the raw fallbacks 180 s. The availability marker
+  follows each call's transport outcome, so `search_order.py` lifts
+  brief-first when the engine dies mid-session and restores it after.
+- **The engine bounds its own search phase.** `EE_SEARCH_PHASE_BUDGET_S`
+  (120 s, a guard inside Cloud Run's 300 s): queries still queued for a
+  source token are cut and counted (`search.budget_cut`); started calls are
+  never cancelled (coalesced joiners from other briefs ride on them).
+- **Collectors queue every brief at once.** One message fires every
+  capability's `research_brief` of the batch; one optional message of
+  fallbacks; then one write turn per capability (was: search, write, search,
+  write — each later brief joined the back of a sixteen-category queue).
 - **A small category gets at least one full wave.** Shares were split by
   cells alone, so a two-cell category got $0.38 against a $1.84 floor (one
   batch + orchestrator + challenge) and closed AT_STAGE_BUDGET with money

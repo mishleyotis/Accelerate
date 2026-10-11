@@ -311,3 +311,88 @@ def test_the_marker_follows_a_reinitialize_between_call_failures(proxy, monkeypa
     assert json.loads(marker.read_text())["available"] is True
     evidence_proxy.serve("u", call)
     assert json.loads(marker.read_text())["available"] is False
+
+
+def test_heavy_calls_pass_the_admission_gate_and_light_calls_do_not_queue(proxy, monkeypatch):
+    """686 cells fire ~136 briefs at once. The proxy lets ADMIT through and
+    queues the rest locally (no Cloud Run clock runs here); every queued call
+    still completes, and a coverage read is never stuck behind them."""
+    import threading as th
+    monkeypatch.setattr(evidence_proxy, "_admit", th.Semaphore(2))
+    live = {"now": 0, "peak": 0}
+    lock = th.Lock()
+
+    def fwd(url, msg):
+        if msg.get("id") is None:
+            return []
+        if (msg.get("params") or {}).get("name") == "research_brief":
+            with lock:
+                live["now"] += 1
+                live["peak"] = max(live["peak"], live["now"])
+            time.sleep(0.2)
+            with lock:
+                live["now"] -= 1
+        return [{"jsonrpc": "2.0", "id": msg["id"], "result": {"ok": (msg.get("params") or {}).get("name")}}]
+    monkeypatch.setattr(mcp_proxy, "forward", fwd)
+    evidence_proxy.serve("u", INIT)
+    results = {}
+
+    def call(i, name):
+        results[i] = evidence_proxy.admitted("u", {"jsonrpc": "2.0", "id": i, "method": "tools/call",
+                                                  "params": {"name": name, "arguments": {}}})
+    threads = [th.Thread(target=call, args=(i, "research_brief")) for i in range(10, 16)]
+    for t in threads:
+        t.start()
+    time.sleep(0.05)
+    t0 = time.monotonic()
+    call(99, "coverage_report")
+    assert time.monotonic() - t0 < 0.15, "a light call waited behind the heavy queue"
+    for t in threads:
+        t.join(5)
+    assert live["peak"] == 2
+    assert all(results[i][0]["result"]["ok"] == "research_brief" for i in range(10, 16))
+    assert evidence_proxy._queue_state == {"waiting": 0, "running": 0}
+
+
+def test_a_capacity_refusal_is_retried_not_handed_to_the_collector(proxy, monkeypatch):
+    """Cloud Run answers 429 when every instance is at its concurrency and
+    503 while the second is cold. The request never reached the engine; the
+    collector must get the brief, not an outage to fall back on."""
+    monkeypatch.setattr(evidence_proxy, "CAPACITY_RETRY_S", (0.01, 0.01, 0.01))
+    seen = {"n": 0}
+
+    def fwd(url, msg):
+        if msg.get("id") is None:
+            return []
+        if msg.get("method") == "tools/call":
+            seen["n"] += 1
+            if seen["n"] <= 2:
+                code = "429: Too Many Requests" if seen["n"] == 1 else "503: Service Unavailable"
+                return [{"jsonrpc": "2.0", "id": msg["id"], "error": {"code": -32000, "message": f"connector HTTP {code}"}}]
+        return [{"jsonrpc": "2.0", "id": msg["id"], "result": {"cards": 3}}]
+    monkeypatch.setattr(mcp_proxy, "forward", fwd)
+    evidence_proxy.serve("u", INIT)
+    out = evidence_proxy.admitted("u", {"jsonrpc": "2.0", "id": 7, "method": "tools/call",
+                                        "params": {"name": "research_brief", "arguments": {}}})
+    assert out[0]["result"] == {"cards": 3} and seen["n"] == 3
+
+
+def test_a_waiting_call_sends_progress_when_the_client_asked_for_it(proxy, monkeypatch):
+    monkeypatch.setattr(evidence_proxy, "HEARTBEAT_S", 0.05)
+
+    def fwd(url, msg):
+        if msg.get("id") is None:
+            return []
+        if msg.get("method") == "tools/call":
+            time.sleep(0.3)
+        return [{"jsonrpc": "2.0", "id": msg["id"], "result": {}}]
+    monkeypatch.setattr(mcp_proxy, "forward", fwd)
+    evidence_proxy.serve("u", INIT)
+    evidence_proxy.admitted("u", {"jsonrpc": "2.0", "id": 8, "method": "tools/call",
+                                  "params": {"name": "research_brief", "arguments": {},
+                                             "_meta": {"progressToken": "tok-1"}}})
+    beats = [m for m in proxy if m.get("method") == "notifications/progress"]
+    assert len(beats) >= 3 and all(b["params"]["progressToken"] == "tok-1" for b in beats)
+    evidence_proxy.admitted("u", {"jsonrpc": "2.0", "id": 9, "method": "tools/call",
+                                  "params": {"name": "research_brief", "arguments": {}}})
+    assert len([m for m in proxy if m.get("method") == "notifications/progress"]) == len(beats)

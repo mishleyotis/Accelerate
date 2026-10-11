@@ -338,12 +338,19 @@ last-known tool list (`/root/.dma/research_layer/<service>.tools.json`, else
 at session start or after a container restart; `/dma-insights:doctor` reports
 a service that stays down.
 
-**Long calls.** The cloud environment sets `MCP_TOOL_TIMEOUT=60000`. The
-per-server `timeout` in `.mcp.json` (evidence 600 s, raw fallbacks 180 s)
-overrides it, the proxy runs calls concurrently (every agent in a session
-shares one proxy process), and the engine bounds its own search phase
-(`EE_SEARCH_PHASE_BUDGET_S`) so a brief under sixteen-way load returns
-partial cards with `search.budget_cut` instead of nothing.
+**A whole run at once.** 686 cells is ~136 capability briefs of up to 48
+queries each; the search sources (SearXNG 4/s, Parallel 1.4 calls/s per
+engine instance, two instances) bound the run's search at 11–15 minutes
+(load harness, 2026-10-11: half the run per instance in 14.4 min at 5x
+scale with harness CPU still inflating it, every question answered, 0
+errors) however many briefs are open. So the queue lives in the proxy: every
+agent in a session shares one proxy process, heavy calls pass an admission
+gate (`DMA_RESEARCH_ADMIT`, 12), the rest wait locally with no server clock
+running, a Cloud Run 429/503 is retried, and the evidence server's per-server
+`timeout` (30 min, overriding the environment's `MCP_TOOL_TIMEOUT=60000`)
+lets a queued call be waited for. The engine bounds its own search phase
+(`EE_SEARCH_PHASE_BUDGET_S`, 120 s) inside Cloud Run's 300 s. Measure with
+`apps/evidence-engine/eval/load.py`.
 
 ## Dispatch mode and where the connectors actually live
 
