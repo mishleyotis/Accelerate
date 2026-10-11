@@ -36,15 +36,22 @@ _NAMES_PATH = Path(__file__).resolve().parent.parent / "registry" / "platform_na
 
 MAX_QUERIES = 12
 
-#: Committed facet operators. Search-engine OR syntax (SearXNG passes it to
-#: the engines; Parallel reads it as prose).
-FACET_OPERATORS = {
-    "works": "launched OR offers OR deployed OR implemented",
-    "fails": "complaint OR outage OR lawsuit OR enforcement OR fine",
-    "value": "results OR growth OR percent OR members OR customers",
-    "contradicts": "discontinued OR delay OR not OR without",
-    "corroborates": "announced OR report OR filing",
+#: One lens word per facet. Measured 2026-10-11 on golden v1 (15 misses):
+#: the former OR-chains ("launched OR offers OR deployed OR implemented")
+#: surfaced 1 of 15 on SearXNG and 0 on Parallel; the same questions as
+#: concise keyword queries surfaced 7 and 2. Parallel's own schema asks for
+#: "concise keyword search queries, 3-6 words each"; SearXNG hands a query
+#: to Google CSE / Bing, which read OR-chains as noise. Operators are gone;
+#: a facet contributes ONE word.
+FACET_LENS = {
+    "works": "launches",
+    "fails": "complaint",
+    "value": "results",
+    "contradicts": "discontinued",
+    "corroborates": "announcement",
 }
+#: Kept for callers that still read the old name (the lens, not a chain).
+FACET_OPERATORS = FACET_LENS
 
 _STOP = frozenset(
     "a an and are as at be by for from has have how in is it its of on or that "
@@ -85,13 +92,20 @@ def _quote(s: str) -> str:
 def expand(question: str, entity: EntityRef, facet: str | None = None,
            sub_vertical: str | None = None, domains_pack: list[str] | None = None,
            ) -> list[dict]:
-    """-> [{query_id, text, facet, kind}] — kind ∈ facet | site_own | site_pack."""
+    """-> [{query_id, text, facet, kind}] — kind ∈ facet | alias | tail | site_own | site_pack.
+
+    Every query is concise: the entity (quoted legal name, or its short
+    alias) plus 2–5 focus words and at most one lens word. Variants differ
+    in WHICH words they carry (head of the focus, tail of the focus, the
+    alias), not in operators — that is what moved recall (see FACET_LENS)."""
     if facet is not None and facet not in FACETS:
         raise ValueError(f"facet {facet!r} not in {FACETS}")
     facets = [facet] if facet else list(FACETS)
     name = _quote(entity.legal_name)
-    focus = question_focus(question, entity)
-    sv = _quote(sub_vertical) if sub_vertical else ""
+    focus_terms = question_focus(question, entity).split()
+    head = " ".join(focus_terms[:4])
+    tail = " ".join(focus_terms[4:8])
+    mid = " ".join(focus_terms[2:7])
     out: list[dict] = []
 
     def add(text: str, f: str, kind: str):
@@ -101,14 +115,29 @@ def expand(question: str, entity: EntityRef, facet: str | None = None,
                         "facet": f, "kind": kind})
 
     for f in facets:
-        add(" ".join(x for x in (name, focus, FACET_OPERATORS[f]) if x), f, "facet")
+        add(" ".join(x for x in (name, head, FACET_LENS[f]) if x), f, "facet")
     own_facet = facet or "works"
+    alias = short_alias(entity)
+    if alias:
+        add(" ".join(x for x in (alias, head or mid) if x), own_facet, "alias")
+        if mid and mid != head:
+            add(" ".join(x for x in (alias, mid) if x), own_facet, "alias")
+    if tail:
+        add(" ".join(x for x in (name, tail) if x), own_facet, "tail")
     for d in sorted({_bare(d) for d in (entity.domains or ()) if _bare(d)}):
-        add(" ".join(x for x in (f"site:{d}", focus) if x), own_facet, "site_own")
+        add(" ".join(x for x in (f"site:{d}", head) if x), own_facet, "site_own")
     pack_facet = facet or "corroborates"
     for d in [_bare(d) for d in (domains_pack or ()) if _bare(d)]:
-        add(" ".join(x for x in (f"site:{d}", name, focus, sv) if x), pack_facet, "site_pack")
+        add(" ".join(x for x in (f"site:{d}", alias or name, " ".join(focus_terms[:2])) if x), pack_facet, "site_pack")
     return out
+
+
+def short_alias(entity: EntityRef) -> str:
+    """The shortest alias of 2–12 characters (the initialism or short form
+    trade press and app stores use for the entity), or ''."""
+    cands = [a.strip() for a in (entity.aliases or ()) if 2 <= len(a.strip()) <= 12]
+    cands = [a for a in cands if a.lower() != (entity.legal_name or "").lower()]
+    return min(cands, key=len) if cands else ""
 
 
 def _bare(d) -> str:

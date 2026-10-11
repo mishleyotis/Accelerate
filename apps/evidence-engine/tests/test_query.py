@@ -18,15 +18,20 @@ PACK = ["ncua.gov", "cutimes.com", "americanbanker.com", "creditunions.com",
 
 def test_five_facets_with_ids_and_quoted_name():
     qs = query.expand(QUESTION, ENTITY, None, None, None)
-    facet_qs, own = qs[:5], qs[5:]
+    facet_qs = qs[:5]
     assert [q["facet"] for q in facet_qs] == list(FACETS)
-    assert [q["query_id"] for q in qs] == [f"Q-{i:02d}" for i in range(1, 8)]
+    assert [q["query_id"] for q in qs] == [f"Q-{i:02d}" for i in range(1, len(qs) + 1)]
     for q in facet_qs:
         assert q["text"].startswith('"Example Federal Credit Union"')
         assert q["kind"] == "facet"
         assert "onboarding" in q["text"] and "extent" not in q["text"]
-    assert "launched" in facet_qs[0]["text"] and "complaint" in facet_qs[1]["text"]
-    assert [q["kind"] for q in own] == ["site_own", "site_own"]      # own domains, no pack
+        assert " OR " not in q["text"], "operators are gone: one lens word per facet"
+        assert len(q["text"].replace('"Example Federal Credit Union"', "").split()) <= 6
+    assert facet_qs[0]["text"].endswith(" launches") and facet_qs[1]["text"].endswith(" complaint")
+    own = [q for q in qs if q["kind"] == "site_own"]
+    assert len(own) == 2 and not [q for q in qs if q["kind"] == "site_pack"]   # own domains, no pack
+    alias = [q for q in qs if q["kind"] == "alias"]
+    assert alias and alias[0]["text"].startswith("Example FCU ")
 
 
 def test_site_variants_and_cap():
@@ -37,14 +42,15 @@ def test_site_variants_and_cap():
     assert [q["text"].split()[0] for q in own] == ["site:example-fcu.test", "site:online.example-fcu.test"]
     pack = [q for q in qs if q["kind"] == "site_pack"]
     assert pack and pack[0]["text"].startswith("site:ncua.gov")
-    assert '"credit union"' in pack[0]["text"]
+    assert "Example FCU" in pack[0]["text"], "a pack probe names the entity by its short alias"
     assert all(q["facet"] in FACETS for q in qs)
 
 
 def test_single_facet_only():
     qs = query.expand(QUESTION, ENTITY, "fails", None, ["ncua.gov"])
     assert {q["facet"] for q in qs} == {"fails"}
-    assert len(qs) == 1 + 2 + 1
+    kinds = [q["kind"] for q in qs]
+    assert kinds.count("facet") == 1 and kinds.count("site_own") == 2 and kinds.count("site_pack") == 1
 
 
 def test_unknown_facet_refused():
@@ -62,7 +68,7 @@ def test_guard_refuses_an_injected_vendor_name():
     qs = query.expand(QUESTION, ENTITY, None, None, None)
     qs.append({"query_id": "Q-99", "text": '"Example Federal Credit Union" Jack Henry Symitar core', "facet": "works", "kind": "facet"})
     clean, violations = query.guard(qs, None)
-    assert [q["query_id"] for q in clean] == [f"Q-{i:02d}" for i in range(1, 8)]
+    assert [q["query_id"] for q in clean] == [q["query_id"] for q in qs if q["query_id"] != "Q-99"]
     refused = [v for v in violations if v["kind"] == "refused"]
     assert {v["name"] for v in refused} == {"Jack Henry", "Symitar"}
     assert all(v["query_id"] == "Q-99" for v in refused)

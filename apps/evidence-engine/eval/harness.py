@@ -384,6 +384,18 @@ def card_sizes(cards: list[dict]) -> dict:
     return out
 
 
+def answer_tokens(calls: list[dict]) -> dict:
+    """Per-call size of the whole research_brief answer (heuristic tokens):
+    mean, p95, max, and the share the cards take of it."""
+    vals = [c["answer_tokens"] for c in calls if isinstance(c.get("answer_tokens"), int)]
+    cards = [c["answer_tokens_cards_only"] for c in calls if isinstance(c.get("answer_tokens_cards_only"), int)]
+    if not vals:
+        return {"calls": 0}
+    return {"calls": len(vals), "mean": round(statistics.mean(vals), 1), "p95": _p95(vals), "max": max(vals),
+            "cards_share": round(sum(cards) / max(1, sum(vals)), 3) if cards else None,
+            "note": "the full tool answer an agent reads (cards + coverage + search block), heuristic 4 chars/token"}
+
+
 def _tiktoken_present() -> bool:
     import importlib.util
     return importlib.util.find_spec("tiktoken") is not None
@@ -455,6 +467,11 @@ async def run_research(engine, samples: list[dict], entities: dict, *, max_cards
         rec["cards_full"] = full
         rec["card_ids"] = [c["card_id"] for c in cards]
         rec["tokens"] = out.get("tokens")
+        # What the AGENT reads: the whole answer as the tool returns it (cards
+        # in the requested provenance + coverage + search block), not just the
+        # cards — the figure token consumption is judged on (owner, 2026-10-11).
+        rec["answer_tokens"] = C.estimate_tokens(out)
+        rec["answer_tokens_cards_only"] = C.estimate_tokens(cards)
         rec["rerank"] = out.get("rerank")
         s = out.get("search") or {}
         rec["search"] = {"queries": len(s.get("queries") or []), "hits": s.get("hits"), "fetched": s.get("fetched"),
@@ -845,6 +862,9 @@ def write_report(res: dict, path: Path = REPORT_PATH) -> None:
     L.append(f"| Generalisation (largest tuning↔held-out gap) | {ge.get('max_gap_points')} points | ≤ 5 points | "
              f"{_verdict(ge.get('max_gap_points'), BARS['generalisation_gap_points'])} | both |")
     rp = m.get("parallel_ramp", {})
+    at = res["metrics"].get("answer_tokens") or {}
+    if at.get("calls"):
+        L.append(f"| research_brief answer size an agent reads (tokens, whole answer) | mean {at['mean']} · p95 {at['p95']} · max {at['max']} (cards {_fmt_share(at.get('cards_share'))} of it) | (informational) | — | offline |")
     L.append(f"| Parallel rate-limit ceiling | {rp.get('measured_ceiling_rps', 'not run')} → recommend `EE_PARALLEL_RPS={rp.get('recommended_EE_PARALLEL_RPS', '?')}` | measured, never assumed | — | LIVE |")
     L.append("")
     L.append("## 2. What was measured live, what offline")
@@ -1172,6 +1192,7 @@ async def _main_async(a) -> dict:
         metrics["negatives_refusal_census"] = negatives_refusal_census(negatives)
         metrics["syndication_inflation"] = syndication_inflation(calls)
         metrics["card_sizes"] = card_sizes(cards)
+        metrics["answer_tokens"] = answer_tokens(calls)
         metrics["source_recall"] = recall_table(calls)
         metrics["generalisation"] = generalisation(metrics)
         if a.live and a.ramp and engine.parallel is not None:
