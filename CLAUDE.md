@@ -213,6 +213,44 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
     `stats()` without a category). orient, the watchdog and the hooks print
     `search_ops_since_checkpoint` for that scope, never the lifetime count
     against the ceiling (a promoted run read "6332 against 60").
+- **A run is never degraded while the open-source research layer answers**
+  (user, 2026-10-11: "runs will never run degraded due to the open source
+  connectors — ensure agents fall back to them"): the connector contract's
+  open-web requirement is a GROUP — any of `exa`, `tavily`, `evidence`,
+  `searxng`, `parallel` (`connector_contract.SEARCH_ANY`); Explorium/Clay
+  stay their own group. A session that lost Exa and Tavily to a credit
+  refusal but holds the research layer passes preflight, is not
+  `enrichment_degraded`, and its agents fall back in the free-chain order
+  (engine `research_brief` → `searxng` / `parallel` → WebSearch), logging
+  each search under the tool that ran it. The relay brief and
+  `enrichment_sources.json` `_free_chain` say the same; tests:
+  `test_connector_contract.py`.
+- **The six research connectors are mapped and ordered** (user, 2026-10-11:
+  "avoid calling web search severally and batch queries to the open source
+  connectors first … results in schemas that align with the gold standard
+  scoring workbook"): the collector and the technographic scanner hold all
+  six (`evidence`, `searxng`, `fetch`, `edgar`, `parallel`, `alphaxiv`);
+  `research_brief` is called ONCE per capability with every cell question as
+  `{question, subcap_ids, facet}` and returns cards grouped by cell
+  (`item.linked_subcap_ids` = the caller's cells, `by_question[]` the
+  unanswered ones) — the gold evidence row, one `engine.cli evidence` line
+  per card; the chain is brief → searxng/parallel → Exa/Tavily → WebSearch and
+  `hooks/search_order.py` refuses WebSearch before the first brief and past
+  three per brief while the engine is up. **The engine deploy gate governs on
+  question coverage** (user, same day: "Fix the above to ensure deploy
+  happens"; same-URL recall stayed 36/70 % and 22/22 % against the 90 %
+  wording while coverage read 100/100 %): `approval_check.py` recomputes it
+  from the results file and prints recall beside it; the NAT stays opt-in.
+- **The research phase enforces /workflows** (user, 2026-10-11: "the research
+  phase should still enforce /workflows"; supersedes the 2026-10-09 AUTO rule
+  that sent a DEGRADED run to lean headless tiers): `--research-mode auto`
+  resolves to the in-session workflow whether or not Exa/Tavily are bound —
+  since the research layer (2026-10-10) the workflow's collectors,
+  orchestrator and challenger hold the plugin's `evidence` server and
+  Parallel, so a degraded run researches inside `/workflows`. Lean tiers run
+  only on an explicit `--research-mode tiers`, or as the announced fallback
+  of a session that recorded no Workflow tool (`--tiers-direct`, owner told).
+  Test: `tests/skills/research_engine/test_lean_tiers_2026_10_09.py`.
 - **Client view review** (user, 2026-10-07, `DMA_customer_view_feedback.docx`):
   the customer audience is labelled **Client** in every reader-facing string
   (banner "Client Dashboard", "Switch back to Zennify view →"; the API value

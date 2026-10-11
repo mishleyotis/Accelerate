@@ -6,7 +6,7 @@ effort: high
 maxTurns: 400
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, Skill, Agent, Write, Edit, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__list_submissions, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__get_upload_status, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment
+tools: Read, Grep, Glob, Bash, Skill, Agent, Write, Edit, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__list_submissions, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__get_upload_status, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment
 disallowedTools: mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -299,3 +299,13 @@ in `${CLAUDE_PLUGIN_ROOT}/docs/goeasy-findings-register.md`; a finding the gate 
 caught here. Never ship a hedge ("Not established this run", "surface-production stage",
 "no score yet", a bare "N/A" or "0" where a value belongs) — a genuine gap is a
 disclosed Coverage Unknown or an ABSENT firmographic with a route, never a hedge.
+
+## Evidence-engine cards before the submit (2026-10-10)
+
+Every evidence-engine card a page cites is re-checked with `verify_cards`
+(liveness, verbatim offsets, contract, date) before `submit_page_payload`,
+and a disputed span is read with `expand_context` — the engine's two
+read-only tools are the only research reach this agent has; a question about
+the world still goes to a producer. The card's `item` is the
+`register_evidence` argument verbatim: register it unchanged, then link the
+cells the producers decided.

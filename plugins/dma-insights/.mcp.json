@@ -6,6 +6,49 @@
         "${CLAUDE_PLUGIN_ROOT}/scripts/mcp_proxy.py",
         "${user_config.mcp_base_url}"
       ]
+    },
+    "evidence": {
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/evidence_proxy.py",
+        "${user_config.evidence_base_url}",
+        "--secret", "dmai-evidence-path-token"
+      ]
+    },
+    "searxng": {
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/evidence_proxy.py",
+        "",
+        "--secret", "dmai-searxng-path-token",
+        "--segment"
+      ]
+    },
+    "fetch": {
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/evidence_proxy.py",
+        "",
+        "--secret", "dmai-fetch-path-token",
+        "--segment"
+      ]
+    },
+    "edgar": {
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/evidence_proxy.py",
+        "",
+        "--secret", "dmai-edgar-path-token",
+        "--segment"
+      ]
+    },
+    "parallel": {
+      "type": "http",
+      "url": "https://search.parallel.ai/mcp"
+    },
+    "alphaxiv": {
+      "type": "http",
+      "url": "https://api.alphaxiv.org/mcp/v1"
     }
   }
 }

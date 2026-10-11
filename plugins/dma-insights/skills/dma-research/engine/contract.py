@@ -494,7 +494,11 @@ TECH_BROKERS = ("clay", "explorium")
 #: asked before a cell is declared absent. `web_search`/`web_fetch` are the
 #: built-in tools; everything after them is an enrichment connector.
 SEARCH_TOOLS = ("web_search", "web_fetch", "exa", "tavily", "clay",
-                "explorium", "vibe", "indeed", "quartr", "drive", "internal")
+                "explorium", "vibe", "indeed", "quartr", "drive", "internal",
+                # the research layer (2026-10-10): the engine is the one
+                # search the floors gate counts for a lean lane; the raw
+                # fallbacks are logged under their own names
+                "evidence_engine", "searxng", "parallel", "edgar")
 #: The connectors whose absence from a cell's searches means "no enrichment
 #: was attempted" — a declared absence must show at least one of these.
 #: The facets a `--prelim` search may carry: the connector-owned tabs
@@ -504,6 +508,20 @@ PRELIM_SHEET_FACETS = ("focus_areas", "issues", "peer_deployments")
 
 ENRICHMENT_TOOLS = tuple(t for t in SEARCH_TOOLS
                          if t not in ("web_search", "web_fetch"))
+
+#: Connector-contract family → Search_Log token, where the two differ. The
+#: contract (`scripts/connector_contract.py`) names a family after its MCP
+#: server, so the engine is the family `evidence`; the log names it
+#: `evidence_engine` so a reader never mistakes the engine for the evidence
+#: rows it produced. Every other family logs under its own name. The
+#: contract test reads this map, so a family the preflight can stop a run
+#: over is always one a cell can log as enrichment effort.
+SEARCH_TOOL_OF_FAMILY = {"evidence": "evidence_engine"}
+
+
+def search_tool_of_family(family: str) -> str:
+    """The Search_Log token a connector-contract family logs under."""
+    return SEARCH_TOOL_OF_FAMILY.get(family, family)
 
 #: T3, the drilldown. A register row answers "what do they run"; the detail
 #: page a click opens answers "so what" — and it has three content cards, two

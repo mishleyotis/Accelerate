@@ -55,7 +55,12 @@ from pathlib import Path
 #: Tavily extract too (QA audit F-L11-042 pair 7): the hook was registered
 #: on it in hooks.json and the docstring called it a fetcher, but this list
 #: did not, so a lane holding it could read a page whole unhindered.
-FETCHERS = ("WebFetch", "mcp__Exa__web_fetch_exa", "mcp__Tavily__tavily_extract")
+FETCHERS = ("WebFetch", "mcp__Exa__web_fetch_exa", "mcp__Tavily__tavily_extract",
+            # the research layer's raw page readers (2026-10-10): a lane reads
+            # evidence-engine CARDS or engine.cli fetch windows, never a page whole
+            "mcp__plugin_dma-insights_fetch__fetch",
+            "mcp__plugin_dma-insights_searxng__web_url_read",
+            "mcp__plugin_dma-insights_parallel__web_fetch")
 
 #: Actor classes whose reading is citation, so must go through the cache —
 #: and the synthesis and verification classes, which read nothing on the
@@ -68,7 +73,13 @@ DENIED_CLASSES = ("category-researcher", "challenger", "surface-producer", "veri
 #: WebSearch and WebFetch, so a claim could be written from a page nobody
 #: registered. The grants are gone from their manifests; this is the
 #: belt-and-braces for a headless child identified by $DMA_ACTOR.
-SEARCHERS = ("WebSearch", "mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search")
+SEARCHERS = ("WebSearch", "mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+             "mcp__plugin_dma-insights_searxng__searxng_web_search",
+             "mcp__plugin_dma-insights_parallel__web_search")
+# NOT a searcher here: `mcp__plugin_dma-insights_evidence__research_brief`. A
+# verifier or challenger may fire ONE independent research_brief to hunt a
+# falsifier (it returns cards, never a page) — provision_agent_tools.py
+# SLICES["evidence/challenge"] is the grant, the body is the instruction.
 DENIED_SEARCH_CLASSES = ("surface-producer", "verifier", "app-auditor", "challenger")
 
 SEARCH_REASON = (

@@ -42,7 +42,8 @@ computes every count. The prose below is what a person or a lane reads to work i
 You are one of three actors, and your dispatch brief says which:
 
 - the **`research-conductor`** — drives `engine.pipeline`: PRELIM, the sixteen category
-  lanes, the challenge pass, the floors gates, the handoff. It holds the connectors (Exa,
+  lanes, the challenge pass, the floors gates, the handoff. It holds the evidence engine (`research_brief` first — register-ready
+  cards, the saturation stop rule; docs/EVIDENCE-ENGINE-TOOLS.md) and the connectors (Exa,
   Tavily, Clay) and services every lane's `search_requests` per capability batch;
 - a **`research-pXcY-producer`** — one category of one run, under
   `references/RESEARCH-PROTOCOL.md`. It searches the open web, logs every search, notes as it

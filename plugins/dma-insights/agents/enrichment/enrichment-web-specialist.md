@@ -7,7 +7,7 @@ maxTurns: 110
 skills:
   - dma-surface-production
   - dma-research
-tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__record_enrichment
+tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, mcp__plugin_dma-insights_evidence__research_brief, mcp__plugin_dma-insights_evidence__crawl_entity, mcp__plugin_dma-insights_evidence__filings_evidence, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__coverage_report, mcp__plugin_dma-insights_searxng__searxng_web_search, mcp__plugin_dma-insights_searxng__searxng_search_suggestions, mcp__plugin_dma-insights_searxng__searxng_instance_info, mcp__plugin_dma-insights_searxng__web_url_read, mcp__plugin_dma-insights_fetch__fetch, mcp__plugin_dma-insights_edgar__get_company_facts, mcp__plugin_dma-insights_edgar__get_recent_filings, mcp__plugin_dma-insights_edgar__get_filing_sections, mcp__plugin_dma-insights_edgar__get_filing_content, mcp__plugin_dma-insights_edgar__get_financials, mcp__plugin_dma-insights_edgar__get_xbrl_concepts, mcp__plugin_dma-insights_parallel__web_search, mcp__plugin_dma-insights_parallel__web_fetch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__record_enrichment
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -662,3 +662,32 @@ The owning producer needs items 1, 2 and 5 to write and defend a row, and cannot
 reconstruct any of them from a summary. `enrichment-planner` needs items 2, 3 and
 5 to close a worklist row or re-open it with a different pathway.
 `finding-challenger` needs item 4.
+
+## The evidence engine first (2026-10-10)
+
+The plugin's **evidence engine** (`mcp__plugin_dma-insights_evidence__*`,
+six tools) is the first rung of every search. `research_brief` takes the
+entity (legal name, domains, charter or CIK), the sub-vertical, the facet and
+the question(s) and returns **register-ready cards**: `card["item"]` is the
+exact `register_evidence` item and the exact `engine.cli evidence` flag set
+(`--source --url --tier --excerpt --published --claim-type`), a verbatim
+sentence-complete 50–500-character span the engine verified against the
+page, the registry's tier **hint**, the claim label that tier licenses, an
+ISO date only when the page states one, and provenance (recency band, origin
+cluster, syndication count, entity match, ladder rung). You decide the cells
+(`--subcap`), the final tier and any lowering of the claim label; the engine
+never does. Respect `coverage.saturation`: when it reads true for a facet,
+stop searching that facet. `expand_context` is for disambiguation or a
+challenge only; `verify_cards` re-runs liveness, offsets and dates. A result
+carrying `needs_spend_approval` means no free source can answer — report it,
+never route to a paid tool on your own. The raw fallbacks (SearXNG, Fetch,
+EDGAR, Parallel) are for an engine outage or a disputed card, are rate-gated
+by the plugin, and every use is logged.
+
+Your batches go to the engine first — `research_brief` for a gap's question,
+`crawl_entity` for the client's own newsroom, careers and investor pages,
+`filings_evidence` for a public filer — and to the raw fallbacks (SearXNG,
+Fetch, EDGAR, Parallel) only when the engine is down or a card is disputed,
+before Exa and Tavily. A card registers unchanged; a page you read whole
+goes into the run's fetch cache with `engine.cli fetch --via-text -` so its
+excerpt verifies like any other.

@@ -63,6 +63,16 @@ GUARDED_SUFFIXES = {
 }
 GUARDED = {PREFIX + t for t in GUARDED_SUFFIXES}
 
+#: The research layer's plugin-scoped servers (plugins/dma-insights/.mcp.json).
+RESEARCH_PREFIX = "mcp__plugin_dma-insights_"
+RESEARCH_SEGMENT = "plugin_dma_insights_"       # separators normalised
+RESEARCH_SERVERS = frozenset({"evidence", "searxng", "fetch", "edgar", "parallel"})
+RESEARCH_REASON = (
+    "dma-insights research layer (evidence engine or a raw fallback), auto-approved by the "
+    "plugin's own hook: every tool is a read; the raw fallbacks are rate-gated by "
+    "hooks/rate_gate.py and logged by hooks/source_health.py."
+)
+
 # ── THE SAME CONNECTOR UNDER A DIFFERENT NAME ────────────────────────────
 #
 # MEASURED 2026-08-31, from the owner: "I keep on getting requests to
@@ -390,6 +400,16 @@ SERVER_SURFACES = {
                  "get_resume"},
         "withheld": set(),
     },
+    # ── the plugin's own research layer (2026-10-10), stable segments ──
+    # Every tool is a read: search, crawl, filings, verify, context, coverage.
+    # The raw fallbacks are additionally rate-gated (hooks/rate_gate.py).
+    "plugin_dma-insights_evidence": {"read": {'expand_context', 'research_brief', 'coverage_report', 'verify_cards', 'filings_evidence', 'crawl_entity'}, "withheld": set()},
+    "plugin_dma-insights_searxng": {"read": {'web_url_read', 'searxng_web_search', 'searxng_search_suggestions', 'searxng_instance_info'}, "withheld": set()},
+    "plugin_dma-insights_fetch": {"read": {'fetch'}, "withheld": set()},
+    # sec-edgar-mcp 1.1.0 serves eighteen tools, all reads of EDGAR; the
+    # provisioner grants six of them.
+    "plugin_dma-insights_edgar": {"read": {'get_segment_data', 'get_filing_sections', 'get_key_metrics', 'get_company_facts', 'get_xbrl_concepts', 'compare_periods', 'discover_company_metrics', 'discover_xbrl_concepts', 'get_insider_summary', 'get_cik_by_ticker', 'get_filing_content', 'analyze_insider_sentiment', 'get_financials', 'search_companies', 'get_insider_transactions', 'get_recommended_tools', 'get_company_info', 'get_recent_filings'}, "withheld": set()},
+    "plugin_dma-insights_parallel": {"read": {'web_search', 'web_fetch'}, "withheld": set()},
     "github": {
         # Reading a repository, a PR, a check run or a log is how any review
         # or CI diagnosis starts. Everything that changes the repository or
@@ -424,9 +444,14 @@ SERVER_SURFACES = {
 #: Read-only tools allowed by their FULL name, derived from the table above so
 #: the allowlist and the read/write split cannot drift apart.
 QUALIFIED_TOOLS = frozenset(
-    f"mcp__{server}__{tool}"
+    f"mcp__{spelling}__{tool}"
     for server, surface in SERVER_SURFACES.items()
-    for tool in surface["read"])
+    for tool in surface["read"]
+    # both spellings of the server segment: the delivered one and the
+    # canonical one `_canonical` reduces a call to (hyphens → underscores),
+    # so a plugin-scoped grant (`plugin_dma-insights_evidence`) compares
+    # equal however the host spells it (CI, 2026-10-11)
+    for spelling in {server, server.replace("-", "_")})
 
 #: The other half, kept so "not approved" is a decision on the record rather
 #: than an absence. Nothing reads this at runtime; the roster check does.
@@ -696,6 +721,18 @@ def main() -> int:
         if tool in GUARDED:
             return 0
         return _allow(REASON)
+    # The plugin's OWN research-layer servers (2026-10-10): the evidence
+    # engine and its raw fallbacks are read-only by construction (search,
+    # fetch, filings, verify); the rate gate decides whether a raw call may
+    # proceed, this hook only answers the permission prompt. alphaXiv is not
+    # here on purpose: its tool set carries writes and is ruled on by verb.
+    if tool.startswith("mcp__") and tool.count("__") >= 2:
+        # Any spelling of the segment (`plugin_dma-insights_evidence`,
+        # `plugin-dma-insights-evidence`, `plugin_dma_insights_evidence`):
+        # separators normalised, then an EXACT match on the server name.
+        seg = tool.split("__")[1].replace("-", "_")
+        if seg.startswith(RESEARCH_SEGMENT) and seg[len(RESEARCH_SEGMENT):] in RESEARCH_SERVERS:
+            return _allow(RESEARCH_REASON)
 
     # The same connector attached under a claude.ai server name. Everything
     # the PREFIX branch allows, allowed here too — EXCEPT the guarded pair,

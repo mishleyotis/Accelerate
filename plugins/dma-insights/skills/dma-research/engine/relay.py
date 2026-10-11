@@ -107,6 +107,13 @@ SKILL_REL = "plugins/dma-insights/skills/dma-research"
 CONNECTOR_NAMESPACES = (
     "mcp__Clay", "mcp__Exa", "mcp__Tavily", "mcp__Vibe_Prospecting",
     "mcp__Indeed", "mcp__Quartr", "mcp__Google_Drive",
+    # The research layer (2026-10-10): plugin-declared servers, scoped names.
+    "mcp__plugin_dma-insights_evidence",
+    "mcp__plugin_dma-insights_searxng",
+    "mcp__plugin_dma-insights_fetch",
+    "mcp__plugin_dma-insights_edgar",
+    "mcp__plugin_dma-insights_parallel",
+    "mcp__plugin_dma-insights_alphaxiv",
 )
 
 #: What a refused tool call reads as in a child's transcript. Mirrors
@@ -126,6 +133,12 @@ TOOL_OF_NAMESPACE = {
     "mcp__Exa": "exa", "mcp__Tavily": "tavily", "mcp__Clay": "clay",
     "mcp__Vibe_Prospecting": "vibe", "mcp__Indeed": "indeed",
     "mcp__Quartr": "quartr", "mcp__Google_Drive": "drive",
+    "mcp__plugin_dma-insights_evidence": "evidence_engine",
+    "mcp__plugin_dma-insights_searxng": "searxng",
+    "mcp__plugin_dma-insights_fetch": "web_fetch",
+    "mcp__plugin_dma-insights_edgar": "edgar",
+    "mcp__plugin_dma-insights_parallel": "parallel",
+    "mcp__plugin_dma-insights_alphaxiv": "web_search",
 }
 
 #: The heal verdicts, and what each tells the fresh lane instance to do. A
@@ -1267,11 +1280,18 @@ def drain_brief(run: runstate.Run, wb, reqs: list[dict], category: str | None) -
         "`mcp__Tavily__tavily_search` (Clay only where your manifest allows "
         "and the request is about people or a company record). If the "
         "connector is refused, absent from your tool list, or out of credit, "
-        "run the SAME query through WebSearch (WebFetch for a named page) — "
-        "the owner's sanctioned failover (2026-10-04) — and log it honestly "
-        "with `--tool web_search` / `--tool web_fetch`, never as exa or "
-        "tavily, so the ENRICHMENT gate still measures that no connector ran. "
-        "Record BLOCKED (step 4) only when WebSearch is refused too, with the "
+        "fall back IN THIS ORDER (owner, 2026-10-11: a run is never degraded "
+        "while the open-source research layer answers): the evidence engine — "
+        "`mcp__plugin_dma-insights_evidence__research_brief` with the entity, "
+        "the facet and the question (its cards register as they stand; log "
+        "`--tool evidence_engine`); then the raw open-source readers — "
+        "`mcp__plugin_dma-insights_searxng__searxng_web_search` (`--tool searxng`) "
+        "or Parallel `mcp__plugin_dma-insights_parallel__web_search` (`--tool "
+        "parallel`); then WebSearch (WebFetch for a named page), the owner's "
+        "built-in failover (2026-10-04), logged `--tool web_search` / "
+        "`--tool web_fetch`. Log every search under the tool that RAN it, "
+        "never as exa or tavily, so the ENRICHMENT gate measures the truth. "
+        "Record BLOCKED (step 4) only when every rung is refused, with the "
         "refusal text verbatim. Susser Bank, 2026-10-05: 27 of 28 report "
         "probes came back BLOCKED on an absent connector while the failover "
         "sat unused, and the report stage could not close without them.",

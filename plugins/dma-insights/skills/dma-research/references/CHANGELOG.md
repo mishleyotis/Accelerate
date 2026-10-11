@@ -81,3 +81,11 @@ any of those. Four gates and one registry close that:
 
 `${CLAUDE_PLUGIN_ROOT}/scripts/stress_run_lifecycle.py` walks all five through the real command
 line in one pass.
+
+**2026-10-10 — the evidence engine as rung 3.** `research_brief` on the plugin's
+`evidence` server returns register-ready cards (the gold evidence row: a verbatim span
+the engine verified, the ladder's tier hint, the licensed label, a page-stated date, the
+origin cluster) and a coverage block whose `saturation` is the facet's stop rule; the raw
+fallbacks (SearXNG, Fetch, EDGAR, Parallel) are gated and logged; the ledger's refusals
+are unchanged and still the write control. RESEARCH-PROTOCOL § Tools, collector manifest,
+plugin CHANGELOG 1.23.0.

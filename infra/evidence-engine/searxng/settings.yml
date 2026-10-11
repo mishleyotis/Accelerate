@@ -1,0 +1,132 @@
+# SearXNG — FSI evidence profile for the DMA Insights evidence engine.
+#
+# Every key below was verified against docs.searxng.org on 2026-10-10
+# (admin/settings/settings_search.html, settings_outgoing.html,
+# settings_server.html). SearXNG merges this file over its defaults
+# (`use_default_settings: true`), so only the deltas are stated.
+#
+# Why these choices (brief §6b):
+#   * Google and Bing block datacentre egress within hours; the profile
+#     weights engines that tolerate automated use (mojeek, brave, duckduckgo,
+#     qwant, startpage) and the academic engines the engine falls back to.
+#   * suspended_times give a blocked engine a measured cool-off instead of
+#     the default day-long suspension, so a transient 429 does not remove
+#     an engine for 24h.
+#   * outgoing.max_request_timeout 12 (the brief) over the 10.0 default:
+#     regulator sites are slow.
+#   * The JSON format is what the engine consumes; html stays for the
+#     instance's own page behind the gateway.
+use_default_settings: true
+
+general:
+  debug: false
+  instance_name: "dmai-searxng"
+  enable_metrics: true
+
+server:
+  port: 8080
+  bind_address: "127.0.0.1"          # never exposed directly; Supergateway / the engine sit in front
+  # secret_key: injected at run time as the SEARXNG_SECRET environment
+  # variable (the documented override) from Secret Manager; never in a file.
+  limiter: false                      # single trusted caller (the engine); the engine rate-limits
+  image_proxy: false
+  method: "GET"
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "en-US"
+  max_page: 3
+  ban_time_on_fail: 5
+  max_ban_time_on_fail: 120
+  formats:
+    - html
+    - json
+  # Engine suspension after an error, in seconds. Defaults are 86400 /
+  # 86400 / 3600; a day-long suspension for one 403 empties the pool.
+  suspended_times:
+    SearxEngineAccessDenied: 1800
+    SearxEngineCaptcha: 3600
+    SearxEngineTooManyRequests: 900
+    cf_SearxEngineCaptcha: 7200
+    cf_SearxEngineAccessDenied: 3600
+    recaptcha_SearxEngineCaptcha: 21600
+
+outgoing:
+  request_timeout: 4.0
+  max_request_timeout: 12.0
+  useragent_suffix: "dmai-evidence-engine"
+  pool_connections: 50
+  pool_maxsize: 20
+  enable_http2: true
+  # proxies: intentionally absent (brief §6c: a paid proxy is an owner decision)
+
+engines:
+  # ── general web: weighted toward engines that tolerate automated use ──
+  - name: mojeek
+    engine: mojeek
+    weight: 1.5
+    disabled: false
+  - name: brave
+    engine: brave
+    weight: 1.3
+    disabled: false
+  - name: duckduckgo
+    engine: duckduckgo
+    weight: 1.2
+    disabled: false
+  - name: qwant
+    engine: qwant
+    weight: 1.1
+    disabled: false
+  - name: startpage
+    engine: startpage
+    weight: 1.0
+    disabled: false
+  - name: wikipedia
+    engine: wikipedia
+    weight: 0.5
+  # kept, but they will suspend themselves on datacentre egress; the
+  # profile does not depend on them
+  - name: google
+    engine: google
+    weight: 0.8
+    disabled: false
+  - name: bing
+    engine: bing
+    weight: 0.8
+    disabled: false
+  # ── news ──
+  - name: duckduckgo news
+    engine: duckduckgo_news
+    weight: 1.0
+    categories: [news]
+  - name: brave.news
+    engine: brave
+    brave_category: news
+    weight: 1.0
+    categories: [news]
+  # ── academic (brief §6b academic chain) ──
+  - name: arxiv
+    engine: arxiv
+    categories: [science]
+    disabled: false
+  - name: semantic scholar
+    engine: semantic_scholar
+    categories: [science]
+    disabled: false
+  - name: openalex
+    engine: openalex
+    categories: [science]
+    disabled: false
+  - name: crossref
+    engine: crossref
+    categories: [science]
+    disabled: false
+  # ── noise for FSI evidence: off ──
+  - name: reddit
+    engine: reddit
+    disabled: true
+  - name: youtube
+    engine: youtube_noapi
+    disabled: true

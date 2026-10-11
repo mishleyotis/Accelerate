@@ -205,6 +205,13 @@ CONNECTOR_NAMESPACES = (
     "mcp__Indeed",
     "mcp__Quartr",
     "mcp__Google_Drive",
+    # The research layer (2026-10-10): plugin-declared servers, scoped names.
+    "mcp__plugin_dma-insights_evidence",
+    "mcp__plugin_dma-insights_searxng",
+    "mcp__plugin_dma-insights_fetch",
+    "mcp__plugin_dma-insights_edgar",
+    "mcp__plugin_dma-insights_parallel",
+    "mcp__plugin_dma-insights_alphaxiv",
 )
 
 ALLOWED = ",".join([
