@@ -1,5 +1,46 @@
 # dma-insights — plugin changelog
 
+## 1.27.0 — 2026-10-12 — find the registrant, for every sub-vertical in the US and Canada
+
+Owner: "The tool is supposed to be find registrant as we deal with 9
+subverticals in US and Canada."
+
+- **`find_registrant` replaces EDGAR's SEC-only company search.** The old
+  lookup answered for public companies only — IMA Financial Group, a private
+  broker, came back with nothing. The evidence engine now routes by
+  sub-vertical (CU, RB, CL, CIB, AM, RIA/WM, IC, IB, FC) and country to the
+  registry that holds the institution, all free and keyless:
+  NCUA (charter, type, assets, members, field of membership, HQ, CEO),
+  FDIC BankFind (certificate, primary regulator, assets), SEC Investment
+  Adviser Public Disclosure and FINRA BrokerCheck (CRD, SEC number), the
+  Farm Credit Administration directory (UNINUM), OSFI (Canadian federally
+  regulated institutions) and SEC EDGAR (any public or Form D parent, CIK).
+  NAIC/state insurance departments and Canadian provincial and securities
+  regulators publish no registry API; they are searched on their own hosts
+  and come back as `candidates`, never as records. Every registry asked
+  reports ok, no_match, candidates, error or not_run, and `ambiguous` when
+  two records tie.
+- **Measured live** (2026-10-12): IMA Financial Group, Inc. → EDGAR CIK
+  1673769 (the SEC-only search had returned 0); Navy Federal → NCUA charter
+  5536, Vienna VA, $204.4B, 15.5M members; First Technology → NCUA 23521,
+  San Jose CA; Glacier Bank → FDIC 30788; Edelman Financial Engines →
+  IAPD/BrokerCheck CRD 104510; Edward Jones → CRD 250; Horizon Farm Credit →
+  FCA 720345; Manufacturers Life → OSFI. Three defects found and fixed on the
+  way: sector words alone made matches ("Colonial Farm Credit" read as
+  "Horizon Farm Credit"), EDGAR answered HTTP 500 to a comma, and NCUA's
+  search misses a name carrying "Federal Credit Union".
+- The tool's description says which gold columns a record fills
+  (Firmographics Regulator, identifier, charter type, HQ, status, assets,
+  members — stated, never held; the record URL as a T1 Source_URL read
+  through `engine.cli fetch`) and that the identifier is the ET identity
+  anchor. Research agents are told to identify the registrant first.
+- **A per-class brief records the rungs it searched.** Verified live after
+  the 1.26.0 deploy: `find_customer_review_evidence` reported
+  `ladder_searched: ["news"]` (inferred from SearXNG answering) while it had
+  probed only review-site hosts, so an absence's Negative_Ladder would have
+  cited a search that never ran. Every `site:<rung>` probe now counts as its
+  rung, and a per-class brief takes its rungs from its probes alone.
+
 ## 1.26.0 — 2026-10-11 — research tools named for what they find, split by source class
 
 Owner: "For each of the MCP tools, avoid generic names, split by

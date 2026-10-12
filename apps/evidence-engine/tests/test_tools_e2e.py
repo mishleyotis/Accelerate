@@ -544,3 +544,14 @@ def test_a_per_class_brief_refuses_an_unknown_class(engine):
     out = run(engine.research_brief(run_id="R-C", entity=ENTITY, source_classes=["blogs"],
                                     questions=["How many members does the credit union serve?"]))
     assert "source_classes" in out["error"] and out["cards"] == []
+
+
+def test_a_per_class_brief_records_the_rungs_it_searched_not_news(engine):
+    """Live 2026-10-12: a review-site brief for an insurance broker reported
+    ladder_searched ["news"] — inferred from SearXNG answering — while it
+    probed only review-site hosts. An absence citing that rung would cite a
+    search that never ran."""
+    out = run(engine.research_brief(run_id="R-L", entity=ENTITY, source_classes=["review_site"],
+                                    questions=["How do members rate the mobile app?"], reference_date="2026-10-10"))
+    assert "news" not in out["coverage"]["ladder_searched"]
+    assert "other" in out["coverage"]["ladder_searched"]          # review sites sit on the `other` rung

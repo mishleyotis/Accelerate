@@ -125,6 +125,10 @@ def ladder_searched(queries: list[dict], sources_used: list[str], rungs_hit: set
             rungs.add("trade_press")
         elif k.startswith("site:careers"):
             rungs.add("careers")
+        elif k.startswith("site:") and k[5:] in LADDER_RUNGS:
+            # site:news, site:academic, site:other (review sites) — every
+            # rung a site pack probes is a rung searched
+            rungs.add(k[5:])
     if any(s.startswith("edgar") for s in sources_used):
         rungs.add("filings")
     if any(s in ("searxng", "parallel") for s in sources_used):
