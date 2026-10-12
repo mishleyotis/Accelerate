@@ -24,6 +24,11 @@ rows are `E-INTERACC-031` / `E-INTERACC-035-R2`. It now resolves through
 `evidence_package_ids` for the run's entity, the mapping `get_evidence`
 reads. Test: `apps/mcp/tests/test_cagr_and_scan_gates.py`.
 
+**A peer name is a label, not prose, to the SG-V4 driver budget**
+(R-INTERAC-20261010 techstack B): 8 of the 106 counted FAILs were
+`peer_deployments[].peer` — the same class as `candidate` and `product`.
+`peer` joins `SG_V4_VERBATIM_LEAVES`; the `basis` beside it stays counted.
+
 Owner, R-INTERAC-20261010: "I see workflows failing and being restarted.
 Please diagnose and fix the above to ensure this never recurs."
 
