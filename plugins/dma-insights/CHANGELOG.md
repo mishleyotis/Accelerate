@@ -111,6 +111,11 @@ rule HANDOFF enforced that the write never did:
   rationale whose last "final N" is not the score struck, and the rescore
   prompt rewrites the rationale: the struck level argued, the level
   immediately above as the gap, arithmetic that lands on the score.
+  The same rescore argued "ADJ_STALE -0.3" on three rows (P2C1.8.3,
+  P3C3.1.1, P4C3.2.2) whose Caps_Applied read "none applied"; a rationale
+  that applies an `ADJ_` label with a delta is now refused unless the write
+  records it (`--adj` or `--caps`). A label named only as not owed is not an
+  application.
 
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow

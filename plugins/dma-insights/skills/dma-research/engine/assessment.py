@@ -616,6 +616,18 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
                             "single-source caps at MEDIUM")
 
     rat = _clean(rationale)
+    # AN ADJUSTMENT THE PROSE APPLIES IS ONE THE WRITE RECORDS. R-INTERAC-
+    # 20261010: three rows re-struck by hand (--score) argued "ADJ_STALE
+    # -0.3" while Caps_Applied read "none applied" — the heatmap's caps line
+    # and the rationale beside it disagreed. A rationale naming an ADJ_/CAP_
+    # label with a delta must be matched by --adj/--cap or by --caps text.
+    recorded = " ".join([_clean(caps)] + [str(x) for x in (adjustments or [])]
+                        + [str(x) for x in (cap_values or [])]).upper()
+    for lab in sorted(set(m.upper() for m in _APPLIED_ADJ.findall(rat))):
+        if lab not in recorded:
+            problems.append(f"the rationale applies {lab} but this write records "
+                            f"no {lab}: pass it (--raw with --adj {lab}:-<delta>, "
+                            f"or --caps naming it) or take it out of the prose")
     if len(rat) < RATIONALE_MIN:
         problems.append(f"rationale is {len(rat)} chars; {RATIONALE_MIN} is the floor "
                         f"— evidence, maturity match, gap to next level, counter, "
@@ -725,6 +737,12 @@ _GAP_WORDS = re.compile(
 #: (Competing)" or "final 2.5" beside a struck 2.0-2.5.
 _FINAL_FIGURE = re.compile(
     r"\bfinal(?:\s+score)?\s*(?:[:=]|is|of|at)?\s*(\d(?:\.\d{1,2})?)(?!\d)", re.I)
+#: An adjustment the prose APPLIES — the label with a negative delta beside
+#: it ("ADJ_STALE -0.3", "ADJ_STALE: -0.25"). A label named only to say it is
+#: not owed ("ADJ_STALE not applied: ...") carries no delta and is not
+#: matched.
+_APPLIED_ADJ = re.compile(
+    r"\b((?:ADJ|CAP)_[A-Z0-9_]+)\s*[:=(]?\s*[-−–]\s*\d?\.\d", re.I)
 _BAND_WORDS = {"ACTIVATING": "M1", "BUILDING": "M2", "COMPETING": "M3",
                "DIFFERENTIATING": "M4"}
 
