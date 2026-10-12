@@ -2,6 +2,19 @@
 
 ## 1.27.1 — 2026-10-12 — a research share always funds a whole round, and the Interac run reaches promotion
 
+**ET-07 reads the reason stated on the item that cites the source**
+(R-INTERAC-20261010 PAGES_B, insights on version B). IC-006 cited E-025 — a
+press item recording the predecessor's retirement, linked to no cell — and
+stated why in its own `r_layer.probes_run`. The gate read only a
+section-level `r_layer`, which `insights.insights` does not declare, so its
+prescribed repair named a field the contract refuses and the stated reason
+was never seen; the repair loop could not converge. `_item_stated_unlinked`
+now accepts a reason on the item that actually cites the id (a reason on
+another card still excuses nothing), and the remediation names the citing
+item, or dropping a citation the claim does not need. For this run the
+citation was dropped: IC-006 rests on Interac's own appointment release
+(E-557, T2). Tests: `apps/mcp/tests/test_cited_linkage.py`.
+
 Owner, R-INTERAC-20261010: "I see workflows failing and being restarted.
 Please diagnose and fix the above to ensure this never recurs."
 
