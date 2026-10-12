@@ -730,6 +730,70 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
             "categories": cats}
 
 
+def widen_peers(wb: RunWorkbook, add: list[str], *, rule: str, owner: str,
+                why: str) -> dict:
+    """Add peers to a LOCKED set, on the engagement owner's word, while no
+    peer figure has been written against it.
+
+    R-INTERAC-20261010 (2026-10-12): the set was locked at PRELIM with one
+    peer, REPORTS refused (client_research §4 fails below three) and the
+    refusal said "the engagement owner widens the set" — but `lock_peer_set`
+    refuses any different set and nothing could widen it. The lock exists so
+    a cohort cannot change under figures already computed against it; with
+    no Peer_Median, quartile or Peer_Scores on any row there is nothing to
+    invalidate. So this only ADDS (every locked peer stays), only while
+    every figure is blank, and only with the owner named and the reason and
+    selection rule recorded in Provenance and Gate_Log."""
+    lock = wb.handoff_lock()
+    have = [p for p in str(lock.get("locked_peer_set") or "").split("|") if p]
+    if not have:
+        raise PrelimRefusal("no peer set is locked; freeze one with `engine.prelim peers`")
+    new = [_clean(n) for n in add if _clean(n)]
+    if not new:
+        raise PrelimRefusal("name at least one peer to add (--peer)")
+    if len(_clean(owner)) < 3:
+        raise PrelimRefusal("name the engagement owner who approved the widening (--owner)")
+    if len(_clean(why)) < 20:
+        raise PrelimRefusal("say why the set is widened (--why, >=20 chars)")
+    if len(_clean(rule)) < 40:
+        raise PrelimRefusal(
+            "the selection rule for the widened set is too short; say what "
+            "makes these the comparison set (>=40 chars)")
+    rows = wb.rows("Peer_Benchmarks")
+    figured = sorted({_clean(r.get("Category_ID")) for r in rows
+                      if any(_clean(r.get(k)) for k in
+                             ("Peer_Median", "Peer_P25", "Peer_P75", "Peer_Scores"))})
+    if figured:
+        raise PrelimRefusal(
+            f"peer figures are already written against the locked set "
+            f"({', '.join(figured[:6])}); widening now would change the cohort "
+            f"under them. Withdraw the run and re-research, or keep the set.")
+    wanted = sorted(set(have) | set(new))
+    if wanted == sorted(have):
+        raise PrelimRefusal(f"every named peer is already in the locked set {have}")
+    names = ", ".join(_grid_name(n) for n in wanted)
+    with wb.transaction("widen_peers"):
+        wb.update_row("Handoff_Lock", "Key", "locked_peer_set",
+                      {"Value": "|".join(wanted)}, save=False)
+        wb.update_row("Handoff_Lock", "Key", "peer_n", {"Value": len(wanted)}, save=False)
+        for r in rows:
+            cid = _clean(r.get("Category_ID"))
+            if cid:
+                wb.update_row("Peer_Benchmarks", "Category_ID", cid,
+                              {"Peer_Names": names, "Peer_N": len(wanted)}, save=False)
+        detail = (f"peer set widened by {_clean(owner)}: {', '.join(have)} -> "
+                  f"{', '.join(wanted)}. Rule: {_clean(rule)}. Why: {_clean(why)}")[:900]
+        wb.append("Provenance", {"SubCap_ID": "", "Step": "widen_peers",
+                                 "Actor": _clean(owner), "At": _utcnow(),
+                                 "Detail": detail}, save=False)
+        wb.append("Gate_Log", {"Timestamp": _utcnow(), "Gate": "PEER_SET_WIDENED",
+                               "Scope": "Handoff_Lock", "Verdict": "PASS",
+                               "Blocking": False, "Detail": detail}, save=False)
+        wb.save()
+    return {"was": have, "locked_peer_set": wanted, "peer_n": len(wanted),
+            "categories": len([r for r in rows if _clean(r.get("Category_ID"))])}
+
+
 def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
                 basis: str, source: str, peer_scores: str = "",
                 n: int | None = None) -> dict:
@@ -1082,6 +1146,14 @@ def main(argv=None) -> int:
                    help="how the peer FIGURES will be obtained; this is the "
                         "token the handoff lock freezes")
 
+    w = common(sub.add_parser(
+        "widen-peers", help="add peers to a locked set on the engagement "
+                            "owner's word, while no peer figure is written"))
+    w.add_argument("--peer", action="append", required=True)
+    w.add_argument("--rule", required=True)
+    w.add_argument("--owner", required=True)
+    w.add_argument("--why", required=True)
+
     m = common(sub.add_parser("peer-median"))
     m.add_argument("--category", required=True)
     m.add_argument("--median"); m.add_argument("--p25"); m.add_argument("--p75")
@@ -1153,6 +1225,9 @@ def main(argv=None) -> int:
         elif a.cmd == "peers":
             print(json.dumps(peers(wb, a.peer, rule=a.rule, basis=a.basis),
                              indent=2, default=str))
+        elif a.cmd == "widen-peers":
+            print(json.dumps(widen_peers(wb, a.peer, rule=a.rule, owner=a.owner,
+                                         why=a.why), indent=2, default=str))
         elif a.cmd == "peer-median":
             print(json.dumps(peer_median(wb, category=a.category, median=a.median,
                                          p25=a.p25, p75=a.p75, basis=a.basis,

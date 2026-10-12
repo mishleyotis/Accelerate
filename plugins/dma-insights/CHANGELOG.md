@@ -134,6 +134,16 @@ rule HANDOFF enforced that the write never did:
   `test_scoring_budget_2026_10_12.py` (the real workflow under node at
   shares from $0 to $40, `scoring_governor_harness.mjs`).
 
+- **A one-peer set nobody could widen** (`engine/prelim.py`): REPORTS
+  refused client_research §4 ("fails below three; the engagement owner
+  widens the set") while `lock_peer_set` refused any different set, so no
+  command existed for the owner's decision. `engine.prelim widen-peers`
+  adds peers to the locked set only — every locked peer stays — only while
+  no Peer_Median, quartile or Peer_Scores is written against it, and only
+  with the owner, reason and selection rule recorded (Provenance and a
+  non-blocking `PEER_SET_WIDENED` Gate_Log row). Tests:
+  `test_widen_peers_2026_10_12.py`.
+
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow
 source run under node (`research_governor_harness.mjs`) at every share from
