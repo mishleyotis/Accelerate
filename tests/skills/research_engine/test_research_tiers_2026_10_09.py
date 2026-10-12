@@ -524,3 +524,42 @@ def test_the_challenger_sees_the_judged_fields_whole():
     assert cell["claim"] == brief._clean(long_claim)
     assert cell["ceiling"] == brief._clean(row["Ceiling_Reasoning"])
     assert cell["triangulation"].startswith("Two rows from different hosts")
+
+
+def test_a_small_category_is_handed_its_fixed_costs_not_a_cell_sliver(tmp_path):
+    """2026-10-11 (owner, live P3C4 round): shares were cut by cells alone,
+    so a small category — two cells beside a big one — was handed less than
+    one collector batch plus its orchestrator and challenge, and the
+    workflow governor refused its first wave with the envelope still holding
+    money. Every invocation is floored at its fixed costs (never less than
+    one full wave) and the shares still partition what is left."""
+    from fixtures import C, _cu_may_hold
+    tax = C.taxonomy()
+    big, small = list(tax.categories)[:2]
+    selected = _cu_may_hold(tax, tax.cells_in(big))[:30] + _cu_may_hold(tax, tax.cells_in(small))[:2]
+    run = new_run(tmp_path, selected=selected)
+    preflight.record(run, preflight_doc())
+    pr = cost.research_price(len(selected), categories=2)
+    # since 1.27.1 each category needs at least one whole round at the
+    # governor's prices, so an envelope that funds both carries the small
+    # category's round (one batch, its orchestrator, its challenge) on top
+    full = pr["usd"] + pr["per_batch"] + pr["per_category_orchestrator"] + pr["per_category_challenge"]
+    disp = S.StubDispatcher(handlers={"research-p": S.lane_noop, "finding-challenger": S.lane_noop})
+    p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
+                                  push=False, folder_root=tmp_path / "out", ingest_poll_s=0,
+                                  sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
+                                  research_mode="workflow",
+                                  stage_budget={"RESEARCH": round(full * 1.05, 2)}))
+    out = p.run_all()
+    assert out["outcome"] == "AWAITING_WORKFLOW", out
+    doc = json.loads(Path(out["handoff"]).read_text())
+    assert doc["budget"]["fits_envelope"] is True
+    tier = doc["budget"]["tier_usd"]
+    shares = {}
+    for inv in doc["invocations"]:
+        batches = sum(len(b) for b in inv["batches"].values())
+        floor = len(inv["cats"]) * (tier["orchestrator"] + tier["challenge"]) + max(1, batches) * tier["collector_batch"]
+        shares[inv["cats"][0]] = inv["budget"]["share_usd"]
+        assert inv["budget"]["share_usd"] + 1e-6 >= floor, (inv["cats"], inv["budget"]["share_usd"], floor)
+    assert small in shares and big in shares
+    assert sum(shares.values()) == pytest.approx(doc["budget"]["remaining"], abs=0.01)

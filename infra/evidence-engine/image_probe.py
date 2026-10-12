@@ -26,9 +26,13 @@ import urllib.request
 TOOLS = {
     "searxng": {"searxng_web_search", "searxng_search_suggestions", "searxng_instance_info", "web_url_read"},
     "fetch": {"fetch"},
-    # the six the plugin binds (sec-edgar-mcp 1.1.0 serves 21; read 2026-10-11)
-    "edgar": {"get_company_facts", "get_recent_filings", "get_filing_sections", "get_filing_content",
-              "get_financials", "get_xbrl_concepts"},
+    # the fourteen upstream tools the plugin's tool surface exposes
+    # (plugins/dma-insights/references/research_tool_surface.json; sec-edgar-mcp
+    # serves 21 — the insider-trading reads are not exposed; read 2026-10-11)
+    "edgar": {"get_cik_by_ticker", "get_company_info", "get_recent_filings",
+              "get_filing_sections", "get_filing_content", "analyze_8k", "get_financials",
+              "get_key_metrics", "get_segment_data", "compare_periods", "get_company_facts",
+              "discover_company_metrics", "discover_xbrl_concepts", "get_xbrl_concepts"},
 }
 NO_PROXY = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 

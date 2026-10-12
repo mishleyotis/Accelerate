@@ -8,8 +8,8 @@ names — so a session that bypasses the engine still cannot burst a source.
 
   * one token bucket per source, shared across every process on the host
     through a state file under a `fcntl` lock (5s timeout);
-  * over budget -> exit 2 with a redirect to `research_brief` (the engine
-    path), never a silent wait;
+  * over budget -> exit 2 with a redirect to the evidence engine's find_*
+    briefs (the engine path), never a silent wait;
   * FAIL OPEN: a corrupt or unreadable state file, a lock timeout, an
     unparseable payload — the call is allowed and a warning is logged.
     A guard that denies on its own bug stops the research it exists to
@@ -18,7 +18,8 @@ names — so a session that bypasses the engine still cannot burst a source.
 Buckets (per source, per host): searxng 2/s burst 4; fetch 1/s burst 2;
 edgar 4/s burst 4 (half the engine's 8/s, so the two together stay under
 SEC's 10/s); parallel 0.5/s burst 2 (anonymous tier, measured ceiling
-pending Phase D). Tool names are the plugin-scoped form the manifests use.
+pending Phase D). Tool names are the plugin-scoped form the manifests use,
+or the claude.ai connector name that shadows it (`mcp__Parallel_Search__*`).
 """
 from __future__ import annotations
 
@@ -41,18 +42,36 @@ LOCK_TIMEOUT_S = 5.0
 REDIRECT = (
     "dma-insights rate gate: the {source} fallback is over its budget "
     "({rate}/s, burst {burst}). Use the evidence engine instead — "
-    "`research_brief` (search → cards) or `expand_context` / `verify_cards` — "
+    "`find_evidence_all_sources` or a per-class find_* tool (search → cards), or "
+    "`expand_card_context` / `verify_evidence_cards` — "
     "which absorbs rate limits centrally, caches, and coalesces identical "
     "queries. The raw connector is for an engine outage or a disputed card; "
     "retry it after {wait:.1f}s if you must."
 )
 
 
+#: A claude.ai connector at the same URL as a plugin research server makes
+#: Claude Code suppress the plugin's copy, so the tool binds under the
+#: connector's name (measured 2026-10-11). Mirrors
+#: `provision_agent_tools.SHADOWED_BY_CLAUDE_AI`; a test pins the copies.
+SHADOWED_BY_CLAUDE_AI = {"Parallel_Search": "parallel", "alphaXiv": "alphaxiv"}
+
+
+def _server_of(tool: str) -> str | None:
+    """The plugin research server a tool name belongs to, under either the
+    plugin-scoped spelling or the claude.ai connector that shadows it."""
+    if tool.startswith(PREFIX):
+        return tool[len(PREFIX):].split("__", 1)[0]
+    parts = tool.split("__")
+    if len(parts) >= 3 and parts[0] == "mcp":
+        seg = parts[1].replace("-", "_")
+        if seg.startswith("claude_ai_"):
+            seg = seg[len("claude_ai_"):]
+        return SHADOWED_BY_CLAUDE_AI.get(seg)
+    return None
+
 def source_of(tool: str) -> str | None:
-    if not tool.startswith(PREFIX):
-        return None
-    rest = tool[len(PREFIX):]
-    server = rest.split("__", 1)[0]
+    server = _server_of(tool)
     return server if server in SOURCES else None
 
 

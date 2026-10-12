@@ -103,3 +103,15 @@ def match(doc: Document, entity: EntityRef, registry_info: dict | None = None) -
     if shared:
         return "ambiguous", f"shared tokens only: {', '.join(shared)} — legal name not matched"
     return "ambiguous", "entity not named on page"
+
+
+def span_names_entity(excerpt: str, entity: EntityRef) -> bool:
+    """The span ITSELF names the entity (legal name or any alias). Measured
+    2026-10-11 on a live per-class regulator brief for an insurance broker: 12 of
+    15 cards were BDC filings whose schedule of investments lists the entity
+    as a borrower — the page named it (entity_match confirmed: a filing page
+    with the legal name verbatim) while the span quoted was about the fund.
+    A class-restricted search leaves only such pages to card, so a per-class
+    card must carry the name in its own words."""
+    text = normalise(excerpt or "")
+    return any(_present(n, text) for n in (entity.legal_name, *(entity.aliases or ())) if n)

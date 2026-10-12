@@ -58,9 +58,16 @@ from pathlib import Path
 FETCHERS = ("WebFetch", "mcp__Exa__web_fetch_exa", "mcp__Tavily__tavily_extract",
             # the research layer's raw page readers (2026-10-10): a lane reads
             # evidence-engine CARDS or engine.cli fetch windows, never a page whole
+            "mcp__plugin_dma-insights_fetch__read_web_page_markdown",
+            "mcp__plugin_dma-insights_searxng__read_web_page_section",
+            # their upstream names, for a session bound before the tool
+            # surface (references/research_tool_surface.json) shipped
             "mcp__plugin_dma-insights_fetch__fetch",
             "mcp__plugin_dma-insights_searxng__web_url_read",
-            "mcp__plugin_dma-insights_parallel__web_fetch")
+            "mcp__plugin_dma-insights_parallel__web_fetch",
+            # the same reader under the claude.ai connector that shadows the
+            # plugin server (measured 2026-10-11)
+            "mcp__Parallel_Search__web_fetch")
 
 #: Actor classes whose reading is citation, so must go through the cache —
 #: and the synthesis and verification classes, which read nothing on the
@@ -74,11 +81,15 @@ DENIED_CLASSES = ("category-researcher", "challenger", "surface-producer", "veri
 #: registered. The grants are gone from their manifests; this is the
 #: belt-and-braces for a headless child identified by $DMA_ACTOR.
 SEARCHERS = ("WebSearch", "mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search",
+             "mcp__plugin_dma-insights_searxng__keyword_search_web_pages",
+             "mcp__plugin_dma-insights_searxng__keyword_search_news",
+             "mcp__plugin_dma-insights_searxng__keyword_search_papers",
              "mcp__plugin_dma-insights_searxng__searxng_web_search",
-             "mcp__plugin_dma-insights_parallel__web_search")
-# NOT a searcher here: `mcp__plugin_dma-insights_evidence__research_brief`. A
-# verifier or challenger may fire ONE independent research_brief to hunt a
-# falsifier (it returns cards, never a page) — provision_agent_tools.py
+             "mcp__plugin_dma-insights_parallel__web_search",
+             "mcp__Parallel_Search__web_search")
+# NOT searchers here: the evidence engine's find_* briefs. A challenger may
+# fire find_contradicting_evidence / find_corroborating_evidence to hunt a
+# falsifier (they return cards, never a page) — provision_agent_tools.py
 # SLICES["evidence/challenge"] is the grant, the body is the instruction.
 DENIED_SEARCH_CLASSES = ("surface-producer", "verifier", "app-auditor", "challenger")
 

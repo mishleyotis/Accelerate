@@ -106,7 +106,18 @@ def test_every_declared_connector_is_allowed_in_project_settings():
     to answer."""
     settings = json.loads((REPO / ".claude" / "settings.json").read_text())
     allow = set(settings.get("permissions", {}).get("allow", []))
-    missing = sorted(ns for ns in declared_namespaces() if ns not in allow)
+    # A namespace is covered by its own rule OR by every tool the agents
+    # declare from it, allowed by exact name. The finer form is how a server
+    # with writes is granted (alphaXiv, 2026-10-11: its folder and follow
+    # tools change the owner's account, and a settings rule overrules the
+    # hook's withheld list — scripts/bootstrap_session.sh § 5).
+    declared_tools: dict[str, set[str]] = {}
+    for p in sorted(AGENTS.rglob("*.md")):
+        m = re.search(r"^tools:(.*)$", p.read_text(encoding="utf-8")[:8000], re.M)
+        for t in re.findall(r"(mcp__[A-Za-z0-9_]+?__[A-Za-z0-9_-]+)", m.group(1) if m else ""):
+            declared_tools.setdefault(t.split("__")[0] + "__" + t.split("__")[1], set()).add(t)
+    missing = sorted(ns for ns in declared_namespaces()
+                     if ns not in allow and not (declared_tools.get(ns) and declared_tools[ns] <= allow))
     assert not missing, (
         f"{missing} are declared by agents but not in .claude/settings.json "
         f"permissions.allow — a trigger-fired session has nobody to answer a "

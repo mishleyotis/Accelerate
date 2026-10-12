@@ -32,6 +32,7 @@ from __future__ import annotations
 import asyncio
 import json
 import re
+import time
 from dataclasses import asdict
 from urllib.parse import urlsplit
 
@@ -97,17 +98,125 @@ def url_key(url: str) -> str:
 _CAPTCHA = re.compile(r"captcha|access denied|unusual traffic", re.I)
 
 
+# ── per-upstream-engine pacing (2026-10-11) ────────────────────────────────
+#
+# Measured on the live instance: every SearXNG query fanned to every enabled
+# upstream engine, so each of them saw the WHOLE query stream from Cloud
+# Run's shared datacentre egress — Brave and Google CSE suspended for TOO
+# MANY REQUESTS, DuckDuckGo and Qwant on CAPTCHA, Bing alone answering with
+# 0 results about the entity. From another egress the same Google CSE
+# returned 20 on-entity results: blocked by RATE, not banned. So each query
+# goes only to the engines with budget left, each engine is held to a polite
+# rate, and an engine SearXNG reports unresponsive is rested for the cool-off
+# its reason earns. When no engine has budget the query skips SearXNG (it
+# never waits): Parallel carries it and the run keeps its pace.
+
+#: Upstream engine -> requests per second, PER EVIDENCE-ENGINE INSTANCE (two
+#: in production, so the upstream sees twice this). Order is preference: a
+#: query takes the first engines with budget. Override: EE_SEARXNG_ENGINES
+#: "google cse:0.2,bing:0.5,...".
+ENGINE_RATES: dict[str, float] = {
+    "google cse": 0.2, "bing": 0.5, "bing news": 0.3, "duckduckgo news": 0.15,
+    "mwmbl": 0.4, "brave": 0.15, "duckduckgo": 0.1, "qwant": 0.08, "wikipedia": 0.3,
+}
+#: Bing News and DuckDuckGo News answered 4/4 on-entity for an IMA query on
+#: 2026-10-11 while DuckDuckGo's WEB search was on CAPTCHA and Google News
+#: denied access — free, keyless, and an entity's press coverage is evidence.
+#: No paid engine is in the pool (owner, 2026-10-11: "avoid paid APIs").
+ENGINE_BURST = 2
+ENGINES_PER_QUERY = 3
+#: Seconds an engine rests after SearXNG reports it unresponsive, by reason.
+COOLDOWN_S = (("too many requests", 900.0), ("captcha", 1800.0), ("access denied", 3600.0),
+              ("timeout", 60.0), ("parsing error", 600.0))
+COOLDOWN_DEFAULT_S = 300.0
+
+
+def engine_rates_from(spec: str | None) -> dict[str, float]:
+    """`"google cse:0.2,bing:0.5"` -> {"google cse": 0.2, "bing": 0.5}; empty -> defaults."""
+    if not spec or not spec.strip():
+        return dict(ENGINE_RATES)
+    out: dict[str, float] = {}
+    for part in spec.split(","):
+        name, _, rate = part.rpartition(":")
+        if name.strip():
+            out[name.strip()] = float(rate)
+    return out
+
+
+class EnginePool:
+    """Token buckets per upstream engine, plus a cool-off per engine."""
+
+    def __init__(self, rates: dict[str, float] | None = None, *, per_query: int = ENGINES_PER_QUERY,
+                 burst: int = ENGINE_BURST, clock=time.monotonic):
+        self.clock = clock
+        self.per_query = max(1, per_query)
+        now = clock()
+        self.state = {name: {"rate": float(rate), "tokens": float(burst), "burst": float(burst),
+                             "at": now, "rest_until": 0.0, "sent": 0, "rested": 0, "reason": None}
+                      for name, rate in (rates or ENGINE_RATES).items() if rate > 0}
+        self.skipped = 0
+
+    def take(self) -> list[str]:
+        """The engines this query may use now (possibly none). Never waits."""
+        now = self.clock()
+        chosen = []
+        for name, st in self.state.items():
+            st["tokens"] = min(st["burst"], st["tokens"] + (now - st["at"]) * st["rate"])
+            st["at"] = now
+            if len(chosen) < self.per_query and now >= st["rest_until"] and st["tokens"] >= 1.0:
+                st["tokens"] -= 1.0
+                st["sent"] += 1
+                chosen.append(name)
+        if not chosen:
+            self.skipped += 1
+        return chosen
+
+    def observe(self, unresponsive) -> None:
+        """Rest every engine SearXNG reported unresponsive, for its reason's cool-off."""
+        now = self.clock()
+        for row in unresponsive or []:
+            try:
+                name, reason = str(row[0]), str(row[1] if len(row) > 1 else "")
+            except (TypeError, IndexError):
+                continue
+            st = self.state.get(name)
+            if st is None:
+                continue
+            low = reason.lower()
+            rest = next((s for key, s in COOLDOWN_S if key in low), COOLDOWN_DEFAULT_S)
+            st["rest_until"] = max(st["rest_until"], now + rest)
+            st["rested"] += 1
+            st["reason"] = reason
+
+    def snapshot(self) -> dict:
+        now = self.clock()
+        return {"skipped_queries": self.skipped,
+                "engines": {n: {"rate_per_s": st["rate"], "sent": st["sent"], "rested": st["rested"],
+                                "resting_s": round(max(0.0, st["rest_until"] - now), 1),
+                                "last_reason": st["reason"]} for n, st in self.state.items()}}
+
+
 class SearxClient:
     source = "searxng"
 
-    def __init__(self, base_url: str, http: httpx.AsyncClient):
+    def __init__(self, base_url: str, http: httpx.AsyncClient, *, pool: EnginePool | None = None):
         self.base_url = base_url.rstrip("/")
         self.http = http
+        self.pool = pool
 
     async def search(self, q: str, *, engines: list[str] | None = None, pageno: int = 1,
                      query_id: str = "", facet: str = "") -> list[SearchHit]:
         params = {"q": q, "format": "json", "categories": "general", "language": "en-US"}
+        if not engines and self.pool is not None:
+            engines = self.pool.take()
+            if not engines:
+                return []           # every engine is at its rate or resting: skip, never wait
         if engines:
+            # NOT beside `categories`: SearXNG queries the UNION of the two,
+            # so a named engine list with categories=general still fanned to
+            # every general engine (measured 2026-10-11, local trial: an
+            # engine sent once returned results from 40 queries).
+            params.pop("categories")
             params["engines"] = ",".join(engines)
         if pageno and pageno > 1:
             params["pageno"] = str(pageno)
@@ -128,6 +237,8 @@ class SearxClient:
             data = r.json()
         except ValueError as e:
             raise SourceError("bad_json", self.source, str(e)) from e
+        if self.pool is not None:
+            self.pool.observe(data.get("unresponsive_engines"))
         hits: list[SearchHit] = []
         for i, item in enumerate(data.get("results") or [], start=1):
             url = str(item.get("url") or "").strip()
@@ -289,17 +400,28 @@ def _hits_from(dicts: list[dict], *, query_id: str, facet: str) -> list[SearchHi
 async def fan_out(queries: list[dict], *, searx: SearxClient | None = None,
                   parallel: ParallelClient | None = None, run_id: str = "",
                   bucket_wait=None, cache=None, breakers=None,
-                  question: str | None = None, concurrency: int = CONCURRENCY) -> dict:
+                  question: str | None = None, concurrency: int = CONCURRENCY,
+                  budget_s: float | None = None) -> dict:
     """-> {hits: [merged], per_source: {source: {count, calls, cached, error}},
     rerouted: ['rerouted_from:<source>', …], lists: n}.
 
     A merged hit: {url, url_key, title, snippet, score, lists_ranking_it,
-    best_rank, sources, query_ids, facets, published, via, hits: [SearchHit]}."""
+    best_rank, sources, query_ids, facets, published, via, hits: [SearchHit]}.
+
+    `budget_s` bounds the phase (2026-10-11: sixteen workflows briefing at
+    once queued every query behind the shared source buckets and briefs
+    outlived the caller's 60 s). At the budget, a query still waiting for a
+    bucket token or a semaphore slot is cancelled and counted in
+    `budget_cut`; one whose upstream call has STARTED is left to finish in
+    the background (its answer lands in the search cache for the next
+    brief) and never cancelled, because identical queries from other
+    briefs are coalesced onto it and a cancelled leader would cancel them."""
     sem = asyncio.Semaphore(max(1, concurrency))
+    started: set[str] = set()
     per_source: dict[str, dict] = {}
     rerouted: list[str] = []
     lists: dict[tuple[str, str], list[SearchHit]] = {}
-    tasks = []
+    tasks, keys = [], []
 
     def ps(source: str) -> dict:
         return per_source.setdefault(source, {"count": 0, "calls": 0, "cached": 0, "error": None})
@@ -320,6 +442,7 @@ async def fan_out(queries: list[dict], *, searx: SearxClient | None = None,
                     return
             if bucket_wait is not None:
                 await bucket_wait(source)
+            started.add(list_key + "|" + source)
             rec["calls"] += 1
             try:
                 # Request coalescing (brief §6a): identical in-flight queries
@@ -354,6 +477,7 @@ async def fan_out(queries: list[dict], *, searx: SearxClient | None = None,
         if source == "searxng":
             for q in queries:
                 qid, text, facet = q.get("query_id", ""), q["text"], q.get("facet", "")
+                keys.append(qid + "|" + source)
                 tasks.append(run_one(source, qid, f"{source}|{text}", qid, facet,
                                      lambda text=text, qid=qid, facet=facet, client=client:
                                      client.search(text, query_id=qid, facet=facet)))
@@ -369,14 +493,25 @@ async def fan_out(queries: list[dict], *, searx: SearxClient | None = None,
                     texts = [b["text"] for b in batch]
                     qid = "+".join(b.get("query_id", "") for b in batch)
                     objective = question or texts[0]
+                    keys.append(qid + "|" + source)
                     tasks.append(run_one(source, qid, f"{source}|{' || '.join(texts)}", qid, facet,
                                          lambda texts=texts, qid=qid, facet=facet, objective=objective, client=client:
                                          client.search(objective, texts, run_id=run_id,
                                                        query_id=qid, facet=facet)))
+    budget_cut = 0
     if tasks:
-        await asyncio.gather(*tasks)
-    return {"hits": rrf_merge(lists), "per_source": per_source, "rerouted": rerouted,
-            "lists": len(lists)}
+        if budget_s is None or budget_s <= 0:
+            await asyncio.gather(*tasks)
+        else:
+            keyed = [(k, asyncio.ensure_future(t)) for k, t in zip(keys, tasks)]
+            done, pending = await asyncio.wait([f for _, f in keyed], timeout=budget_s)
+            for k, f in keyed:
+                if f in pending and k not in started:
+                    f.cancel()
+                    budget_cut += 1
+    snapshot = dict(lists)
+    return {"hits": rrf_merge(snapshot), "per_source": per_source, "rerouted": rerouted,
+            "lists": len(snapshot), "budget_cut": budget_cut}
 
 
 def rrf_merge(lists: dict[tuple[str, str], list[SearchHit]], *, k: int = RRF_K) -> list[dict]:

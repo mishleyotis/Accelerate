@@ -79,11 +79,20 @@ class Settings:
     #: then 2/s, p50 1.9 s) recorded no 429 up to 2/s ⇒ 2 × 0.7.
     parallel_rps: float = field(default_factory=lambda: _float("EE_PARALLEL_RPS", 1.4))
     searxng_rps: float = field(default_factory=lambda: _float("EE_SEARXNG_RPS", 4.0))
+    # Per-upstream-engine rates behind SearXNG ("google cse:0.2,bing:0.5,…";
+    # empty = search.ENGINE_RATES) and how many engines one query may use.
+    searxng_engines: str = field(default_factory=lambda: os.environ.get("EE_SEARXNG_ENGINES", ""))
+    searxng_engines_per_query: int = field(default_factory=lambda: int(os.environ.get("EE_SEARXNG_ENGINES_PER_QUERY", "3")))
     arxiv_rps: float = field(default_factory=lambda: _float("EE_ARXIV_RPS", 1 / 3))
     fetch_timeout_s: float = field(default_factory=lambda: _float("EE_FETCH_TIMEOUT_S", 12.0))
     #: Wall-clock budget for the fetch phase of ONE research_brief; stragglers
     #: are cancelled and reported, never waited for (measured 2026-10-10).
     fetch_phase_budget_s: float = field(default_factory=lambda: _float("EE_FETCH_PHASE_BUDGET_S", 30.0))
+    # The search phase's twin (2026-10-11): queries still queued for a source
+    # token at this point are cut and reported. A GUARD, not the pace: the
+    # plugin's proxy admits heavy calls so a brief's search runs ~60-90 s, and
+    # 120 s + the 30 s fetch phase + ranking stays inside Cloud Run's 300 s.
+    search_phase_budget_s: float = field(default_factory=lambda: _float("EE_SEARCH_PHASE_BUDGET_S", 120.0))
     max_bytes: int = field(default_factory=lambda: _int("EE_MAX_BYTES", 20_000_000))
     breaker_min_s: float = field(default_factory=lambda: _float("EE_BREAKER_MIN_S", 30.0))
     breaker_max_s: float = field(default_factory=lambda: _float("EE_BREAKER_MAX_S", 600.0))

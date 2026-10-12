@@ -46,8 +46,9 @@ def test_searx_parses_json():
             return await SearxClient("http://searx.test", http).search("q", query_id="Q-01", facet="works", engines=["bing"], pageno=2)
 
     hits = _run(go())
-    assert "format=json" in seen["url"] and "categories=general" in seen["url"] and "language=en-US" in seen["url"]
-    assert "engines=bing" in seen["url"] and "pageno=2" in seen["url"]
+    assert "format=json" in seen["url"] and "language=en-US" in seen["url"]
+    # named engines replace the category (SearXNG unions the two)
+    assert "engines=bing" in seen["url"] and "categories=" not in seen["url"] and "pageno=2" in seen["url"]
     assert [h.rank for h in hits] == [1, 2]
     assert hits[0] == SearchHit(url="https://www.cutimes.com/2026/01/01/example/", title="Example launches",
                                 snippet="Example Federal Credit Union launched digital onboarding.", source="searxng",
@@ -305,3 +306,146 @@ def test_fan_out_drives_the_real_per_key_breakers():
     assert first["per_source"]["searxng"]["error"] == "429"
     assert br.get("searxng").state == "open"
     assert second["rerouted"] == ["rerouted_from:searxng"] and second["per_source"]["searxng"]["calls"] == 0
+
+
+class _SlowSearx:
+    """A SearXNG stand-in whose calls take `delay` seconds each."""
+    source = "searxng"
+
+    def __init__(self, delay: float):
+        self.delay, self.calls, self.finished = delay, [], []
+
+    async def search(self, text, *, query_id="", facet=""):
+        self.calls.append(text)
+        await asyncio.sleep(self.delay)
+        self.finished.append(text)
+        return [SearchHit(url=f"https://ex.test/{query_id}", title=text, snippet="s",
+                          rank=1, source="searxng", query_id=query_id, facet=facet)]
+
+
+def _queries(n):
+    return [{"query_id": f"Q-{i:02d}", "text": f"query {i}", "facet": "works"} for i in range(n)]
+
+
+def test_fan_out_search_budget_cuts_only_queries_still_queued():
+    """Sixteen-way load (2026-10-11): a bucket that lets one query through
+    per 0.2 s, ten queries, a 0.3 s budget. The phase returns at the budget
+    with what it has; the queued queries are cut and counted; a call that
+    had already started is not cancelled — it finishes in the background."""
+    sx = _SlowSearx(delay=0.25)
+
+    async def bucket(source):                        # one token per 0.2 s, in arrival order
+        slot, bucket.n = bucket.n, bucket.n + 1
+        await asyncio.sleep(0.2 * slot)
+    bucket.n = 0
+
+    async def go():
+        t0 = asyncio.get_running_loop().time()
+        out = await fan_out(_queries(10), searx=sx, parallel=None, run_id="R",
+                            bucket_wait=bucket, budget_s=0.3)
+        took = asyncio.get_running_loop().time() - t0
+        await asyncio.sleep(0.5)                      # let started calls land
+        return out, took
+    out, took = asyncio.run(go())
+    assert took < 0.45
+    assert out["budget_cut"] >= 7
+    assert len(sx.calls) == len(sx.finished) >= 1    # every started call completed
+
+
+def test_fan_out_without_a_budget_waits_for_every_query():
+    sx = _SlowSearx(delay=0.01)
+    out = asyncio.run(fan_out(_queries(4), searx=sx, parallel=None, run_id="R"))
+    assert out["budget_cut"] == 0 and len(sx.finished) == 4 and len(out["hits"]) == 4
+
+
+def test_a_budget_cut_never_cancels_a_call_another_brief_joined():
+    """Identical queries from two briefs are coalesced onto one upstream call.
+    The first brief's budget expires while that call is in flight: the second
+    brief must still receive the answer, not a CancelledError."""
+    sx = _SlowSearx(delay=0.4)
+
+    async def go():
+        a = asyncio.create_task(fan_out(_queries(1), searx=sx, parallel=None, run_id="A", budget_s=0.1))
+        await asyncio.sleep(0.02)
+        b = asyncio.create_task(fan_out(_queries(1), searx=sx, parallel=None, run_id="B"))
+        return await a, await b
+    first, second = asyncio.run(go())
+    assert first["budget_cut"] == 0                  # started, so not cut
+    assert len(second["hits"]) == 1                  # the joiner got the answer
+    assert len(sx.calls) == 1                        # one upstream call served both
+
+
+# ── per-upstream-engine pacing (2026-10-11) ────────────────────────────────
+
+def test_engine_pool_never_sends_an_engine_past_its_rate_and_never_waits():
+    t = {"now": 0.0}
+    pool = search.EnginePool({"google cse": 0.2, "bing": 0.5}, per_query=3, burst=2, clock=lambda: t["now"])
+    first = [pool.take() for _ in range(3)]
+    assert first == [["google cse", "bing"], ["google cse", "bing"], []]   # bursts spent, then skip
+    assert pool.skipped == 1
+    t["now"] += 2.0                                  # bing refills 1 token, google cse 0.4
+    assert pool.take() == ["bing"]
+    t["now"] += 3.0
+    assert pool.take() == ["google cse", "bing"]
+
+
+def test_engine_pool_rests_an_engine_for_the_cooldown_its_reason_earns():
+    t = {"now": 100.0}
+    pool = search.EnginePool({"brave": 10.0, "bing": 10.0, "qwant": 10.0}, clock=lambda: t["now"])
+    pool.observe([["brave", "Suspended: too many requests"], ["qwant", "CAPTCHA"], ["nope", "timeout"]])
+    assert pool.take() == ["bing"]
+    t["now"] += 901
+    assert "brave" in pool.take() and "qwant" not in pool.take()
+    t["now"] += 1800
+    assert "qwant" in pool.take()
+    snap = pool.snapshot()["engines"]
+    assert snap["brave"]["rested"] == 1 and snap["qwant"]["last_reason"] == "CAPTCHA"
+
+
+def test_engine_rates_parse_from_the_setting():
+    assert search.engine_rates_from("google cse:0.2, bing:0.5") == {"google cse": 0.2, "bing": 0.5}
+    assert search.engine_rates_from("") == search.ENGINE_RATES
+
+
+def test_searx_client_sends_only_paced_engines_and_learns_from_unresponsive():
+    """The query names the engines the pool chose; SearXNG's
+    unresponsive_engines answer rests the one that was blocked; with no
+    engine left the client skips the call instead of waiting."""
+    seen = []
+
+    def handler(request):
+        seen.append(request.url.params.get("engines"))
+        return httpx.Response(200, json=_searx_json([{"url": "https://a.test/1", "title": "t", "content": "c",
+                                                      "engine": "bing"}]) | {
+            "unresponsive_engines": [["google cse", "Suspended: too many requests"]]})
+    t = {"now": 0.0}
+    pool = search.EnginePool({"google cse": 1.0, "bing": 1.0}, per_query=2, burst=1, clock=lambda: t["now"])
+
+    async def go():
+        async with _client(handler) as http:
+            sx = SearxClient("http://searx.test", http, pool=pool)
+            a = await sx.search("q1", query_id="Q-1")
+            t["now"] += 1.0
+            b = await sx.search("q2", query_id="Q-2")
+            c = await sx.search("q3", query_id="Q-3")       # bing spent, google cse resting
+            return a, b, c
+    a, b, c = _run(go())
+    assert seen == ["google cse,bing", "bing"] and len(a) == 1 and len(b) == 1 and c == []
+
+
+def test_named_engines_are_never_sent_beside_a_category():
+    """SearXNG queries the UNION of `categories` and `engines`: with both, a
+    paced query still reached every general engine."""
+    params = []
+
+    def handler(request):
+        params.append(dict(request.url.params))
+        return httpx.Response(200, json=_searx_json([]))
+
+    async def go():
+        async with _client(handler) as http:
+            await SearxClient("http://searx.test", http).search("q", engines=["bing"])
+            await SearxClient("http://searx.test", http).search("q")
+    _run(go())
+    assert params[0].get("engines") == "bing" and "categories" not in params[0]
+    assert params[1].get("categories") == "general" and "engines" not in params[1]

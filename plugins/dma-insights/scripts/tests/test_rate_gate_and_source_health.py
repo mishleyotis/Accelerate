@@ -31,7 +31,7 @@ def test_bucket_denies_past_burst_and_refills(tmp_path):
     codes = [rate_gate.decide(payload, state_path=state, clock=clock)[0] for _ in range(3)]
     assert codes == [0, 0, 2]                     # burst 2, then denied
     code, msg = rate_gate.decide(payload, state_path=state, clock=clock)
-    assert code == 2 and "research_brief" in msg and "fetch" in msg
+    assert code == 2 and "find_evidence_all_sources" in msg and "fetch" in msg
     t[0] += 1.0                                   # 1/s refill
     assert rate_gate.decide(payload, state_path=state, clock=clock)[0] == 0
 

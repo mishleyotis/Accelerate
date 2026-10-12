@@ -40,6 +40,29 @@ def tools() -> list[dict]:
     return out
 
 
+def surface_section() -> list[str]:
+    """What agents SEE: the tool surface the plugin proxy applies
+    (references/research_tool_surface.json), for all four research services."""
+    sys.path.insert(0, str(HERE))
+    import research_tool_surface as S
+    lines = ["## What agents see — the research tool surface", "",
+             "Agents never see the upstream names above. `scripts/evidence_proxy.py` serves each research "
+             "service through `references/research_tool_surface.json`: a specific name per function, a "
+             "description that states the source class, the tier it earns and the gold-workbook columns "
+             "its output fills, and preset arguments the agent cannot override. An upstream tool the "
+             "surface does not name is not exposed.", "",
+             "| Tool (agent-facing) | Upstream | Preset | What it is for |", "|---|---|---|---|"]
+    for svc in S.SERVICES:
+        for e in S.entries(svc):
+            preset = ", ".join(f"`{k}={v}`" for k, v in (e.get("preset") or {}).items()) or "—"
+            first = e["description"].split(". ")[0].rstrip(".") + "."
+            lines.append(f"| `{S.full_name(svc, e['name'])}` | `{svc}:{e['upstream']}` | {preset} | {first} |")
+    lines.append("")
+    for name, text in S.surface()["appendices"].items():
+        lines += [f"**Appendix `{name}`** (appended to every tool that names it):", "", text, ""]
+    return lines
+
+
 def render(ts: list[dict]) -> str:
     lines = ["# The evidence engine — tool reference", "",
              f"Generated from `apps/evidence-engine/evidence_server.py` by `gen_evidence_tools_md.py`; "
@@ -51,6 +74,7 @@ def render(ts: list[dict]) -> str:
     for t in ts:
         lines.append(f"| `{t['name']}` | `{t['name']}({', '.join(t['args'])})` |")
     lines.append("")
+    lines += surface_section()
     for t in ts:
         lines += [f"## `{t['name']}`", "", "```", f"{t['name']}({', '.join(t['args'])})", "```", "", t["doc"], ""]
     return "\n".join(lines).rstrip() + "\n"

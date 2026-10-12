@@ -40,7 +40,7 @@ def test_door():
                 tools = await c.post("/mcp", json=LIST, headers={**HDR, "X-DMA-Path-Token": "sekrit"})
                 names = sorted(t["name"] for t in _body(tools)["result"]["tools"])
                 assert names == ["coverage_report", "crawl_entity", "expand_context", "filings_evidence",
-                                 "research_brief", "verify_cards"]
+                                 "find_registrant", "research_brief", "verify_cards"]
                 root = await c.get("/")
                 assert root.status_code == 200 and b"open-source" in root.content.lower()
     asyncio.run(go())

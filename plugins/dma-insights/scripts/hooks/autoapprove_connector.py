@@ -402,14 +402,38 @@ SERVER_SURFACES = {
     },
     # ── the plugin's own research layer (2026-10-10), stable segments ──
     # Every tool is a read: search, crawl, filings, verify, context, coverage.
+    # First set: the names agents see (references/research_tool_surface.json,
+    # applied by evidence_proxy.py since 2026-10-11); second: the upstream
+    # names, still reads, for a session bound before the surface shipped.
     # The raw fallbacks are additionally rate-gated (hooks/rate_gate.py).
-    "plugin_dma-insights_evidence": {"read": {'expand_context', 'research_brief', 'coverage_report', 'verify_cards', 'filings_evidence', 'crawl_entity'}, "withheld": set()},
-    "plugin_dma-insights_searxng": {"read": {'web_url_read', 'searxng_web_search', 'searxng_search_suggestions', 'searxng_instance_info'}, "withheld": set()},
-    "plugin_dma-insights_fetch": {"read": {'fetch'}, "withheld": set()},
-    # sec-edgar-mcp 1.1.0 serves eighteen tools, all reads of EDGAR; the
-    # provisioner grants six of them.
-    "plugin_dma-insights_edgar": {"read": {'get_segment_data', 'get_filing_sections', 'get_key_metrics', 'get_company_facts', 'get_xbrl_concepts', 'compare_periods', 'discover_company_metrics', 'discover_xbrl_concepts', 'get_insider_summary', 'get_cik_by_ticker', 'get_filing_content', 'analyze_insider_sentiment', 'get_financials', 'search_companies', 'get_insider_transactions', 'get_recommended_tools', 'get_company_info', 'get_recent_filings'}, "withheld": set()},
+    "plugin_dma-insights_evidence": {"read": {'find_evidence_all_sources', 'find_regulator_evidence', 'find_trade_press_evidence', 'find_news_wire_evidence', 'find_job_posting_evidence', 'find_customer_review_evidence', 'find_academic_evidence', 'find_contradicting_evidence', 'find_corroborating_evidence', 'read_entity_newsroom', 'read_entity_careers', 'read_entity_investor_pages', 'read_entity_about_pages', 'find_sec_filing_evidence', 'find_registrant', 'expand_card_context', 'verify_evidence_cards', 'report_evidence_coverage'}
+        | {'expand_context', 'research_brief', 'coverage_report', 'verify_cards', 'filings_evidence', 'crawl_entity', 'find_registrant'}, "withheld": set()},
+    "plugin_dma-insights_searxng": {"read": {'keyword_search_web_pages', 'keyword_search_news', 'keyword_search_papers', 'suggest_query_refinements', 'check_search_engines', 'read_web_page_section'}
+        | {'web_url_read', 'searxng_web_search', 'searxng_search_suggestions', 'searxng_instance_info'}, "withheld": set()},
+    "plugin_dma-insights_fetch": {"read": {'read_web_page_markdown'}
+        | {'fetch'}, "withheld": set()},
+    # sec-edgar-mcp serves twenty-one tools, all reads of EDGAR; the surface
+    # exposes fourteen (find_registrant on the evidence server replaced its
+    # SEC-only company search) and the provisioner grants those.
+    "plugin_dma-insights_edgar": {"read": {'get_cik_for_ticker', 'get_sec_registrant_profile', 'list_sec_filings', 'read_10k_10q_sections', 'read_filing_full_text', 'read_8k_material_events', 'get_financial_statements', 'get_key_financial_metrics', 'get_business_segment_data', 'compare_financial_periods', 'get_xbrl_company_facts', 'list_reported_metrics', 'list_xbrl_concepts', 'get_xbrl_filing_concepts'}
+        | {'get_segment_data', 'get_filing_sections', 'get_key_metrics', 'get_company_facts', 'get_xbrl_concepts', 'compare_periods', 'discover_company_metrics', 'discover_xbrl_concepts', 'get_insider_summary', 'get_cik_by_ticker', 'get_filing_content', 'analyze_insider_sentiment', 'get_financials', 'search_companies', 'get_insider_transactions', 'get_recommended_tools', 'get_company_info', 'get_recent_filings'}, "withheld": set()},
     "plugin_dma-insights_parallel": {"read": {'web_search', 'web_fetch'}, "withheld": set()},
+    # The same two research servers under the claude.ai connector that
+    # shadows them (Claude Code suppresses the plugin copy when the account
+    # attaches a connector at the same URL — measured 2026-10-11). Parallel
+    # is read-only; alphaXiv's library, folder and follow tools change the
+    # owner's account and stay prompting.
+    "Parallel_Search": {"read": {'web_search', 'web_fetch'}, "withheld": set()},
+    "plugin_dma-insights_alphaxiv": {"read": {'discover_papers', 'get_paper_content', 'answer_pdf_queries'},
+                                     "withheld": {'create_folder', 'delete_folder', 'rename_folder',
+                                                  'save_papers_to_folder', 'remove_papers_from_folder',
+                                                  'move_papers_between_folders', 'edit_private_paper_metadata',
+                                                  'follow_researcher', 'unfollow_researcher'}},
+    "alphaXiv": {"read": {'discover_papers', 'get_paper_content', 'answer_pdf_queries'},
+                 "withheld": {'create_folder', 'delete_folder', 'rename_folder',
+                              'save_papers_to_folder', 'remove_papers_from_folder',
+                              'move_papers_between_folders', 'edit_private_paper_metadata',
+                              'follow_researcher', 'unfollow_researcher'}},
     "github": {
         # Reading a repository, a PR, a check run or a log is how any review
         # or CI diagnosis starts. Everything that changes the repository or

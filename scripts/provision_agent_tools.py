@@ -56,6 +56,8 @@ ROOT = Path(__file__).resolve().parents[1]
 AGENTS = ROOT / "plugins" / "dma-insights" / "agents"
 SERVER = ROOT / "apps" / "mcp" / "server.py"
 PREFIX = "mcp__plugin_dma-insights_connector__"
+sys.path.insert(0, str(ROOT / "plugins" / "dma-insights" / "scripts"))
+import research_tool_surface as _surface  # noqa: E402
 
 #: Connector tools that MUTATE — serving content, a claim, or the findings
 #: memory. Everything else the connector exposes is a read.
@@ -142,40 +144,57 @@ EXTERNAL = {
                 "mcp__Google_Drive__download_file_content",
                 "mcp__Google_Drive__get_file_metadata"],
     # ── THE RESEARCH LAYER (2026-10-10, apps/evidence-engine) ──────────────
-    # The evidence engine is the PRIMARY research interface: one
-    # `research_brief` replaces a search → open → read → excerpt loop and
-    # returns register-ready cards (docs/CARD-CONTRACT.md). Plugin-declared
-    # servers (`.mcp.json`), scoped `mcp__plugin_dma-insights_<server>__`.
-    "evidence": ["mcp__plugin_dma-insights_evidence__research_brief",
-                 "mcp__plugin_dma-insights_evidence__crawl_entity",
-                 "mcp__plugin_dma-insights_evidence__filings_evidence",
-                 "mcp__plugin_dma-insights_evidence__expand_context",
-                 "mcp__plugin_dma-insights_evidence__verify_cards",
-                 "mcp__plugin_dma-insights_evidence__coverage_report"],
+    # Plugin-declared servers (`.mcp.json`), scoped
+    # `mcp__plugin_dma-insights_<server>__`. Since 2026-10-11 the agent sees
+    # each service through its TOOL SURFACE (owner: "avoid generic names,
+    # split by functionality … as per gold standard requirements"):
+    # specific names, clear descriptions and preset arguments, applied by
+    # scripts/evidence_proxy.py from references/research_tool_surface.json —
+    # the one place a research tool is named. The grants are read from it.
+    # `evidence`: the PRIMARY interface — find_evidence_all_sources plus the
+    # per-class find_* tools (regulator, trade press, news, job postings,
+    # reviews, academic, contradicting, corroborating), the entity-site
+    # readers, SEC filing cards, context, verification and coverage.
+    "evidence": list(_surface.full_names("evidence")),
     # The RAW fallbacks: an engine outage, a disputed card, debugging. Their
     # use is rate-gated (hooks/rate_gate.py) and logged (hooks/source_health.py).
-    # Tool names verified against each server on 2026-10-10 (DISCOVERY §4).
-    "searxng": ["mcp__plugin_dma-insights_searxng__searxng_web_search",
-                "mcp__plugin_dma-insights_searxng__searxng_search_suggestions",
-                "mcp__plugin_dma-insights_searxng__searxng_instance_info",
-                "mcp__plugin_dma-insights_searxng__web_url_read"],
-    "fetch":   ["mcp__plugin_dma-insights_fetch__fetch"],
-    # sec-edgar-mcp serves 18 tools; the six a researcher reaches for.
-    "edgar":   ["mcp__plugin_dma-insights_edgar__get_company_facts",
-                "mcp__plugin_dma-insights_edgar__get_recent_filings",
-                "mcp__plugin_dma-insights_edgar__get_filing_sections",
-                "mcp__plugin_dma-insights_edgar__get_filing_content",
-                "mcp__plugin_dma-insights_edgar__get_financials",
-                "mcp__plugin_dma-insights_edgar__get_xbrl_concepts"],
+    "searxng": list(_surface.full_names("searxng")),
+    "fetch":   list(_surface.full_names("fetch")),
+    # sec-edgar-mcp serves 21 tools; the surface exposes the fourteen a
+    # researcher reaches for (no insider-trading reads).
+    "edgar":   list(_surface.full_names("edgar")),
+    # ── SHADOWED BY A CLAUDE.AI CONNECTOR (measured 2026-10-11) ──────────
+    # Parallel and alphaXiv are ALSO claude.ai connectors at the same URL.
+    # When the account has them attached, Claude Code suppresses the
+    # plugin's server ("Suppressing plugin MCP server … duplicates a
+    # claude.ai connector") and the tools bind as `mcp__Parallel_Search__*`
+    # / `mcp__alphaXiv__*` instead. An agent granted only the plugin names
+    # then held NO Parallel at all — the IMA session of 2026-10-11 bound
+    # 4 of the 6 open-source servers. Both spellings are granted; whichever
+    # the harness binds is the one the agent calls. `SHADOWED_BY_CLAUDE_AI`
+    # below is the one table every hook reads the alias from.
     "parallel": ["mcp__plugin_dma-insights_parallel__web_search",
-                 "mcp__plugin_dma-insights_parallel__web_fetch"],
-    # alphaXiv is OAuth per user; its tool names cannot be listed without a
-    # signed-in session (401 anonymously, DISCOVERY §4). The family is
-    # mapped to the research tier (collector, conductor, web specialist) so
-    # a captured listing flows to them by adding names HERE; until then the
-    # grant contributes no tool and the doctor reports a WARNING, never a stop.
-    "alphaxiv": [],
+                 "mcp__plugin_dma-insights_parallel__web_fetch",
+                 "mcp__Parallel_Search__web_search",
+                 "mcp__Parallel_Search__web_fetch"],
+    # alphaXiv is OAuth per user (401 anonymously), so the plugin server
+    # binds only after a sign-in; the claude.ai connector is the usual
+    # binding. Reads only: the library/folder/follow tools are writes and
+    # no research body asks for them. Listing captured from a signed-in
+    # session, 2026-10-11.
+    "alphaxiv": ["mcp__alphaXiv__discover_papers",
+                 "mcp__alphaXiv__get_paper_content",
+                 "mcp__alphaXiv__answer_pdf_queries",
+                 "mcp__plugin_dma-insights_alphaxiv__discover_papers",
+                 "mcp__plugin_dma-insights_alphaxiv__get_paper_content",
+                 "mcp__plugin_dma-insights_alphaxiv__answer_pdf_queries"],
 }
+
+#: claude.ai connector server segment -> the plugin research server it
+#: shadows. Read by the hooks (rate gate, source health, auto-approve), the
+#: relay and agent_run; `tests/skills/test_agent_tool_provisioning.py` pins
+#: every copy equal to this one.
+SHADOWED_BY_CLAUDE_AI = {"Parallel_Search": "parallel", "alphaXiv": "alphaxiv"}
 
 #: Slices of a family, for a role that needs one half of it. `clay/people`
 #: is the contacts pass (find, poll, attach); `clay/company` the
@@ -195,13 +214,13 @@ SLICES = {
     "indeed/ratings": ["mcp__Indeed__get_company_data"],
     # The verifier's slice of the engine: re-check a card and read around
     # its span; never a new search (an adversary that can reach outside the
-    # run it judges is a participant). `evidence/challenge` adds the one
-    # independent research_brief a challenger may fire to falsify.
-    "evidence/verify":    ["mcp__plugin_dma-insights_evidence__verify_cards",
-                           "mcp__plugin_dma-insights_evidence__expand_context"],
-    "evidence/challenge": ["mcp__plugin_dma-insights_evidence__verify_cards",
-                           "mcp__plugin_dma-insights_evidence__expand_context",
-                           "mcp__plugin_dma-insights_evidence__research_brief"],
+    # run it judges is a participant). `evidence/challenge` adds the
+    # independent hunts a challenger may fire to steelman then falsify —
+    # the contradicting and the corroborating brief, never an open search.
+    "evidence/verify":    list(_surface.full_names("evidence", kinds=("verify", "context"))),
+    "evidence/challenge": list(_surface.full_names("evidence", kinds=("verify", "context")))
+                          + [_surface.full_name("evidence", "find_contradicting_evidence"),
+                             _surface.full_name("evidence", "find_corroborating_evidence")],
 }
 
 
@@ -307,7 +326,8 @@ RESEARCH_COLLECTOR = row(
     why="collects evidence for one batch of a category's open cells in the "
         "free-chain order (owner, 2026-10-11): ONE research_brief per capability "
         "with every cell's question (register-ready cards grouped by cell), the "
-        "raw open-source fallbacks (SearXNG, Parallel search; Fetch and EDGAR "
+        "raw open-source fallbacks (SearXNG, Parallel search; alphaXiv for a "
+        "published-research question; Fetch and EDGAR "
         "for a filing or a page the engine could not read) when the engine "
         "answers an error, Exa/Tavily when the session holds them, WebSearch "
         "last; reads a page as engine.cli fetch windows, registers verbatim "
@@ -395,7 +415,7 @@ RESEARCH_CONDUCTOR = row(
                        "exa", "tavily", "clay/people"], reads="floor",
     extra=["Agent", "AskUserQuestion"],
     why="holds the evidence engine, its raw fallbacks (SearXNG, Fetch, EDGAR, "
-        "Parallel), Exa, Tavily and Clay because it services every lane's "
+        "Parallel; alphaXiv for a published-research question), Exa, Tavily and Clay because it services every lane's "
         "search_requests per capability batch; its preflight is the "
         "connector contract's caller")
 
@@ -440,8 +460,9 @@ WEB_SPECIALIST = row(
     writes=LEDGER_TOOLS,
     why="services the search batches the orchestrator hands it through the "
         "evidence engine first (research_brief, crawl_entity, filings_evidence), "
-        "the raw fallbacks (SearXNG, Fetch, EDGAR, Parallel) when the engine is "
-        "down or a card is disputed, then Exa and Tavily; Tavily extract is its "
+        "the raw fallbacks (SearXNG, Fetch, EDGAR, Parallel; alphaXiv papers for "
+        "an industry-research question) when the engine is down or a card is "
+        "disputed, then Exa and Tavily; Tavily extract is its "
         "verbatim-excerpt read of last resort")
 
 #: Read-only auditors. They exist to disbelieve a result, and an adversary

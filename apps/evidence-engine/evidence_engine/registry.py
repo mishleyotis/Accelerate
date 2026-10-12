@@ -331,3 +331,90 @@ def site_pack(sub_vertical: str | None, limit: int = 8) -> list[dict]:
         elif isinstance(r, dict) and r.get("domain"):
             out.append({"domain": str(r["domain"]), "rung": str(r.get("rung") or "news")})
     return out[:limit]
+
+
+# ── per-class search (2026-10-11) ──────────────────────────────────────────
+#
+# WHY (owner, 2026-10-11): "For each of the MCP tools, avoid generic names,
+# split by functionality to ensure thorough results, as per gold standard
+# requirements." One mixed brief lets the loudest class (the entity's own
+# marketing, wires) crowd out the quieter ones a cell's evidence ladder
+# needs — a regulator record, a job posting, an app-store review. The
+# per-class research tools ask `research_brief(source_classes=[…])`: the
+# probes run against THIS registry's hosts for those classes (the
+# sub-vertical's own pack first), and a hit is kept only when it classifies
+# into one of them. The classes are SOURCE_TYPES; the tier each earns is the
+# registry's, unchanged.
+
+#: Which class a site-pack rung probes (the pack's `other` rung holds review
+#: sites; they are classified by host instead).
+_CLASS_OF_RUNG = {"regulator": "regulator", "filings": "filing", "trade_press": "trade_press",
+                  "news": "news", "careers": "job_board", "academic": "academic"}
+#: A class with no enumerable hosts probes with plain queries only and keeps
+#: what classifies into it (vendor collateral is shape-based; `other` is the
+#: open set).
+ROBOTS_REFUSE_HOSTS = frozenset({"indeed.com", "linkedin.com"})
+SEARCHABLE_CLASSES = ("regulator", "filing", "entity_owned", "trade_press", "news",
+                      "academic", "vendor", "job_board", "review_site", "other")
+
+
+def class_hosts(source_class: str) -> list[str]:
+    """The registry's hosts for one class, in file order."""
+    data = raw()
+    if source_class == "regulator":
+        reg = data.get("regulators") or {}
+        return list(dict.fromkeys((reg.get("explicit_hosts") or []) + (reg.get("hosts") or [])))
+    if source_class == "filing":
+        return list(dict.fromkeys(e["host"] for e in (data.get("filings") or {}).get("hosts") or ()))
+    if source_class in ("trade_press", "news", "academic", "job_board", "review_site"):
+        section = data.get(source_class) or {}
+        hosts = list(section.get("hosts") or [])
+        hosts += [hp["host"] for hp in section.get("host_paths") or ()]
+        return list(dict.fromkeys(hosts))
+    return []
+
+
+def class_pack(source_classes, sub_vertical: str | None, limit: int = 8) -> list[dict]:
+    """[{domain, rung}] — the `site:` probes for these classes: the
+    sub-vertical pack's own entries for them first, then the registry's
+    hosts, at most `limit`."""
+    classes = [c for c in (source_classes or ()) if c in SEARCHABLE_CLASSES]
+    out: list[dict] = []
+    seen: set[str] = set()
+
+    def add(domain: str, cls: str) -> None:
+        d = domain.lower().strip()
+        if d and d not in seen and len(out) < limit:
+            seen.add(d)
+            out.append({"domain": d, "rung": _RUNG[cls], "source_class": cls})
+
+    if "regulator" in classes:
+        add("gov", "regulator")         # `site:gov`: every US federal and state body, DFIs included
+    for row in site_pack(sub_vertical, limit=64):
+        cls = _CLASS_OF_RUNG.get(row["rung"]) or classify("https://" + row["domain"] + "/")["source_type"]
+        if cls in classes:
+            add(row["domain"], cls)
+    # one host per class per round, so a two-class call probes both; hosts
+    # whose robots.txt refuses the pages a probe finds go last (measured
+    # 2026-10-11: indeed.com /viewjob and /cmp, linkedin.com /in and
+    # /company — found, refused, no card; the Indeed connector reads those)
+    pools = [sorted(class_hosts(c), key=lambda h: h in ROBOTS_REFUSE_HOSTS) for c in classes]
+    for i in range(max((len(p) for p in pools), default=0)):
+        for cls, pool in zip(classes, pools):
+            if i < len(pool):
+                add(pool[i], cls)
+    return out
+
+
+def in_classes(url: str | None, entity: EntityRef | None, source_classes,
+               pack: list[dict] | None = None) -> bool:
+    """A hit belongs to the requested classes when it classifies into one,
+    or sits on a host the class pack probed (a sub-vertical trade title the
+    registry has not enumerated yet, e.g. cutoday.info)."""
+    classes = set(source_classes or ())
+    if not classes:
+        return True
+    if classify(url, entity)["source_type"] in classes:
+        return True
+    host = host_of(url)
+    return any(_under(host, p["domain"]) for p in (pack or ()) if p.get("source_class") in classes)
