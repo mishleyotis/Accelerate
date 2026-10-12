@@ -131,3 +131,17 @@ def test_hook_copies_equal_the_surface():
         assert full in post                               # search_order counts every brief
     for full in D.FETCHERS + D.SEARCHERS:
         assert full in pre, full                          # the page guard actually fires
+
+
+def test_the_evidence_server_instructions_name_the_surfaced_tools():
+    """Measured 2026-10-12 in a resumed session: the tools bound under the
+    surfaced names while the server instructions still said `research_brief`,
+    `expand_context`, `verify_cards` — the engine's own initialize text."""
+    text = S.instructions("evidence")
+    for n in ("find_evidence_all_sources", "expand_card_context", "verify_evidence_cards"):
+        assert n in text
+    for old in ("research_brief", "expand_context ", "verify_cards"):
+        assert old not in text
+    got = S.with_instructions("evidence", {"serverInfo": {"name": "dmai-evidence"}, "instructions": "Call research_brief first"})
+    assert got["instructions"] == text and got["serverInfo"] == {"name": "dmai-evidence"}
+    assert S.with_instructions("fetch", {"instructions": "x"}) == {"instructions": "x"}

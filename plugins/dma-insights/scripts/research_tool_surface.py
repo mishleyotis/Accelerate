@@ -102,6 +102,20 @@ def present(service: str, upstream_tools: list) -> list:
     return out
 
 
+def instructions(service: str) -> str | None:
+    """The server instructions an agent reads at initialize, naming the
+    surfaced tools (the upstream service's own text names the generic ones)."""
+    return (surface().get("instructions") or {}).get(service)
+
+
+def with_instructions(service: str, result: dict) -> dict:
+    """An upstream initialize result with this service's instructions set."""
+    text = instructions(service)
+    if not text or not isinstance(result, dict):
+        return result
+    return {**result, "instructions": text}
+
+
 def to_upstream(service: str, params: dict) -> dict:
     """tools/call params, surfaced name -> upstream name + presets."""
     params = dict(params or {})

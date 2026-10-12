@@ -111,7 +111,8 @@ def test_a_surfaced_call_reaches_the_upstream_tool_with_its_preset(proxy, monkey
             return []
         return [{"jsonrpc": "2.0", "id": msg["id"], "result": {"ok": True}}]
     monkeypatch.setattr(mcp_proxy, "forward", fwd)
-    evidence_proxy.serve("https://svc.test/mcp", INIT)
+    init = evidence_proxy.serve("https://svc.test/mcp", INIT)
+    assert "find_evidence_all_sources" in init[0]["result"]["instructions"]
     evidence_proxy.admitted("https://svc.test/mcp", {
         "jsonrpc": "2.0", "id": 9, "method": "tools/call",
         "params": {"name": "find_regulator_evidence",
@@ -148,7 +149,7 @@ def test_a_down_service_still_binds_its_last_known_tools(proxy, monkeypatch):
     # a later successful initialize clears the degraded state
     monkeypatch.setattr(mcp_proxy, "forward", lambda url, msg: [{"jsonrpc": "2.0", "id": msg.get("id"), "result": {"ok": True}}])
     ok = evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "id": 4, "method": "initialize", "params": {}})
-    assert ok[0]["result"] == {"ok": True} and evidence_proxy._degraded["reason"] is None
+    assert ok[0]["result"]["ok"] is True and evidence_proxy._degraded["reason"] is None
 
 
 def test_a_cold_start_answers_inside_the_cli_window_then_refreshes(proxy, monkeypatch):
@@ -280,7 +281,8 @@ def test_concurrent_calls_do_not_queue_behind_a_long_brief(tmp_path):
             p.stdin.write(json.dumps(o) + "\n")
             p.stdin.flush()
         send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}})
-        assert json.loads(p.stdout.readline())["result"] == {"ok": "initialize"}
+        init = json.loads(p.stdout.readline())["result"]
+        assert init["ok"] == "initialize" and "find_evidence_all_sources" in init["instructions"]
         t0 = time.monotonic()
         send({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "research_brief"}})
         send({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "coverage_report"}})

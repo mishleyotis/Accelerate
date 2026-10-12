@@ -455,6 +455,14 @@ def _to_upstream(msg: dict) -> dict:
     return {**msg, "params": surface.to_upstream(_service(), msg.get("params") or {})}
 
 
+def _initialized(replies: list, msg: dict) -> list:
+    """The upstream initialize answer, with the surface's server instructions
+    (they name the tools the agent actually sees)."""
+    return [{**r, "result": surface.with_instructions(_service(), r["result"])}
+            if isinstance(r, dict) and r.get("id") == msg.get("id") and isinstance(r.get("result"), dict) else r
+            for r in replies]
+
+
 def _presented(replies: list, msg: dict) -> list:
     out = []
     for r in replies:
@@ -491,7 +499,7 @@ def serve(url, msg: dict) -> list:
             if why is None:
                 _mark(True, None)
                 _recovered.set()
-                return box["replies"]
+                return _initialized(box["replies"], msg)
         else:
             why = f"no answer within {INIT_BUDGET_S:.0f}s (cold start?)"
         _degraded["reason"] = why
