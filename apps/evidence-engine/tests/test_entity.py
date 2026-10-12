@@ -77,3 +77,12 @@ def test_location_alone_does_not_confirm_without_the_name():
 def test_title_counts_as_page_text_and_match_is_case_insensitive():
     d = _doc("https://springfield-daily.test/x", "the body says nothing", title="EXAMPLE FEDERAL CREDIT UNION names CEO")
     assert entity.match(d, ENTITY, _info(d.url))[0] == "probable"
+
+
+def test_a_span_must_name_the_entity_itself():
+    from evidence_engine.entity import span_names_entity
+    ent = EntityRef(legal_name="Example Holdings Group, Inc.", aliases=["Example Holdings Group", "EHG"])
+    assert span_names_entity("Example Holdings Group, Inc. launched a client portal in 2025.", ent)
+    assert span_names_entity("EHG created an internal Technology Advisory Group.", ent)
+    # a fund's filing that lists the entity elsewhere on the page: the span is about the fund
+    assert not span_names_entity("We will not invest more than 30% of our total assets outside the United States.", ent)

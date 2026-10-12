@@ -1,5 +1,5 @@
 {
-  "_comment": "Last-known tools/list of each plugin research service, served by scripts/evidence_proxy.py ONLY while its service has not answered `initialize` (cold start, outage) so the tools bind from the first turn; the live listing replaces it the moment the service answers (notifications/tools/list_changed). A session's own runtime cache (<DMA_RESEARCH_LAYER_STATE>/<service>.tools.json) wins over this file. Captured from a bound session on 2026-10-11. tests/test_evidence_proxy.py pins: every tool scripts/provision_agent_tools.py grants for these four families is listed here.",
+  "_comment": "Last-known tools/list of each plugin research service, served by scripts/evidence_proxy.py ONLY while its service has not answered `initialize` (cold start, outage) so the tools bind from the first turn; the live listing replaces it the moment the service answers (notifications/tools/list_changed). A session's own runtime cache (<DMA_RESEARCH_LAYER_STATE>/<service>.tools.json) wins over this file. Captured from a bound session on 2026-10-11. This is the UPSTREAM listing: agents see it through references/research_tool_surface.json (specific names, presets), applied by the proxy. tests/test_research_tool_surface.py pins: every upstream tool the surface names is listed here.",
   "captured": "2026-10-11",
   "evidence": [
     {"name": "research_brief", "description": "Ranked evidence cards for one or more questions about an entity, plus a coverage block (novelty, saturation, conflict candidates, the ladder rungs searched). One call replaces a search → open → read → excerpt loop. BATCH A WHOLE CAPABILITY: pass `questions` as objects `{\"question\": \"...\", \"subcap_ids\": [\"P1C1.1.1\"], \"facet\": \"primary\"}` — one per cell question (and one per owed facet naming every cell it bears on). One search pass and one fetch slice serve them all; cards come back with `item.linked_subcap_ids` = the cells of the question each answered (the caller's ids, echoed, never invented) and `by_question[]` says which questions got no card. `max_cards`/`token_budget` are then per question. `entity`: {legal_name, domains[], aliases[], location, charter, cik, ticker}. `facet` ∈ works|fails|value|contradicts|corroborates (omit for all five). `subcap_labels` are opaque labels for logging only. A vendor name in a question is refused unless `allow_names_from_cards` maps it to the card_id it came from. `provenance` ∈ minimal|standard|full.",
@@ -98,6 +98,27 @@
        "limit": {"type": "integer", "default": 10}, "query": {"type": "string"}}}},
     {"name": "get_cik_by_ticker", "description": "Convert a stock ticker symbol to its SEC CIK (Central Index Key).",
      "inputSchema": {"type": "object", "required": ["ticker"], "properties": {"ticker": {"type": "string"}}}},
+    {"name": "get_company_info", "description": "Company details from SEC records: name, CIK, SIC code, exchange, fiscal year end.",
+     "inputSchema": {"type": "object", "required": ["identifier"], "properties": {"identifier": {"type": "string"}}}},
+    {"name": "get_key_metrics", "description": "Key XBRL metrics for a ticker or CIK (metrics optional).",
+     "inputSchema": {"type": "object", "required": ["identifier"], "properties": {
+       "identifier": {"type": "string"}, "metrics": {"type": "array", "items": {}, "default": null}}}},
+    {"name": "get_segment_data", "description": "Segment data for a ticker or CIK (segment_type: geographic|business).",
+     "inputSchema": {"type": "object", "required": ["identifier"], "properties": {
+       "identifier": {"type": "string"}, "segment_type": {"type": "string", "default": "geographic"}}}},
+    {"name": "analyze_8k", "description": "Analyze an 8-K current report for material events (items 1.01, 2.02, 5.02, 7.01, 8.01).",
+     "inputSchema": {"type": "object", "required": ["identifier", "accession_number"], "properties": {
+       "accession_number": {"type": "string"}, "identifier": {"type": "string"}}}},
+    {"name": "compare_periods", "description": "One metric across fiscal years (metric, start_year, end_year).",
+     "inputSchema": {"type": "object", "required": ["identifier", "metric", "start_year", "end_year"], "properties": {
+       "end_year": {"type": "integer"}, "identifier": {"type": "string"}, "metric": {"type": "string"}, "start_year": {"type": "integer"}}}},
+    {"name": "discover_company_metrics", "description": "Discover which XBRL metrics a company reports (search_term optional).",
+     "inputSchema": {"type": "object", "required": ["identifier"], "properties": {
+       "identifier": {"type": "string"}, "search_term": {"type": "string", "default": null}}}},
+    {"name": "discover_xbrl_concepts", "description": "Discover all XBRL concepts in a filing (accession_number or form_type; namespace_filter).",
+     "inputSchema": {"type": "object", "required": ["identifier"], "properties": {
+       "accession_number": {"type": "string", "default": null}, "form_type": {"type": "string", "default": "10-K"},
+       "identifier": {"type": "string"}, "namespace_filter": {"type": "string", "default": null}}}},
     {"name": "get_company_facts", "description": "XBRL company facts for a ticker or CIK.",
      "inputSchema": {"type": "object", "required": ["identifier"], "properties": {"identifier": {"type": "string"}}}},
     {"name": "get_recent_filings", "description": "Get recent SEC filings for a company or across all filers (identifier optional; form_type, days, limit).",

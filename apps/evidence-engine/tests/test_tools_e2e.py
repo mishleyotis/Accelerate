@@ -518,3 +518,29 @@ def test_search_waits_on_the_source_buckets_not_the_one_per_second_host_bucket(e
     assert snap["sources"]["searxng"]["acquired"] == n_searx > 8
     # at 4/s burst 4 the bucket costs (n-4)/4 virtual seconds; at the old 1/s, n-1
     assert out["timing_ms"]["search"] / 1000 <= (n_searx - 4) / 4 + 1.0, out["timing_ms"]
+
+
+def test_a_per_class_brief_searches_and_keeps_only_that_class(engine):
+    """Owner, 2026-10-11: split the research tools by functionality so each
+    source class is searched in its own right. `source_classes=["news"]`
+    probes the news hosts with `site:` first and keeps only hits that
+    classify as news (the wire copy here) — the entity's own page, the trade
+    copy on an unregistered host and the regulator page are dropped, and the
+    drop is counted, never silent."""
+    out = run(engine.research_brief(run_id="R-C", entity=ENTITY, source_classes=["news"],
+                                    questions=["How many members does the credit union serve?"],
+                                    max_cards=6, reference_date="2026-10-10"))
+    assert "error" not in out, out
+    kinds = [q["kind"] for q in out["search"]["queries"]]
+    assert kinds[0].startswith("site:") and "site:entity" not in kinds
+    assert out["search"]["source_classes"] == ["news"]
+    assert out["search"]["class_filtered"] >= 3
+    assert out["cards"], out["search"]
+    for c in out["cards"]:
+        assert "prnewswire.com" in c["item"]["source_url"], c["item"]["source_url"]
+
+
+def test_a_per_class_brief_refuses_an_unknown_class(engine):
+    out = run(engine.research_brief(run_id="R-C", entity=ENTITY, source_classes=["blogs"],
+                                    questions=["How many members does the credit union serve?"]))
+    assert "source_classes" in out["error"] and out["cards"] == []

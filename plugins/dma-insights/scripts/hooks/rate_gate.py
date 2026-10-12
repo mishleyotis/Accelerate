@@ -8,8 +8,8 @@ names — so a session that bypasses the engine still cannot burst a source.
 
   * one token bucket per source, shared across every process on the host
     through a state file under a `fcntl` lock (5s timeout);
-  * over budget -> exit 2 with a redirect to `research_brief` (the engine
-    path), never a silent wait;
+  * over budget -> exit 2 with a redirect to the evidence engine's find_*
+    briefs (the engine path), never a silent wait;
   * FAIL OPEN: a corrupt or unreadable state file, a lock timeout, an
     unparseable payload — the call is allowed and a warning is logged.
     A guard that denies on its own bug stops the research it exists to
@@ -42,7 +42,8 @@ LOCK_TIMEOUT_S = 5.0
 REDIRECT = (
     "dma-insights rate gate: the {source} fallback is over its budget "
     "({rate}/s, burst {burst}). Use the evidence engine instead — "
-    "`research_brief` (search → cards) or `expand_context` / `verify_cards` — "
+    "`find_evidence_all_sources` or a per-class find_* tool (search → cards), or "
+    "`expand_card_context` / `verify_evidence_cards` — "
     "which absorbs rate limits centrally, caches, and coalesces identical "
     "queries. The raw connector is for an engine outage or a disputed card; "
     "retry it after {wait:.1f}s if you must."

@@ -56,6 +56,8 @@ ROOT = Path(__file__).resolve().parents[1]
 AGENTS = ROOT / "plugins" / "dma-insights" / "agents"
 SERVER = ROOT / "apps" / "mcp" / "server.py"
 PREFIX = "mcp__plugin_dma-insights_connector__"
+sys.path.insert(0, str(ROOT / "plugins" / "dma-insights" / "scripts"))
+import research_tool_surface as _surface  # noqa: E402
 
 #: Connector tools that MUTATE — serving content, a claim, or the findings
 #: memory. Everything else the connector exposes is a read.
@@ -142,31 +144,25 @@ EXTERNAL = {
                 "mcp__Google_Drive__download_file_content",
                 "mcp__Google_Drive__get_file_metadata"],
     # ── THE RESEARCH LAYER (2026-10-10, apps/evidence-engine) ──────────────
-    # The evidence engine is the PRIMARY research interface: one
-    # `research_brief` replaces a search → open → read → excerpt loop and
-    # returns register-ready cards (docs/CARD-CONTRACT.md). Plugin-declared
-    # servers (`.mcp.json`), scoped `mcp__plugin_dma-insights_<server>__`.
-    "evidence": ["mcp__plugin_dma-insights_evidence__research_brief",
-                 "mcp__plugin_dma-insights_evidence__crawl_entity",
-                 "mcp__plugin_dma-insights_evidence__filings_evidence",
-                 "mcp__plugin_dma-insights_evidence__expand_context",
-                 "mcp__plugin_dma-insights_evidence__verify_cards",
-                 "mcp__plugin_dma-insights_evidence__coverage_report"],
+    # Plugin-declared servers (`.mcp.json`), scoped
+    # `mcp__plugin_dma-insights_<server>__`. Since 2026-10-11 the agent sees
+    # each service through its TOOL SURFACE (owner: "avoid generic names,
+    # split by functionality … as per gold standard requirements"):
+    # specific names, clear descriptions and preset arguments, applied by
+    # scripts/evidence_proxy.py from references/research_tool_surface.json —
+    # the one place a research tool is named. The grants are read from it.
+    # `evidence`: the PRIMARY interface — find_evidence_all_sources plus the
+    # per-class find_* tools (regulator, trade press, news, job postings,
+    # reviews, academic, contradicting, corroborating), the entity-site
+    # readers, SEC filing cards, context, verification and coverage.
+    "evidence": list(_surface.full_names("evidence")),
     # The RAW fallbacks: an engine outage, a disputed card, debugging. Their
     # use is rate-gated (hooks/rate_gate.py) and logged (hooks/source_health.py).
-    # Tool names verified against each server on 2026-10-10 (DISCOVERY §4).
-    "searxng": ["mcp__plugin_dma-insights_searxng__searxng_web_search",
-                "mcp__plugin_dma-insights_searxng__searxng_search_suggestions",
-                "mcp__plugin_dma-insights_searxng__searxng_instance_info",
-                "mcp__plugin_dma-insights_searxng__web_url_read"],
-    "fetch":   ["mcp__plugin_dma-insights_fetch__fetch"],
-    # sec-edgar-mcp serves 18 tools; the six a researcher reaches for.
-    "edgar":   ["mcp__plugin_dma-insights_edgar__get_company_facts",
-                "mcp__plugin_dma-insights_edgar__get_recent_filings",
-                "mcp__plugin_dma-insights_edgar__get_filing_sections",
-                "mcp__plugin_dma-insights_edgar__get_filing_content",
-                "mcp__plugin_dma-insights_edgar__get_financials",
-                "mcp__plugin_dma-insights_edgar__get_xbrl_concepts"],
+    "searxng": list(_surface.full_names("searxng")),
+    "fetch":   list(_surface.full_names("fetch")),
+    # sec-edgar-mcp serves 21 tools; the surface exposes the fifteen a
+    # researcher reaches for (no insider-trading reads).
+    "edgar":   list(_surface.full_names("edgar")),
     # ── SHADOWED BY A CLAUDE.AI CONNECTOR (measured 2026-10-11) ──────────
     # Parallel and alphaXiv are ALSO claude.ai connectors at the same URL.
     # When the account has them attached, Claude Code suppresses the
@@ -218,13 +214,13 @@ SLICES = {
     "indeed/ratings": ["mcp__Indeed__get_company_data"],
     # The verifier's slice of the engine: re-check a card and read around
     # its span; never a new search (an adversary that can reach outside the
-    # run it judges is a participant). `evidence/challenge` adds the one
-    # independent research_brief a challenger may fire to falsify.
-    "evidence/verify":    ["mcp__plugin_dma-insights_evidence__verify_cards",
-                           "mcp__plugin_dma-insights_evidence__expand_context"],
-    "evidence/challenge": ["mcp__plugin_dma-insights_evidence__verify_cards",
-                           "mcp__plugin_dma-insights_evidence__expand_context",
-                           "mcp__plugin_dma-insights_evidence__research_brief"],
+    # run it judges is a participant). `evidence/challenge` adds the
+    # independent hunts a challenger may fire to steelman then falsify —
+    # the contradicting and the corroborating brief, never an open search.
+    "evidence/verify":    list(_surface.full_names("evidence", kinds=("verify", "context"))),
+    "evidence/challenge": list(_surface.full_names("evidence", kinds=("verify", "context")))
+                          + [_surface.full_name("evidence", "find_contradicting_evidence"),
+                             _surface.full_name("evidence", "find_corroborating_evidence")],
 }
 
 

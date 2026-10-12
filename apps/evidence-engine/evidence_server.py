@@ -50,7 +50,8 @@ async def research_brief(run_id: str, entity: dict, questions: list[str | dict],
                          subcap_labels: list[str] | None = None, max_cards: int = 8,
                          token_budget: int = 2400, provenance: str = "standard",
                          reference_date: str | None = None,
-                         allow_names_from_cards: dict | None = None) -> dict:
+                         allow_names_from_cards: dict | None = None,
+                         source_classes: list[str] | None = None) -> dict:
     """Ranked evidence cards for one or more questions about an entity, plus
     a coverage block (novelty, saturation, conflict candidates, the ladder
     rungs searched). One call replaces a search → open → read → excerpt loop.
@@ -65,11 +66,16 @@ async def research_brief(run_id: str, entity: dict, questions: list[str | dict],
     ticker}. `facet` ∈ works|fails|value|contradicts|corroborates (omit for
     all five). `subcap_labels` are opaque labels for logging only. A vendor
     name in a question is refused unless `allow_names_from_cards` maps it to
-    the card_id it came from. `provenance` ∈ minimal|standard|full."""
+    the card_id it came from. `provenance` ∈ minimal|standard|full.
+    `source_classes` ⊆ regulator|filing|entity_owned|trade_press|news|
+    academic|vendor|job_board|review_site|other restricts the search to
+    those classes' registered hosts and keeps only hits that classify into
+    them (omit for every class)."""
     return await engine().research_brief(run_id=run_id, entity=entity, questions=questions,
                                          sub_vertical=sub_vertical, facet=facet, subcap_labels=subcap_labels,
                                          max_cards=max_cards, token_budget=token_budget, provenance=provenance,
-                                         reference_date=reference_date, allow_names_from_cards=allow_names_from_cards)
+                                         reference_date=reference_date, allow_names_from_cards=allow_names_from_cards,
+                                         source_classes=source_classes)
 
 
 @mcp.tool()

@@ -119,7 +119,14 @@ def families() -> dict[str, list[str]]:
     for j in range(i, len(src)):
         depth += (src[j] == "{") - (src[j] == "}")
         if depth == 0:
-            exec(f"EXTERNAL = {src[i:j + 1]}", {}, ns)      # noqa: S102
+            # the research-layer families are read from the tool surface
+            # (references/research_tool_surface.json) by the provisioner
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(
+                "research_tool_surface", Path(__file__).resolve().parent / "research_tool_surface.py")
+            _surface = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(_surface)
+            exec(f"EXTERNAL = {src[i:j + 1]}", {"_surface": _surface}, ns)      # noqa: S102
             break
     else:
         raise ContractBroken(f"EXTERNAL in {_PROVISIONER} does not close")
