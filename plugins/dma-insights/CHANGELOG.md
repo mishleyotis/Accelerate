@@ -144,6 +144,14 @@ rule HANDOFF enforced that the write never did:
   non-blocking `PEER_SET_WIDENED` Gate_Log row). Tests:
   `test_widen_peers_2026_10_12.py`.
 
+- **Report probes ran and could not be logged** (`engine/pipeline.py`): the
+  REPORTS probe round checkpointed each category's search window but not
+  RELAY's, which the probe lanes' connector searches log under and which
+  RESEARCH had left at 955 against 60. All 56 probe searches ran, every
+  `engine.cli search` was refused, and the writers saw peer absences with
+  no search behind them. The probe round now opens a fresh RELAY window
+  too. Test: `test_widen_peers_2026_10_12.py`.
+
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow
 source run under node (`research_governor_harness.mjs`) at every share from

@@ -64,3 +64,35 @@ def test_widening_never_removes_and_needs_owner_and_reason(tmp_path):
         _widen(run.open(), why="short")
     out = _widen(run.open(), add=["Peer B"])
     assert "Peer A" in out["locked_peer_set"]
+
+
+# ── the probe round opens a fresh RELAY window ──────────────────────────
+#
+# Same run: RESEARCH left the RELAY window at 955 against 60 and nothing
+# reset it, so all 56 report-probe searches ran and were refused unlogged.
+
+from types import SimpleNamespace
+
+from engine import ledger as L
+from engine import pipeline as P
+
+from engine import pipeline_stub as S
+from fixtures import researched_run
+
+
+def test_the_report_probe_round_resets_the_relay_window(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    # fill RELAY's window the way a long research stage does
+    for i in range(L.SEARCH_OP_CEILING + 5):
+        try:
+            L.append_search(wb, subcap=[cells[0]], facet="corroborates", tool="exa",
+                            query=f"relay connector volley {i}", hits=0, kept=0,
+                            outcome="EMPTY", actor="enrichment-web-specialist")
+        except L.LedgerRefusal:
+            break
+    assert L._ops_since_checkpoint(run.open(), "RELAY") >= L.SEARCH_OP_CEILING
+    opts = P.Options(dispatcher=S.StubDispatcher(S.default_handlers()), reads=S.StubReads(),
+                     shipper=S.StubShipper(), push=False, folder_root=tmp_path / "o",
+                     ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None)
+    P.Pipeline(run, opts)._report_probes()
+    assert L._ops_since_checkpoint(run.open(), "RELAY") < L.SEARCH_OP_CEILING

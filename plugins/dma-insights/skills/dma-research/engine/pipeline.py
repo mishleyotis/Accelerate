@@ -3918,8 +3918,13 @@ class Pipeline:
             # unlogged (P2C3, 2026-10-05).
             from . import runstate as RS_
             cats = sorted({str(r.get("category") or "") for r in relay.open_requests(self.run)} - {""})
+            # RELAY TOO (R-INTERAC-20261010, 2026-10-12): the probe lanes run
+            # connector tools, so their searches log under the RELAY scope —
+            # whose window RESEARCH had filled (955 against 60) and nothing
+            # reset. Every probe ran and 56 were refused unlogged, so the
+            # report writers saw peer absences with no search behind them.
             if cats:
-                RS_.checkpoint(self.wb, "REPORTS probes", scope=cats)
+                RS_.checkpoint(self.wb, "REPORTS probes", scope=cats + ["RELAY"])
             if q["queued"]:
                 self.opts.log(f"  [PROBES] {q['queued']} report probe(s) derived from "
                               f"Solution_Catalogue, Tech_Register and the peer set")
