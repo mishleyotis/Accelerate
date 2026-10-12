@@ -241,7 +241,9 @@ def test_the_rescore_prompt_rewrites_rather_than_prefixes():
 # ── an adjustment the prose applies is one the write records ─────────────
 #
 # Same run, same rescore: P2C1.8.3, P3C3.1.1 and P4C3.2.2 argued "ADJ_STALE
-# -0.3" while Caps_Applied read "none applied".
+# -0.3" while Caps_Applied read "none applied". A hand-struck score may state
+# its adjustment in prose (the ADJ_STALE rule admits it), so the write records
+# it rather than refusing it.
 
 from fixtures import RATIONALE, researched_run, score_cell
 
@@ -257,21 +259,23 @@ def _rat(eids, tail):
     return RATIONALE.format(e0=eids[0], e1=eids[1], lvl=rubric.maturity_level(2.0)) + tail
 
 
-def test_a_stated_adjustment_the_write_does_not_record_is_refused(tmp_path):
+def test_a_stated_adjustment_is_recorded_in_caps_applied(tmp_path):
     wb, cell, eids = _scoring(tmp_path)
-    with pytest.raises(A.ScoringRefusal, match="applies ADJ_STALE"):
-        score_cell(wb, cell, eids, score=2.0,
-                   rationale=_rat(eids, " ADJ_STALE -0.3 applied for 2022 evidence."))
+    out = score_cell(wb, cell, eids, score=2.0,
+                     rationale=_rat(eids, " ADJ_STALE -0.3 applied for 2022 evidence."))
+    assert out["caps_applied"] == "ADJ_STALE -0.3 (stated in the rationale)"
+    assert wb.scoring_row(cell)["Caps_Applied"] == out["caps_applied"]
 
 
-def test_a_stated_adjustment_named_in_caps_passes(tmp_path):
+def test_an_adjustment_already_recorded_is_not_recorded_twice(tmp_path):
     wb, cell, eids = _scoring(tmp_path)
     out = score_cell(wb, cell, eids, score=2.0, caps="ADJ_STALE:-0.3 (2022 evidence)",
                      rationale=_rat(eids, " ADJ_STALE -0.3 applied for 2022 evidence."))
-    assert "ADJ_STALE" in out["caps_applied"]
+    assert out["caps_applied"] == "ADJ_STALE:-0.3 (2022 evidence)"
 
 
-def test_an_adjustment_named_as_not_owed_is_not_an_application(tmp_path):
+def test_an_adjustment_named_as_not_owed_is_not_recorded(tmp_path):
     wb, cell, eids = _scoring(tmp_path)
-    score_cell(wb, cell, eids, score=2.0,
-               rationale=_rat(eids, " ADJ_STALE not applied: both sources are dated 2025."))
+    out = score_cell(wb, cell, eids, score=2.0,
+                     rationale=_rat(eids, " ADJ_STALE not applied: both sources are dated 2025."))
+    assert out["caps_applied"] == "none applied"

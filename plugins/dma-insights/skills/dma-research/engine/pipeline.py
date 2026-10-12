@@ -3553,6 +3553,7 @@ class Pipeline:
             if rows:
                 inv[0]["solutions_brief"] = rows[0]["prompt_file"]
         doc = {"workflow": str(PLUGIN / SCORING_WORKFLOW), "invocations": inv,
+               "estimate": self._scoring_price(inv, env),
                "then": self.plan()["command"],
                "how": ("start every invocation in ONE message — Workflow({scriptPath: "
                        "<workflow>, args: <invocation>}) per pillar — wait for all, then "
@@ -3565,6 +3566,62 @@ class Pipeline:
         return {"file": str(path), "invocations": inv,
                 "summary": f"{len(inv)} pillar workflow(s), {rows} scorer brief(s), "
                            f"{len(pending)} pending critic move(s)"}
+
+    def _scoring_price(self, inv: list[dict], env: dict | None) -> dict:
+        """Price every pillar's workflow before it is handed, and give each
+        its share of the SCORING envelope (R-INTERAC-20261010: the stage
+        cost $87.52 against $25 and the handoff printed "est $None").
+
+        A pillar costs its scorer rows at `cost.SCORING_TIER_USD`, its
+        critic rounds each with a rescore, and the solutions duty where it
+        rides. When a binding envelope cannot fund the whole stage, nothing
+        is handed: `StageRefused` names the figure that would, before any
+        agent is paid for — a SCORING stage cut short leaves no gate to
+        pass. Otherwise each invocation's budget carries its share, the
+        per-brief prices and the runtime rate the workflow's governor
+        converts `budget.spent()` with. Mutates `inv`; returns the estimate."""
+        from . import cost
+        tier = dict(cost.SCORING_TIER_USD)
+        rounds = int(self.opts.critic_rounds)
+        need: dict[str, float] = {}
+        for i in inv:
+            brief_usd = []
+            for md in i.get("briefs") or []:
+                try:
+                    rows = len(json.loads(Path(md).with_suffix(".json").read_text())
+                               .get("rows_to_score") or [])
+                except (OSError, ValueError, AttributeError):
+                    rows = 65                       # a brief's measured mean
+                brief_usd.append(round(rows * tier["scorer_per_row"], 2))
+            i["_brief_usd"] = brief_usd
+            need[i["pillar"]] = round(sum(brief_usd) + rounds * (tier["critic"] + tier["rescore"])
+                                      + (tier["solutions"] if i.get("solutions_brief") else 0.0), 2)
+        total = round(sum(need.values()), 2)
+        remaining = None if not env else env.get("remaining")
+        fits = remaining is None or total <= float(remaining) + 1e-9
+        if env and env.get("binding") and not fits:
+            spent = float(env.get("spent") or 0)
+            self._stage_budget_hit = {**env, "estimate_usd": total, "fits_envelope": False}
+            raise StageRefused(
+                f"AT_STAGE_BUDGET before dispatch: the SCORING envelope has "
+                f"${float(remaining):.2f} of ${float(env.get('ceiling') or 0):.2f} left and "
+                f"scoring {', '.join(f'{p} ~${u:.2f}' for p, u in sorted(need.items()))} "
+                f"costs ~${total:.2f} (scorers ${tier['scorer_per_row']}/row, "
+                f"{rounds} critic round(s) ~${tier['critic']:.2f} each). No agent was paid "
+                f"for. A person raises it (`--stage-budget SCORING="
+                f"{int(spent + total) + 1}` funds the stage); the run-wide `--max-usd` "
+                f"does not raise an envelope.")
+        for i in inv:
+            mine = need[i["pillar"]]
+            share = mine if remaining is None or not total else \
+                round(float(remaining) * mine / total, 2)
+            b = dict(i.get("budget") or {})
+            b.update(estimate_usd=mine, share_usd=share, fits_envelope=fits,
+                     tier_usd=tier, brief_usd=i.pop("_brief_usd"),
+                     usd_per_runtime_token=cost.RUNTIME_USD_PER_TOKEN)
+            i["budget"] = b
+        return {"usd": total, "by_pillar": need, "fits_envelope": fits,
+                "basis": "cost.SCORING_TIER_USD (measured R-INTERAC-20261010)"}
 
     @staticmethod
     def _lane_rows(batch: dict) -> list[dict]:

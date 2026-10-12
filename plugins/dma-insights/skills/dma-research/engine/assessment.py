@@ -619,15 +619,16 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
     # AN ADJUSTMENT THE PROSE APPLIES IS ONE THE WRITE RECORDS. R-INTERAC-
     # 20261010: three rows re-struck by hand (--score) argued "ADJ_STALE
     # -0.3" while Caps_Applied read "none applied" — the heatmap's caps line
-    # and the rationale beside it disagreed. A rationale naming an ADJ_/CAP_
-    # label with a delta must be matched by --adj/--cap or by --caps text.
+    # and the rationale beside it disagreed. A hand-struck score may state
+    # its adjustment in the prose (the ADJ_STALE rule above admits that), so
+    # the write does not refuse it: it records every ADJ_ label the prose
+    # applies with a delta and that --adj / --cap / --caps did not already
+    # name, in Caps_Applied, marked as stated in the rationale.
     recorded = " ".join([_clean(caps)] + [str(x) for x in (adjustments or [])]
                         + [str(x) for x in (cap_values or [])]).upper()
-    for lab in sorted(set(m.upper() for m in _APPLIED_ADJ.findall(rat))):
-        if lab not in recorded:
-            problems.append(f"the rationale applies {lab} but this write records "
-                            f"no {lab}: pass it (--raw with --adj {lab}:-<delta>, "
-                            f"or --caps naming it) or take it out of the prose")
+    stated_adj = [f"{m.group(1).upper()} {m.group(2).replace('−', '-').replace('–', '-')}"
+                  for m in _APPLIED_ADJ_DELTA.finditer(rat)
+                  if m.group(1).upper() not in recorded]
     if len(rat) < RATIONALE_MIN:
         problems.append(f"rationale is {len(rat)} chars; {RATIONALE_MIN} is the floor "
                         f"— evidence, maturity match, gap to next level, counter, "
@@ -686,7 +687,15 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
     if problems:
         raise ScoringRefusal(f"{subcap}: score refused — " + "; ".join(problems))
 
-    caps_txt = _clean(caps) or ("no evidence: capped at 2.0" if not eids else "none applied")
+    caps_txt = _clean(caps)
+    if stated_adj:
+        seen = []
+        for a in stated_adj:
+            if a not in seen:
+                seen.append(a)
+        caps_txt = "; ".join([t for t in (caps_txt,) if t]
+                             + [f"{a} (stated in the rationale)" for a in seen])
+    caps_txt = caps_txt or ("no evidence: capped at 2.0" if not eids else "none applied")
     with wb.transaction("assessment.score"):
         wb.set_scoring(subcap, {"Score": sc, "Confidence": conf,
                                 "Evidence_Ceiling": ec, "Caps_Applied": caps_txt,
@@ -741,8 +750,8 @@ _FINAL_FIGURE = re.compile(
 #: it ("ADJ_STALE -0.3", "ADJ_STALE: -0.25"). A label named only to say it is
 #: not owed ("ADJ_STALE not applied: ...") carries no delta and is not
 #: matched.
-_APPLIED_ADJ = re.compile(
-    r"\b((?:ADJ|CAP)_[A-Z0-9_]+)\s*[:=(]?\s*[-−–]\s*\d?\.\d", re.I)
+_APPLIED_ADJ_DELTA = re.compile(
+    r"\b(ADJ_[A-Z0-9_]+)\s*[:=(]?\s*([-−–]\s*\d?\.\d+)", re.I)
 _BAND_WORDS = {"ACTIVATING": "M1", "BUILDING": "M2", "COMPETING": "M3",
                "DIFFERENTIATING": "M4"}
 

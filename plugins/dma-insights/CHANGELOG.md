@@ -112,10 +112,27 @@ rule HANDOFF enforced that the write never did:
   prompt rewrites the rationale: the struck level argued, the level
   immediately above as the gap, arithmetic that lands on the score.
   The same rescore argued "ADJ_STALE -0.3" on three rows (P2C1.8.3,
-  P3C3.1.1, P4C3.2.2) whose Caps_Applied read "none applied"; a rationale
-  that applies an `ADJ_` label with a delta is now refused unless the write
-  records it (`--adj` or `--caps`). A label named only as not owed is not an
-  application.
+  P3C3.1.1, P4C3.2.2) whose Caps_Applied read "none applied"; an `ADJ_`
+  label the rationale applies with a delta is now written to Caps_Applied
+  ("ADJ_STALE -0.3 (stated in the rationale)") when `--adj`/`--caps` did not
+  already name it — a hand-struck score may state its adjustment in prose,
+  so the write records it rather than refusing. A label named only as not
+  owed is not an application.
+
+- **SCORING was never priced** (`engine/pipeline.py`, `engine/cost.py`,
+  `workflows/dma-pillar-scoring.js`): the stage cost $87.52 against a $25
+  envelope — 11 scorers $67.82 ($0.095 a row), 8 critic rounds $15.87, 4
+  rescores $1.52, solutions $0.73. The handoff printed "est $None", handed
+  every pillar the whole envelope as its `remaining`, and the workflow logged
+  the envelope and checked nothing. `cost.SCORING_TIER_USD` holds the
+  measured prices; `_scoring_price` prices each pillar from its briefs' rows,
+  refuses before dispatch when a binding envelope cannot fund the stage
+  (naming the `--stage-budget SCORING=` that would), and hands each pillar
+  its share; the workflow prices every scorer (its first critic round held
+  in reserve), critic and rescore before starting it, and reports rather
+  than enforces an envelope the owner made non-binding. Tests:
+  `test_scoring_budget_2026_10_12.py` (the real workflow under node at
+  shares from $0 to $40, `scoring_governor_harness.mjs`).
 
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow

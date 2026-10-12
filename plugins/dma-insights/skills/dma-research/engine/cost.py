@@ -222,6 +222,18 @@ RESEARCH_TIERS = {
 RUNTIME_USD_PER_TOKEN = 7.5e-6
 
 
+#: WHAT A SCORING WORKFLOW AGENT COSTS, measured on R-INTERAC-20261010
+#: (2026-10-12, 715 rows, four pillar workflows): 11 scorer agents $67.82
+#: ($6.17 each for ~65 rows = $0.095/row), 8 critic rounds $15.87 ($1.98
+#: each), 4 rescores $1.52 ($0.38), the solutions duty $0.73. The stage cost
+#: $87.52 against a $25 envelope it was never priced against — the handoff
+#: printed "est $None" and the workflow logged the envelope without
+#: checking it. `pipeline._scoring_price` prices a pillar from these;
+#: `dma-pillar-scoring.js` checks each agent against them before it starts.
+SCORING_TIER_USD = {"scorer_per_row": 0.095, "critic": 2.0, "rescore": 0.40,
+                    "solutions": 0.75}
+
+
 #: LEAN LANES (2026-10-09, agent_run.py `lean_command`): the floor a headless
 #: lane opens at with no MCP server, no settings source and only its own
 #: tools — measured 6,537 tokens for a bare haiku child — plus the manifest
