@@ -456,7 +456,10 @@ class Engine:
             self.store.put_card(run_id, c)
         state = self.store.run_state(run_id)
         block, new_state = COV.coverage_block(run_state=state, facet=facet, returned=cards, queries=queries,
-                                              sources_used=[s for s, v in fan["per_source"].items() if v.get("count")])
+                                              # a per-class brief searched its class's hosts, not
+                                              # the open web: its rungs come from its site: probes
+                                              sources_used=[] if classes else
+                                              [s for s, v in fan["per_source"].items() if v.get("count")])
         def _upd(s):
             s.update(new_state)
             s.setdefault("queries", []).extend([q["text"] for q in queries])

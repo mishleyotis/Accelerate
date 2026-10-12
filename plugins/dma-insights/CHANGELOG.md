@@ -34,6 +34,12 @@ subverticals in US and Canada."
   members — stated, never held; the record URL as a T1 Source_URL read
   through `engine.cli fetch`) and that the identifier is the ET identity
   anchor. Research agents are told to identify the registrant first.
+- **A per-class brief records the rungs it searched.** Verified live after
+  the 1.26.0 deploy: `find_customer_review_evidence` reported
+  `ladder_searched: ["news"]` (inferred from SearXNG answering) while it had
+  probed only review-site hosts, so an absence's Negative_Ladder would have
+  cited a search that never ran. Every `site:<rung>` probe now counts as its
+  rung, and a per-class brief takes its rungs from its probes alone.
 
 ## 1.26.0 — 2026-10-11 — research tools named for what they find, split by source class
 
