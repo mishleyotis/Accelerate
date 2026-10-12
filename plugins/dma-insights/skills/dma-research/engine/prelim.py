@@ -790,8 +790,27 @@ def widen_peers(wb: RunWorkbook, add: list[str], *, rule: str, owner: str,
                                "Scope": "Handoff_Lock", "Verdict": "PASS",
                                "Blocking": False, "Detail": detail}, save=False)
         wb.save()
+    # Widening re-opens every per-peer search already run against the narrower
+    # set (R-INTERAC-20261010: the adoption search had covered one peer, the
+    # widening added four, and nothing re-opened it — 28 pairs promoted as
+    # "Not searched"). Say so where the driver and the next agent look; the
+    # platform page preflight refuses until the pairs are searched.
+    from .assessment import peer_adoption_gaps, tech_peer_gaps
+    owed = peer_adoption_gaps(wb) + tech_peer_gaps(wb)
+    if owed:
+        added = [p for p in wanted if p not in have]
+        wb.append("Gate_Log", {
+            "Timestamp": _utcnow(), "Gate": "PEER_ADOPTION_OWED",
+            "Scope": "Platform_Peer_Adoption", "Verdict": "FAIL", "Blocking": True,
+            "Detail": (f"{len(owed)} peer search(es) owed (platform adoption and "
+                       f"tech register) after "
+                       f"the peer set was widened (added: {', '.join(added)}). "
+                       f"`engine.assessment peer-gaps` lists them; record each with "
+                       f"`engine.assessment peer-adoption` or `engine.cli techscan "
+                       f"peer-record`.")[:900]})
     return {"was": have, "locked_peer_set": wanted, "peer_n": len(wanted),
-            "categories": len([r for r in rows if _clean(r.get("Category_ID"))])}
+            "categories": len([r for r in rows if _clean(r.get("Category_ID"))]),
+            "adoption_owed": len(owed)}
 
 
 def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,

@@ -29,6 +29,44 @@ reads. Test: `apps/mcp/tests/test_cagr_and_scan_gates.py`.
 `peer_deployments[].peer` — the same class as `candidate` and `product`.
 `peer` joins `SG_V4_VERBATIM_LEAVES`; the `basis` beside it stays counted.
 
+**Every locked peer is searched before a peer surface ships**
+(owner, R-INTERAC-20261010: "the peer context is not completed alongside the
+platform page"). The adoption search had run against ONE peer; the owner then
+widened the set to five (`engine.prelim widen-peers`), and nothing re-opened
+it — SCORING's adoption duty fired only while `Platform_Peer_Adoption` was
+EMPTY. The platform page promoted 28 of 35 (product, peer) rows reading "Not
+searched", the techstack register 31 of 40 reading "No search for this peer
+on this product is recorded", and two established peer deployments in the
+sheet (AP+ on AWS + Snowflake, The Clearing House on Workday) sat on rows the
+page dropped. Prevention, at every layer that could have caught it:
+
+- `engine.assessment peer_adoption_gaps` / `tech_peer_gaps` compute the owed
+  (product or register row, locked peer) pairs; `engine.assessment peer-gaps`
+  lists them. `peer-adoption` accepts `NA` (an advisory line no peer deploys)
+  and refuses an UNKNOWN whose basis says the pair was never searched;
+  `techscan peer-record` refuses the same.
+- SCORING's adoption duty fires while any pair is owed, not only on an empty
+  sheet; `widen-peers` logs a blocking `PEER_ADOPTION_OWED` with the count.
+- PAGES preflight: `PEER-ADOPT` halts the platform page on any owed pair
+  (every recommended platform is served) and warns on the techstack page
+  (a register row the producer drops on materiality owes nothing).
+- Connector AG-04 (`peer_set.named_peer_findings`): a null peer row whose
+  basis says it was never searched is refused on platform tiles and on
+  served techstack register rows — the hand-driven path is covered too.
+- PROMOTE re-runs when a page was re-shipped after the last promotion (it
+  read only "was the run ever promoted", so a repaired page stayed staged).
+
+For this run: 28 platform + 32 register pairs searched and recorded
+(Pay.UK runs Dynamics 365, Fabric, Power BI, Purview and Kong; Vipps
+MobilePay runs Salesforce, Marketing Cloud, Azure and Kong; The Clearing
+House runs ServiceNow, Dynatrace, Entra ID and Azure; Swish names none);
+platform and techstack re-shipped and re-promoted.
+
+**Open decision, not resolved here:** `peer_coverage` has three definitions —
+the contract text ("the established share"), connector AG-04 (deployed ÷
+all peer rows, one peer of tolerance) and `techscan.peer_state` (deployed ÷
+established). The run serves AG-04's arithmetic, the binding gate.
+
 Owner, R-INTERAC-20261010: "I see workflows failing and being restarted.
 Please diagnose and fix the above to ensure this never recurs."
 

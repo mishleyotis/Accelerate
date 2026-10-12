@@ -1460,8 +1460,17 @@ class Pipeline:
             return ok, ("all six pages PASS on version B" if ok else
                         f"pending: {', '.join(p for p in allp if not self._page_ok(p, 'B'))}")
         if stage == "PROMOTE":
-            ok = bool(str(md.get("promoted_at") or "").strip())
-            return ok, (f"promoted at {md.get('promoted_at')}" if ok else "not promoted")
+            at = str(md.get("promoted_at") or "").strip()
+            # A page re-shipped AFTER the promotion is staged, not served: the
+            # promotion is owed again (R-INTERAC-20261010, the platform page
+            # repaired after promote would otherwise never reach a reader).
+            later = sorted(p for p, rec in (self.state.get("pages") or {}).items()
+                           if isinstance(rec, dict) and rec.get("status") == "pass"
+                           and at and str(rec.get("at") or "")[:19] > at[:19])
+            ok = bool(at) and not later
+            return ok, (f"promoted at {at}" if ok else
+                        f"re-shipped after the promotion at {at}: {', '.join(later)}"
+                        if at else "not promoted")
         raise KeyError(stage)
 
     def _page_ok(self, page: str, version: str) -> bool:
@@ -3571,8 +3580,13 @@ class Pipeline:
         # THE SOLUTIONS DUTY rides on the first invocation while its tabs are
         # empty — the lane path runs it beside the scorers, and the
         # assessment report's preconditions stay shut without it.
-        if not all([r for r in self.wb.rows(t) if any(v not in (None, "") for v in r.values())]
-                   for t in ("Solution_Catalogue", "Platform_Peer_Adoption")):
+        # ... and while any (product, locked peer) pair is still owed: one row
+        # used to count as done, so a peer added after the search was never
+        # searched (R-INTERAC-20261010, 28 pairs).
+        from .assessment import peer_adoption_gaps
+        if (not all([r for r in self.wb.rows(t) if any(v not in (None, "") for v in r.values())]
+                    for t in ("Solution_Catalogue", "Platform_Peer_Adoption"))
+                or peer_adoption_gaps(self.wb)):
             sb = brief.scoring_batch(self.wb, run=self.run,
                                      out_dir=self._briefs("scoring_wf_solutions"), solutions=True)
             rows = self._lane_rows(sb)
@@ -4424,10 +4438,12 @@ class Pipeline:
                           detail=("advisory: " + "; ".join(
                               f"[{b['gate']}] {b['detail']} — fix: {b['fix']}"
                               for b in advisory))[:900])
+            gates = ", ".join(sorted({str(b.get("gate")) for b in advisory}))
             self.opts.log(f"  [{stage}] {len(advisory)} advisory preflight finding(s) "
-                          f"(unlinked timeline or report-section citations) — the page "
-                          f"producer states them on the surface (r_layer.probes_run); "
-                          f"link the capability ones to clear this line")
+                          f"[{gates}] — not a halt; the details are in Gate_Log "
+                          f"(PAGE_PREFLIGHT). ET-07: the producer states unlinked "
+                          f"citations on the surface; PEER-ADOPT: peer searches owed "
+                          f"on register rows the page may still drop")
         if not blockers:
             if todo:
                 L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="PASS",

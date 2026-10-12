@@ -404,6 +404,12 @@ def peer_record(wb: RunWorkbook, *, ts_id: str, peer: str,
             "a peer row states the BASIS in a clause — what was seen and "
             "where. 'Deployed: yes' with nothing behind it is the shape "
             "that makes a peer comparison unfalsifiable.")
+    from .assessment import _NOT_SEARCHED
+    if deployed is None and _NOT_SEARCHED.search(str(basis or "")):
+        raise ScanRefused(
+            "an unknown peer row records a search that came back empty; this "
+            "basis says the pair was never searched. Search the peer for the "
+            "product and record what came back (R-INTERAC-20261010)")
     if deployed and not source_url:
         raise ScanRefused(
             "a peer recorded as DEPLOYED carries the source that says so. "

@@ -268,6 +268,53 @@ def page_floors(wb, pages) -> list:
     return out
 
 
+def peer_adoption_blockers(wb) -> list:
+    """The platform page renders one peer row per LOCKED peer per card. A
+    pair never searched ships as "Not searched" (R-INTERAC-20261010: 28 of
+    35 pairs, after the peer set was widened from one to five) — so the
+    page waits until every pair carries a searched verdict."""
+    from .assessment import peer_adoption_gaps
+    gaps = peer_adoption_gaps(wb)
+    if not gaps:
+        return []
+    peers = sorted({g["peer"] for g in gaps})
+    shown = "; ".join(f"{g['product']} x {g['peer']}" for g in gaps[:8])
+    return [{
+        "gate": "PEER-ADOPT", "page": "platform", "needs_connector": False,
+        "detail": (f"{len(gaps)} (product, peer) pair(s) on Platform_Peer_Adoption "
+                   f"were never searched, across {len(peers)} locked peer(s) "
+                   f"({', '.join(peers)}): {shown}"
+                   + (" ..." if len(gaps) > 8 else "")),
+        "fix": ("search each pair (peer name + product, the vendor's customer story, "
+                "the peer's own job postings) and record it: `engine.assessment "
+                "peer-adoption --product ... --peer ... --verdict Y|N|UNKNOWN|NA "
+                "--basis ... --source ...`; `engine.assessment peer-gaps` lists what "
+                "is still owed. A competing product at the same layer is N.")}]
+
+
+def tech_peer_blockers(wb) -> list:
+    """A register row compared to peers is compared to every locked peer.
+
+    ADVISORY, not a halt: the techstack producer may drop a register row on
+    materiality (D4 — HR software, website hosting), and a dropped row's peer
+    rows owe nothing. The connector refuses a SERVED row whose peer row says
+    it was never searched (AG-04, peer_set.unsearched_register_rows); this
+    line names the work early so the producer is not refused for it."""
+    from .assessment import tech_peer_gaps
+    gaps = tech_peer_gaps(wb)
+    if not gaps:
+        return []
+    shown = "; ".join(f"{g['ts_id']} x {g['peer']}" for g in gaps[:8])
+    return [{
+        "gate": "PEER-ADOPT", "page": "techstack", "needs_connector": False,
+        "severity": "warn",
+        "detail": (f"{len(gaps)} (register row, peer) pair(s) on Tech_Peer_Deployments "
+                   f"were never searched: {shown}" + (" ..." if len(gaps) > 8 else "")),
+        "fix": ("search each pair and record it: `engine.cli techscan peer-record "
+                "--ts ... --peer ... --deployed yes|no|unknown --basis ... "
+                "[--source-url ...]`; a competing product at the same layer is no")}]
+
+
 # ── the preflight ─────────────────────────────────────────────────────────
 
 def preflight(wb, pages=("techstack",)) -> list:
@@ -285,6 +332,10 @@ def preflight(wb, pages=("techstack",)) -> list:
                     f"(or retire the citation); link every PRELIM and profile row "
                     f"before PAGES, not one page at a time")})
     out += page_floors(wb, pages)
+    if "platform" in pages:
+        out += peer_adoption_blockers(wb)
+    if "techstack" in pages:
+        out += tech_peer_blockers(wb)
     if "techstack" not in pages:
         return out
     rows = [r for r in wb.rows("Tech_Register") if _clean(r.get("TS_ID"))]

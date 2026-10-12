@@ -1170,18 +1170,117 @@ def solution(wb: RunWorkbook, *, sol_id: str, name: str, platform: str,
     return {"solution": sol_id, "rows": len(wb.rows("Solution_Catalogue"))}
 
 
+#: A peer row that says it was never searched. R-INTERAC-20261010
+#: (2026-10-12): the peer set was widened from one to five after the adoption
+#: search had run, and the platform page promoted with 28 (product, peer)
+#: pairs reading "Not searched ... the platform adoption search covered
+#: Australian Payments Plus only".
+_NOT_SEARCHED = re.compile(
+    r"\bnot (?:yet )?searched\b|\bnever searched\b|\bwas not searched\b|"
+    r"\bno search\b[^.;]{0,80}\b(?:is |was )?(?:recorded|run|made)\b|"
+    r"\bnot run\b|\bNOT_RUN\b|\bsearch (?:covered|ran for) [^.;]{0,80}\bonly\b",
+    re.I)
+
+
+def _peer_key(name) -> str:
+    return re.sub(r"\s+", " ", _clean(name).lower())
+
+
+def locked_peers(wb: RunWorkbook) -> list[str]:
+    """The peer set frozen in Handoff_Lock (the set every peer surface owes)."""
+    try:
+        lock = wb.handoff_lock()
+    except Exception:                               # noqa: BLE001
+        return []
+    return [p for p in str(lock.get("locked_peer_set") or "").split("|") if _clean(p)]
+
+
+def peer_adoption_gaps(wb: RunWorkbook) -> list[dict]:
+    """Every (product, locked peer) pair Platform_Peer_Adoption still owes.
+
+    The product set is the run's recommended platforms (Solution_Catalogue)
+    plus any product already carrying an adoption row; the peer set is the
+    LOCKED set, so a peer added by `widen_peers` after the search ran is owed
+    a search rather than silently missing. A pair is owed when it has no row
+    or its row records that it was never searched. Y, N, NA and an UNKNOWN that
+    records an empty search all close it."""
+    peers = locked_peers(wb)
+    if not peers:
+        return []
+    rows = [r for r in wb.rows("Platform_Peer_Adoption")
+            if _clean(r.get("Product / Layer")) and _clean(r.get("Peer"))]
+    products: list[str] = []
+    for r in wb.rows("Solution_Catalogue"):
+        pr = _clean(r.get("platform"))
+        if pr and pr.lower() not in [x.lower() for x in products]:
+            products.append(pr)
+    for r in rows:
+        pr = _clean(r.get("Product / Layer"))
+        if pr.lower() not in [x.lower() for x in products]:
+            products.append(pr)
+    have = {(_clean(r.get("Product / Layer")).lower(), _peer_key(r.get("Peer"))): r
+            for r in rows}
+    owed = []
+    for pr in products:
+        for peer in peers:
+            r = have.get((pr.lower(), _peer_key(peer)))
+            if r is None:
+                owed.append({"product": pr, "peer": peer, "why": "no adoption row"})
+            elif (_clean(r.get("Verdict")).upper() == "UNKNOWN"
+                  and _NOT_SEARCHED.search(_clean(r.get("Basis")))):
+                owed.append({"product": pr, "peer": peer,
+                             "why": "row records the pair was never searched"})
+    return owed
+
+
+def tech_peer_gaps(wb: RunWorkbook) -> list[dict]:
+    """Every (register row, locked peer) pair Tech_Peer_Deployments owes.
+
+    A register row that compares itself to peers compares itself to ALL of
+    them: once any peer row exists for a TS_ID, each locked peer needs a
+    searched row (R-INTERAC-20261010: 31 of 40 techstack peer rows promoted
+    reading "No search for this peer on this product is recorded")."""
+    peers = locked_peers(wb)
+    if not peers:
+        return []
+    by_ts: dict[str, dict] = {}
+    for r in wb.rows("Tech_Peer_Deployments"):
+        ts = _clean(r.get("TS_ID"))
+        if ts and _clean(r.get("Peer")):
+            by_ts.setdefault(ts, {})[_peer_key(r.get("Peer"))] = r
+    owed = []
+    for ts, have in sorted(by_ts.items()):
+        for peer in peers:
+            r = have.get(_peer_key(peer))
+            if r is None:
+                owed.append({"ts_id": ts, "peer": peer, "why": "no peer row"})
+            elif (_clean(r.get("Deployed")).lower() in ("", "unknown", "none")
+                  and _NOT_SEARCHED.search(_clean(r.get("Basis")))):
+                owed.append({"ts_id": ts, "peer": peer,
+                             "why": "row records the pair was never searched"})
+    return owed
+
+
 def peer_adoption(wb: RunWorkbook, *, product: str, peer: str, verdict: str,
                   basis: str, source: str, as_of: str = "") -> dict:
     require_stage(wb)
-    v = _clean(verdict).upper()
-    if v not in ("Y", "N", "UNKNOWN"):
-        raise ScoringRefusal("verdict is Y, N or UNKNOWN")
-    if v != "UNKNOWN" and (len(_clean(basis)) < 20 or not _clean(source)):
+    v = _clean(verdict).upper().replace("/", "")
+    if v not in ("Y", "N", "UNKNOWN", "NA"):
+        raise ScoringRefusal("verdict is Y, N, UNKNOWN or NA (not applicable: an "
+                             "advisory or service line no peer deploys)")
+    if v == "UNKNOWN" and _NOT_SEARCHED.search(_clean(basis)):
+        raise ScoringRefusal(
+            "an UNKNOWN verdict records a search that came back empty; this basis "
+            "says the pair was never searched. Search the peer for the product "
+            "(peer name + product, vendor customer story, the peer's own job "
+            "postings) and record what came back")
+    if v in ("Y", "N") and (len(_clean(basis)) < 20 or not _clean(source)):
         raise ScoringRefusal("a Y/N deployment verdict carries a basis (>=20 chars) "
                              "and a source; a technographic claim about a named "
                              "institution carries a research finding's burden")
-    if v == "UNKNOWN" and len(_clean(basis)) < 20:
-        raise ScoringRefusal("UNKNOWN carries what was searched and came back empty")
+    if v in ("UNKNOWN", "NA") and len(_clean(basis)) < 20:
+        raise ScoringRefusal("UNKNOWN carries what was searched and came back empty; "
+                             "NA carries why no peer could deploy it")
     row = {
         "Product / Layer": _clean(product), "Peer": _clean(peer), "Verdict": v,
         "Basis": _clean(basis), "Source": _clean(source) or "not established",
@@ -1444,6 +1543,8 @@ def main(argv=None) -> int:
     pa.add_argument("--product", required=True); pa.add_argument("--peer", required=True)
     pa.add_argument("--verdict", required=True); pa.add_argument("--basis", required=True)
     pa.add_argument("--source", default=""); pa.add_argument("--as-of", default="")
+    common(sub.add_parser("peer-gaps", help="every (product, locked peer) pair "
+                                            "Platform_Peer_Adoption still owes"))
     common(sub.add_parser("gate"))
     common(sub.add_parser("state"))
     a = ap.parse_args(argv)
@@ -1487,6 +1588,12 @@ def main(argv=None) -> int:
         elif a.cmd == "peer-adoption":
             out = peer_adoption(wb, product=a.product, peer=a.peer, verdict=a.verdict,
                                 basis=a.basis, source=a.source, as_of=a.as_of)
+        elif a.cmd == "peer-gaps":
+            gaps = peer_adoption_gaps(wb)
+            tech = tech_peer_gaps(wb)
+            print(json.dumps({"owed": len(gaps) + len(tech), "platform_pairs": gaps,
+                              "register_pairs": tech}, indent=2))
+            return 0 if not (gaps or tech) else 1
         elif a.cmd == "gate":
             out = gate(wb, run.qa_dir)
             print(json.dumps(out, indent=2, sort_keys=True, default=str))
