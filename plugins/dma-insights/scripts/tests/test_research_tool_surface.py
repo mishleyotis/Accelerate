@@ -145,3 +145,21 @@ def test_the_evidence_server_instructions_name_the_surfaced_tools():
     got = S.with_instructions("evidence", {"serverInfo": {"name": "dmai-evidence"}, "instructions": "Call research_brief first"})
     assert got["instructions"] == text and got["serverInfo"] == {"name": "dmai-evidence"}
     assert S.with_instructions("fetch", {"instructions": "x"}) == {"instructions": "x"}
+
+
+def test_find_registrant_covers_every_sub_vertical_not_only_sec_filers():
+    """Owner, 2026-10-12: "The tool is supposed to be find registrant as we
+    deal with 9 subverticals in US and Canada." EDGAR's company search is no
+    longer the registrant lookup; the evidence server's find_registrant is,
+    and its description names the registry for each kind of institution."""
+    e = next(x for x in S.entries("evidence") if x["name"] == "find_registrant")
+    assert e["upstream"] == "find_registrant" and e["kind"] == "registry"
+    text = S.description(e)
+    for reg in ("NCUA", "FDIC", "FINRA", "Farm Credit", "OSFI", "EDGAR", "NAIC", "provincial"):
+        assert reg in text, reg
+    for code in ("CU", "RB", "CL", "CIB", "AM", "RIA", "IC", "IB", "FC"):
+        assert code in text, code
+    for col in ("Firmographics", "Regulator", "Source_URL", "T1", "ET gates"):
+        assert col in text, col
+    assert "search_companies" not in {x["upstream"] for x in S.entries("edgar")}
+    assert "find_sec_registrant" not in S.names("edgar")

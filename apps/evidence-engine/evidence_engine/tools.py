@@ -154,6 +154,8 @@ class Engine:
     registry_pack: list[str] = field(default_factory=list)
     #: the last brief's fused hit list (diagnostics; not returned by any tool)
     last_hits: list[dict] = field(default_factory=list)
+    #: the registries' API client (find_registrant), opened on first use
+    _registry_http: object | None = None
 
     def __post_init__(self):
         st = settings()
@@ -660,6 +662,44 @@ class Engine:
                    "not_found": sum(1 for r in results if r["verdict"] == "NOT_FOUND")}
         return {"run_id": run_id, "results": results, "summary": summary,
                 "note": "confidence only moves down: a FAIL here is final until the card is re-issued"}
+
+    # ── 7 · find_registrant ─────────────────────────────────────────────
+    async def find_registrant(self, *, entity: dict, sub_vertical: str | None = None,
+                              country: str | None = None, run_id: str | None = None) -> dict:
+        """The institution in the registry that holds it, for every
+        sub-vertical in the US and Canada (registrants.py). Registries with a
+        keyless interface are asked directly; the ones without are searched
+        on their own hosts through the paced fan-out and come back as
+        candidates. Never a card: a registry record identifies the entity;
+        the evidence about it is the record page, read and registered."""
+        import httpx
+
+        from . import registrants as REG
+        from .tls import trust_context
+        ent = entity_ref(entity)
+        if ent is None or not ent.legal_name:
+            return {"error": "entity.legal_name is required"}
+        if self._registry_http is None:
+            self._registry_http = httpx.AsyncClient(timeout=25, follow_redirects=True, verify=trust_context())
+        lookups = REG.Registrants(self._registry_http, user_agent=settings().sec_user_agent)
+        free = self._free_sources_available()
+
+        async def search(queries: list[dict]) -> list[dict]:
+            if not free:
+                return []
+            fan = await S.fan_out(queries, searx=self.searx if "searxng" in free else None,
+                                  parallel=self.parallel if "parallel" in free else None,
+                                  run_id=run_id or "registrant", bucket_wait=self._source_wait,
+                                  cache=_SearchCache(self.store), breakers=RL.breakers(),
+                                  budget_s=min(60.0, settings().search_phase_budget_s))
+            return [{"url": h["url"], "title": h.get("title", ""), "snippet": h.get("snippet", "")}
+                    for h in fan["hits"]]
+
+        t0 = time.monotonic()
+        out = await lookups.lookup(ent, sub_vertical=sub_vertical, country=country, search=search)
+        out["entity"] = ent.legal_name
+        out["elapsed_ms"] = int((time.monotonic() - t0) * 1000)
+        return out
 
     # ── 6 · coverage_report ─────────────────────────────────────────────
     async def coverage_report(self, *, run_id: str) -> dict:

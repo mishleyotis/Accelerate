@@ -160,7 +160,7 @@ EXTERNAL = {
     # use is rate-gated (hooks/rate_gate.py) and logged (hooks/source_health.py).
     "searxng": list(_surface.full_names("searxng")),
     "fetch":   list(_surface.full_names("fetch")),
-    # sec-edgar-mcp serves 21 tools; the surface exposes the fifteen a
+    # sec-edgar-mcp serves 21 tools; the surface exposes the fourteen a
     # researcher reaches for (no insider-trading reads).
     "edgar":   list(_surface.full_names("edgar")),
     # ── SHADOWED BY A CLAUDE.AI CONNECTOR (measured 2026-10-11) ──────────

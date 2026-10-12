@@ -47,6 +47,12 @@
        "card_ids": {"type": "array", "items": {"type": "string"}},
        "recheck_liveness": {"type": "boolean", "default": true},
        "run_id": {"type": "string"}}}},
+    {"name": "find_registrant", "description": "The institution in the registry that holds it — every sub-vertical, US and Canada (NCUA, FDIC, SEC IAPD, FINRA BrokerCheck, FCA, OSFI, SEC EDGAR; NAIC/state and Canadian provincial/securities regulators searched as candidates).",
+     "inputSchema": {"type": "object", "additionalProperties": false, "required": ["entity"], "properties": {
+       "country": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null},
+       "entity": {"type": "object", "additionalProperties": true},
+       "run_id": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null},
+       "sub_vertical": {"anyOf": [{"type": "string"}, {"type": "null"}], "default": null}}}},
     {"name": "coverage_report", "description": "Per-facet and per-label card counts, source diversity, single-source concentration (flag > 40%), recency distribution, open conflict candidates, saturation by facet, and the ladder rungs searched.",
      "inputSchema": {"type": "object", "additionalProperties": false, "required": ["run_id"], "properties": {
        "run_id": {"type": "string"}}}}

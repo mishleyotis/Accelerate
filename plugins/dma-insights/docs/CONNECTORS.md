@@ -488,10 +488,10 @@ Agents go to the **evidence engine** first; the other five are escape hatches
 
 | Plugin server | Tools | Hosted | Access path | Licence |
 |---|---|---|---|---|
-| `evidence` | 6 upstream, 17 surfaced (`docs/EVIDENCE-ENGINE-TOOLS.md`) | Cloud Run `dmai-evidence` (`apps/evidence-engine`) | `scripts/evidence_proxy.py`: Google ID token for the service's audience + `X-DMA-Path-Token` from Secret Manager `dmai-evidence-path-token` — the same rungs as the connector, a sibling helper (`evidence_auth_headers.sh`), nothing to paste | FastMCP Apache-2.0; trafilatura, htmldate Apache-2.0; pypdfium2 BSD/Apache; rank-bm25 Apache-2.0; datasketch, edgartools MIT; fastembed Apache-2.0 (models MIT/Apache-2.0) |
+| `evidence` | 7 upstream, 18 surfaced (`docs/EVIDENCE-ENGINE-TOOLS.md`) | Cloud Run `dmai-evidence` (`apps/evidence-engine`) | `scripts/evidence_proxy.py`: Google ID token for the service's audience + `X-DMA-Path-Token` from Secret Manager `dmai-evidence-path-token` — the same rungs as the connector, a sibling helper (`evidence_auth_headers.sh`), nothing to paste | FastMCP Apache-2.0; trafilatura, htmldate Apache-2.0; pypdfium2 BSD/Apache; rank-bm25 Apache-2.0; datasketch, edgartools MIT; fastembed Apache-2.0 (models MIT/Apache-2.0) |
 | `searxng` | 4 upstream, 6 surfaced (`keyword_search_web_pages`, `keyword_search_news`, `keyword_search_papers`, `suggest_query_refinements`, `check_search_engines`, `read_web_page_section`) | Cloud Run `dmai-searxng` (`infra/evidence-engine/searxng`) | ID token + secret path segment `/mcp-<token>` from `dmai-searxng-path-token` | SearXNG AGPL-3.0 (unmodified, source linked); mcp-searxng MIT; Supergateway MIT |
 | `fetch` | 1 (`read_web_page_markdown`) | Cloud Run `dmai-fetch` | ID token + `/mcp-<token>` | mcp-server-fetch MIT |
-| `edgar` | 21 served, 15 surfaced and granted | Cloud Run `dmai-edgar` | ID token + `/mcp-<token>`; `SEC_EDGAR_USER_AGENT` set | sec-edgar-mcp **AGPL-3.0** (run unmodified; the service root links its source) |
+| `edgar` | 21 served, 14 surfaced and granted | Cloud Run `dmai-edgar` | ID token + `/mcp-<token>`; `SEC_EDGAR_USER_AGENT` set | sec-edgar-mcp **AGPL-3.0** (run unmodified; the service root links its source) |
 | `parallel` | `web_search` (and a whole-page read tool the lanes are denied) | vendor, `https://search.parallel.ai/mcp`, anonymous free tier | `type: http`, no key | vendor terms (free for exploration and light use; rate limits unpublished — measured in Phase D) |
 | `alphaxiv` | unlisted (401 anonymously) | vendor, `https://api.alphaxiv.org/mcp/v1`, OAuth per user | `type: http`; the session signs in | vendor terms |
 
@@ -513,6 +513,15 @@ classify into it are kept. The full table is in
 `docs/EVIDENCE-ENGINE-TOOLS.md` (generated). Parallel and alphaXiv bind as
 claude.ai connectors or plain `http` servers, outside the proxy, and keep
 their vendors' names.
+
+**Finding the registrant** (owner 2026-10-12: "The tool is supposed to be
+find registrant as we deal with 9 subverticals in US and Canada"):
+`find_registrant` on the evidence server replaces EDGAR's SEC-only company
+search. It routes by sub-vertical and country to the registry that holds the
+institution — NCUA, FDIC BankFind, SEC IAPD, FINRA BrokerCheck, the Farm
+Credit Administration directory, OSFI and SEC EDGAR, all keyless — and
+searches NAIC/state insurance departments and Canadian provincial and
+securities regulators (no registry API) as candidates.
 
 **Who holds what** (`scripts/provision_agent_tools.py`; owner 2026-10-11,
 "ensure all six are mapped to the agents and well orchestrated"): the engine

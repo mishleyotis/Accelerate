@@ -126,6 +126,25 @@ async def coverage_report(run_id: str) -> dict:
     return await engine().coverage_report(run_id=run_id)
 
 
+@mcp.tool()
+async def find_registrant(entity: dict, sub_vertical: str | None = None, country: str | None = None,
+                          run_id: str | None = None) -> dict:
+    """The institution in the registry that holds it — every sub-vertical,
+    US and Canada. Asks, by sub-vertical (CU RB CL CIB AM RIA/WM IC IB FC)
+    and country (US|CA; omit for both): NCUA (credit unions), FDIC BankFind
+    (banks), SEC IAPD and FINRA BrokerCheck (advisers, broker-dealers), the
+    Farm Credit Administration directory (Farm Credit), OSFI (Canadian
+    federally regulated institutions) and SEC EDGAR (any public parent)
+    directly; NAIC/state insurance departments and Canadian provincial and
+    securities regulators, which publish no registry API, are searched on
+    their own hosts and returned as candidates. Each match carries the
+    registry's identifier (CIK, CRD, FDIC certificate, NCUA charter, FCA
+    UNINUM), the record URL and the fields the registry states; every
+    registry asked reports ok, no_match, candidates, error or not_run."""
+    return await engine().find_registrant(entity=entity, sub_vertical=sub_vertical, country=country,
+                                          run_id=run_id)
+
+
 @mcp.resource("health://sources", name="source health", mime_type="application/json")
 def source_health() -> str:
     return json.dumps({"version": __version__, "limits": RL.health(),

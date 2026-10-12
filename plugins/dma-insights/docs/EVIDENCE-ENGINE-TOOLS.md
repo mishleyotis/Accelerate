@@ -2,7 +2,7 @@
 
 Generated from `apps/evidence-engine/evidence_server.py` by `gen_evidence_tools_md.py`; signatures read with `ast`, descriptions are each tool's docstring verbatim. Regenerate rather than hand-edit.
 
-**6 tools**, FastMCP over streamable HTTP, deployed as `dmai-evidence` (plugin server name `evidence`, scoped tool prefix `mcp__plugin_dma-insights_evidence__`). Contract: `apps/evidence-engine/docs/CARD-CONTRACT.md`.
+**7 tools**, FastMCP over streamable HTTP, deployed as `dmai-evidence` (plugin server name `evidence`, scoped tool prefix `mcp__plugin_dma-insights_evidence__`). Contract: `apps/evidence-engine/docs/CARD-CONTRACT.md`.
 
 | Tool | Signature |
 |---|---|
@@ -12,6 +12,7 @@ Generated from `apps/evidence-engine/evidence_server.py` by `gen_evidence_tools_
 | `expand_context` | `expand_context(context_handle: str, window: int = 2, run_id: str | None = None)` |
 | `verify_cards` | `verify_cards(run_id: str, card_ids: list[str], recheck_liveness: bool = True)` |
 | `coverage_report` | `coverage_report(run_id: str)` |
+| `find_registrant` | `find_registrant(entity: dict, sub_vertical: str | None = None, country: str | None = None, run_id: str | None = None)` |
 
 ## What agents see — the research tool surface
 
@@ -33,6 +34,7 @@ Agents never see the upstream names above. `scripts/evidence_proxy.py` serves ea
 | `mcp__plugin_dma-insights_evidence__read_entity_investor_pages` | `evidence:crawl_entity` | `path_focus=['ir', 'disclosures']` | Evidence cards from the institution's OWN investor-relations and disclosure pages (annual reports, financial statements, governance, board and committee charters, regulatory disclosures), sitemap first, robots.txt honoured, budget capped, with a crawl manifest. |
 | `mcp__plugin_dma-insights_evidence__read_entity_about_pages` | `evidence:crawl_entity` | `path_focus=['about']` | Evidence cards from the institution's OWN about, leadership and history pages (who leads it, its charter story, field of membership, locations), sitemap first, robots.txt honoured, budget capped, with a crawl manifest. |
 | `mcp__plugin_dma-insights_evidence__find_sec_filing_evidence` | `evidence:filings_evidence` | — | Evidence cards anchored in SEC filings: 10-K, 10-Q and 8-K sections (business, risk factors, MD&A, material events) and XBRL facts with exact values, each card citing the filing URL on sec.gov. |
+| `mcp__plugin_dma-insights_evidence__find_registrant` | `evidence:find_registrant` | — | Finds the institution in the REGISTRY that holds it — for all nine sub-verticals in the US and Canada, the first identity step of every run. |
 | `mcp__plugin_dma-insights_evidence__expand_card_context` | `evidence:expand_context` | — | The sentences around an evidence card's excerpt, ON DEMAND, from the page the engine cached (`context_handle` from the card's provenance; `window` sentences each side). |
 | `mcp__plugin_dma-insights_evidence__verify_evidence_cards` | `evidence:verify_cards` | — | Re-checks registered evidence cards before they are believed: the URL is still live (or archived), the excerpt is still verbatim at its offsets in the cached page, the item still passes the card contract (Source_Name, Source_URL, Tier, Excerpt length, Claim_Type licence) and the stated Date_Published still parses and is not in the future. |
 | `mcp__plugin_dma-insights_evidence__report_evidence_coverage` | `evidence:coverage_report` | — | The run's evidence coverage, for deciding whether a facet is done: card counts per facet and per label, source diversity, single-source concentration (flag above 40% — a Triangulation risk), the Recency distribution (CURRENT…UNVERIFIED), open conflict candidates, saturation by facet, the evidence-ladder rungs searched (what an absence's Negative_Ladder may cite), and the health of every search backend and upstream search engine. |
@@ -43,7 +45,6 @@ Agents never see the upstream names above. `scripts/evidence_proxy.py` serves ea
 | `mcp__plugin_dma-insights_searxng__check_search_engines` | `searxng:searxng_instance_info` | — | What the run's SearXNG instance can do right now: its categories, the engines configured and enabled, defaults and plugins. |
 | `mcp__plugin_dma-insights_searxng__read_web_page_section` | `searxng:web_url_read` | — | Reads ONE web page as markdown, in a bounded way: `readHeadings: true` lists its headings, `section` returns one section by heading, `startChar`/`maxLength` pages through it, `paragraphRange` takes paragraphs. |
 | `mcp__plugin_dma-insights_fetch__read_web_page_markdown` | `fetch:fetch` | — | Fetches one URL and returns its content as markdown (`raw` for the original HTML), `max_length` characters from `start_index` — page through a long page instead of reading it whole. |
-| `mcp__plugin_dma-insights_edgar__find_sec_registrant` | `edgar:search_companies` | — | Finds a company in SEC EDGAR by name and returns each match's CIK and ticker — the first step before any other SEC tool, and the identity check (ET gates) that the registrant is the assessed entity and not a namesake. |
 | `mcp__plugin_dma-insights_edgar__get_cik_for_ticker` | `edgar:get_cik_by_ticker` | — | Converts a stock ticker to the registrant's SEC CIK (Central Index Key), which every other SEC tool accepts as `identifier`. |
 | `mcp__plugin_dma-insights_edgar__get_sec_registrant_profile` | `edgar:get_company_info` | — | The registrant's SEC profile: legal name, CIK, SIC industry code, exchange, state of incorporation and fiscal year end — Firmographics registry fields (stated, never held) and the identity anchor for every filing cited. |
 | `mcp__plugin_dma-insights_edgar__list_sec_filings` | `edgar:get_recent_filings` | — | Lists the registrant's recent SEC filings (`form_type` e.g. |
@@ -70,6 +71,10 @@ OUTPUT IS A RESULT LIST, NOT EVIDENCE: each result is a title, a URL and the sea
 **Appendix `page`** (appended to every tool that names it):
 
 OUTPUT IS PAGE TEXT for the servicing tier and the technographic scanner (category researchers and challengers are refused by the deny_whole_page_fetch hook and read through `engine.cli fetch`, whose cached copy is what the ledger verifies an Excerpt against). Take Excerpt as a verbatim 50–500 character, sentence-complete span; take Date_Published only from a date the page itself states (byline, publication metadata, URL path), never the date you read it.
+
+**Appendix `registry`** (appended to every tool that names it):
+
+OUTPUT → GOLD WORKBOOK. A registry record states identity facts, never a judgement: Firmographics rows Regulator (the registry or primary_regulator), Charter or registry identifier (charter number, FDIC certificate, CRD, CIK, UNINUM), Charter type, Headquarters (city and region), Status, and — where the registry states them — Total assets and Members, each with its Unit and As at; registry answers are stated, never held. Cite the match's record_url as the Evidence row's Source_URL (a regulator or filing authority: Tier T1, Claim_Type FACT) after reading the record through `engine.cli fetch`, so the Excerpt is verbatim from the record and Date_Published is the date it states. The identifier is the identity anchor the ET gates check every later source against: a namesake (match_score below 1.0, a different city, `ambiguous`) is not the entity until the record says so. A `candidates` row is a page to open, not a fact.
 
 **Appendix `sec`** (appended to every tool that names it):
 
@@ -149,3 +154,22 @@ coverage_report(run_id: str)
 Per-facet and per-label card counts, source diversity, single-source
 concentration (flag > 40%), recency distribution, open conflict
 candidates, saturation by facet, and the ladder rungs searched.
+
+## `find_registrant`
+
+```
+find_registrant(entity: dict, sub_vertical: str | None = None, country: str | None = None, run_id: str | None = None)
+```
+
+The institution in the registry that holds it — every sub-vertical,
+US and Canada. Asks, by sub-vertical (CU RB CL CIB AM RIA/WM IC IB FC)
+and country (US|CA; omit for both): NCUA (credit unions), FDIC BankFind
+(banks), SEC IAPD and FINRA BrokerCheck (advisers, broker-dealers), the
+Farm Credit Administration directory (Farm Credit), OSFI (Canadian
+federally regulated institutions) and SEC EDGAR (any public parent)
+directly; NAIC/state insurance departments and Canadian provincial and
+securities regulators, which publish no registry API, are searched on
+their own hosts and returned as candidates. Each match carries the
+registry's identifier (CIK, CRD, FDIC certificate, NCUA charter, FCA
+UNINUM), the record URL and the fields the registry states; every
+registry asked reports ok, no_match, candidates, error or not_run.
