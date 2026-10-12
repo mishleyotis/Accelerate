@@ -199,3 +199,33 @@ def test_no_hint_the_connector_would_refuse_as_too_high():
         got = registry.classify(url, ENTITY, source_name=name)
         assert sr.tier_violation(url, got["tier"]) is None, (url, got)
         assert sr.scan_tier_violation(name, got["tier"]) is None or registry.is_own_host(url, ENTITY), (url, got)
+
+
+def test_class_pack_puts_the_sub_vertical_pack_first_then_registry_hosts():
+    pack = registry.class_pack(["trade_press"], "credit union")
+    doms = [p["domain"] for p in pack]
+    assert doms[:4] == ["cuinsight.com", "creditunions.com", "cutimes.com", "cutoday.info"]
+    assert all(p["source_class"] == "trade_press" and p["rung"] == "trade_press" for p in pack)
+    assert len(pack) <= 8
+
+
+def test_class_pack_regulator_probes_site_gov_and_the_named_bodies():
+    doms = [p["domain"] for p in registry.class_pack(["regulator"], "banks")]
+    assert doms[0] == "gov" and "fdic.gov" in doms
+
+
+def test_class_pack_interleaves_two_classes():
+    pack = registry.class_pack(["job_board", "review_site"], None, limit=6)
+    classes = [p["source_class"] for p in pack]
+    assert "job_board" in classes and "review_site" in classes
+
+
+def test_in_classes_keeps_registered_hosts_and_pack_hosts_only():
+    pack = registry.class_pack(["trade_press"], "credit union")
+    assert registry.in_classes("https://www.cutimes.com/2026/01/x", None, ["trade_press"], pack)
+    assert registry.in_classes("https://www.cutoday.info/x", None, ["trade_press"], pack)   # pack host
+    assert not registry.in_classes("https://www.prnewswire.com/news-releases/x", None, ["trade_press"], pack)
+    assert registry.in_classes("https://www.indeed.com/viewjob?jk=1", None, ["job_board"])
+    assert registry.in_classes("https://www.linkedin.com/jobs/view/1", None, ["job_board"])
+    assert not registry.in_classes("https://www.linkedin.com/company/x", None, ["job_board"])
+    assert registry.in_classes("https://dfi.wa.gov/x", None, ["regulator"])

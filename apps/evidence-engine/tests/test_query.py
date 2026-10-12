@@ -122,3 +122,38 @@ def test_registry_site_pack_follows_the_sub_vertical():
     assert registry.site_pack("Commercial Lending")[0]["domain"] == "consumerfinance.gov"
     assert registry.site_pack(None)[0]["rung"] == "news" and len(registry.site_pack(None)) <= 8
     assert {"domain": "apps.apple.com", "rung": "other"} in registry.site_pack("Credit Unions")
+
+
+def test_expand_for_classes_puts_site_probes_first_and_skips_the_own_site():
+    from evidence_engine import registry
+    ent = EntityRef(legal_name="Example Federal Credit Union", domains=["example-fcu.test"],
+                    aliases=["Example FCU"])
+    pack = registry.class_pack(["job_board"], None, limit=4)
+    qs = query.expand_for_classes("Is the institution hiring data engineers for its analytics platform?",
+                              ent, None, pack, ["job_board"])
+    assert [q["kind"] for q in qs[:4]] == ["site:careers"] * 4
+    # robots-refusing hosts (indeed, linkedin) are probed last: their pages are found, never carded
+    assert qs[0]["text"].startswith("site:glassdoor.com")
+    assert [p["domain"] for p in registry.class_pack(["job_board"], None)][-2:] == ["indeed.com", "linkedin.com"]
+    assert any(q["kind"] == "facet" and q["text"].endswith("jobs") for q in qs)
+    assert not any(q["kind"] == "site:entity" for q in qs)
+    own = query.expand_for_classes("data engineers", ent, None, [], ["entity_owned"])
+    assert any(q["kind"] == "site:entity" for q in own)
+    assert query.expand_for_classes("data engineers", ent, None, pack, ["job_board"]) == \
+        query.expand_for_classes("data engineers", ent, None, pack, ["job_board"])        # deterministic
+
+
+def test_search_name_drops_corporate_suffixes_only():
+    assert query.search_name(EntityRef(legal_name="Example Holdings Group, Inc.")) == "Example Holdings Group"
+    assert query.search_name(EntityRef(legal_name="Example Mutual Co., LLC")) == "Example Mutual"
+    assert query.search_name(EntityRef(legal_name="Example Federal Credit Union")) == "Example Federal Credit Union"
+
+
+def test_class_probes_lead_with_the_bare_name_per_host():
+    from evidence_engine import registry
+    ent = EntityRef(legal_name="Example Holdings Group, Inc.", aliases=["EHG"])
+    qs = query.expand_for_classes("What do employees say about technology tools?", ent, None,
+                                  registry.class_pack(["review_site"], None, limit=2), ["review_site"])
+    assert qs[0]["text"] == 'site:apps.apple.com "Example Holdings Group"'
+    assert qs[1]["text"].startswith('site:apps.apple.com "Example Holdings Group" ')
+    assert all("Inc" not in q["text"] for q in qs)

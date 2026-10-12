@@ -44,14 +44,14 @@ def test_a_collector_is_sent_to_the_brief_before_its_first_websearch(tmp_path):
     layer = _marker(tmp_path)
     st = tmp_path / "state"
     why = so.decide(_p("WebSearch"), state_dir=st, layer_dir=layer, scope=_Scope())
-    assert "ONE mcp__plugin_dma-insights_evidence__research_brief" in why and "subcap_ids" in why
+    assert "ONE mcp__plugin_dma-insights_evidence__find_evidence_all_sources" in why and "subcap_ids" in why
     # one brief fired and answered: the general searches are allowed, up to the ceiling
     so.record(_p(so.BRIEF, resp={"cards": [{"card_id": "EV-1"}]}), state_dir=st)
     for _ in range(so.WEB_PER_BRIEF):
         assert so.decide(_p("WebSearch"), state_dir=st, layer_dir=layer, scope=_Scope()) == ""
         so.record(_p("WebSearch"), state_dir=st)
     why = so.decide(_p("mcp__Exa__web_search_exa"), state_dir=st, layer_dir=layer, scope=_Scope())
-    assert "3 general searches against 1 research_brief" in why and "searxng_web_search" in why
+    assert "3 general searches against 1 evidence-engine brief" in why and "keyword_search_web_pages" in why
     # a second brief lifts the ceiling in proportion
     so.record(_p(so.BRIEF, resp={"cards": []}), state_dir=st)
     assert so.decide(_p("WebSearch"), state_dir=st, layer_dir=layer, scope=_Scope()) == ""
@@ -84,9 +84,9 @@ def test_only_research_actors_are_ordered_and_counts_are_per_agent(tmp_path):
     assert so.decide(_p("WebFetch"), state_dir=st, layer_dir=layer, scope=_Scope()) == ""
     so.record(_p(so.BRIEF, agent_id="A1", resp={"cards": []}), state_dir=st)
     assert so.decide(_p("WebSearch", agent_id="A1"), state_dir=st, layer_dir=layer, scope=_Scope()) == ""
-    assert "no research_brief yet" in so.decide(_p("WebSearch", agent_id="A2"), state_dir=st,
+    assert "no evidence-engine brief yet" in so.decide(_p("WebSearch", agent_id="A2"), state_dir=st,
                                                 layer_dir=layer, scope=_Scope())
-    assert "no research_brief yet" in so.decide(_p("WebSearch", agent="dma-insights:research-p1c1-producer",
+    assert "no evidence-engine brief yet" in so.decide(_p("WebSearch", agent="dma-insights:research-p1c1-producer",
                                                    agent_id="A3"), state_dir=st, layer_dir=layer, scope=_Scope())
 
 
@@ -95,7 +95,7 @@ def test_a_corrupt_state_or_marker_fails_open(tmp_path):
     st = tmp_path / "state"; st.mkdir(); (st / "S1.json").write_text("{not json")
     assert so.decide(_p("WebSearch"), state_dir=st, layer_dir=layer, scope=_Scope()) == ""
     good = _marker(tmp_path / "ok")
-    assert "no research_brief yet" in so.decide(_p("WebSearch"), state_dir=st, layer_dir=good, scope=_Scope())
+    assert "no evidence-engine brief yet" in so.decide(_p("WebSearch"), state_dir=st, layer_dir=good, scope=_Scope())
 
 
 def test_the_proxy_writes_the_marker_the_hook_reads(tmp_path, monkeypatch):
@@ -109,3 +109,16 @@ def test_the_proxy_writes_the_marker_the_hook_reads(tmp_path, monkeypatch):
     assert so.layer_available(tmp_path / "layer") is False
     d = json.loads((tmp_path / "layer" / "evidence.json").read_text())
     assert d["reason"] == "HTTP 404" and "token" not in json.dumps(d).lower().replace("path-token", "")
+
+
+def test_every_per_class_brief_counts_and_the_upstream_name_still_does(tmp_path):
+    """Owner, 2026-10-11: the per-class find_* tools are briefs too — a
+    collector that chased its unanswered cells with find_regulator_evidence
+    earns its WebSearch allowance exactly as the all-sources call does; a
+    session bound before the surface shipped still counts research_brief."""
+    st = tmp_path / "state"
+    for i, tool in enumerate(("mcp__plugin_dma-insights_evidence__find_regulator_evidence",
+                              "mcp__plugin_dma-insights_evidence__find_job_posting_evidence",
+                              "mcp__plugin_dma-insights_evidence__research_brief")):
+        row = so.record(_p(tool, resp={"cards": []}), state_dir=st)
+        assert row["briefs"] == i + 1

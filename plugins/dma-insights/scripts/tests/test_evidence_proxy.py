@@ -9,7 +9,8 @@ import pytest
 
 SCRIPTS = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SCRIPTS))
-import evidence_proxy  # noqa: E402
+import evidence_proxy
+import research_tool_surface as surface  # noqa: E402
 import mcp_proxy  # noqa: E402
 
 #: Secret Manager NAMES (not values) — split so the secret scanner's
@@ -95,6 +96,32 @@ def _wait(cond, timeout=3.0):
     return False
 
 
+LIVE = {"name": "coverage_report", "inputSchema": {"type": "object", "properties": {"run_id": {"type": "string"}}}}
+
+
+def test_a_surfaced_call_reaches_the_upstream_tool_with_its_preset(proxy, monkeypatch):
+    """Owner, 2026-10-11: specific tool names. The agent calls
+    find_regulator_evidence; the service receives research_brief with
+    source_classes fixed to regulator, whatever the caller sent."""
+    sent = []
+
+    def fwd(url, msg):
+        sent.append(msg)
+        if msg.get("id") is None:
+            return []
+        return [{"jsonrpc": "2.0", "id": msg["id"], "result": {"ok": True}}]
+    monkeypatch.setattr(mcp_proxy, "forward", fwd)
+    init = evidence_proxy.serve("https://svc.test/mcp", INIT)
+    assert "find_evidence_all_sources" in init[0]["result"]["instructions"]
+    evidence_proxy.admitted("https://svc.test/mcp", {
+        "jsonrpc": "2.0", "id": 9, "method": "tools/call",
+        "params": {"name": "find_regulator_evidence",
+                   "arguments": {"run_id": "R", "source_classes": ["news"]}}})
+    call = [m for m in sent if m.get("method") == "tools/call"][-1]
+    assert call["params"] == {"name": "research_brief",
+                              "arguments": {"run_id": "R", "source_classes": ["regulator"]}}
+
+
 def test_a_down_service_still_binds_its_last_known_tools(proxy, monkeypatch):
     """The service answers 404 (not deployed) or is unreachable: the proxy
     completes the handshake itself, advertises listChanged, lists the
@@ -113,14 +140,16 @@ def test_a_down_service_still_binds_its_last_known_tools(proxy, monkeypatch):
     assert evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "method": "notifications/initialized"}) == []
     tl = evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
     names = {t["name"] for t in tl[0]["result"]["tools"]}
-    assert {"research_brief", "coverage_report"} <= names
+    # the snapshot is served through the tool surface: specific names, no generic upstream ones
+    assert {"find_evidence_all_sources", "find_regulator_evidence", "report_evidence_coverage"} <= names
+    assert not names & {"research_brief", "coverage_report"}
     call = evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
                                                          "params": {"name": "research_brief", "arguments": {}}})
     assert "unavailable" in call[0]["error"]["message"]
     # a later successful initialize clears the degraded state
     monkeypatch.setattr(mcp_proxy, "forward", lambda url, msg: [{"jsonrpc": "2.0", "id": msg.get("id"), "result": {"ok": True}}])
     ok = evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "id": 4, "method": "initialize", "params": {}})
-    assert ok[0]["result"] == {"ok": True} and evidence_proxy._degraded["reason"] is None
+    assert ok[0]["result"]["ok"] is True and evidence_proxy._degraded["reason"] is None
 
 
 def test_a_cold_start_answers_inside_the_cli_window_then_refreshes(proxy, monkeypatch):
@@ -136,7 +165,7 @@ def test_a_cold_start_answers_inside_the_cli_window_then_refreshes(proxy, monkey
             time.sleep(0.8)
         if msg.get("id") is None:
             return []
-        return [{"jsonrpc": "2.0", "id": msg["id"], "result": {"tools": [{"name": "live_tool"}]}
+        return [{"jsonrpc": "2.0", "id": msg["id"], "result": {"tools": [LIVE]}
                  if msg.get("method") == "tools/list" else {"ok": True}}]
     monkeypatch.setattr(mcp_proxy, "forward", slow_forward)
     t0 = time.monotonic()
@@ -148,8 +177,9 @@ def test_a_cold_start_answers_inside_the_cli_window_then_refreshes(proxy, monkey
     assert evidence_proxy._degraded["reason"] is None
     assert seen.count("notifications/initialized") == 1        # replayed once, upstream
     tl = evidence_proxy.serve("https://svc.test/mcp", {"jsonrpc": "2.0", "id": 5, "method": "tools/list"})
-    assert tl[0]["result"]["tools"] == [{"name": "live_tool"}]
-    assert evidence_proxy.known_tools() == [{"name": "live_tool"}]   # remembered for the next cold start
+    # the live listing is presented through the surface; the UPSTREAM listing is remembered
+    assert [t["name"] for t in tl[0]["result"]["tools"]] == ["report_evidence_coverage"]
+    assert evidence_proxy.known_tools() == [LIVE]   # remembered for the next cold start
 
 
 def test_a_call_made_while_warming_waits_for_the_service(proxy, monkeypatch):
@@ -199,7 +229,8 @@ def test_the_snapshot_lists_every_tool_the_agents_are_granted():
     for fam in ("evidence", "searxng", "fetch", "edgar"):
         listed = {t["name"] for t in snap[fam]}
         for tool in prov.EXTERNAL[fam]:
-            assert tool.split("__", 2)[2] in listed, (fam, tool)
+            # agents are granted SURFACED names; each maps to an upstream tool the snapshot lists
+            assert surface.upstream_of(fam, tool.split("__", 2)[2]) in listed, (fam, tool)
         for t in snap[fam]:
             assert t["inputSchema"]["type"] == "object", (fam, t["name"])
 
@@ -250,7 +281,8 @@ def test_concurrent_calls_do_not_queue_behind_a_long_brief(tmp_path):
             p.stdin.write(json.dumps(o) + "\n")
             p.stdin.flush()
         send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}})
-        assert json.loads(p.stdout.readline())["result"] == {"ok": "initialize"}
+        init = json.loads(p.stdout.readline())["result"]
+        assert init["ok"] == "initialize" and "find_evidence_all_sources" in init["instructions"]
         t0 = time.monotonic()
         send({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "research_brief"}})
         send({"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "coverage_report"}})

@@ -31,6 +31,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import mcp_proxy  # noqa: E402
+import research_tool_surface as surface  # noqa: E402
 
 #: Cloud Run URLs in one project share the project's hash suffix; the
 #: defaults are what deploy-evidence.sh will produce for each new service.
@@ -402,6 +403,7 @@ def _capacity_refused(replies: list, msg: dict) -> bool:
 
 def admitted(url, msg: dict) -> list:
     """serve(), behind the heavy-call gate and the capacity retry."""
+    msg = _to_upstream(msg)
     name = (msg.get("params") or {}).get("name") or ""
     heavy = msg.get("method") == "tools/call" and name in HEAVY_TOOLS
     stop = threading.Event()
@@ -435,8 +437,45 @@ def admitted(url, msg: dict) -> list:
             _admit.release()
 
 
+# ── THE TOOL SURFACE (2026-10-11) ─────────────────────────────────────────
+#
+# Agents see specific, described tools (scripts/research_tool_surface.py,
+# references/research_tool_surface.json): `find_regulator_evidence`, not
+# `research_brief`. The listing is rewritten on the way out — live or from
+# the snapshot, which stays the UPSTREAM listing — and every call is mapped
+# back to the upstream tool with its preset arguments on the way in.
+
+def _present(tools: list) -> list:
+    return surface.present(_service(), tools)
+
+
+def _to_upstream(msg: dict) -> dict:
+    if msg.get("method") != "tools/call":
+        return msg
+    return {**msg, "params": surface.to_upstream(_service(), msg.get("params") or {})}
+
+
+def _initialized(replies: list, msg: dict) -> list:
+    """The upstream initialize answer, with the surface's server instructions
+    (they name the tools the agent actually sees)."""
+    return [{**r, "result": surface.with_instructions(_service(), r["result"])}
+            if isinstance(r, dict) and r.get("id") == msg.get("id") and isinstance(r.get("result"), dict) else r
+            for r in replies]
+
+
+def _presented(replies: list, msg: dict) -> list:
+    out = []
+    for r in replies:
+        if isinstance(r, dict) and r.get("id") == msg.get("id") and isinstance(r.get("result"), dict) \
+                and isinstance(r["result"].get("tools"), list):
+            r = {**r, "result": {**r["result"], "tools": _present(r["result"]["tools"])}}
+        out.append(r)
+    return out
+
+
 def serve(url, msg: dict) -> list:
     """forward(), answering the handshake itself when the service is cold or down."""
+    msg = _to_upstream(msg)
     method = msg.get("method")
     if method == "initialize":
         _live["gen"] += 1
@@ -460,7 +499,7 @@ def serve(url, msg: dict) -> list:
             if why is None:
                 _mark(True, None)
                 _recovered.set()
-                return box["replies"]
+                return _initialized(box["replies"], msg)
         else:
             why = f"no answer within {INIT_BUDGET_S:.0f}s (cold start?)"
         _degraded["reason"] = why
@@ -490,7 +529,7 @@ def serve(url, msg: dict) -> list:
         if msg.get("id") is None:                       # notifications: replayed on recovery
             return []
         if method == "tools/list":
-            return [{"jsonrpc": "2.0", "id": msg.get("id"), "result": {"tools": known_tools()}}]
+            return [{"jsonrpc": "2.0", "id": msg.get("id"), "result": {"tools": _present(known_tools())}}]
         if method in ("ping",):
             return [{"jsonrpc": "2.0", "id": msg.get("id"), "result": {}}]
         _kick.set()
@@ -505,6 +544,7 @@ def serve(url, msg: dict) -> list:
         for r in replies:
             if isinstance(r, dict) and r.get("id") == msg.get("id"):
                 remember_tools(((r.get("result") or {}).get("tools")) or [])
+        return _presented(replies, msg)
     return replies
 
 

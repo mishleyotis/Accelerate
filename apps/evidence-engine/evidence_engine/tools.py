@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 from . import contract as C
 from . import coverage as COV
 from . import crawl as CR
+from . import entity as E
 from . import excerpt as X
 from . import filings as F
 from . import pipeline as P
@@ -277,7 +278,7 @@ class Engine:
                              token_budget: int = 2400, provenance: str = "standard",
                              reference_date: str | None = None,
                              allow_names_from_cards: dict | None = None,
-                             fetch_limit: int = 20) -> dict:
+                             fetch_limit: int = 20, source_classes: list[str] | None = None) -> dict:
         """One call for a whole capability batch. `questions` is a list of
         plain strings (one combined brief, as before) or of objects
         `{question, subcap_ids[], facet?}` — one per cell question. With
@@ -287,13 +288,25 @@ class Engine:
         named for the question it answered, and `by_question` says which
         questions got no card (the collector's `nothing_found` material).
         `max_cards` and `token_budget` are per question in that mode. The
-        engine never invents a cell: the ids are the caller's, echoed."""
+        engine never invents a cell: the ids are the caller's, echoed.
+
+        `source_classes` (⊆ contract.SOURCE_TYPES) makes it a per-class
+        brief: the probes are `site:` over the registry's hosts for those
+        classes (registry.class_pack, the sub-vertical's own pack first,
+        rotated across questions), and a hit is kept only when it classifies
+        into one of them (registry.in_classes) — the plugin's
+        find_regulator_record_evidence, find_job_posting_evidence and their
+        siblings."""
         t0 = time.monotonic()
         ent = entity_ref(entity)
         if ent is None or not ent.legal_name:
             return {"error": "entity.legal_name is required", "cards": []}
         if facet is not None and facet not in C.FACETS:
             return {"error": f"facet must be one of {C.FACETS}", "cards": []}
+        classes = [str(c).strip().lower() for c in (source_classes or ()) if str(c).strip()]
+        off = [c for c in classes if c not in C.SOURCE_TYPES]
+        if off:
+            return {"error": f"source_classes {off} not in {C.SOURCE_TYPES}", "cards": []}
         ref = _ref_date(reference_date)
         specs, bad = _question_specs(questions, facet)
         if bad:
@@ -305,10 +318,22 @@ class Engine:
         # queries, guarded: one pass over every question, each question's
         # share capped so a batch of twelve cells still fits one fan-out
         pack = self.registry_pack or registry.site_pack(sub_vertical)
+        cpack = registry.class_pack(classes, sub_vertical) if classes else []
         per_q = Q.per_question_budget(len(specs))
         queries, seen_text = [], set()
-        for spec in specs:
-            for q in Q.expand(spec["question"], ent, spec["lens"], sub_vertical, pack)[:per_q]:
+        for n, spec in enumerate(specs):
+            if classes:
+                # rotate the class pack so a batch's questions probe different
+                # hosts (two probes per host), and count a question's share
+                # AFTER de-duplication: the bare `site:<host> "<name>"` probe
+                # is shared across the batch and runs once
+                k = (n * max(1, per_q // 2)) % len(cpack) if cpack else 0
+                planned = [q for q in Q.expand_for_classes(spec["question"], ent, spec["lens"],
+                                                           cpack[k:] + cpack[:k], classes)
+                           if q["text"] not in seen_text]
+            else:
+                planned = Q.expand(spec["question"], ent, spec["lens"], sub_vertical, pack)
+            for q in planned[:per_q]:
                 if q["text"] in seen_text:
                     continue
                 seen_text.add(q["text"])
@@ -334,6 +359,11 @@ class Engine:
             if src not in free and f"rerouted_from:{src}" not in fan["rerouted"]:
                 fan["rerouted"].append(f"rerouted_from:{src}")
         hits = fan["hits"]
+        class_filtered = 0
+        if classes:
+            kept_hits = [h for h in hits if registry.in_classes(h["url"], ent, classes, cpack)]
+            class_filtered = len(hits) - len(kept_hits)
+            hits = kept_hits
         # In-process diagnostics only (the eval harness reads it to tell a
         # discovery miss from a fetch loss); never part of the tool answer.
         self.last_hits = [{"url": h["url"], "url_key": h["url_key"], "sources": list(h.get("sources") or [])} for h in hits]
@@ -341,6 +371,10 @@ class Engine:
         t_fetch = time.monotonic()
         docs, failures = await self._documents_for_hits(hits, limit=fetch_limit, reference=ref,
                                                         hits_by_key=hits_by_key, entity=ent, question=question)
+        if classes:   # a redirect can land off-class: the card's own URL decides
+            off_class = [d for d in docs if not registry.in_classes(d.url, ent, classes, cpack)]
+            class_filtered += len(off_class)
+            docs = [d for d in docs if d not in off_class]
         t_rank = time.monotonic()
         qids = {h["url_key"]: h.get("query_ids", []) for h in hits}
         facets = {h["url_key"]: h.get("facets", []) for h in hits}
@@ -391,6 +425,23 @@ class Engine:
                                     "query_ids": [q["query_id"] for q in queries
                                                   if q.get("question_index") == spec["index"]],
                                     "card_ids": ids, "answered": bool(ids)})
+        off_entity = 0
+        if classes:
+            # a per-class card must be ABOUT the entity in its own span: the
+            # class filter leaves only pages of that class, and a page that
+            # merely lists the entity (a BDC's schedule of investments) would
+            # otherwise card an unrelated T1 span (entity.span_names_entity)
+            keep = [c for c in cards
+                    if c["provenance"].get("entity_match") != "ambiguous"
+                    and (c["provenance"].get("source_type_hint") == "entity_owned"
+                         or E.span_names_entity(c["item"]["excerpt"], ent))]
+            off_entity = len(cards) - len(keep)
+            if off_entity:
+                kept_ids = {c["card_id"] for c in keep}
+                cards = keep
+                for row in by_question:
+                    row["card_ids"] = [i for i in row["card_ids"] if i in kept_ids]
+                    row["answered"] = bool(row["card_ids"])
         projected = [self._project(c, provenance) for c in cards]
         kept, tokens = P.trim_to_budget(projected, token_budget * (len(specs) if batched else 1))
         cards = cards[:len(kept)]
@@ -425,6 +476,12 @@ class Engine:
                        # queries cut at the search-phase budget (load): their
                        # questions may read unanswered — re-ask those rows
                        "budget_cut": fan.get("budget_cut", 0),
+                       # a per-class brief: the classes asked for, and the
+                       # hits dropped because they classified outside them
+                       "source_classes": classes, "class_filtered": class_filtered,
+                       # per-class cards dropped because the span does not
+                       # name the entity (or the page only shares its tokens)
+                       "off_entity_dropped": off_entity,
                        "dropped": dropped[:10]},
             "guard_violations": violations,
             "ambiguous_cards": [c["card_id"] for c in cards if c["provenance"].get("entity_match") == "ambiguous"],

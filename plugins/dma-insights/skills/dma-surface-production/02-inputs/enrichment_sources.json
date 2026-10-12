@@ -285,7 +285,7 @@
   },
   "search_connectors": {
     "research_layer": {
-      "serves": "free first: evidence (research_brief → register-ready cards; coverage.saturation is the stop rule); searxng, parallel, fetch, edgar: raw fallbacks on outage or dispute; alphaxiv: no holder",
+      "serves": "free first: evidence (find_* briefs → register-ready cards; coverage.saturation is the stop rule); searxng, parallel, fetch, edgar: raw fallbacks on outage or dispute; alphaxiv: no holder",
       "status": "wired; not live until deploy (parallel is live)",
       "held_by": [
         "research-conductor",

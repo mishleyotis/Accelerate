@@ -6,7 +6,7 @@ effort: high
 maxTurns: 200
 skills:
   - dma-research
-tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, Agent, AskUserQuestion, mcp__plugin_dma-insights_evidence__research_brief, mcp__plugin_dma-insights_evidence__crawl_entity, mcp__plugin_dma-insights_evidence__filings_evidence, mcp__plugin_dma-insights_evidence__expand_context, mcp__plugin_dma-insights_evidence__verify_cards, mcp__plugin_dma-insights_evidence__coverage_report, mcp__plugin_dma-insights_searxng__searxng_web_search, mcp__plugin_dma-insights_searxng__searxng_search_suggestions, mcp__plugin_dma-insights_searxng__searxng_instance_info, mcp__plugin_dma-insights_searxng__web_url_read, mcp__plugin_dma-insights_fetch__fetch, mcp__plugin_dma-insights_edgar__get_company_facts, mcp__plugin_dma-insights_edgar__get_recent_filings, mcp__plugin_dma-insights_edgar__get_filing_sections, mcp__plugin_dma-insights_edgar__get_filing_content, mcp__plugin_dma-insights_edgar__get_financials, mcp__plugin_dma-insights_edgar__get_xbrl_concepts, mcp__plugin_dma-insights_parallel__web_search, mcp__plugin_dma-insights_parallel__web_fetch, mcp__Parallel_Search__web_search, mcp__Parallel_Search__web_fetch, mcp__alphaXiv__discover_papers, mcp__alphaXiv__get_paper_content, mcp__alphaXiv__answer_pdf_queries, mcp__plugin_dma-insights_alphaxiv__discover_papers, mcp__plugin_dma-insights_alphaxiv__get_paper_content, mcp__plugin_dma-insights_alphaxiv__answer_pdf_queries, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Clay__search-contacts, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
+tools: Read, Grep, Glob, Bash, Skill, WebSearch, WebFetch, Agent, AskUserQuestion, mcp__plugin_dma-insights_evidence__find_evidence_all_sources, mcp__plugin_dma-insights_evidence__find_regulator_evidence, mcp__plugin_dma-insights_evidence__find_trade_press_evidence, mcp__plugin_dma-insights_evidence__find_news_wire_evidence, mcp__plugin_dma-insights_evidence__find_job_posting_evidence, mcp__plugin_dma-insights_evidence__find_customer_review_evidence, mcp__plugin_dma-insights_evidence__find_academic_evidence, mcp__plugin_dma-insights_evidence__find_contradicting_evidence, mcp__plugin_dma-insights_evidence__find_corroborating_evidence, mcp__plugin_dma-insights_evidence__read_entity_newsroom, mcp__plugin_dma-insights_evidence__read_entity_careers, mcp__plugin_dma-insights_evidence__read_entity_investor_pages, mcp__plugin_dma-insights_evidence__read_entity_about_pages, mcp__plugin_dma-insights_evidence__find_sec_filing_evidence, mcp__plugin_dma-insights_evidence__expand_card_context, mcp__plugin_dma-insights_evidence__verify_evidence_cards, mcp__plugin_dma-insights_evidence__report_evidence_coverage, mcp__plugin_dma-insights_searxng__keyword_search_web_pages, mcp__plugin_dma-insights_searxng__keyword_search_news, mcp__plugin_dma-insights_searxng__keyword_search_papers, mcp__plugin_dma-insights_searxng__suggest_query_refinements, mcp__plugin_dma-insights_searxng__check_search_engines, mcp__plugin_dma-insights_searxng__read_web_page_section, mcp__plugin_dma-insights_fetch__read_web_page_markdown, mcp__plugin_dma-insights_edgar__find_sec_registrant, mcp__plugin_dma-insights_edgar__get_cik_for_ticker, mcp__plugin_dma-insights_edgar__get_sec_registrant_profile, mcp__plugin_dma-insights_edgar__list_sec_filings, mcp__plugin_dma-insights_edgar__read_10k_10q_sections, mcp__plugin_dma-insights_edgar__read_filing_full_text, mcp__plugin_dma-insights_edgar__read_8k_material_events, mcp__plugin_dma-insights_edgar__get_financial_statements, mcp__plugin_dma-insights_edgar__get_key_financial_metrics, mcp__plugin_dma-insights_edgar__get_business_segment_data, mcp__plugin_dma-insights_edgar__compare_financial_periods, mcp__plugin_dma-insights_edgar__get_xbrl_company_facts, mcp__plugin_dma-insights_edgar__list_reported_metrics, mcp__plugin_dma-insights_edgar__list_xbrl_concepts, mcp__plugin_dma-insights_edgar__get_xbrl_filing_concepts, mcp__plugin_dma-insights_parallel__web_search, mcp__plugin_dma-insights_parallel__web_fetch, mcp__Parallel_Search__web_search, mcp__Parallel_Search__web_fetch, mcp__alphaXiv__discover_papers, mcp__alphaXiv__get_paper_content, mcp__alphaXiv__answer_pdf_queries, mcp__plugin_dma-insights_alphaxiv__discover_papers, mcp__plugin_dma-insights_alphaxiv__get_paper_content, mcp__plugin_dma-insights_alphaxiv__answer_pdf_queries, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Clay__search-contacts, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_staged_payload
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
 
@@ -504,8 +504,8 @@ disclosed Coverage Unknown or an ABSENT firmographic with a route, never a hedge
 
 ## The evidence engine first (2026-10-10)
 
-The plugin's **evidence engine** (`mcp__plugin_dma-insights_evidence__*`,
-six tools) is the first rung of every search. `research_brief` takes the
+The plugin's **evidence engine** (`mcp__plugin_dma-insights_evidence__*`)
+is the first rung of every search. `find_evidence_all_sources` takes the
 entity (legal name, domains, charter or CIK), the sub-vertical, the facet and
 the question(s) and returns **register-ready cards**: `card["item"]` is the
 exact `register_evidence` item and the exact `engine.cli evidence` flag set
@@ -516,18 +516,39 @@ ISO date only when the page states one, and provenance (recency band, origin
 cluster, syndication count, entity match, ladder rung). You decide the cells
 (`--subcap`), the final tier and any lowering of the claim label; the engine
 never does. Respect `coverage.saturation`: when it reads true for a facet,
-stop searching that facet. `expand_context` is for disambiguation or a
-challenge only; `verify_cards` re-runs liveness, offsets and dates. A result
+stop searching that facet. `expand_card_context` is for disambiguation or a
+challenge only; `verify_evidence_cards` re-runs liveness, offsets and dates. A result
 carrying `needs_spend_approval` means no free source can answer — report it,
 never route to a paid tool on your own. The raw fallbacks (SearXNG, Fetch,
 EDGAR, Parallel) are for an engine outage or a disputed card, are rate-gated
 by the plugin, and every use is logged.
 
+**The engine's tools, by what they search** (names since 2026-10-11 —
+`references/research_tool_surface.json`; each description says the tier its
+source class earns and the gold columns its cards fill):
+`find_evidence_all_sources` (every class, the batched first call) ·
+`find_regulator_evidence` (.gov bodies, NCUA/FDIC/OCC/FRB/SEC/CFPB, state
+DFIs, NAIC, FINRA — T1) · `find_trade_press_evidence` (T3) ·
+`find_news_wire_evidence` (news and wires; a wire copy is syndication) ·
+`find_job_posting_evidence` (careers rung — org_talent proxy) ·
+`find_customer_review_evidence` (app stores, BBB, Trustpilot — DQ_Fails) ·
+`find_academic_evidence` · `find_contradicting_evidence` (DQ_Contradicts) ·
+`find_corroborating_evidence` (DQ_Corroborates, Triangulation) ·
+`read_entity_newsroom` / `read_entity_careers` / `read_entity_investor_pages`
+/ `read_entity_about_pages` (the entity's own site, never T1) ·
+`find_sec_filing_evidence` (10-K/10-Q/8-K and XBRL, T1) ·
+`expand_card_context` · `verify_evidence_cards` · `report_evidence_coverage`.
+A cell `by_question[]` left unanswered after the all-sources call is chased
+with the per-class tool for the rung its ladder still owes BEFORE an absence
+is declared — the absence's Negative_Ladder cites those rungs.
+
 You hold the engine AND its raw fallbacks because you service every lane's
-`search_requests`: route a batch to `research_brief` (or `crawl_entity` for
-the institution's own pages, `filings_evidence` for a public filer), and only
-on an engine outage or a disputed card to the raw SearXNG `searxng_web_search`,
-Fetch `fetch`, EDGAR `get_company_facts` / `get_filing_sections` or Parallel
-`web_search` connectors — each gated by `hooks/rate_gate.py`, each logged to
-`source_health.jsonl`. `coverage_report` is what you read before declaring a
+`search_requests`: route a batch to `find_evidence_all_sources` or the
+per-class find_* tool its source class names (the `read_entity_*` readers for
+the institution's own pages, `find_sec_filing_evidence` for a public filer),
+and only on an engine outage or a disputed card to the raw SearXNG
+`keyword_search_web_pages` / `keyword_search_news`, Fetch
+`read_web_page_markdown`, EDGAR (`list_sec_filings`, `read_10k_10q_sections`,
+`get_financial_statements` …) or Parallel `web_search` connectors — each gated by `hooks/rate_gate.py`, each logged to
+`source_health.jsonl`. `report_evidence_coverage` is what you read before declaring a
 category saturated.

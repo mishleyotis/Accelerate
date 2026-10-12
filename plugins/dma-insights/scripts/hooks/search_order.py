@@ -7,8 +7,9 @@ hook makes it so. For a research actor (collector, category researcher,
 servicing, technographic scanner) a `WebSearch` / Exa / Tavily search is
 refused:
 
-  * before this agent has fired ONE `research_brief` (the batched call —
-    every cell question of the capability in one `questions[]`), while the
+  * before this agent has fired ONE evidence-engine brief (the batched
+    call — every cell question of the capability in one `questions[]`:
+    `find_evidence_all_sources` or a per-class `find_*` sibling), while the
     evidence service is marked AVAILABLE by the plugin's own proxy;
   * past WEB_PER_BRIEF general searches per brief fired, unless the last
     brief answered an error or `needs_spend_approval` (the engine could
@@ -33,7 +34,23 @@ import time
 from pathlib import Path
 
 SEARCHERS = ("WebSearch", "mcp__Exa__web_search_exa", "mcp__Tavily__tavily_search")
-BRIEF = "mcp__plugin_dma-insights_evidence__research_brief"
+#: Every batched evidence-engine search counts as a brief: the all-sources
+#: call and its per-class siblings (references/research_tool_surface.json,
+#: kind "brief"; tests/test_research_tool_surface.py pins this tuple to it),
+#: plus the upstream name a session bound before the surface shipped.
+BRIEFS = (
+    "mcp__plugin_dma-insights_evidence__find_evidence_all_sources",
+    "mcp__plugin_dma-insights_evidence__find_regulator_evidence",
+    "mcp__plugin_dma-insights_evidence__find_trade_press_evidence",
+    "mcp__plugin_dma-insights_evidence__find_news_wire_evidence",
+    "mcp__plugin_dma-insights_evidence__find_job_posting_evidence",
+    "mcp__plugin_dma-insights_evidence__find_customer_review_evidence",
+    "mcp__plugin_dma-insights_evidence__find_academic_evidence",
+    "mcp__plugin_dma-insights_evidence__find_contradicting_evidence",
+    "mcp__plugin_dma-insights_evidence__find_corroborating_evidence",
+    "mcp__plugin_dma-insights_evidence__research_brief",
+)
+BRIEF = BRIEFS[0]
 #: the classes whose searching is citation and must start at the engine
 ORDERED_CLASSES = ("category-collector", "category-researcher", "servicing", "technographic-scanner")
 WEB_PER_BRIEF = 3
@@ -43,20 +60,23 @@ LAYER_DIR = Path(os.environ.get("DMA_RESEARCH_LAYER_STATE") or "/root/.dma/resea
 STATE_DIR = Path(os.environ.get("DMA_SEARCH_ORDER_STATE") or "/root/.dma/search_order")
 
 FIRST = (
-    "dma-insights search order: {actor} has fired no research_brief yet in this agent, and the "
+    "dma-insights search order: {actor} has fired no evidence-engine brief yet in this agent, and the "
     "evidence engine is available. Batch this capability's questions into ONE "
-    "mcp__plugin_dma-insights_evidence__research_brief call first — `questions` as objects, one per "
+    "mcp__plugin_dma-insights_evidence__find_evidence_all_sources call first — `questions` as objects, one per "
     "cell question: {{\"question\": \"...\", \"subcap_ids\": [\"<cell>\"], \"facet\": \"primary\"}}, plus one "
     "per owed facet naming every cell it bears on. Its cards come back register-ready with "
-    "`item.linked_subcap_ids` and `by_question[]` names what nothing answered. The free chain is "
-    "research_brief → searxng / parallel → WebSearch; WebSearch is the last rung, for a question the "
+    "`item.linked_subcap_ids` and `by_question[]` names what nothing answered; chase those with the "
+    "per-class tools (find_regulator_evidence, find_trade_press_evidence, find_news_wire_evidence, "
+    "find_job_posting_evidence, find_customer_review_evidence). The free chain is "
+    "evidence engine → searxng / parallel → WebSearch; WebSearch is the last rung, for a question the "
     "layer answered an error on."
 )
 BUDGET = (
     "dma-insights search order: {actor} has fired {web} general searches against {briefs} "
-    "research_brief call(s). Batch the remaining questions into one more research_brief (the "
-    "unanswered `by_question` rows, with their tail or alias wording), or the raw layer "
-    "(mcp__plugin_dma-insights_searxng__searxng_web_search / "
+    "evidence-engine brief(s). Batch the remaining questions into one more brief — a per-class "
+    "find_* tool for the source class the cell's ladder still owes, with the unanswered "
+    "`by_question` rows — or the raw layer "
+    "(mcp__plugin_dma-insights_searxng__keyword_search_web_pages / "
     "mcp__plugin_dma-insights_parallel__web_search — or mcp__Parallel_Search__web_search where the "
     "claude.ai connector shadows it — one message), before another WebSearch. "
     "{limit} general searches per brief is the ceiling; a brief that answers an error lifts it."
@@ -140,7 +160,7 @@ def record(payload: dict, *, state_dir: Path = STATE_DIR) -> dict:
     path = _state_path(payload, state_dir)
     st = _load(path)
     row = st.setdefault(agent_key(payload), {"briefs": 0, "web": 0, "last_brief_error": False})
-    if tool == BRIEF:
+    if tool in BRIEFS:
         row["briefs"] += 1
         resp = payload.get("tool_response")
         text = json.dumps(resp)[:4000].lower() if resp is not None else ""

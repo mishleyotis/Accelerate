@@ -1,5 +1,70 @@
 # dma-insights — plugin changelog
 
+## 1.26.0 — 2026-10-11 — research tools named for what they find, split by source class
+
+Owner: "For each of the MCP tools, avoid generic names, split by
+functionality to ensure thorough results, as per gold standard
+requirements. Ensure clear description of tools", and "Apart from evidence
+tiers, check the gold standard scoring workbook columns eg excerpts, URLs,
+dates etc."
+
+- **A tool surface for the four research services.** Agents no longer see
+  `research_brief`, `fetch` or `get_company_facts`. `scripts/evidence_proxy.py`
+  serves `evidence`, `searxng`, `fetch` and `edgar` through
+  `references/research_tool_surface.json` (`scripts/research_tool_surface.py`):
+  39 tools, each with a specific name, a description that names the source
+  class, the tier it earns and the gold-workbook columns its output fills,
+  and preset arguments the agent cannot override. Calls are mapped back to
+  the upstream tool; an upstream tool the surface does not name (EDGAR's
+  insider-trading reads) is not exposed. The snapshot stays the upstream
+  listing; upstream names still pass through for a session bound earlier.
+- **Split by source class, so quiet classes are searched in their own
+  right.** `find_evidence_all_sources` stays the batched first call; the
+  cells it leaves unanswered are chased with `find_regulator_evidence`,
+  `find_trade_press_evidence`, `find_news_wire_evidence`,
+  `find_job_posting_evidence`, `find_customer_review_evidence`,
+  `find_academic_evidence`, `find_contradicting_evidence` and
+  `find_corroborating_evidence`; the entity's own site has
+  `read_entity_newsroom` / `_careers` / `_investor_pages` / `_about_pages`.
+  The engine gained `research_brief(source_classes=[…])`: `site:` probes over
+  the source registry's hosts for the class (the sub-vertical's pack first,
+  rotated across a batch's questions; `site:gov` for regulators) and only
+  hits that classify into it are kept, counted in `search.class_filtered`.
+- **Measured live before shipping** (local pinned SearXNG + Parallel, IMA
+  Financial Group, P1C1.1–P1C1.2's 16 cells and twelve class-matched
+  questions). Two defects were found and fixed in the same change: a
+  regulator-class brief carded **15 T1 spans from BDC filings that list the
+  entity as a borrower** — the page named the entity, the span was about the
+  fund — so a per-class card must now name the entity in its own excerpt
+  and an `ambiguous` match is dropped (`search.off_entity_dropped`); and
+  quoting the legal name with its `, Inc.` suffix starved job-board and
+  review-site probes, so per-class probes use the plain name and lead with a
+  bare `site:<host> "<name>"`. After the fixes, on class-matched questions
+  the review tool returned 2 App Store cards where the all-sources call
+  returned none of that class; the trade-press tool 11 cards covering all
+  15 cells from the two insurance trade titles the all-sources call also
+  reached; the regulator tool an honest 0 for a private broker. Limits: `site:` probes rely on Google CSE, DuckDuckGo and
+  Brave (Bing and Parallel ignore the operator), so a rested Google CSE
+  thins the class tools; Indeed and LinkedIn pages are found but refused by
+  robots.txt and are probed last — Indeed postings come through the Indeed
+  connector.
+- **Gold columns in every description.** A card tool says which
+  Evidence_Detail column each field fills — Source_Name, Source_URL, Tier
+  (registry, never typed; own domain never T1), Date_Published (a date the
+  page states, never the retrieval date), Claim_Type, SubCap_IDs, Excerpt
+  (verbatim 50–500, sentence-complete) — and what the ledger computes (E_ID,
+  ERS, Recency, Retrieved_At, Access_Status, the scoring row's Evidence_IDs
+  and Source_URLs). A search tool says a snippet is never an Excerpt; an
+  EDGAR tool says how a filing becomes a T1 row.
+- **The page-read guard now fires on the plugin's own readers.** They were
+  listed in `deny_whole_page_fetch.FETCHERS` but missing from the hook's
+  matcher; the matcher now carries every reader and searcher it lists.
+- Grants, the challenge slice (`find_contradicting_evidence`,
+  `find_corroborating_evidence`), `search_order` (every find_* brief
+  counts), the rate gate, source health, auto-approve, the workflow, relay,
+  agent bodies and docs read the new names; `docs/EVIDENCE-ENGINE-TOOLS.md`
+  carries the generated surface table.
+
 ## 1.25.0 — 2026-10-11 — the research connectors bind, stay bound, and answer under load
 
 Owner: "Confirm connector reachability especially the open source ones …

@@ -243,7 +243,7 @@ rendered output and asserting the same verdicts the recordings assert.
    owner 2026-10-11: "runs will never run degraded due to the open source
    connectors") — and at least one of Clay/Vibe-Prospecting present, or the
    firing STOPS naming exactly what it carries. When Exa and Tavily refuse,
-   agents fall back in the free-chain order: engine `research_brief`, then
+   agents fall back in the free-chain order: engine `find_evidence_all_sources` (then the per-class find_* tools), then
    `searxng` / `parallel`, then WebSearch, each search logged under the tool
    that ran it. Attachment of a vendor connector happens on the Routine's
    own EDIT screen in the routines UI — the connector browse list's Use
@@ -488,29 +488,51 @@ Agents go to the **evidence engine** first; the other five are escape hatches
 
 | Plugin server | Tools | Hosted | Access path | Licence |
 |---|---|---|---|---|
-| `evidence` | 6 (`docs/EVIDENCE-ENGINE-TOOLS.md`) | Cloud Run `dmai-evidence` (`apps/evidence-engine`) | `scripts/evidence_proxy.py`: Google ID token for the service's audience + `X-DMA-Path-Token` from Secret Manager `dmai-evidence-path-token` — the same rungs as the connector, a sibling helper (`evidence_auth_headers.sh`), nothing to paste | FastMCP Apache-2.0; trafilatura, htmldate Apache-2.0; pypdfium2 BSD/Apache; rank-bm25 Apache-2.0; datasketch, edgartools MIT; fastembed Apache-2.0 (models MIT/Apache-2.0) |
-| `searxng` | 4 (`searxng_web_search`, `searxng_search_suggestions`, `searxng_instance_info`, `web_url_read`) | Cloud Run `dmai-searxng` (`infra/evidence-engine/searxng`) | ID token + secret path segment `/mcp-<token>` from `dmai-searxng-path-token` | SearXNG AGPL-3.0 (unmodified, source linked); mcp-searxng MIT; Supergateway MIT |
-| `fetch` | 1 (`fetch`) | Cloud Run `dmai-fetch` | ID token + `/mcp-<token>` | mcp-server-fetch MIT |
-| `edgar` | 18 served, 6 granted | Cloud Run `dmai-edgar` | ID token + `/mcp-<token>`; `SEC_EDGAR_USER_AGENT` set | sec-edgar-mcp **AGPL-3.0** (run unmodified; the service root links its source) |
+| `evidence` | 6 upstream, 17 surfaced (`docs/EVIDENCE-ENGINE-TOOLS.md`) | Cloud Run `dmai-evidence` (`apps/evidence-engine`) | `scripts/evidence_proxy.py`: Google ID token for the service's audience + `X-DMA-Path-Token` from Secret Manager `dmai-evidence-path-token` — the same rungs as the connector, a sibling helper (`evidence_auth_headers.sh`), nothing to paste | FastMCP Apache-2.0; trafilatura, htmldate Apache-2.0; pypdfium2 BSD/Apache; rank-bm25 Apache-2.0; datasketch, edgartools MIT; fastembed Apache-2.0 (models MIT/Apache-2.0) |
+| `searxng` | 4 upstream, 6 surfaced (`keyword_search_web_pages`, `keyword_search_news`, `keyword_search_papers`, `suggest_query_refinements`, `check_search_engines`, `read_web_page_section`) | Cloud Run `dmai-searxng` (`infra/evidence-engine/searxng`) | ID token + secret path segment `/mcp-<token>` from `dmai-searxng-path-token` | SearXNG AGPL-3.0 (unmodified, source linked); mcp-searxng MIT; Supergateway MIT |
+| `fetch` | 1 (`read_web_page_markdown`) | Cloud Run `dmai-fetch` | ID token + `/mcp-<token>` | mcp-server-fetch MIT |
+| `edgar` | 21 served, 15 surfaced and granted | Cloud Run `dmai-edgar` | ID token + `/mcp-<token>`; `SEC_EDGAR_USER_AGENT` set | sec-edgar-mcp **AGPL-3.0** (run unmodified; the service root links its source) |
 | `parallel` | `web_search` (and a whole-page read tool the lanes are denied) | vendor, `https://search.parallel.ai/mcp`, anonymous free tier | `type: http`, no key | vendor terms (free for exploration and light use; rate limits unpublished — measured in Phase D) |
 | `alphaxiv` | unlisted (401 anonymously) | vendor, `https://api.alphaxiv.org/mcp/v1`, OAuth per user | `type: http`; the session signs in | vendor terms |
+
+**The tool surface** (owner 2026-10-11: "avoid generic names, split by
+functionality to ensure thorough results, as per gold standard
+requirements. Ensure clear description of tools"): agents never see the
+upstream names in this table. `scripts/evidence_proxy.py` serves the four
+plugin research services through `references/research_tool_surface.json` —
+one specific name per function (`find_regulator_evidence`,
+`find_job_posting_evidence`, `read_entity_investor_pages`,
+`read_10k_10q_sections` …), a description naming the source class, the tier
+it earns and the gold-workbook columns the output fills (Source_Name,
+Source_URL, Tier, Date_Published, Claim_Type, SubCap_IDs, Excerpt; the
+ledger computes E_ID, ERS, Recency, Retrieved_At and Access_Status), and
+preset arguments the agent cannot override. The per-class evidence tools
+call `research_brief(source_classes=[…])`: `site:` probes over the source
+registry's hosts for that class, sub-vertical pack first, and only hits that
+classify into it are kept. The full table is in
+`docs/EVIDENCE-ENGINE-TOOLS.md` (generated). Parallel and alphaXiv bind as
+claude.ai connectors or plain `http` servers, outside the proxy, and keep
+their vendors' names.
 
 **Who holds what** (`scripts/provision_agent_tools.py`; owner 2026-10-11,
 "ensure all six are mapped to the agents and well orchestrated"): the engine
 is held by `research-conductor`, `enrichment-web-specialist`,
-`research-evidence-collector` and `technographic-scanner` (all six tools),
-by `adversarial-verifier` and `finding-challenger` (`verify_cards`,
-`expand_context`, one independent `research_brief`) and by
-`page-consolidator` and `surface-producer` (`verify_cards`,
-`expand_context`). The raw fallbacks (`searxng`, `fetch`, `edgar`,
+`research-evidence-collector` and `technographic-scanner` (all seventeen
+surfaced tools), by `adversarial-verifier` and `finding-challenger`
+(`verify_evidence_cards`, `expand_card_context`, and the independent
+`find_contradicting_evidence` / `find_corroborating_evidence` hunts) and by
+`page-consolidator` and `surface-producer` (`verify_evidence_cards`,
+`expand_card_context`). The raw fallbacks (`searxng`, `fetch`, `edgar`,
 `parallel`) are held by the same four searching agents; `alphaxiv` is
 mapped to the collector, the conductor and the web specialist and grants a
 tool the day its listing is captured. **The order is enforced**: one
-batched `research_brief` per capability (every cell question as a
+batched `find_evidence_all_sources` per capability (every cell question as a
 `{question, subcap_ids, facet}` object; cards come back grouped by cell),
-the raw layer for what it left, Exa/Tavily after, WebSearch last —
+the per-class find_* briefs for the cells it left (regulator, trade press,
+news, job postings, customer reviews, academic), the raw layer after, Exa/Tavily after, WebSearch last —
 `hooks/search_order.py` refuses a research actor's WebSearch before its
-first brief and past three per brief while the engine is up.
+first brief and past three per brief while the engine is up (every find_*
+brief counts).
 **Per-page producers are unchanged**: the owner's
 2026-09-14 decision that producers hold no search tool and emit
 `search_requests` stands — the brief's table would have given them the
@@ -518,7 +540,7 @@ engine directly; that deviation is recorded here for the owner to overturn.
 
 **Backstops**: `hooks/rate_gate.py` (PreToolUse on the four raw fallbacks;
 per-source bucket under a `fcntl` lock, exit 2 with a redirect to
-`research_brief`, FAIL OPEN), `hooks/source_health.py` (PostToolUse on all
+the engine's find_* briefs, FAIL OPEN), `hooks/source_health.py` (PostToolUse on all
 six; `/root/.dma/source_health.jsonl` + a counts sidecar), the
 whole-page-fetch guard now lists the raw readers, and the doctor's six
 `research layer:` rows (`scripts/research_layer.py`): a raw fallback down is
