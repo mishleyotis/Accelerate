@@ -120,3 +120,31 @@ def test_a_deferred_page_is_not_owed_on_version_a(tmp_path):
                       shipper=S.StubShipper(), push=False, folder_root=tmp_path / "o",
                       ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None)
     assert P.Pipeline(run, opts2)._deferred() == ("techstack",)
+
+
+# ── a report that quotes its gates cannot re-trip GS-RPT-NOTOKENS ────────
+
+def test_a_leftover_token_finding_names_tokens_without_braces(tmp_path):
+    from engine import gold_standard as G
+    import inspect, re
+    src = inspect.getsource(G)
+    assert "leftover template token(s)" in src
+    # the finding text the Gate_Log will carry has no {{...}}
+    tok = ["{{CATALOGUE_VERSION}}", "{{CATALOGUE_HASH}}"]
+    names = sorted({t.strip("{} ") for t in tok})
+    assert not re.search(r"\{\{", ", ".join(names))
+
+
+def test_the_gate_table_renders_the_latest_verdict_per_gate_and_scope(tmp_path):
+    from engine import ledger as L, reports as R, report_spec as RS
+    run, wb, cells, ev = researched_run(tmp_path)
+    L.append_gate(wb, gate="GS", scope="report:research", verdict="FAIL", blocking=True,
+                  detail="1 finding(s): GS-RPT-NOTOKENS: ['{{CATALOGUE_VERSION}}']")
+    L.append_gate(wb, gate="GS", scope="report:research", verdict="PASS", blocking=True,
+                  detail="PASS — 0 findings")
+    sec = next(s for spec in RS.SPECS.values() for s in spec.sections
+               if "Gate_Log" in s.inputs)
+    tables = R._tables_for(run.open(), sec)
+    text = repr(tables)
+    assert "{{CATALOGUE_VERSION}}" not in text
+    assert "PASS — 0 findings" in text

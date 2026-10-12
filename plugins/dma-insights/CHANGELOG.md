@@ -175,6 +175,14 @@ rule HANDOFF enforced that the write never did:
   `PAGES_DEFERRED_TO_B` Gate_Log row and remembered on resume) moves it:
   PAGES_A no longer owes it and PAGES_B produces it against version B.
 
+- **A report re-tripped GS-RPT-NOTOKENS on its own gate table**
+  (`engine/gold_standard.py`, `engine/reports.py`): the finding quoted the
+  leftover tokens with their braces, the report's gate table rendered every
+  Gate_Log row ever written, and the client research report then failed the
+  token check on an old gate message, not on any template residue — the
+  package refused at PACKAGE. The finding names tokens without braces, and
+  the gate table renders the latest verdict per gate and scope.
+
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow
 source run under node (`research_governor_harness.mjs`) at every share from
