@@ -167,6 +167,14 @@ rule HANDOFF enforced that the write never did:
   `source_domain` join the verbatim leaves the driver's budget skips (9 of the
   Interac heatmap's 20 counted FAILs).
 
+- **A version-A page could stop the whole run** (`engine/pipeline.py`):
+  techstack failed ET-07/ET-12 against evidence the server ingested before
+  the workbook's repairs (links attached later, connector provenance the
+  worker dropped), and a page halted on version A stopped every later stage.
+  `--defer-to-b PAGE` (an owner decision, logged as a non-blocking
+  `PAGES_DEFERRED_TO_B` Gate_Log row and remembered on resume) moves it:
+  PAGES_A no longer owes it and PAGES_B produces it against version B.
+
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow
 source run under node (`research_governor_harness.mjs`) at every share from

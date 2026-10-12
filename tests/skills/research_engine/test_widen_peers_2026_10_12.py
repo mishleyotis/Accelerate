@@ -96,3 +96,27 @@ def test_the_report_probe_round_resets_the_relay_window(tmp_path):
                      ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None)
     P.Pipeline(run, opts)._report_probes()
     assert L._ops_since_checkpoint(run.open(), "RELAY") < L.SEARCH_OP_CEILING
+
+
+# ── a version-A page can be deferred to version B ───────────────────────
+#
+# Same run: techstack failed ET-07/ET-12 on version A against evidence the
+# server ingested before the workbook's repairs, and a page halted on A
+# stopped the run. `--defer-to-b techstack` moves it, logged.
+
+def test_a_deferred_page_is_not_owed_on_version_a(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    opts = P.Options(dispatcher=S.StubDispatcher(S.default_handlers()), reads=S.StubReads(),
+                     shipper=S.StubShipper(), push=False, folder_root=tmp_path / "o",
+                     ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None,
+                     defer_to_b=("techstack",))
+    pl = P.Pipeline(run, opts)
+    assert pl._deferred() == ("techstack",)
+    ok, why = pl.done("PAGES_A")
+    assert why == "pending: heatmap"           # techstack is no longer owed on A
+    assert any(r.get("Gate") == "PAGES_DEFERRED_TO_B" for r in run.open().rows("Gate_Log"))
+    # remembered on resume without the flag
+    opts2 = P.Options(dispatcher=S.StubDispatcher(S.default_handlers()), reads=S.StubReads(),
+                      shipper=S.StubShipper(), push=False, folder_root=tmp_path / "o",
+                      ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None)
+    assert P.Pipeline(run, opts2)._deferred() == ("techstack",)

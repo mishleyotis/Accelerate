@@ -675,6 +675,13 @@ class Options:
     # tolerates a legitimate paraphrase drifting below threshold; 249 (Golden 1)
     # does not.
     sg_v4_budget: int = 8
+    # PAGES_A pages a person has moved to version B (R-INTERAC-20261010,
+    # 2026-10-12): techstack failed ET-07/ET-12 against version A's evidence
+    # — links and connector provenance the workbook now carries but the
+    # server ingested before they existed — and a page halted on A stopped
+    # the whole run. A deferred page is not shipped on A; PAGES_B produces it
+    # against version B. Recorded in Gate_Log, never silent.
+    defer_to_b: tuple = ()
     ingest_poll_s: float = 60.0
     ingest_timeout_s: float = 3600.0
     folder_root: Path | None = None
@@ -1429,9 +1436,12 @@ class Pipeline:
                          "reports READY but not rendered" if not all(files) else
                          "Recommendations not projected from the report's REC cards"))
         if stage == "PAGES_A":
-            ok = self._pages_passed(PAGES_A, "A")
-            return ok, ("techstack, heatmap shipped to version A" if ok else
-                        f"pending: {', '.join(p for p in PAGES_A if not self._page_ok(p, 'A'))}")
+            moved = tuple(self.state.get("deferred_to_b") or ())
+            due = tuple(p for p in PAGES_A if p not in moved)
+            ok = self._pages_passed(due, "A")
+            return ok, ((f"{', '.join(due) or 'no page'} shipped to version A"
+                         + (f"; {', '.join(moved)} deferred to B" if moved else "")) if ok else
+                        f"pending: {', '.join(p for p in due if not self._page_ok(p, 'A'))}")
         if stage == "PACKAGE":
             pk = self.state.get("package") or {}
             ok = bool(pk.get("verified")) and Path(str(pk.get("folder") or "/nonexistent")).is_dir()
@@ -4641,11 +4651,32 @@ class Pipeline:
         NEEDS_CONNECTOR rather than failing the stage."""
         self._cohort_peers()
 
+    def _deferred(self) -> tuple:
+        """PAGES_A pages moved to version B — by this invocation's flag or a
+        previous one (remembered in pipeline state, so a resume without the
+        flag does not try them on A again)."""
+        have = list((self.state.get("deferred_to_b") or []))
+        for p in getattr(self.opts, "defer_to_b", ()) or ():
+            if p in PAGES_A and p not in have:
+                have.append(p)
+                L.append_gate(self.wb, gate="PAGES_DEFERRED_TO_B", scope=p, verdict="PASS",
+                              blocking=False,
+                              detail=f"{p} moved from version A to version B by the owner: "
+                                     f"its version-A verdict rests on evidence ingested before "
+                                     f"the workbook's repairs; PAGES_B produces it on B")
+        if have != list(self.state.get("deferred_to_b") or []):
+            self.state["deferred_to_b"] = have
+            self._save_state()
+        return tuple(have)
+
     def _stage_pages_a(self) -> str:
         self._reset_counters()
-        self._pages_prepare(PAGES_A)
-        shipped = self._ship_pages(PAGES_A, "A", produce=True)
-        return f"shipped to version A: {', '.join(shipped)}"
+        pages = tuple(p for p in PAGES_A if p not in self._deferred())
+        self._pages_prepare(pages)
+        shipped = self._ship_pages(pages, "A", produce=True) if pages else []
+        moved = [p for p in PAGES_A if p not in pages]
+        return (f"shipped to version A: {', '.join(shipped) or 'none'}"
+                + (f"; deferred to B: {', '.join(moved)}" if moved else ""))
 
     def _stage_package(self) -> str:
         from . import assemble, grains, techscan
@@ -4681,9 +4712,11 @@ class Pipeline:
 
     def _stage_pages_b(self) -> str:
         self._reset_counters()
-        self._pages_prepare(tuple(p for g in PAGES_B for p in g))
-        restaged = self._ship_pages(PAGES_A, "B", produce=False)   # from disk, no lanes
-        shipped = []
+        deferred = self._deferred()
+        self._pages_prepare(tuple(p for g in PAGES_B for p in g) + deferred)
+        restaged = self._ship_pages(tuple(p for p in PAGES_A if p not in deferred),
+                                    "B", produce=False)   # from disk, no lanes
+        shipped = self._ship_pages(deferred, "B", produce=True) if deferred else []
         for group in PAGES_B:
             shipped += self._ship_pages(group, "B", produce=True)
         return f"restaged {', '.join(restaged)}; shipped {', '.join(shipped)} to version B"
@@ -4891,7 +4924,8 @@ def _build_opts(a) -> Options:
                    reset_guard=bool(getattr(a, "reset_guard", False)),
                    sg_v4_budget=int(getattr(a, "sg_v4_budget", None)
                                     if getattr(a, "sg_v4_budget", None) is not None
-                                    else Options.sg_v4_budget))
+                                    else Options.sg_v4_budget),
+                   defer_to_b=tuple(getattr(a, "defer_to_b", None) or ()))
 
 
 def _research_mode(a) -> str:
@@ -4942,6 +4976,10 @@ def main(argv=None) -> int:
                         "promotes (invariant 12); this is the driver's own revision "
                         "policy, raised by a person for a page whose misses are "
                         "ungroundable by construction (stated absences)")
+    r.add_argument("--defer-to-b", action="append", choices=PAGES_A, default=[],
+                   help="move a version-A page to version B (an owner decision, "
+                        "logged): for a page whose A verdict rests on evidence "
+                        "ingested before the workbook's repairs. Remembered on resume")
     r.add_argument("--reset-guard", action="store_true",
                    help="clear the workflow-handoff guard first: a stage the "
                         "guard refused (same work handed with nothing moving, or "
