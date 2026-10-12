@@ -4391,11 +4391,25 @@ def _check_technographic_scan(conn, run_id, page, payload) -> list:
     if cited:
         try:
             cur = conn.cursor()
+            # A register cites WORKBOOK-LOCAL ids ('E-031'); the stored row
+            # is the entity-qualified one ('E-INTERACC-031', '-R2' after a
+            # re-scan). Resolve through `evidence_package_ids` — the mapping
+            # get_evidence reads — or a register that cites four Clay and
+            # Vibe Prospecting readings is told it cites none
+            # (R-INTERAC-20261010 techstack B, 2026-10-12: refused twice
+            # with E-031/E-035/E-037/E-040 all origin 'connector').
+            ids = sorted(cited)
             cur.execute(
-                """SELECT count(*) FROM evidence_index
-                    WHERE e_id = ANY(%s) AND origin::text = 'connector'
-                      AND connector_tool ~* '(clay|vibe|explorium)'""",
-                (sorted(cited),))
+                """SELECT count(*) FROM evidence_index e
+                    WHERE e.origin::text = 'connector'
+                      AND e.connector_tool ~* '(clay|vibe|explorium)'
+                      AND (e.e_id = ANY(%s)
+                           OR e.e_id IN (
+                               SELECT m.e_id FROM evidence_package_ids m
+                                 JOIN runs r ON r.entity_id = m.entity_id
+                                WHERE r.id = %s
+                                  AND m.package_local_id = ANY(%s)))""",
+                (ids, run_id, [i.upper() for i in ids]))
             if (cur.fetchone() or [0])[0]:
                 return []
         except Exception:                          # noqa: BLE001

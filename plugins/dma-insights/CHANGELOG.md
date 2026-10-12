@@ -15,6 +15,15 @@ item, or dropping a citation the claim does not need. For this run the
 citation was dropped: IC-006 rests on Interac's own appointment release
 (E-557, T2). Tests: `apps/mcp/tests/test_cited_linkage.py`.
 
+**ET-12 resolves workbook-local ids through the package mapping**
+(R-INTERAC-20261010 techstack B). The register cited `E-031`, `E-035`,
+`E-037`, `E-040` — four Clay and Vibe Prospecting readings, every one
+`origin: connector` — and ET-12 refused it twice, because its query matched
+the cited string against `evidence_index.e_id` literally while the stored
+rows are `E-INTERACC-031` / `E-INTERACC-035-R2`. It now resolves through
+`evidence_package_ids` for the run's entity, the mapping `get_evidence`
+reads. Test: `apps/mcp/tests/test_cagr_and_scan_gates.py`.
+
 Owner, R-INTERAC-20261010: "I see workflows failing and being restarted.
 Please diagnose and fix the above to ensure this never recurs."
 
