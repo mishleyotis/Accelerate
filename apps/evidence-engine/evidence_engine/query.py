@@ -149,6 +149,71 @@ def expand(question: str, entity: EntityRef, facet: str | None = None,
     return out
 
 
+#: One lens word per source class, for the plain (non-`site:`) probe a
+#: per-class brief adds: the word that class's pages carry.
+CLASS_LENS = {
+    "regulator": "regulator", "filing": "10-K", "entity_owned": "", "trade_press": "",
+    "news": "news", "academic": "study", "vendor": "case study", "job_board": "jobs",
+    "review_site": "reviews", "other": "",
+}
+
+
+_CORP_SUFFIX = re.compile(r",?\s+(?:inc|incorporated|llc|l\.l\.c|corp|corporation|co|company|ltd|limited|plc|lp|llp)\.?$",
+                          re.I)
+
+
+def search_name(entity: EntityRef) -> str:
+    """The legal name as people write it: corporate suffixes dropped
+    ("Example Holdings Group, Inc." -> "Example Holdings Group"). Measured
+    2026-10-11: the suffix in a quoted `site:` probe returned nothing on job
+    boards and review sites that name the firm without it."""
+    name = re.sub(r"\s+", " ", str(entity.legal_name or "")).strip()
+    prev = None
+    while prev != name:
+        prev, name = name, _CORP_SUFFIX.sub("", name).strip()
+    return name or str(entity.legal_name or "")
+
+
+def expand_for_classes(question: str, entity: EntityRef, facet: str | None,
+                       class_pack: list[dict], source_classes) -> list[dict]:
+    """The probes of a per-class brief (`research_brief(source_classes=…)`).
+
+    For each host of the class pack, in order: the BARE probe
+    `site:<host> "<name>"` (a job board's or review site's page for the
+    firm is found by its name alone — and the identical text from the next
+    question is deduplicated by the caller, so it runs once per call), then
+    the FOCUSED probe `site:<host> "<name>" <two focus words>`; then one
+    plain probe per class with its lens word; the entity's own domains only
+    when `entity_owned` was asked for. Kinds stay `site:<rung>` so
+    coverage.ladder_searched reads them. Same input, same output."""
+    if facet is not None and facet not in FACETS:
+        raise ValueError(f"facet {facet!r} not in {FACETS}")
+    f = facet or "corroborates"
+    name = _quote(search_name(entity))
+    focus_terms = question_focus(question, entity).split()
+    head2 = " ".join(focus_terms[:2])
+    head = " ".join(focus_terms[:3])
+    out: list[dict] = []
+
+    def add(text: str, kind: str):
+        text = re.sub(r"\s+", " ", text).strip()
+        if text and all(q["text"] != text for q in out) and len(out) < MAX_QUERIES:
+            out.append({"query_id": f"Q-{len(out) + 1:02d}", "text": text, "facet": f, "kind": kind})
+
+    for entry in class_pack or ():
+        d, kind = _bare(entry["domain"]), f"site:{entry.get('rung') or 'other'}"
+        add(f"site:{d} {name}", kind)
+        if head2:
+            add(f"site:{d} {name} {head2}", kind)
+    for cls in source_classes or ():
+        lens = FACET_LENS[facet] if facet else ""
+        add(" ".join(x for x in (name, head, CLASS_LENS.get(cls, ""), lens) if x), "facet")
+    if "entity_owned" in (source_classes or ()):
+        for d in sorted({_bare(d) for d in (entity.domains or ()) if _bare(d)}):
+            add(" ".join(x for x in (f"site:{d}", head) if x), "site:entity")
+    return out
+
+
 def short_alias(entity: EntityRef) -> str:
     """The shortest alias of 2–12 characters (the initialism or short form
     trade press and app stores use for the entity), or ''."""

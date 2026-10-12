@@ -24,7 +24,7 @@ connector is required", "never fetch a page" beside "fetch every rich document w
    the web — the run paid for these rows already.
 2. **The toolkit's named artefacts**, read through `engine.cli fetch` on the URL the
    card or the source catalogue gives. A researcher told what to look for stops fishing.
-3. **The evidence engine** — `research_brief` on the `evidence` server (lean lane: `engine.cli
+3. **The evidence engine** — its `find_*` tools, all-sources first (lean lane: `engine.cli
    evidence-brief`): cards whose `item` is the `engine.cli evidence` flag set (add `--subcap`);
    `coverage.saturation` stops the facet; `needs_spend_approval` is reported, never paid.
 4. **`WebSearch`** for discovery — the one web tool a lane holds. Its result list is

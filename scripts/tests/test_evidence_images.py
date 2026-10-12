@@ -138,13 +138,18 @@ def test_the_probe_passes_a_good_door_and_fails_a_wrong_token_or_missing_tool():
         srv.shutdown()
 
 
-def test_the_probe_holds_edgar_to_the_six_tools_the_plugin_binds():
+def test_the_probe_holds_edgar_to_the_tools_the_plugin_binds():
+    """Agents bind the SURFACED names (references/research_tool_surface.json);
+    each maps to an upstream sec-edgar-mcp tool, and the image probe must
+    find exactly those upstream tools."""
     sys.path.insert(0, str(EE))
+    sys.path.insert(0, str(ROOT / "plugins" / "dma-insights" / "scripts"))
     import image_probe  # noqa: PLC0415
+    import research_tool_surface as surface  # noqa: PLC0415
     bound = set()
     for f in (ROOT / "plugins" / "dma-insights" / "agents").rglob("*.md"):
         bound |= set(re.findall(r"mcp__plugin_dma-insights_edgar__(\w+)", f.read_text()))
-    assert bound and bound == image_probe.TOOLS["edgar"]
+    assert bound and {surface.upstream_of("edgar", n) for n in bound} == image_probe.TOOLS["edgar"]
 
 
 def test_every_gateway_stdio_command_parses_as_sh():

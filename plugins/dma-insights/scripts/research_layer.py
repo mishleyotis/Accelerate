@@ -28,6 +28,9 @@ PLUGIN = HERE.parent
 RESEARCH_SERVERS = ("evidence", "searxng", "fetch", "edgar", "parallel", "alphaxiv")
 PRIMARY = "evidence"
 SEARCH_FALLBACKS = ("searxng", "parallel")
+#: plugin server -> the claude.ai connector that shadows it (measured
+#: 2026-10-11; provision_agent_tools.SHADOWED_BY_CLAUDE_AI, inverted).
+SHADOWED = {"parallel": "Parallel_Search", "alphaxiv": "alphaXiv"}
 SESSION_SEARCH_FAMILIES = ("exa", "tavily")
 
 INIT = {"jsonrpc": "2.0", "id": 1, "method": "initialize",
@@ -159,6 +162,10 @@ def checks(*, probe_network: bool, baseline_families: set[str] | None = None,
         detail = f"{note} (token value not shown)" if hdrs else note
         if s == "alphaxiv" and status == 401:
             detail += " — reachable; OAuth is per user, sign in from the session to list its tools"
+        if s in SHADOWED:
+            detail += (f" — where the account attaches the claude.ai {SHADOWED[s]} connector, Claude Code "
+                       f"suppresses this plugin copy and the tools bind as mcp__{SHADOWED[s]}__*; "
+                       f"the research agents hold both names")
         rows.append(_check(name, True if ok else s != PRIMARY, detail,
                            "" if ok else "check the deploy and the invoker grant; a raw fallback down is a "
                                          "warning, the engine down is a stop only without a search fallback",

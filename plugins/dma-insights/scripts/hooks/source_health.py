@@ -27,10 +27,28 @@ LOG_PATH = Path(os.environ.get("DMA_SOURCE_HEALTH_LOG") or "/root/.dma/source_he
 WINDOW = 200
 
 
+#: A claude.ai connector at the same URL as a plugin research server makes
+#: Claude Code suppress the plugin's copy, so the tool binds under the
+#: connector's name (measured 2026-10-11). Mirrors
+#: `provision_agent_tools.SHADOWED_BY_CLAUDE_AI`; a test pins the copies.
+SHADOWED_BY_CLAUDE_AI = {"Parallel_Search": "parallel", "alphaXiv": "alphaxiv"}
+
+
+def _server_of(tool: str) -> str | None:
+    """The plugin research server a tool name belongs to, under either the
+    plugin-scoped spelling or the claude.ai connector that shadows it."""
+    if tool.startswith(PREFIX):
+        return tool[len(PREFIX):].split("__", 1)[0]
+    parts = tool.split("__")
+    if len(parts) >= 3 and parts[0] == "mcp":
+        seg = parts[1].replace("-", "_")
+        if seg.startswith("claude_ai_"):
+            seg = seg[len("claude_ai_"):]
+        return SHADOWED_BY_CLAUDE_AI.get(seg)
+    return None
+
 def source_of(tool: str) -> str | None:
-    if not tool.startswith(PREFIX):
-        return None
-    server = tool[len(PREFIX):].split("__", 1)[0]
+    server = _server_of(tool)
     return server if server in SOURCES else None
 
 

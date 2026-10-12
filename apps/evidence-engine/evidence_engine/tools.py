@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 from . import contract as C
 from . import coverage as COV
 from . import crawl as CR
+from . import entity as E
 from . import excerpt as X
 from . import filings as F
 from . import pipeline as P
@@ -153,6 +154,8 @@ class Engine:
     registry_pack: list[str] = field(default_factory=list)
     #: the last brief's fused hit list (diagnostics; not returned by any tool)
     last_hits: list[dict] = field(default_factory=list)
+    #: the registries' API client (find_registrant), opened on first use
+    _registry_http: object | None = None
 
     def __post_init__(self):
         st = settings()
@@ -165,7 +168,9 @@ class Engine:
             from . import gcp_auth
             auth = gcp_auth.MetadataIdTokenAuth(st.searxng_url) if st.searxng_id_token else None
             self.searx = S.SearxClient(gcp_auth.searxng_base(st.searxng_url, st.searxng_path_token),
-                                       httpx.AsyncClient(timeout=20, auth=auth))
+                                       httpx.AsyncClient(timeout=20, auth=auth),
+                                       pool=S.EnginePool(S.engine_rates_from(st.searxng_engines),
+                                                         per_query=st.searxng_engines_per_query))
         if self.parallel is None and st.parallel_enabled and st.parallel_mcp_url:
             self.parallel = S.ParallelClient(st.parallel_mcp_url)
         if not self.registry_pack:
@@ -179,6 +184,15 @@ class Engine:
     # ── helpers ─────────────────────────────────────────────────────────
     async def _bucket_wait(self, host: str) -> None:
         await RL.limits().host(host).acquire()
+
+    async def _source_wait(self, source: str) -> None:
+        """A SEARCH call's limiter is its SOURCE's bucket (searxng 4/s burst
+        4, parallel 1.4/s burst 2 — settings). Until 2026-10-11 the fan-out
+        was handed `_bucket_wait`, the per-WEBSITE politeness bucket (1/s,
+        burst 1) keyed by the source's name, and the source buckets were
+        never acquired at all: every brief searched at 1 call/s per backend
+        per instance, and sixteen workflows queued behind it."""
+        await RL.limits().source(source).acquire()
 
     async def _sec_wait(self) -> None:
         await RL.limits().source("sec").acquire()
@@ -266,7 +280,7 @@ class Engine:
                              token_budget: int = 2400, provenance: str = "standard",
                              reference_date: str | None = None,
                              allow_names_from_cards: dict | None = None,
-                             fetch_limit: int = 20) -> dict:
+                             fetch_limit: int = 20, source_classes: list[str] | None = None) -> dict:
         """One call for a whole capability batch. `questions` is a list of
         plain strings (one combined brief, as before) or of objects
         `{question, subcap_ids[], facet?}` — one per cell question. With
@@ -276,13 +290,25 @@ class Engine:
         named for the question it answered, and `by_question` says which
         questions got no card (the collector's `nothing_found` material).
         `max_cards` and `token_budget` are per question in that mode. The
-        engine never invents a cell: the ids are the caller's, echoed."""
+        engine never invents a cell: the ids are the caller's, echoed.
+
+        `source_classes` (⊆ contract.SOURCE_TYPES) makes it a per-class
+        brief: the probes are `site:` over the registry's hosts for those
+        classes (registry.class_pack, the sub-vertical's own pack first,
+        rotated across questions), and a hit is kept only when it classifies
+        into one of them (registry.in_classes) — the plugin's
+        find_regulator_record_evidence, find_job_posting_evidence and their
+        siblings."""
         t0 = time.monotonic()
         ent = entity_ref(entity)
         if ent is None or not ent.legal_name:
             return {"error": "entity.legal_name is required", "cards": []}
         if facet is not None and facet not in C.FACETS:
             return {"error": f"facet must be one of {C.FACETS}", "cards": []}
+        classes = [str(c).strip().lower() for c in (source_classes or ()) if str(c).strip()]
+        off = [c for c in classes if c not in C.SOURCE_TYPES]
+        if off:
+            return {"error": f"source_classes {off} not in {C.SOURCE_TYPES}", "cards": []}
         ref = _ref_date(reference_date)
         specs, bad = _question_specs(questions, facet)
         if bad:
@@ -294,10 +320,22 @@ class Engine:
         # queries, guarded: one pass over every question, each question's
         # share capped so a batch of twelve cells still fits one fan-out
         pack = self.registry_pack or registry.site_pack(sub_vertical)
+        cpack = registry.class_pack(classes, sub_vertical) if classes else []
         per_q = Q.per_question_budget(len(specs))
         queries, seen_text = [], set()
-        for spec in specs:
-            for q in Q.expand(spec["question"], ent, spec["lens"], sub_vertical, pack)[:per_q]:
+        for n, spec in enumerate(specs):
+            if classes:
+                # rotate the class pack so a batch's questions probe different
+                # hosts (two probes per host), and count a question's share
+                # AFTER de-duplication: the bare `site:<host> "<name>"` probe
+                # is shared across the batch and runs once
+                k = (n * max(1, per_q // 2)) % len(cpack) if cpack else 0
+                planned = [q for q in Q.expand_for_classes(spec["question"], ent, spec["lens"],
+                                                           cpack[k:] + cpack[:k], classes)
+                           if q["text"] not in seen_text]
+            else:
+                planned = Q.expand(spec["question"], ent, spec["lens"], sub_vertical, pack)
+            for q in planned[:per_q]:
                 if q["text"] in seen_text:
                     continue
                 seen_text.add(q["text"])
@@ -315,13 +353,19 @@ class Engine:
         t_search = time.monotonic()
         fan = await S.fan_out(queries, searx=self.searx if "searxng" in free else None,
                               parallel=self.parallel if "parallel" in free else None,
-                              run_id=run_id, bucket_wait=self._bucket_wait, cache=_SearchCache(self.store),
-                              breakers=RL.breakers(), question=question)
+                              run_id=run_id, bucket_wait=self._source_wait, cache=_SearchCache(self.store),
+                              breakers=RL.breakers(), question=question,
+                              budget_s=settings().search_phase_budget_s)
         configured = [n for n, c in (("searxng", self.searx), ("parallel", self.parallel)) if c is not None]
         for src in configured:
             if src not in free and f"rerouted_from:{src}" not in fan["rerouted"]:
                 fan["rerouted"].append(f"rerouted_from:{src}")
         hits = fan["hits"]
+        class_filtered = 0
+        if classes:
+            kept_hits = [h for h in hits if registry.in_classes(h["url"], ent, classes, cpack)]
+            class_filtered = len(hits) - len(kept_hits)
+            hits = kept_hits
         # In-process diagnostics only (the eval harness reads it to tell a
         # discovery miss from a fetch loss); never part of the tool answer.
         self.last_hits = [{"url": h["url"], "url_key": h["url_key"], "sources": list(h.get("sources") or [])} for h in hits]
@@ -329,6 +373,10 @@ class Engine:
         t_fetch = time.monotonic()
         docs, failures = await self._documents_for_hits(hits, limit=fetch_limit, reference=ref,
                                                         hits_by_key=hits_by_key, entity=ent, question=question)
+        if classes:   # a redirect can land off-class: the card's own URL decides
+            off_class = [d for d in docs if not registry.in_classes(d.url, ent, classes, cpack)]
+            class_filtered += len(off_class)
+            docs = [d for d in docs if d not in off_class]
         t_rank = time.monotonic()
         qids = {h["url_key"]: h.get("query_ids", []) for h in hits}
         facets = {h["url_key"]: h.get("facets", []) for h in hits}
@@ -379,6 +427,23 @@ class Engine:
                                     "query_ids": [q["query_id"] for q in queries
                                                   if q.get("question_index") == spec["index"]],
                                     "card_ids": ids, "answered": bool(ids)})
+        off_entity = 0
+        if classes:
+            # a per-class card must be ABOUT the entity in its own span: the
+            # class filter leaves only pages of that class, and a page that
+            # merely lists the entity (a BDC's schedule of investments) would
+            # otherwise card an unrelated T1 span (entity.span_names_entity)
+            keep = [c for c in cards
+                    if c["provenance"].get("entity_match") != "ambiguous"
+                    and (c["provenance"].get("source_type_hint") == "entity_owned"
+                         or E.span_names_entity(c["item"]["excerpt"], ent))]
+            off_entity = len(cards) - len(keep)
+            if off_entity:
+                kept_ids = {c["card_id"] for c in keep}
+                cards = keep
+                for row in by_question:
+                    row["card_ids"] = [i for i in row["card_ids"] if i in kept_ids]
+                    row["answered"] = bool(row["card_ids"])
         projected = [self._project(c, provenance) for c in cards]
         kept, tokens = P.trim_to_budget(projected, token_budget * (len(specs) if batched else 1))
         cards = cards[:len(kept)]
@@ -391,7 +456,10 @@ class Engine:
             self.store.put_card(run_id, c)
         state = self.store.run_state(run_id)
         block, new_state = COV.coverage_block(run_state=state, facet=facet, returned=cards, queries=queries,
-                                              sources_used=[s for s, v in fan["per_source"].items() if v.get("count")])
+                                              # a per-class brief searched its class's hosts, not
+                                              # the open web: its rungs come from its site: probes
+                                              sources_used=[] if classes else
+                                              [s for s, v in fan["per_source"].items() if v.get("count")])
         def _upd(s):
             s.update(new_state)
             s.setdefault("queries", []).extend([q["text"] for q in queries])
@@ -410,6 +478,15 @@ class Engine:
             "search": {"queries": [{"query_id": q["query_id"], "text": q["text"], "facet": q["facet"], "kind": q["kind"]} for q in queries],
                        "per_source": fan["per_source"], "rerouted": fan.get("rerouted", []),
                        "hits": len(hits), "fetched": len(docs), "fetch_failures": failures[:10],
+                       # queries cut at the search-phase budget (load): their
+                       # questions may read unanswered — re-ask those rows
+                       "budget_cut": fan.get("budget_cut", 0),
+                       # a per-class brief: the classes asked for, and the
+                       # hits dropped because they classified outside them
+                       "source_classes": classes, "class_filtered": class_filtered,
+                       # per-class cards dropped because the span does not
+                       # name the entity (or the page only shares its tokens)
+                       "off_entity_dropped": off_entity,
                        "dropped": dropped[:10]},
             "guard_violations": violations,
             "ambiguous_cards": [c["card_id"] for c in cards if c["provenance"].get("entity_match") == "ambiguous"],
@@ -589,6 +666,44 @@ class Engine:
         return {"run_id": run_id, "results": results, "summary": summary,
                 "note": "confidence only moves down: a FAIL here is final until the card is re-issued"}
 
+    # ── 7 · find_registrant ─────────────────────────────────────────────
+    async def find_registrant(self, *, entity: dict, sub_vertical: str | None = None,
+                              country: str | None = None, run_id: str | None = None) -> dict:
+        """The institution in the registry that holds it, for every
+        sub-vertical in the US and Canada (registrants.py). Registries with a
+        keyless interface are asked directly; the ones without are searched
+        on their own hosts through the paced fan-out and come back as
+        candidates. Never a card: a registry record identifies the entity;
+        the evidence about it is the record page, read and registered."""
+        import httpx
+
+        from . import registrants as REG
+        from .tls import trust_context
+        ent = entity_ref(entity)
+        if ent is None or not ent.legal_name:
+            return {"error": "entity.legal_name is required"}
+        if self._registry_http is None:
+            self._registry_http = httpx.AsyncClient(timeout=25, follow_redirects=True, verify=trust_context())
+        lookups = REG.Registrants(self._registry_http, user_agent=settings().sec_user_agent)
+        free = self._free_sources_available()
+
+        async def search(queries: list[dict]) -> list[dict]:
+            if not free:
+                return []
+            fan = await S.fan_out(queries, searx=self.searx if "searxng" in free else None,
+                                  parallel=self.parallel if "parallel" in free else None,
+                                  run_id=run_id or "registrant", bucket_wait=self._source_wait,
+                                  cache=_SearchCache(self.store), breakers=RL.breakers(),
+                                  budget_s=min(60.0, settings().search_phase_budget_s))
+            return [{"url": h["url"], "title": h.get("title", ""), "snippet": h.get("snippet", "")}
+                    for h in fan["hits"]]
+
+        t0 = time.monotonic()
+        out = await lookups.lookup(ent, sub_vertical=sub_vertical, country=country, search=search)
+        out["entity"] = ent.legal_name
+        out["elapsed_ms"] = int((time.monotonic() - t0) * 1000)
+        return out
+
     # ── 6 · coverage_report ─────────────────────────────────────────────
     async def coverage_report(self, *, run_id: str) -> dict:
         cards = self.store.list_cards(run_id)
@@ -598,4 +713,9 @@ class Engine:
         rep["ladder_rungs_searched"] = state.get("ladder_rungs", [])
         rep["queries_run"] = len(state.get("queries", []))
         rep["sources_health"] = RL.health()
+        pool = getattr(self.searx, "pool", None)
+        if pool is not None:
+            # this instance's per-engine pacing behind SearXNG: what was sent,
+            # what is resting and why (search.EnginePool)
+            rep["sources_health"]["searxng_engines"] = pool.snapshot()
         return rep

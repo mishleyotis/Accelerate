@@ -2475,11 +2475,19 @@ class Pipeline:
                 ratio = float((self.state.get("workflow_calibration") or {}).get("ratio") or 1.0)
                 return round(max(pr["usd"] * max(1.0, ratio), _round_floor_usd(i, tier)), 4)
             need = {id(i): _est(i) for i in inv}
+            floor = {id(i): _round_floor_usd(i, tier) for i in inv}
             if remaining is not None and fits_env and sum(need.values()) > float(remaining) + 1e-9:
-                # the scope estimate fits, but not once every category is
-                # funded for at least one whole round: allocate whole
-                # categories instead of handing shares no wave fits in
-                fits_env = False
+                if sum(floor.values()) <= float(remaining) + 1e-9:
+                    # the scope fits and every category's one-round FLOOR
+                    # fits, though not every priced need: each is handed its
+                    # floor plus a cells-proportional part of what is left
+                    # (merged with the default branch's fixed-cost floor,
+                    # 2026-10-11 — the same defect, fixed twice)
+                    need = floor
+                else:
+                    # not even one whole round per category: allocate whole
+                    # categories instead of handing shares no wave fits in
+                    fits_env = False
             if not fits_env and remaining is not None:
                 left = float(remaining)
                 handed = []
