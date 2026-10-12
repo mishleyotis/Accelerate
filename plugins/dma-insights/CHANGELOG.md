@@ -152,6 +152,21 @@ rule HANDOFF enforced that the write never did:
   no search behind them. The probe round now opens a fresh RELAY window
   too. Test: `test_widen_peers_2026_10_12.py`.
 
+- **Connector readings landed as package evidence** (`apps/worker`,
+  `engine/assemble.py`): the ingest hardcoded `origin='package'` and never
+  read the workbook's `Origin`, so every Clay/Vibe technographic reading
+  reached the server with no tool and ET-12 ("the register cites no machine
+  technographic scan") could never pass for an engine-produced run — the
+  "worker fix in flight" of 2026-10-09 had not landed. Both readers now carry
+  `origin` and the retrieval time (read when stated, never reported missing),
+  `evidence_index.json` exports them, a connector row lands as `connector`
+  with its tool, and a re-scan corrects a row an earlier ingest landed as
+  `package`. Every other origin is unchanged. Needs a worker deploy.
+  Tests: `apps/worker/tests/test_connector_origin_lands_2026_10_12.py`.
+- **SG-V4 labels counted as prose** (`engine/pipeline.py`): `publisher` and
+  `source_domain` join the verbatim leaves the driver's budget skips (9 of the
+  Interac heatmap's 20 counted FAILs).
+
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow
 source run under node (`research_governor_harness.mjs`) at every share from

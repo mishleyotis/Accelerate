@@ -1111,6 +1111,13 @@ def _read_ev_tab(wb, tab: str, observe) -> dict | None:
         return None
     cols = {k: _pick(headers, names) for k, names in _EV_ALIASES.items()}
     cols["e_id"] = _pick(headers, _EV_E_ID_KEYS)
+    # PROVENANCE, read when the ledger states it and never reported missing
+    # (no package before the research engine carried it). The engine's
+    # Evidence_Detail states each row's `Origin` and when it was read; until
+    # 2026-10-12 neither was read, so a Clay or Vibe technographic reading
+    # landed as origin 'package' with no tool, and ET-12 ("the register cites
+    # no machine technographic scan") could never pass (R-INTERAC-20261010).
+    cols.update({k: _pick(headers, names) for k, names in _EV_PROVENANCE.items()})
     # Every excerpt-class column, because a row can carry two and the
     # first alias is not always the verbatim one (MEM-0162).
     excerpt_cols = _pick_all(headers, _EV_ALIASES["excerpt"])
@@ -1155,11 +1162,42 @@ def _read_ev_tab(wb, tab: str, observe) -> dict | None:
                         (x.strip() for x in str(v("subcaps") or "").split(","))
                         if SUBCAP_RE.match(s)],
         }
+        rec.update(_connector_provenance(v("origin"), rec["source_name"],
+                                         v("retrieved")))
         if e_id not in rows:
             order.append(e_id)
         rows[e_id] = rec
     return {"tab": tab, "cols": cols, "rows": rows,
             "order": order, "rows_seen": rows_seen}
+
+
+_EV_PROVENANCE = {"origin": ("origin",),
+                  "retrieved": ("retrieved_at", "retrieved")}
+
+
+def _connector_provenance(origin, source_name, retrieved) -> dict:
+    """{origin, connector_tool, connector_retrieved_at} for one evidence row.
+
+    Only a row the package states as `connector` changes anything: it lands
+    as origin 'connector' with its tool (the source name, which the engine's
+    ledger requires to name the tool: "Clay company Tech Stack …", "Vibe
+    Prospecting enrich-business …") and its retrieval time. Every other row
+    keeps the package origin it has always had — `internal` carries
+    redaction semantics this reader does not decide."""
+    if str(origin or "").strip().lower() != "connector":
+        return {}
+    from datetime import datetime
+    when = None
+    if isinstance(retrieved, datetime):
+        when = retrieved
+    elif retrieved:
+        try:
+            when = datetime.fromisoformat(str(retrieved).strip().replace("Z", "+00:00"))
+        except ValueError:
+            when = None
+    return {"origin": "connector",
+            "connector_tool": str(source_name or "").strip()[:200] or None,
+            "connector_retrieved_at": when}
 
 
 _EV_EMPTY = (None, "", [], {})
@@ -2516,6 +2554,8 @@ _EI_ALIASES = {
     "source_name": ("source_name", "source", "title", "source_title",
                     "publisher"),
     "source_url": ("url", "source_url", "link", "url_or_citation"),
+    "origin": ("origin",),
+    "retrieved": ("retrieved_at", "retrieved"),
     "tier": ("tier", "evidence_tier"),
     "ers": ("ers", "ers_score"),
     "published": ("date_published", "published_date", "publish_date",
@@ -2618,6 +2658,9 @@ def parse_evidence_index(path: str, obs: list | None = None) -> list:
             "excerpt": _best_excerpt([pick(item, "excerpt")]),
             "subcaps": [s for s in (str(x).strip() for x in (subs or []))
                         if SUBCAP_RE.match(s)],
+            **_connector_provenance(pick(item, "origin"),
+                                    pick(item, "source_name"),
+                                    pick(item, "retrieved")),
         })
     if skipped:
         observe("evidence_index_items_skipped",
@@ -2631,7 +2674,8 @@ def parse_evidence_index(path: str, obs: list | None = None) -> list:
 #: and an index that disagrees with it is a disagreement to record, not to
 #: resolve in the index's favour.
 _FILLABLE = ("source_url", "source_name", "published_date", "stated_recency",
-             "tier", "ers", "claim_type", "fact_count", "excerpt")
+             "tier", "ers", "claim_type", "fact_count", "excerpt",
+             "origin", "connector_tool", "connector_retrieved_at")
 
 
 def merge_evidence_sources(workbook_rows: list, index_rows: list,

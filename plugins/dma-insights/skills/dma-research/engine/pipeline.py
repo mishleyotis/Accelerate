@@ -115,9 +115,14 @@ BRIEFS_DIR = "briefs"
 #: SG-V4 FAIL there is not ungrounded prose a producer can re-ground, so it
 #: does not count against `sg_v4_budget` (owner decision 2026-10-06, Arbor
 #: Bank: 660 of the heatmap's 789 FAILs sat on these fields).
+#: `publisher` and `source_domain` are the same label class as `source_name`
+#: and `url` — who published the row and where it lives — and were counted as
+#: prose until 2026-10-12 (R-INTERAC-20261010 heatmap: 9 of its 20 counted
+#: FAILs were a publisher name or a domain, e.g. sim 0.287 on "LinkedIn").
 SG_V4_VERBATIM_LEAVES = frozenset({
     "excerpt", "verbatim_quote", "quote", "source", "source_name",
-    "source_title", "title", "product", "candidate", "url"})
+    "source_title", "title", "product", "candidate", "url",
+    "publisher", "source_domain"})
 
 
 def _contract_version_of(progress, page: str) -> str | None:
