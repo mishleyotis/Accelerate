@@ -4414,8 +4414,9 @@ class Pipeline:
                               f"[{b['gate']}] {b['detail']} — fix: {b['fix']}"
                               for b in advisory))[:900])
             self.opts.log(f"  [{stage}] {len(advisory)} advisory preflight finding(s) "
-                          f"(unlinked timeline citations) — the context producer states "
-                          f"them on the surface; link them at PRELIM to clear this line")
+                          f"(unlinked timeline or report-section citations) — the page "
+                          f"producer states them on the surface (r_layer.probes_run); "
+                          f"link the capability ones to clear this line")
         if not blockers:
             if todo:
                 L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="PASS",
@@ -4716,9 +4717,22 @@ class Pipeline:
         self._pages_prepare(tuple(p for g in PAGES_B for p in g) + deferred)
         restaged = self._ship_pages(tuple(p for p in PAGES_A if p not in deferred),
                                     "B", produce=False)   # from disk, no lanes
-        shipped = self._ship_pages(deferred, "B", produce=True) if deferred else []
+        # A DEFERRED page ships LAST, and its refusal is held until every
+        # other page has had its turn (R-INTERAC-20261010: techstack, deferred
+        # for a server-side fix, halted PAGES_B before overview, insights,
+        # platform or context were attempted).
+        shipped = []
+        held = None
         for group in PAGES_B:
             shipped += self._ship_pages(group, "B", produce=True)
+        if deferred:
+            try:
+                shipped += self._ship_pages(deferred, "B", produce=True)
+            except StageRefused as e:
+                held = e
+        if held:
+            raise StageRefused(f"{held} — every other page shipped to version B: "
+                               f"{', '.join(restaged + shipped) or 'none'}")
         return f"restaged {', '.join(restaged)}; shipped {', '.join(shipped)} to version B"
 
     def _stage_promote(self) -> str:

@@ -183,6 +183,16 @@ rule HANDOFF enforced that the write never did:
   package refused at PACKAGE. The finding names tokens without braces, and
   the gate table renders the latest verdict per gate and scope.
 
+- **PAGES_B stopped before any page could state an identity citation**
+  (`engine/page_preflight.py`, `engine/pipeline.py`): the preflight treated
+  every unlinked row a report section cites (annual reports, roster, company
+  overview — 35 on Interac) as an overview-page halt, and offered "attach it
+  to a cell" — the misattribution ET-07 exists to stop. Report-section
+  citations are now advisory, like timeline ones: the page producer states
+  them on the surface (`r_layer.probes_run`, the connector's own exception).
+  A page deferred to version B also ships LAST, and its refusal no longer
+  stops overview, insights, platform and context from shipping first.
+
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow
 source run under node (`research_governor_harness.mjs`) at every share from

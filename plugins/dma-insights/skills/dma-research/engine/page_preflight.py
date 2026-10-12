@@ -194,7 +194,16 @@ _CITING_SHEETS = {
 #: link the context producer states on the surface (the connector's
 #: `_stated_unlinked` exception). Every other citing sheet reasons at cell
 #: grain and the connector refuses it outright.
-_ET07_ADVISORY_SHEETS = frozenset({"Entity_Timeline"})
+#:
+#: Report_Narrative too (R-INTERAC-20261010, 2026-10-12): a report section
+#: cites the institution's own annual reports, roster and company overview —
+#: identity evidence that supports no capability cell — and the page it
+#: projects into states why on the surface (`r_layer.probes_run`, the
+#: connector's `_stated_unlinked` exception). Halting here stopped PAGES_B on
+#: 35 such rows before any producer could state the reason, and the fix the
+#: blocker offered — attach each to a cell — is the misattribution ET-07
+#: exists to prevent.
+_ET07_ADVISORY_SHEETS = frozenset({"Entity_Timeline", "Report_Narrative"})
 
 
 #: PRELIM narrative sections whose citations are about the INSTITUTION, not

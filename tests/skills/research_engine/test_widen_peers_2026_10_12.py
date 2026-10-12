@@ -148,3 +148,39 @@ def test_the_gate_table_renders_the_latest_verdict_per_gate_and_scope(tmp_path):
     text = repr(tables)
     assert "{{CATALOGUE_VERSION}}" not in text
     assert "PASS — 0 findings" in text
+
+
+def test_a_deferred_page_ships_last_and_its_halt_does_not_block_the_others(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    opts = P.Options(dispatcher=S.StubDispatcher(S.default_handlers()), reads=S.StubReads(),
+                     shipper=S.StubShipper(), push=False, folder_root=tmp_path / "o",
+                     ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None,
+                     defer_to_b=("techstack",))
+    pl = P.Pipeline(run, opts)
+    order = []
+
+    def ship(pages, version, produce=True):
+        order.append(tuple(pages))
+        if "techstack" in pages:
+            raise P.StageRefused("techstack halted on ET-12")
+        return list(pages)
+    pl._ship_pages = ship
+    pl._pages_prepare = lambda pages: None
+    import pytest
+    with pytest.raises(P.StageRefused, match="every other page shipped to version B") as e:
+        pl._stage_pages_b()
+    assert order[-1] == ("techstack",)
+    assert "overview" in str(e.value) and "context" in str(e.value)
+
+
+def test_a_report_section_citation_with_no_cell_is_advisory_not_a_halt(tmp_path):
+    """Identity evidence cited from a report section supports no cell; the
+    page states why on the surface. The preflight warns, it does not halt."""
+    from engine import page_preflight as PP, ledger as L
+    run, wb, cells, ev = researched_run(tmp_path)
+    eid = L.append_evidence(wb, source_name="Acme 2024 Annual Report", source_url="https://acme.example/ar",
+                            tier="T2", excerpt="Acme employed more than nine hundred people across its offices in 2024.",
+                            subcaps=[], origin="public")
+    wb.append("Report_Narrative", {"Section_ID": "3", "Evidence_IDs": eid})
+    found = [b for b in PP.preflight(run.open(), ("overview",)) if eid in b["detail"]]
+    assert found and all(b["severity"] == "warn" for b in found)
