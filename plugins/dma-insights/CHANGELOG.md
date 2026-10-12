@@ -102,6 +102,16 @@ rule HANDOFF enforced that the write never did:
   it reports on — both Provenance-logged. Tests:
   `test_intake_source_of_record_2026_10_11.py`.
 
+- **A re-strike kept its old ending** (`engine/assessment.py`,
+  `workflows/dma-pillar-scoring.js`): the rescore prompt said to put the
+  critic's reason "at the head of the existing rationale", so 7 of the 8 P3
+  rows the critic moved still concluded "final 3 (Competing)" or "final 2.5"
+  beside a struck 2.0–2.5, and named M4 as the gap from M2. The critic passed
+  the scores and could not move text. `rubric_problems` now refuses a
+  rationale whose last "final N" is not the score struck, and the rescore
+  prompt rewrites the rationale: the struck level argued, the level
+  immediately above as the gap, arithmetic that lands on the score.
+
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow
 source run under node (`research_governor_harness.mjs`) at every share from

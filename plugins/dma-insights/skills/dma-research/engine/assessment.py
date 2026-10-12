@@ -719,6 +719,12 @@ _GAP_WORDS = re.compile(
     r"\b(gap|missing|absent|lacks?|lacking|no evidence of|not yet|unevidenced|"
     r"would (?:need|require|lift)|short of|below|does not (?:yet )?(?:show|name|"
     r"evidence|demonstrate)|to reach|next level|GAP TO NEXT)\b", re.I)
+#: The figure a rationale concludes at ("final 2.5", "final score: 3",
+#: "final = 2.75"). R-INTERAC-20261010: a re-strike prefixed the critic's
+#: reason and kept the old ending, so 7 of 8 moved P3 rows said "final 3
+#: (Competing)" or "final 2.5" beside a struck 2.0-2.5.
+_FINAL_FIGURE = re.compile(
+    r"\bfinal(?:\s+score)?\s*(?:[:=]|is|of|at)?\s*(\d(?:\.\d{1,2})?)(?!\d)", re.I)
 _BAND_WORDS = {"ACTIVATING": "M1", "BUILDING": "M2", "COMPETING": "M3",
                "DIFFERENTIATING": "M4"}
 
@@ -753,6 +759,12 @@ def rubric_problems(rat: str, sc, eids: list[str], cited: set) -> list[str]:
         out.append(f"the rationale argues {', '.join(sorted(named))} but the score "
                    f"{sc} is {level}; the level named must be the level struck "
                    f"(name the next level only as the gap)")
+    finals = _FINAL_FIGURE.findall(text)
+    if finals and abs(float(finals[-1]) - float(sc)) > 1e-6:
+        out.append(f"the rationale concludes at final {finals[-1]} but the score "
+                   f"struck is {sc}; rewrite the ending so the arithmetic lands "
+                   f"on the score — a re-strike rewrites the rationale's "
+                   f"conclusion, it does not prefix a reason to the old one")
     if sc < 5.0 and not _GAP_WORDS.search(text):
         out.append("the rationale names no gap to the next level (what is missing, "
                    "absent, unevidenced or would be needed); a score under 5.0 "

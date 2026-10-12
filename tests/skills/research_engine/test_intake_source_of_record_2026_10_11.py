@@ -198,3 +198,41 @@ def test_the_cli_commands_are_wired(tmp_path):
                                "Clay web-crawl reading of the client's site"],
                        cwd=ENGINE, capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
+
+
+# ── a re-strike rewrites its conclusion (same run, SCORING) ──────────────
+#
+# R-INTERAC-20261010, P3: the critic moved 8 rows; the rescore prefixed the
+# critic's reason to the old rationale, so 7 of 8 ended "final 3 (Competing)"
+# or "final 2.5" beside a struck 2.0-2.5. The critic passed the scores and
+# could not move the text. The write now refuses a "final N" that is not the
+# score struck, and the rescore prompt rewrites the ending.
+
+from engine import assessment as A
+
+WORKFLOW = Path(__file__).resolve().parents[3] / \
+    "plugins/dma-insights/workflows/dma-pillar-scoring.js"
+
+
+@pytest.mark.parametrize("text,sc", [
+    ("M2 Building; gap to M3: no KPIs. ceiling 3.0, final 3 (Competing)", 2.5),
+    ("M2 Building; missing measured outcomes. final score: 2.75", 2.25),
+    ("M2 Building; gap to M3. capped, final = 2.5", 2.0),
+])
+def test_a_final_figure_that_is_not_the_struck_score_is_refused(text, sc):
+    assert any("concludes at final" in p for p in A.rubric_problems(text, sc, [], set()))
+
+
+@pytest.mark.parametrize("text,sc", [
+    ("M2 Building; gap to M3: no KPIs. ceiling 2.5, final 2.5", 2.5),
+    ("M2 Building; gap to M3: no KPIs. final 2.50", 2.5),
+    ("M2 Building; the gap to M3 is a documented framework", 2.0),
+])
+def test_a_final_figure_on_the_struck_score_or_none_passes(text, sc):
+    assert not any("concludes at final" in p for p in A.rubric_problems(text, sc, [], set()))
+
+
+def test_the_rescore_prompt_rewrites_rather_than_prefixes():
+    src = WORKFLOW.read_text()
+    assert "at the head of the existing rationale" not in src
+    assert "REWRITE the rationale" in src and "IMMEDIATELY above" in src

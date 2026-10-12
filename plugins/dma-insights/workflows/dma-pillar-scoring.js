@@ -57,7 +57,7 @@ Return pillar ${P}, verdict PASS or FAIL as recorded, moves (how many --move you
 
 const rescorePrompt = (round) => `You are ${ACT} for DMA run ${A.run}, round ${round}, RESCORE. Work from ${A.eng}.
 The independent critic moved rows of pillar ${P}. List them: python3 -m engine.assessment moves ${R} --pillar ${P}
-For EACH row: re-strike it at or below its "to" through python3 -m engine.assessment score ${R} --subcap <CELL> --score <to or lower> --actor ${ACT}, keeping its confidence and overlay (shown with the move), with the critic's reason at the head of the existing rationale. Touch no other row.
+For EACH row: re-strike it at or below its "to" through python3 -m engine.assessment score ${R} --subcap <CELL> --score <to or lower> --actor ${ACT}, keeping its confidence and overlay (shown with the move). REWRITE the rationale for the new score - do not prefix the critic's reason to the old text: open with the critic's reason, argue the level the new score sits in (its band word and M-level, in that level's rubric words - not the next level's), name as the gap the level IMMEDIATELY above it, and end on arithmetic that concludes at the score you strike (the engine refuses a 'final N' that is not the struck score). Touch no other row.
 Return pillar ${P}, verdict "RESCORED", scored (rows re-struck), moves 0, notes.`
 
 const solutionsPrompt = (file) => `You are the technographic-scanner for DMA run ${A.run}, carrying the SCORING stage's solutions duty. Work from ${A.eng}, foreground commands, long timeouts.
