@@ -193,6 +193,14 @@ rule HANDOFF enforced that the write never did:
   A page deferred to version B also ships LAST, and its refusal no longer
   stops overview, insights, platform and context from shipping first.
 
+- **One cited intake document passed for seven** (`engine/intake.py`): HANDOFF
+  checked only that SOME internal evidence existed, so the largest intake
+  document — a 133 KB proposal deck — had no evidence row and no record of
+  being read (most of it was slides reused from another client's proposal,
+  which would have been foreign evidence). Every landed document is now cited
+  or declared read with the reason (`engine.intake declare-read`, recorded in
+  the manifest with who and when); HANDOFF names the silent ones.
+
 Tests: `tests/skills/research_engine/test_research_budget_floor_2026_10_11.py`
 — the driver's shares swept across envelope sizes, and the real workflow
 source run under node (`research_governor_harness.mjs`) at every share from

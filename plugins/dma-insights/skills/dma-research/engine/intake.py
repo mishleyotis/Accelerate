@@ -122,17 +122,78 @@ def internal_rows(wb) -> int:
                if str(r.get("Origin") or "").strip().lower() == "internal")
 
 
+def cited_documents(wb, root) -> dict:
+    """{file: rows} — internal evidence rows per landed document, matched by
+    the document's source of record (or its local path, for a register
+    written before `ledger._intake_source_of_record`)."""
+    out = {}
+    rows = [r for r in wb.rows("Evidence_Detail")
+            if str(r.get("Origin") or "").strip().lower() == "internal"]
+    for d in docs(root):
+        keys = [k for k in (str(d.get("source_url") or "").strip().rstrip("/"),
+                            d["file"]) if k]
+        out[d["file"]] = sum(1 for r in rows if any(
+            k in str(r.get("Source_URL") or "") for k in keys))
+    return out
+
+
+def declared(root) -> dict:
+    """{file: reason} — documents recorded as READ and deliberately not cited."""
+    m = _dir(root) / MANIFEST
+    try:
+        rows = json.loads(m.read_text()).get("documents") or []
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return {r["file"]: r["read_not_cited"] for r in rows if r.get("read_not_cited")}
+
+
+def declare_read(root, file: str, *, reason: str, actor: str) -> dict:
+    """Record that a landed document was read and why nothing in it is cited.
+
+    R-INTERAC-20261010 (2026-10-12): the largest of seven intake documents —
+    a 133 KB Zennify blueprint — had no evidence row and nothing said whether
+    it was read. Most of it was a reused proposal for ANOTHER client (49
+    Navacord mentions to 14 Interac), so citing it would have been foreign
+    evidence; its one Interac slide repeated sources the run already held.
+    That is a legitimate outcome, and now a recorded one."""
+    reason = str(reason or "").strip()
+    if len(reason) < 40:
+        raise ValueError("say what the document holds and why none of it is "
+                         "cited (>=40 chars)")
+    m = _dir(root) / MANIFEST
+    doc = json.loads(m.read_text())
+    hit = next((r for r in doc.get("documents") or [] if r.get("file") == file), None)
+    if hit is None:
+        raise FileNotFoundError(f"{file} is not in {INTAKE_DIR}/{MANIFEST}")
+    hit["read_not_cited"] = reason
+    hit["read_by"] = str(actor or "unattributed")
+    hit["read_at"] = _dt.datetime.now(_dt.timezone.utc).isoformat(timespec="seconds")
+    m.write_text(json.dumps(doc, indent=1))
+    return hit
+
+
 def handoff_blocker(wb, root) -> str | None:
     mode = str(wb.metadata().get("evidence_mode") or "").upper()
     if mode not in NEEDS_INTAKE:
         return None
-    if internal_rows(wb):
-        return None
     n = len(docs(root))
-    return (f"evidence_mode is {mode}, {n} internal document(s) landed, and "
-            f"not one Evidence_Detail row has Origin=internal — the "
-            f"documents were not read. Re-dispatch the categories they bear "
-            f"on; do not score a hybrid run as if it were public.")
+    if not internal_rows(wb):
+        return (f"evidence_mode is {mode}, {n} internal document(s) landed, and "
+                f"not one Evidence_Detail row has Origin=internal — the "
+                f"documents were not read. Re-dispatch the categories they bear "
+                f"on; do not score a hybrid run as if it were public.")
+    # EVERY DOCUMENT, NOT ONE (R-INTERAC-20261010): a run citing one of seven
+    # documents passed the check above while the largest went unread and
+    # unrecorded. A document is cited, or declared read with the reason.
+    silent = [f for f, n_rows in cited_documents(wb, root).items()
+              if not n_rows and f not in declared(root)]
+    if silent:
+        return (f"{len(silent)} of {n} intake document(s) have no evidence row "
+                f"and no record of being read: {', '.join(silent)}. Cite what "
+                f"they hold, or record why nothing is cited: python3 -m "
+                f"engine.intake declare-read --root {root} --file <doc> "
+                f"--reason '<what it holds and why none of it is cited>'")
+    return None
 
 
 def main(argv=None) -> int:
@@ -143,6 +204,12 @@ def main(argv=None) -> int:
     a_.add_argument("--file", required=True)
     a_.add_argument("--title")
     a_.add_argument("--source-url")
+    d_ = sub.add_parser("declare-read", help="record that a landed document was "
+                        "read and why nothing in it is cited")
+    d_.add_argument("--root", required=True)
+    d_.add_argument("--file", required=True)
+    d_.add_argument("--reason", required=True)
+    d_.add_argument("--actor", default="research-conductor")
     s_ = sub.add_parser("state")
     s_.add_argument("--root", required=True)
     s_.add_argument("--json", action="store_true")
@@ -150,6 +217,14 @@ def main(argv=None) -> int:
     if a.cmd == "add":
         try:
             row = add(a.root, a.file, title=a.title, source_url=a.source_url)
+        except (FileNotFoundError, ValueError) as e:
+            print(f"REFUSED: {e}", file=sys.stderr)
+            return 1
+        print(json.dumps(row, indent=1))
+        return 0
+    if a.cmd == "declare-read":
+        try:
+            row = declare_read(a.root, a.file, reason=a.reason, actor=a.actor)
         except (FileNotFoundError, ValueError) as e:
             print(f"REFUSED: {e}", file=sys.stderr)
             return 1

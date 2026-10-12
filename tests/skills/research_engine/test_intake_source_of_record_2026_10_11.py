@@ -279,3 +279,32 @@ def test_an_adjustment_named_as_not_owed_is_not_recorded(tmp_path):
     out = score_cell(wb, cell, eids, score=2.0,
                      rationale=_rat(eids, " ADJ_STALE not applied: both sources are dated 2025."))
     assert out["caps_applied"] == "none applied"
+
+
+# ── every intake document is cited or declared read ─────────────────────
+#
+# R-INTERAC-20261010: one cited document of seven satisfied the old check
+# while the largest (a 133 KB proposal deck, mostly another client's slides)
+# went unread and unrecorded.
+
+def _hybrid(run):
+    wb = run.open()
+    wb.set_metadata("evidence_mode", "HYBRID")
+    return wb
+
+
+def test_a_silent_intake_document_blocks_the_handoff(tmp_path):
+    run = new_run(tmp_path, n=2, prelim=False, folder=False)
+    path = _land(run, tmp_path)
+    other = tmp_path / "deck.md"
+    other.write_text("A deck about another institution entirely, with no Acme content at all.\n")
+    I.add(run.root, other, title="Unrelated deck", source_url="https://docs.google.com/x/deck")
+    L.append_evidence(_hybrid(run), source_name="Client meeting summary", source_url=str(path),
+                      tier="T2", excerpt=SPAN, subcaps=[_cell(run)], origin="internal")
+    msg = I.handoff_blocker(run.open(), run.root)
+    assert msg and "deck.md" in msg and "notes.md" not in msg
+    with pytest.raises(ValueError):
+        I.declare_read(run.root, "deck.md", reason="short", actor="x")
+    I.declare_read(run.root, "deck.md", actor="research-conductor",
+                   reason="A deck about another institution; nothing in it is about this client.")
+    assert I.handoff_blocker(run.open(), run.root) is None
