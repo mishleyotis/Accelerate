@@ -541,6 +541,23 @@ def main(argv=None) -> int:
                          "source actually sits on, and what was mis-filed")
     rt.add_argument("--actor", default=None)
 
+    cr = common(sub.add_parser(
+        "cite-record", help="give a connector reading registered with no URL "
+                            "the URL it reports on, and its cells' Source_URLs"))
+    cr.add_argument("--e-id", required=True)
+    cr.add_argument("--url", required=True)
+    cr.add_argument("--why", required=True)
+    cr.add_argument("--actor", default=None)
+
+    rh = common(sub.add_parser(
+        "rehome-intake", help="re-point internal rows cited by a local "
+                              "01_intake/ path, a file:// URL or no URL to the "
+                              "intake manifest's source of record (matched by "
+                              "the verbatim span), and the cells' Source_URLs "
+                              "with them"))
+    rh.add_argument("--why", required=True)
+    rh.add_argument("--actor", default=None)
+
     at = common(sub.add_parser(
         "attach",
         help="cite an evidence row the run ALREADY holds from one of your "
@@ -556,6 +573,11 @@ def main(argv=None) -> int:
                          "category's cells (engine/scope.py)")
     at.add_argument("--actor", default=None,
                     help="the agent attaching. Defaults to $DMA_ACTOR")
+    at.add_argument("--detach", action="store_true",
+                    help="take back a row a repair wave attached to a DECLARED "
+                         "ABSENCE when it does not bear on the cell (gate term "
+                         "absence_superseded, rows irrelevant), so the absence "
+                         "stands again. Needs --why. Refused on a synthesised cell")
     at.add_argument("--decline", action="store_true",
                     help="the opposite outcome, recorded: you READ the "
                          "proposal and it does not bear on this cell. Needs "
@@ -996,10 +1018,35 @@ def main(argv=None) -> int:
             return 1
         print(json.dumps(out, indent=2))
         return 0
+    if a.cmd == "cite-record":
+        try:
+            out = ledger.cite_connector_record(wb, a.e_id, a.url, why=a.why,
+                                               actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
+        return 0
+    if a.cmd == "rehome-intake":
+        try:
+            out = ledger.rehome_intake_urls(wb, why=a.why, run=run,
+                                            actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
+        return 0
     if a.cmd == "attach":
         cells = [c for c in (a.subcap or []) if str(c).strip()]
         try:
-            if a.decline:
+            if getattr(a, "detach", False):
+                if len(cells) != 1 or not a.why:
+                    print("REFUSED: --detach takes back ONE row from ONE cell "
+                          "and needs --why.", file=sys.stderr)
+                    return 1
+                out = ledger.detach_evidence(wb, a.e_id, cells[0],
+                                             why=a.why, actor=_actor(a))
+            elif a.decline:
                 if len(cells) != 1:
                     print("REFUSED: --decline judges ONE proposal on ONE "
                           "cell. Pass a single --subcap.", file=sys.stderr)

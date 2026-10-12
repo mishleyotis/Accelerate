@@ -539,7 +539,11 @@ def test_a_small_category_is_handed_its_fixed_costs_not_a_cell_sliver(tmp_path):
     selected = _cu_may_hold(tax, tax.cells_in(big))[:30] + _cu_may_hold(tax, tax.cells_in(small))[:2]
     run = new_run(tmp_path, selected=selected)
     preflight.record(run, preflight_doc())
-    full = cost.research_price(len(selected), categories=2)["usd"]
+    pr = cost.research_price(len(selected), categories=2)
+    # since 1.27.1 each category needs at least one whole round at the
+    # governor's prices, so an envelope that funds both carries the small
+    # category's round (one batch, its orchestrator, its challenge) on top
+    full = pr["usd"] + pr["per_batch"] + pr["per_category_orchestrator"] + pr["per_category_challenge"]
     disp = S.StubDispatcher(handlers={"research-p": S.lane_noop, "finding-challenger": S.lane_noop})
     p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
                                   push=False, folder_root=tmp_path / "out", ingest_poll_s=0,

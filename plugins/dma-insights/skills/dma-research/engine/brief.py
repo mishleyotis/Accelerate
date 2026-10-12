@@ -422,6 +422,24 @@ def dq_texts(wb: RunWorkbook) -> dict[str, str]:
     return {k: " ".join(v) for k, v in out.items()}
 
 
+def evidence_ceiling(wb: RunWorkbook, subcap: str) -> dict:
+    """The ceiling the cell's CITED evidence allows — `assessment.ceiling_for`,
+    the number `score` refuses above — and the band it tops out in, for the
+    synthesis writer to conclude at instead of re-deriving it.
+
+    R-INTERAC-20261010: five challenge FAILs on ceiling_reasoning, each a
+    round — a 5.0 ceiling on one source identity, 3.0 on T4/T5 rows, a band
+    that contradicted the stated number. The engine knew the number; the
+    writer never saw it. The row's own Ceiling_Band is left out of the
+    computation, because the cap it imposes is the thing being decided."""
+    from . import assessment as A
+    row = dict(next((r for r in wb.scoring_rows()
+                     if str(r.get("SubCap_ID") or "").strip() == subcap), {}) or {})
+    row["Ceiling_Band"] = ""
+    value, why = A.ceiling_for(wb, row)
+    return {"value": value, "band_max": C.band_of(value), "why": why}
+
+
 def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None,
              propose: bool = True, dq_index: dict | None = None) -> dict:
     """Registered rows this cell could cite and does not.
@@ -565,6 +583,7 @@ def reusable(wb: RunWorkbook, subcap: str, *, register: dict | None = None,
     return {
         "subcap": subcap,
         "name": C.subcap_names().get(subcap) or None,
+        "evidence_ceiling": evidence_ceiling(wb, subcap),
         "cites_now": sorted(cited),
         "names_this_cell": mine,
         "capability_siblings": sibs[:REUSE_PER_CELL],
@@ -1704,8 +1723,16 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
                      for x in rows[:CHALLENGE_EVIDENCE_PER_CELL]],
         "evidence_total": len(eids),
         # facet_coverage
+        # a facet written NOT_RUN / NO_FINDING is NOT answered: listing it
+        # here told challengers a volley fired that the record says did not,
+        # and they failed facet_coverage on the contradiction (R-INTERAC-20261010)
         "facets_answered": sorted(f for f in C.DQ_FACETS
-                                  if _clean(r.get(f"DQ_{f.title()}"))),
+                                  if _clean(r.get(f"DQ_{f.title()}"))
+                                  and not _clean(r.get(f"DQ_{f.title()}")).upper()
+                                  .startswith(("NOT_RUN", "NO_FINDING"))),
+        "facets_not_run": sorted(f for f in C.DQ_FACETS
+                                 if _clean(r.get(f"DQ_{f.title()}")).upper()
+                                 .startswith(("NOT_RUN", "NO_FINDING"))),
         # contradiction_handling
         "contradiction": {"text": _clean(r.get("DQ_Contradicts"))[:CHALLENGE_FIELD_CHARS],
                           "disposition": _clean(r.get("Contradiction_Disposition"))},

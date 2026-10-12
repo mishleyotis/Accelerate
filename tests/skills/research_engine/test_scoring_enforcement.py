@@ -142,7 +142,7 @@ def test_scoring_handoff_writes_one_workflow_per_owed_pillar(tmp_path):
     opts = P.Options(dispatcher=S.StubDispatcher(S.default_handlers()), reads=S.StubReads(),
                      shipper=S.StubShipper(), push=False, folder_root=tmp_path / "out",
                      ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None,
-                     scoring_mode="workflow")
+                     scoring_mode="workflow", stage_budget={"SCORING": 20.0})
     h = P.Pipeline(run, opts)._scoring_handoff()
     assert not h.get("passed")
     doc = json.loads(Path(h["file"]).read_text())

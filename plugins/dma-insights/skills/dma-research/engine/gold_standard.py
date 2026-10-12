@@ -489,7 +489,14 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
 
     tok = re.findall(r"\{\{[^}]*\}\}", whole)
     if tok:
-        out.append(Finding("GS-RPT-NOTOKENS", f"{len(tok)} leftover token(s): {tok[:3]}", "GSY-07"))
+        # NAMED WITHOUT THEIR BRACES (R-INTERAC-20261010): this message lands
+        # in Gate_Log, and a report that quotes its own gate status (client
+        # research §8) then carried "{{CATALOGUE_VERSION}}" verbatim and
+        # failed this same check on a token no template left behind.
+        names = sorted({t.strip("{} ") for t in tok})
+        out.append(Finding("GS-RPT-NOTOKENS",
+                           f"{len(tok)} leftover template token(s): {', '.join(names[:3])}",
+                           "GSY-07"))
 
     for bad in BANNED_HEDGES:
         if bad in ("tbd", "todo", "placeholder"):

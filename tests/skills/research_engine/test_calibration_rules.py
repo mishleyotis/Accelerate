@@ -72,6 +72,8 @@ def test_a_single_document_fact_blocks_the_gate(tmp_path):
     run, wb, sub, _ = _ready(tmp_path)
     # a second subcap whose three rows are all the SAME host
     sub2 = small_selection(2)[1]
+    from fixtures import fire_volleys
+    fire_volleys(wb, sub2)        # an answered facet needs its search logged
     eids2 = [L.append_evidence(
         wb, source_name=f"Annual Report 2025 p{i}",
         source_url=f"https://acme.example/ar25#x{i}", tier="T2",
@@ -94,6 +96,9 @@ def test_a_single_document_fact_blocks_the_gate(tmp_path):
     syn["Triangulation"] += (" One source identity, so the launch and adoption "
                              "figures are read as consistent with deployment, not "
                              "corroborated.")
+    # own-site rows cap the ceiling at 2.0 (CAP-OWN); the ledger refuses a
+    # band above it at the write (2026-10-11)
+    syn["Ceiling_Band"] = "Building"
     L.append_synthesis(wb, sub2, syn, actor="research-p1c1-producer")
     challenge(wb, sub2)
     out = floors_gate.run(wb, "P1C1", qa_dir=run.qa_dir)

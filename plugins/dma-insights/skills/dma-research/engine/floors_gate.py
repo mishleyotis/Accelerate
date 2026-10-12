@@ -124,6 +124,25 @@ ADVISORY_TERMS = (
 # `declare_absence` refuses on — so the gate and the writer agree.
 
 
+#: Every term that can fail a category, in report order. One tuple, read by
+#: `run` and by the research workflow's tests: a blocking term the repair
+#: prompts do not tell an agent how to close is a term handed back every round
+#: to agents who cannot act on it (R-INTERAC-20261010: absence_single_tool was
+#: the commonest term on the run and the collector's repair lines never named
+#: it, so every repair wave re-fired WebSearch and re-failed).
+BLOCKING_TERMS = (
+    "unresolved_citations", "boilerplate", "claim_unsupported",
+    "absence_undeclared", "evidence_smear", "challenge_missing",
+    "challenge_not_independent", "challenge_failed", "single_source_fact",
+    "synthesis_missing", "dq_gaps", "absence_unsearched",
+    "volleys_incomplete", "absence_undeclared_empty",
+    "absence_over_evidence", "absence_superseded",
+    # 2026-09-03 (owner issue 1): the primary question is owed on every
+    # searched cell, and an empty cell must show an enrichment connector.
+    "primary_unfired", "absence_single_tool",
+)
+
+
 #: Fallbacks for the two run-level density floors when gold_reference.json
 #: cannot be read — the Golden 1 ratios as measured 2026-09-03 (727 evidence
 #: rows over 690 subcaps; 442 of 690 subcaps evidenced).
@@ -280,6 +299,9 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
         # otherwise, because a cell mid-synthesis legitimately has rows it
         # has not yet decided about.
         "absence_over_evidence": [], "evidence_unattached": [],
+        # a declared absence a repair wave has since attached evidence to:
+        # owed a synthesis, not a challenge (see the verdict branch below)
+        "absence_superseded": [],
         # The two volume terms. Populated near the end of `run` from the
         # computed coverage, and ADVISORY since 2026-09-13 — declared here so
         # they appear in `finding_keys` and in `advisory` like every other
@@ -485,6 +507,20 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
             # ladder_overstated); demanding a challenge verdict on it would
             # only add a token-costly step with nothing to falsify.
             pass
+        elif (cell in declared_set and eids
+              and str(r.get("Absence_Claimed") or "").strip().upper() in ("YES", "TRUE", "1")
+              and L.actor_for(wb, cell, "synthesis") is None):
+            # A DECLARED ABSENCE THAT NOW CARRIES EVIDENCE (R-INTERAC-20261010,
+            # 2026-10-11): a repair wave collected for an absence_single_tool
+            # cell and attached rows, but nothing re-synthesised it. It is no
+            # longer a declared absence (it has evidence), and it cannot be
+            # challenged (`record_challenge` refuses a cell with no synthesis
+            # author) — so reported as challenge_missing it was handed back
+            # every round to a challenger that could never close it (P1C1:
+            # five cells; P4C1.4.3). The one move that closes it is the
+            # orchestrator's: a synthesis from the attached rows.
+            findings["absence_superseded"].append(
+                {"subcap": cell, "evidence": eids})
         elif verdict == "FAIL":
             # MEM-0441: a FAILED challenge used to read as "challenged" and
             # the gate PASSED the category — 103 of Susser Bank's cells
@@ -560,17 +596,7 @@ def run(wb: RunWorkbook, category: str, *, require_synthesis: bool = False,
     tools_used = sorted({str(s.get("Tool") or "").strip()
                          for s in cat_searches if str(s.get("Tool") or "").strip()})
 
-    blocking = [k for k in (
-        "unresolved_citations", "boilerplate", "claim_unsupported",
-        "absence_undeclared", "evidence_smear", "challenge_missing",
-        "challenge_not_independent", "challenge_failed", "single_source_fact",
-        "synthesis_missing", "dq_gaps", "absence_unsearched",
-        "volleys_incomplete", "absence_undeclared_empty",
-        "absence_over_evidence",
-        # 2026-09-03 (owner issue 1): the primary question is owed on every
-        # searched cell, and an empty cell must show an enrichment connector.
-        "primary_unfired", "absence_single_tool",
-    ) if findings[k]]
+    blocking = [k for k in BLOCKING_TERMS if findings[k]]
     # A category whose research has not converged is not challenged yet: the
     # challenge stage runs after the floors gate says the work is done, so
     # asking for the verdict in the same breath as the work is asking the

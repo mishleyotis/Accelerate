@@ -220,6 +220,22 @@ class EvidenceLander:
         self.superseded: dict[str, str] = {}  # minted -> the id it supersedes
 
     # ------------------------------------------------------------------
+    def _correct_origin(self, e_id, ev) -> None:
+        """A row this entity already holds as 'package' that the package now
+        states is a connector reading becomes one — the provenance the
+        ingest dropped before 2026-10-12, corrected on the next scan the way
+        `url_backfill` corrects a missing URL. Nothing else on the row moves,
+        and a row already carrying another origin is left alone."""
+        if ev.get("origin") != "connector":
+            return
+        self.cur.execute(
+            """UPDATE evidence_index
+                  SET origin = 'connector',
+                      connector_tool = COALESCE(connector_tool, %s),
+                      connector_retrieved_at = COALESCE(connector_retrieved_at, %s)
+                WHERE e_id = %s AND origin = 'package'""",
+            (ev.get("connector_tool"), ev.get("connector_retrieved_at"), e_id))
+
     def _lookup(self, local, url, claim_type, excerpt):
         """(stored e_id, content matches) for this entity's row under
         `local`, or (None, False). The entity is in the WHERE clause and in
@@ -298,21 +314,33 @@ class EvidenceLander:
                 # duplicate recognised on a later scan is a duplicate.
                 self.landed.add(prior)
                 self.claimed.add(local)
+                self._correct_origin(prior, ev)
                 return prior
 
         candidate = qualify(ev["e_id"], self.token)
         tried: list[str] = []
         while candidate and candidate not in tried and len(tried) < self.MAX_MINT_ATTEMPTS:
             tried.append(candidate)
+            # A connector reading lands as one (0063): origin 'connector' with
+            # its tool and retrieval time, so ET-12 can see the technographic
+            # scan the register rests on. Every other row is 'package', as
+            # before (R-INTERAC-20261010: every Clay/Vibe row landed
+            # 'package' with no tool and ET-12 could never pass).
+            connector = ev.get("origin") == "connector"
             self.cur.execute(
                 """INSERT INTO evidence_index
                      (e_id, entity_id, origin, source_name, source_url, excerpt,
-                      tier, claim_type, ers, published_date, reference_date)
-                   VALUES (%s,%s,'package',%s,%s,%s,%s,%s,%s,%s,%s)
+                      tier, claim_type, ers, published_date, reference_date,
+                      connector_tool, connector_retrieved_at)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                    ON CONFLICT DO NOTHING RETURNING e_id""",
-                (candidate, self.entity_id, ev.get("source_name"), url, excerpt,
+                (candidate, self.entity_id,
+                 "connector" if connector else "package",
+                 ev.get("source_name"), url, excerpt,
                  ev.get("tier"), claim_type, ev.get("ers"),
-                 ev.get("published_date"), self.reference_date))
+                 ev.get("published_date"), self.reference_date,
+                 ev.get("connector_tool") if connector else None,
+                 ev.get("connector_retrieved_at") if connector else None))
             if self.cur.fetchone():
                 self.landed.add(candidate)
                 if local:
@@ -346,6 +374,7 @@ class EvidenceLander:
                 if local:
                     self._map(local, candidate)
                     self.claimed.add(local)
+                self._correct_origin(candidate, ev)
                 return candidate
 
             # Same stored id, different content. Within this entity that is a

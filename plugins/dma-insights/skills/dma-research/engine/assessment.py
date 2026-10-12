@@ -616,6 +616,19 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
                             "single-source caps at MEDIUM")
 
     rat = _clean(rationale)
+    # AN ADJUSTMENT THE PROSE APPLIES IS ONE THE WRITE RECORDS. R-INTERAC-
+    # 20261010: three rows re-struck by hand (--score) argued "ADJ_STALE
+    # -0.3" while Caps_Applied read "none applied" — the heatmap's caps line
+    # and the rationale beside it disagreed. A hand-struck score may state
+    # its adjustment in the prose (the ADJ_STALE rule above admits that), so
+    # the write does not refuse it: it records every ADJ_ label the prose
+    # applies with a delta and that --adj / --cap / --caps did not already
+    # name, in Caps_Applied, marked as stated in the rationale.
+    recorded = " ".join([_clean(caps)] + [str(x) for x in (adjustments or [])]
+                        + [str(x) for x in (cap_values or [])]).upper()
+    stated_adj = [f"{m.group(1).upper()} {m.group(2).replace('−', '-').replace('–', '-')}"
+                  for m in _APPLIED_ADJ_DELTA.finditer(rat)
+                  if m.group(1).upper() not in recorded]
     if len(rat) < RATIONALE_MIN:
         problems.append(f"rationale is {len(rat)} chars; {RATIONALE_MIN} is the floor "
                         f"— evidence, maturity match, gap to next level, counter, "
@@ -674,7 +687,15 @@ def score(wb: RunWorkbook, subcap: str, *, score=None, confidence: str, rational
     if problems:
         raise ScoringRefusal(f"{subcap}: score refused — " + "; ".join(problems))
 
-    caps_txt = _clean(caps) or ("no evidence: capped at 2.0" if not eids else "none applied")
+    caps_txt = _clean(caps)
+    if stated_adj:
+        seen = []
+        for a in stated_adj:
+            if a not in seen:
+                seen.append(a)
+        caps_txt = "; ".join([t for t in (caps_txt,) if t]
+                             + [f"{a} (stated in the rationale)" for a in seen])
+    caps_txt = caps_txt or ("no evidence: capped at 2.0" if not eids else "none applied")
     with wb.transaction("assessment.score"):
         wb.set_scoring(subcap, {"Score": sc, "Confidence": conf,
                                 "Evidence_Ceiling": ec, "Caps_Applied": caps_txt,
@@ -719,6 +740,18 @@ _GAP_WORDS = re.compile(
     r"\b(gap|missing|absent|lacks?|lacking|no evidence of|not yet|unevidenced|"
     r"would (?:need|require|lift)|short of|below|does not (?:yet )?(?:show|name|"
     r"evidence|demonstrate)|to reach|next level|GAP TO NEXT)\b", re.I)
+#: The figure a rationale concludes at ("final 2.5", "final score: 3",
+#: "final = 2.75"). R-INTERAC-20261010: a re-strike prefixed the critic's
+#: reason and kept the old ending, so 7 of 8 moved P3 rows said "final 3
+#: (Competing)" or "final 2.5" beside a struck 2.0-2.5.
+_FINAL_FIGURE = re.compile(
+    r"\bfinal(?:\s+score)?\s*(?:[:=]|is|of|at)?\s*(\d(?:\.\d{1,2})?)(?!\d)", re.I)
+#: An adjustment the prose APPLIES — the label with a negative delta beside
+#: it ("ADJ_STALE -0.3", "ADJ_STALE: -0.25"). A label named only to say it is
+#: not owed ("ADJ_STALE not applied: ...") carries no delta and is not
+#: matched.
+_APPLIED_ADJ_DELTA = re.compile(
+    r"\b(ADJ_[A-Z0-9_]+)\s*[:=(]?\s*([-−–]\s*\d?\.\d+)", re.I)
 _BAND_WORDS = {"ACTIVATING": "M1", "BUILDING": "M2", "COMPETING": "M3",
                "DIFFERENTIATING": "M4"}
 
@@ -753,6 +786,12 @@ def rubric_problems(rat: str, sc, eids: list[str], cited: set) -> list[str]:
         out.append(f"the rationale argues {', '.join(sorted(named))} but the score "
                    f"{sc} is {level}; the level named must be the level struck "
                    f"(name the next level only as the gap)")
+    finals = _FINAL_FIGURE.findall(text)
+    if finals and abs(float(finals[-1]) - float(sc)) > 1e-6:
+        out.append(f"the rationale concludes at final {finals[-1]} but the score "
+                   f"struck is {sc}; rewrite the ending so the arithmetic lands "
+                   f"on the score — a re-strike rewrites the rationale's "
+                   f"conclusion, it does not prefix a reason to the old one")
     if sc < 5.0 and not _GAP_WORDS.search(text):
         out.append("the rationale names no gap to the next level (what is missing, "
                    "absent, unevidenced or would be needed); a score under 5.0 "

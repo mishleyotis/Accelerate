@@ -51,3 +51,15 @@ def test_a_leaf_that_only_contains_a_verbatim_word_counts():
 
 def test_the_budget_default_is_unchanged():
     assert P.Options.__dataclass_fields__["sg_v4_budget"].default == 8
+
+
+def test_a_publisher_name_or_domain_is_a_label_not_prose():
+    """R-INTERAC-20261010 heatmap: 9 of 20 counted FAILs were a publisher
+    name ("LinkedIn", sim 0.287) or an evidence row's domain — labels of the
+    same class as source_name and url, which no producer can re-ground."""
+    from engine import pipeline as P
+    fails = ["cell_evidence.cells[181].items[0].publisher (sim 0.287 < 0.5)",
+             "evidence_age.rows[273].source_domain (sim 0.29 < 0.5)",
+             "cell_evidence.cells[248].synthesis (sim 0.591 < 0.62)"]
+    paths = [f.split(" (sim")[0] for f in fails]
+    assert P.prose_sg_v4_fails(paths) == ["cell_evidence.cells[248].synthesis"]

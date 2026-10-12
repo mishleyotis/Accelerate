@@ -191,6 +191,16 @@ def _tables_for(wb: RunWorkbook, sec: RS.Section, card: str | None = None) -> li
         if name == "Financial_Trends":
             out.append(_financial_table(rows))
             continue
+        if name == "Gate_Log":
+            # THE LATEST VERDICT PER (gate, scope), not the log's history
+            # (R-INTERAC-20261010): the whole log rendered superseded FAILs
+            # beside their PASSes — and an old GS message quoting leftover
+            # template tokens put those tokens back into the report, which
+            # then failed GS-RPT-NOTOKENS on its own gate table.
+            latest: dict = {}
+            for r in rows:
+                latest[(str(r.get("Gate") or ""), str(r.get("Scope") or ""))] = r
+            rows = list(latest.values())
         title, cols = _TABLE_TITLES.get(name, (name.replace("_", " "), None))
         cols = list(cols or C.SHEETS[name])
         if name == "Subcap_Scores" and card and re.fullmatch(r"P[1-4]", card):

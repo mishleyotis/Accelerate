@@ -115,9 +115,14 @@ BRIEFS_DIR = "briefs"
 #: SG-V4 FAIL there is not ungrounded prose a producer can re-ground, so it
 #: does not count against `sg_v4_budget` (owner decision 2026-10-06, Arbor
 #: Bank: 660 of the heatmap's 789 FAILs sat on these fields).
+#: `publisher` and `source_domain` are the same label class as `source_name`
+#: and `url` — who published the row and where it lives — and were counted as
+#: prose until 2026-10-12 (R-INTERAC-20261010 heatmap: 9 of its 20 counted
+#: FAILs were a publisher name or a domain, e.g. sim 0.287 on "LinkedIn").
 SG_V4_VERBATIM_LEAVES = frozenset({
     "excerpt", "verbatim_quote", "quote", "source", "source_name",
-    "source_title", "title", "product", "candidate", "url"})
+    "source_title", "title", "product", "candidate", "url",
+    "publisher", "source_domain"})
 
 
 def _contract_version_of(progress, page: str) -> str | None:
@@ -670,6 +675,13 @@ class Options:
     # tolerates a legitimate paraphrase drifting below threshold; 249 (Golden 1)
     # does not.
     sg_v4_budget: int = 8
+    # PAGES_A pages a person has moved to version B (R-INTERAC-20261010,
+    # 2026-10-12): techstack failed ET-07/ET-12 against version A's evidence
+    # — links and connector provenance the workbook now carries but the
+    # server ingested before they existed — and a page halted on A stopped
+    # the whole run. A deferred page is not shipped on A; PAGES_B produces it
+    # against version B. Recorded in Gate_Log, never silent.
+    defer_to_b: tuple = ()
     ingest_poll_s: float = 60.0
     ingest_timeout_s: float = 3600.0
     folder_root: Path | None = None
@@ -751,6 +763,32 @@ def _repair_batches(repairs: dict[str, list[str]],
     if cur:
         out.append(cur)
     return out
+
+
+def _governor_tiers(price: dict) -> dict[str, float]:
+    """The per-wave prices the research workflow's governor checks every wave
+    against (`budget.tier_usd`). One source, so the share the driver hands and
+    the waves the workflow can afford are priced by the same numbers."""
+    return {"collector_batch": float(price.get("per_batch") or 0.0),
+            "orchestrator": float(price.get("per_category_orchestrator") or 0.0),
+            "challenge": float(price.get("per_category_challenge") or 0.0)}
+
+
+def _round_floor_usd(inv: dict, tier: dict[str, float]) -> float:
+    """The least an invocation's share can be and still produce a gate verdict:
+    for each category, every first-wave batch (open and repair; a category
+    with neither runs one gate-only batch), plus the orchestrator pass and
+    the challenge the workflow reserves before it buys a collector. A share
+    below this is refused by the governor before any agent runs
+    (R-INTERAC-20261010: P3C2 and P3C4 at $0.81, P1C3 $1.22, P4C1 $1.49,
+    against a $1.74 first wave)."""
+    total = 0.0
+    for c in inv["cats"]:
+        nb = len((inv.get("batches") or {}).get(c) or []) \
+            + len((inv.get("repair_batches") or {}).get(c) or [])
+        total += (max(1, nb) * tier["collector_batch"]
+                  + tier["orchestrator"] + tier["challenge"])
+    return round(total, 4)
 
 
 class Pipeline:
@@ -1398,9 +1436,12 @@ class Pipeline:
                          "reports READY but not rendered" if not all(files) else
                          "Recommendations not projected from the report's REC cards"))
         if stage == "PAGES_A":
-            ok = self._pages_passed(PAGES_A, "A")
-            return ok, ("techstack, heatmap shipped to version A" if ok else
-                        f"pending: {', '.join(p for p in PAGES_A if not self._page_ok(p, 'A'))}")
+            moved = tuple(self.state.get("deferred_to_b") or ())
+            due = tuple(p for p in PAGES_A if p not in moved)
+            ok = self._pages_passed(due, "A")
+            return ok, ((f"{', '.join(due) or 'no page'} shipped to version A"
+                         + (f"; {', '.join(moved)} deferred to B" if moved else "")) if ok else
+                        f"pending: {', '.join(p for p in due if not self._page_ok(p, 'A'))}")
         if stage == "PACKAGE":
             pk = self.state.get("package") or {}
             ok = bool(pk.get("verified")) and Path(str(pk.get("folder") or "/nonexistent")).is_dir()
@@ -2415,21 +2456,43 @@ class Pipeline:
             # AT_STAGE_BUDGET before any agent is paid for — a decision for a
             # person, not a wave the governor refuses one batch at a time.
             deferred = []
+            tier = _governor_tiers(price)
+
+            def _est(i):
+                # what this invocation needs end to end: its own priced shape,
+                # never less than ONE ROUND at the governor's own wave prices
+                # (R-INTERAC-20261010: a cells-proportional share handed
+                # P3C4 $0.81 against a $1.74 first wave; the workflow
+                # refused every wave and four categories came back
+                # AT_STAGE_BUDGET with no agent run)
+                cs = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
+                         for c in i["cats"])
+                cp = sum(len(open_caps.get(c, {})) for c in i["cats"])
+                pr = cost_mod.research_price(
+                    cs, categories=len(i["cats"]), capabilities=cp or None,
+                    batch_cells=limit, collector_model=self.opts.collector_model,
+                    synthesis_model=self.opts.synthesis_model)
+                ratio = float((self.state.get("workflow_calibration") or {}).get("ratio") or 1.0)
+                return round(max(pr["usd"] * max(1.0, ratio), _round_floor_usd(i, tier)), 4)
+            need = {id(i): _est(i) for i in inv}
+            floor = {id(i): _round_floor_usd(i, tier) for i in inv}
+            if remaining is not None and fits_env and sum(need.values()) > float(remaining) + 1e-9:
+                if sum(floor.values()) <= float(remaining) + 1e-9:
+                    # the scope fits and every category's one-round FLOOR
+                    # fits, though not every priced need: each is handed its
+                    # floor plus a cells-proportional part of what is left
+                    # (merged with the default branch's fixed-cost floor,
+                    # 2026-10-11 — the same defect, fixed twice)
+                    need = floor
+                else:
+                    # not even one whole round per category: allocate whole
+                    # categories instead of handing shares no wave fits in
+                    fits_env = False
             if not fits_env and remaining is not None:
-                def _est(i):
-                    cs = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
-                             for c in i["cats"])
-                    cp = sum(len(open_caps.get(c, {})) for c in i["cats"])
-                    pr = cost_mod.research_price(
-                        cs, categories=len(i["cats"]), capabilities=cp or None,
-                        batch_cells=limit, collector_model=self.opts.collector_model,
-                        synthesis_model=self.opts.synthesis_model)
-                    ratio = float((self.state.get("workflow_calibration") or {}).get("ratio") or 1.0)
-                    return round(pr["usd"] * max(1.0, ratio), 4)
                 left = float(remaining)
                 handed = []
-                for i in sorted(inv, key=_est):
-                    e_i = _est(i)
+                for i in sorted(inv, key=lambda i: need[id(i)]):
+                    e_i = need[id(i)]
                     if e_i <= left + 1e-9:
                         handed.append(i); left -= e_i
                         i.setdefault("_est", e_i)
@@ -2479,48 +2542,25 @@ class Pipeline:
                              "usd_per_runtime_token": price.get("usd_per_runtime_token"),
                              # the per-wave prices the workflow's governor
                              # checks a wave against before starting it
-                             "tier_usd": {"collector_batch": price.get("per_batch"),
-                                          "orchestrator": price.get("per_category_orchestrator"),
-                                          "challenge": price.get("per_category_challenge")},
+                             "tier_usd": tier,
                              "raise_with": f"--stage-budget RESEARCH=<usd>"}
             doc["estimate"]["fits_envelope"] = fits_env
             total_cells = max(1, cells + rcells)
-
-            # A CATEGORY HAS FIXED COSTS, NOT ONLY PER-CELL ONES (2026-10-11).
-            # Its orchestrator pass and its challenge are paid once whatever
-            # its size, and its first wave is whole batches. A share cut by
-            # cells alone gave a small category — a three-cell repair round —
-            # less than one batch plus that reserve, so the workflow's governor
-            # refused its first wave and it closed AT_STAGE_BUDGET with the
-            # envelope still holding money. Each invocation is now floored at
-            # its fixed costs (one orchestrator + one challenge per category,
-            # every first-wave batch: never less than one full wave) and the
-            # rest of what is left is split by cells. Floors that do not fit
-            # fall back to the cell split; whole-category allocation above
-            # already covers an envelope too small for the scope.
-            def _floor(i) -> float:
-                nb = sum(len(b) for b in i["batches"].values()) + sum(
-                    -(-len(r) // max(1, limit)) for r in i["repairs"].values() if r)
-                return (len(i["cats"]) * (float(price.get("per_category_orchestrator") or 0.0)
-                                          + float(price.get("per_category_challenge") or 0.0))
-                        + max(1, nb) * float(price.get("per_batch") or 0.0))
-            floors = {id(i): _floor(i) for i in inv}
-            spare = (None if remaining is None
-                     else float(remaining) - sum(floors.values()))
+            surplus = (0.0 if remaining is None
+                       else max(0.0, float(remaining) - sum(need[id(i)] for i in inv)))
             for i in inv:
                 mine = sum(sum(open_caps.get(c, {}).values()) + len(i["repairs"][c])
                            for c in i["cats"])
-                # A handed category's share is ITS OWN end-to-end estimate when
-                # categories were allocated whole; otherwise its fixed floor
-                # plus the spare partitioned by cells.
-                if remaining is None:
-                    share = None
-                elif i.get("_est") is not None:
-                    share = i["_est"]
-                elif spare is not None and spare >= 0:
-                    share = round(floors[id(i)] + spare * mine / total_cells, 4)
-                else:
-                    share = round(float(remaining) * mine / total_cells, 4)
+                # A handed category's share is ITS OWN end-to-end need — at
+                # least one whole round at the governor's wave prices — when
+                # categories were allocated whole; when the envelope funds
+                # every category, each gets its need plus a cells-proportional
+                # part of the surplus. Never the cells-proportional part
+                # alone: a category's orchestrator and challenge are a fixed
+                # cost a 6-cell category pays like a 45-cell one.
+                share = (None if remaining is None
+                         else (i.get("_est") if i.get("_est") is not None
+                               else round(need[id(i)] + surplus * mine / total_cells, 4)))
                 i.pop("_est", None)
                 # EVERY INVOCATION KNOWS ITS SHARE. Sixteen workflows spend
                 # one envelope at once; a per-invocation share, proportional
@@ -3536,6 +3576,7 @@ class Pipeline:
             if rows:
                 inv[0]["solutions_brief"] = rows[0]["prompt_file"]
         doc = {"workflow": str(PLUGIN / SCORING_WORKFLOW), "invocations": inv,
+               "estimate": self._scoring_price(inv, env),
                "then": self.plan()["command"],
                "how": ("start every invocation in ONE message — Workflow({scriptPath: "
                        "<workflow>, args: <invocation>}) per pillar — wait for all, then "
@@ -3548,6 +3589,62 @@ class Pipeline:
         return {"file": str(path), "invocations": inv,
                 "summary": f"{len(inv)} pillar workflow(s), {rows} scorer brief(s), "
                            f"{len(pending)} pending critic move(s)"}
+
+    def _scoring_price(self, inv: list[dict], env: dict | None) -> dict:
+        """Price every pillar's workflow before it is handed, and give each
+        its share of the SCORING envelope (R-INTERAC-20261010: the stage
+        cost $87.52 against $25 and the handoff printed "est $None").
+
+        A pillar costs its scorer rows at `cost.SCORING_TIER_USD`, its
+        critic rounds each with a rescore, and the solutions duty where it
+        rides. When a binding envelope cannot fund the whole stage, nothing
+        is handed: `StageRefused` names the figure that would, before any
+        agent is paid for — a SCORING stage cut short leaves no gate to
+        pass. Otherwise each invocation's budget carries its share, the
+        per-brief prices and the runtime rate the workflow's governor
+        converts `budget.spent()` with. Mutates `inv`; returns the estimate."""
+        from . import cost
+        tier = dict(cost.SCORING_TIER_USD)
+        rounds = int(self.opts.critic_rounds)
+        need: dict[str, float] = {}
+        for i in inv:
+            brief_usd = []
+            for md in i.get("briefs") or []:
+                try:
+                    rows = len(json.loads(Path(md).with_suffix(".json").read_text())
+                               .get("rows_to_score") or [])
+                except (OSError, ValueError, AttributeError):
+                    rows = 65                       # a brief's measured mean
+                brief_usd.append(round(rows * tier["scorer_per_row"], 2))
+            i["_brief_usd"] = brief_usd
+            need[i["pillar"]] = round(sum(brief_usd) + rounds * (tier["critic"] + tier["rescore"])
+                                      + (tier["solutions"] if i.get("solutions_brief") else 0.0), 2)
+        total = round(sum(need.values()), 2)
+        remaining = None if not env else env.get("remaining")
+        fits = remaining is None or total <= float(remaining) + 1e-9
+        if env and env.get("binding") and not fits:
+            spent = float(env.get("spent") or 0)
+            self._stage_budget_hit = {**env, "estimate_usd": total, "fits_envelope": False}
+            raise StageRefused(
+                f"AT_STAGE_BUDGET before dispatch: the SCORING envelope has "
+                f"${float(remaining):.2f} of ${float(env.get('ceiling') or 0):.2f} left and "
+                f"scoring {', '.join(f'{p} ~${u:.2f}' for p, u in sorted(need.items()))} "
+                f"costs ~${total:.2f} (scorers ${tier['scorer_per_row']}/row, "
+                f"{rounds} critic round(s) ~${tier['critic']:.2f} each). No agent was paid "
+                f"for. A person raises it (`--stage-budget SCORING="
+                f"{int(spent + total) + 1}` funds the stage); the run-wide `--max-usd` "
+                f"does not raise an envelope.")
+        for i in inv:
+            mine = need[i["pillar"]]
+            share = mine if remaining is None or not total else \
+                round(float(remaining) * mine / total, 2)
+            b = dict(i.get("budget") or {})
+            b.update(estimate_usd=mine, share_usd=share, fits_envelope=fits,
+                     tier_usd=tier, brief_usd=i.pop("_brief_usd"),
+                     usd_per_runtime_token=cost.RUNTIME_USD_PER_TOKEN)
+            i["budget"] = b
+        return {"usd": total, "by_pillar": need, "fits_envelope": fits,
+                "basis": "cost.SCORING_TIER_USD (measured R-INTERAC-20261010)"}
 
     @staticmethod
     def _lane_rows(batch: dict) -> list[dict]:
@@ -3844,8 +3941,13 @@ class Pipeline:
             # unlogged (P2C3, 2026-10-05).
             from . import runstate as RS_
             cats = sorted({str(r.get("category") or "") for r in relay.open_requests(self.run)} - {""})
+            # RELAY TOO (R-INTERAC-20261010, 2026-10-12): the probe lanes run
+            # connector tools, so their searches log under the RELAY scope —
+            # whose window RESEARCH had filled (955 against 60) and nothing
+            # reset. Every probe ran and 56 were refused unlogged, so the
+            # report writers saw peer absences with no search behind them.
             if cats:
-                RS_.checkpoint(self.wb, "REPORTS probes", scope=cats)
+                RS_.checkpoint(self.wb, "REPORTS probes", scope=cats + ["RELAY"])
             if q["queued"]:
                 self.opts.log(f"  [PROBES] {q['queued']} report probe(s) derived from "
                               f"Solution_Catalogue, Tech_Register and the peer set")
@@ -4320,8 +4422,9 @@ class Pipeline:
                               f"[{b['gate']}] {b['detail']} — fix: {b['fix']}"
                               for b in advisory))[:900])
             self.opts.log(f"  [{stage}] {len(advisory)} advisory preflight finding(s) "
-                          f"(unlinked timeline citations) — the context producer states "
-                          f"them on the surface; link them at PRELIM to clear this line")
+                          f"(unlinked timeline or report-section citations) — the page "
+                          f"producer states them on the surface (r_layer.probes_run); "
+                          f"link the capability ones to clear this line")
         if not blockers:
             if todo:
                 L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="PASS",
@@ -4557,11 +4660,32 @@ class Pipeline:
         NEEDS_CONNECTOR rather than failing the stage."""
         self._cohort_peers()
 
+    def _deferred(self) -> tuple:
+        """PAGES_A pages moved to version B — by this invocation's flag or a
+        previous one (remembered in pipeline state, so a resume without the
+        flag does not try them on A again)."""
+        have = list((self.state.get("deferred_to_b") or []))
+        for p in getattr(self.opts, "defer_to_b", ()) or ():
+            if p in PAGES_A and p not in have:
+                have.append(p)
+                L.append_gate(self.wb, gate="PAGES_DEFERRED_TO_B", scope=p, verdict="PASS",
+                              blocking=False,
+                              detail=f"{p} moved from version A to version B by the owner: "
+                                     f"its version-A verdict rests on evidence ingested before "
+                                     f"the workbook's repairs; PAGES_B produces it on B")
+        if have != list(self.state.get("deferred_to_b") or []):
+            self.state["deferred_to_b"] = have
+            self._save_state()
+        return tuple(have)
+
     def _stage_pages_a(self) -> str:
         self._reset_counters()
-        self._pages_prepare(PAGES_A)
-        shipped = self._ship_pages(PAGES_A, "A", produce=True)
-        return f"shipped to version A: {', '.join(shipped)}"
+        pages = tuple(p for p in PAGES_A if p not in self._deferred())
+        self._pages_prepare(pages)
+        shipped = self._ship_pages(pages, "A", produce=True) if pages else []
+        moved = [p for p in PAGES_A if p not in pages]
+        return (f"shipped to version A: {', '.join(shipped) or 'none'}"
+                + (f"; deferred to B: {', '.join(moved)}" if moved else ""))
 
     def _stage_package(self) -> str:
         from . import assemble, grains, techscan
@@ -4597,11 +4721,26 @@ class Pipeline:
 
     def _stage_pages_b(self) -> str:
         self._reset_counters()
-        self._pages_prepare(tuple(p for g in PAGES_B for p in g))
-        restaged = self._ship_pages(PAGES_A, "B", produce=False)   # from disk, no lanes
+        deferred = self._deferred()
+        self._pages_prepare(tuple(p for g in PAGES_B for p in g) + deferred)
+        restaged = self._ship_pages(tuple(p for p in PAGES_A if p not in deferred),
+                                    "B", produce=False)   # from disk, no lanes
+        # A DEFERRED page ships LAST, and its refusal is held until every
+        # other page has had its turn (R-INTERAC-20261010: techstack, deferred
+        # for a server-side fix, halted PAGES_B before overview, insights,
+        # platform or context were attempted).
         shipped = []
+        held = None
         for group in PAGES_B:
             shipped += self._ship_pages(group, "B", produce=True)
+        if deferred:
+            try:
+                shipped += self._ship_pages(deferred, "B", produce=True)
+            except StageRefused as e:
+                held = e
+        if held:
+            raise StageRefused(f"{held} — every other page shipped to version B: "
+                               f"{', '.join(restaged + shipped) or 'none'}")
         return f"restaged {', '.join(restaged)}; shipped {', '.join(shipped)} to version B"
 
     def _stage_promote(self) -> str:
@@ -4807,7 +4946,8 @@ def _build_opts(a) -> Options:
                    reset_guard=bool(getattr(a, "reset_guard", False)),
                    sg_v4_budget=int(getattr(a, "sg_v4_budget", None)
                                     if getattr(a, "sg_v4_budget", None) is not None
-                                    else Options.sg_v4_budget))
+                                    else Options.sg_v4_budget),
+                   defer_to_b=tuple(getattr(a, "defer_to_b", None) or ()))
 
 
 def _research_mode(a) -> str:
@@ -4858,6 +4998,10 @@ def main(argv=None) -> int:
                         "promotes (invariant 12); this is the driver's own revision "
                         "policy, raised by a person for a page whose misses are "
                         "ungroundable by construction (stated absences)")
+    r.add_argument("--defer-to-b", action="append", choices=PAGES_A, default=[],
+                   help="move a version-A page to version B (an owner decision, "
+                        "logged): for a page whose A verdict rests on evidence "
+                        "ingested before the workbook's repairs. Remembered on resume")
     r.add_argument("--reset-guard", action="store_true",
                    help="clear the workflow-handoff guard first: a stage the "
                         "guard refused (same work handed with nothing moving, or "

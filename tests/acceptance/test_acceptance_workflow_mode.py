@@ -24,6 +24,10 @@ from test_acceptance_pipeline import _fresh, _opts
 
 
 def _wf_opts(tmp_path, **over):
+    # SCORING is priced before it is handed (2026-10-12: $0.095/row + ~$2.40
+    # a critic round, measured), and the default $5 envelope does not fund a
+    # fixture's critic rounds — a real run passes --stage-budget SCORING.
+    over.setdefault("stage_budget", {"SCORING": 20.0})
     return _opts(tmp_path, scoring_mode="workflow", report_mode="workflow",
                  pages_mode="workflow", **over)
 

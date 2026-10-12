@@ -57,21 +57,63 @@ Return pillar ${P}, verdict PASS or FAIL as recorded, moves (how many --move you
 
 const rescorePrompt = (round) => `You are ${ACT} for DMA run ${A.run}, round ${round}, RESCORE. Work from ${A.eng}.
 The independent critic moved rows of pillar ${P}. List them: python3 -m engine.assessment moves ${R} --pillar ${P}
-For EACH row: re-strike it at or below its "to" through python3 -m engine.assessment score ${R} --subcap <CELL> --score <to or lower> --actor ${ACT}, keeping its confidence and overlay (shown with the move), with the critic's reason at the head of the existing rationale. Touch no other row.
+For EACH row: re-strike it at or below its "to" through python3 -m engine.assessment score ${R} --subcap <CELL> --score <to or lower> --actor ${ACT}, keeping its confidence and overlay (shown with the move). REWRITE the rationale for the new score - do not prefix the critic's reason to the old text: open with the critic's reason, argue the level the new score sits in (its band word and M-level, in that level's rubric words - not the next level's), name as the gap the level IMMEDIATELY above it, and end on arithmetic that concludes at the score you strike (the engine refuses a 'final N' that is not the struck score). Touch no other row.
 Return pillar ${P}, verdict "RESCORED", scored (rows re-struck), moves 0, notes.`
 
 const solutionsPrompt = (file) => `You are the technographic-scanner for DMA run ${A.run}, carrying the SCORING stage's solutions duty. Work from ${A.eng}, foreground commands, long timeouts.
 Your brief is ${file}: read it once and follow its rules exactly. Fill Solution_Catalogue (one row per platform the assessment can argue for, through engine.assessment solution) and Platform_Peer_Adoption (engine.assessment peer-adoption), DECLARING through engine.cli complete declare what cannot be examined. You score nothing and touch no pillar's rows.
 Return pillar ${P}, verdict "SOLUTIONS_DONE" or "BLOCKED" (with the refusal), scored 0, moves 0, notes.`
 
-const solutions = A.solutions_brief ? agent(solutionsPrompt(A.solutions_brief), {
-  label: 'solutions duty', phase: 'Score', schema: OUT,
-  agentType: 'dma-insights:technographic-scanner',
-}) : null
-const scored = await parallel((A.briefs || []).map((f, i) => () => agent(scorerPrompt(f), {
+// THE GOVERNOR (R-INTERAC-20261010: SCORING cost $87.52 against a $25
+// envelope; this script logged the envelope and checked nothing). The driver
+// prices each pillar from the measured tier prices and hands its share;
+// every agent here is priced before it starts and starts only when it fits
+// both what is left of the stage's envelope (budget.spent() is shared by
+// every workflow of the turn) and this pillar's share. A scorer is started
+// only with its pillar's first critic round held in reserve: scores nobody
+// critiques cannot pass the gate. An envelope the owner made non-binding
+// (an explicit --max-usd alone) is reported, not enforced.
+const BUDGET = A.budget || null
+const TIER = Object.assign({ scorer_per_row: 0.095, critic: 2.0, rescore: 0.4, solutions: 0.75 },
+  (BUDGET && BUDGET.tier_usd) || {})
+const RATE = (BUDGET && BUDGET.usd_per_runtime_token) || 0
+const ENFORCE = !!(BUDGET && BUDGET.remaining != null && BUDGET.binding !== false)
+const base = budget.spent()
+let est = 0
+const spentUsd = () => (budget.spent() - base) * RATE
+function affordable(usd, what) {
+  if (!ENFORCE) return true
+  const runLeft = BUDGET.remaining - spentUsd()
+  const shareLeft = BUDGET.share_usd == null ? Infinity : BUDGET.share_usd - est
+  if (usd <= runLeft + 1e-9 && usd <= shareLeft + 1e-9) return true
+  log(`AT_STAGE_BUDGET: ${what} needs ~$${usd.toFixed(2)}; SCORING envelope has ~$${Math.max(0, runLeft).toFixed(2)} left (of $${BUDGET.ceiling}), ${P}'s share ~$${shareLeft === Infinity ? '∞' : Math.max(0, shareLeft).toFixed(2)} — not started`)
+  return false
+}
+const briefUsd = (i) => ((BUDGET && BUDGET.brief_usd) || [])[i] ?? 65 * TIER.scorer_per_row
+const stopped = (what) => ({ pillar: P, verdict: 'AT_STAGE_BUDGET', scored: 0, moves: 0,
+  notes: `${what}; raise with ${(BUDGET && BUDGET.raise_with) || '--stage-budget SCORING=<usd>'}` })
+
+let solutions = null
+if (A.solutions_brief && affordable(TIER.solutions, 'solutions duty')) {
+  est += TIER.solutions
+  solutions = agent(solutionsPrompt(A.solutions_brief), {
+    label: 'solutions duty', phase: 'Score', schema: OUT,
+    agentType: 'dma-insights:technographic-scanner',
+  })
+}
+const runnable = []
+const unreached = []
+;(A.briefs || []).forEach((f, i) => {
+  if (affordable(briefUsd(i) + TIER.critic, `${P} scorer ${i + 1}/${A.briefs.length} (+ the critic reserve)`)) {
+    runnable.push([f, i]); est += briefUsd(i)
+  } else unreached.push(f)
+})
+if ((A.briefs || []).length && !runnable.length) return stopped(`no ${P} scorer brief fits the envelope (${unreached.length} unscored)`)
+const scored = await parallel(runnable.map(([f, i]) => () => agent(scorerPrompt(f), {
   label: `${P} score ${i + 1}/${A.briefs.length}`, phase: 'Score', schema: OUT, model: 'sonnet',
   agentType: `dma-insights:${ACT}`,
 })))
+if (unreached.length) log(`${P}: ${unreached.length} scorer brief(s) not started for budget: ${unreached.join(', ')}`)
 if (solutions) {
   const sol = await solutions
   log(`solutions duty: ${sol ? sol.verdict : 'agent died'}`)
@@ -87,8 +129,10 @@ let last = null
 // round 2 judges only the moved rows; a pillar still FAILing after that
 // returns to the driver, whose gate names the rows — not a third sample.
 const CRITIC_ROUNDS = A.rounds || 2
-if (A.budget && A.budget.ceiling != null) log(`${P}: SCORING envelope $${A.budget.spent} of $${A.budget.ceiling} spent`)
+if (BUDGET && BUDGET.ceiling != null) log(`${P}: SCORING envelope $${BUDGET.spent} of $${BUDGET.ceiling} spent, share $${BUDGET.share_usd}, est $${BUDGET.estimate_usd}${ENFORCE ? '' : ' (not binding)'}`)
 for (let round = 1; round <= CRITIC_ROUNDS; round++) {
+  if (!affordable(TIER.critic, `${P} critic r${round}`)) return last || stopped(`${P} critic r${round} does not fit the envelope`)
+  est += TIER.critic
   last = await agent(criticPrompt(round), {
     label: `${P} critic r${round}`, phase: 'Critique', schema: OUT,
     agentType: 'dma-insights:scoring-critic',
@@ -97,6 +141,8 @@ for (let round = 1; round <= CRITIC_ROUNDS; round++) {
   log(`${P} r${round}: critic ${last.verdict}, ${last.moves || 0} move(s)`)
   if (last.verdict === 'PASS') break
   if (!last.moves) break                     // a FAIL the engine accepted always carries moves
+  if (!affordable(TIER.rescore, `${P} rescore r${round}`)) return last
+  est += TIER.rescore
   const rs = await agent(rescorePrompt(round), {
     label: `${P} rescore r${round}`, phase: 'Rescore', schema: OUT, model: 'sonnet',
     agentType: `dma-insights:${ACT}`,

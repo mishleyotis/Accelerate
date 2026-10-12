@@ -112,6 +112,10 @@ def evidence_index_doc(wb: RunWorkbook) -> dict:
             "fact_count": r.get("Fact_Count"),
             "subcaps_supported": ", ".join(_split_ids(r.get("SubCap_IDs"))),
             "excerpt": r.get("Excerpt"),
+            # provenance the worker lands on evidence_index (origin
+            # 'connector' + its tool), so ET-12 can see a technographic scan
+            "origin": r.get("Origin"),
+            "retrieved_at": r.get("Retrieved_At"),
         })
     return {"run_id": md.get("run_id"), "entity_id": md.get("entity_id"),
             "generated_at": _utcnow(), "items": items}
