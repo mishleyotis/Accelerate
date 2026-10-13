@@ -163,6 +163,39 @@ def test_an_empty_cohort_is_logged_and_re_asked_until_it_answers(tmp_path):
     assert len(calls) == 1                           # filled: never re-asked
 
 
+def test_the_page_preflight_refuses_a_peer_page_whose_figures_were_never_mapped(tmp_path):
+    """PEER-COHORT (2026-10-13): the heatmap, overview and platform pages are
+    not spent while a category's peer figure was never mapped from the
+    cohort — that page would ship with peers excluded. Mapped means the
+    cohort answered: its average, or its stated absence."""
+    from engine import page_preflight as PP
+    run, wb, cells, ev = researched_run(tmp_path)
+    cats = [r["Category_ID"] for r in wb.rows("Peer_Benchmarks") if r.get("Category_ID")]
+    found = [b for b in PP.peer_cohort_blockers(wb, ("heatmap", "platform", "techstack"))]
+    assert {b["page"] for b in found} == {"heatmap", "platform"}
+    assert all(b["gate"] == "PEER-COHORT" and b["needs_connector"]
+               and b.get("severity", "block") == "block" for b in found)
+    assert PP.peer_cohort_blockers(wb, ("techstack", "insights")) == []
+    # an inferred placeholder is not a mapping either
+    prelim.peer_median(wb, category=cats[0], median=2.9, basis="inferred",
+                       source="analyst estimate, no cohort behind it")
+    prelim.fill_cohort_peers(wb, {"sub_vertical": "CU", "entities": 0, "categories": {}})
+    assert any(cats[0] in b["detail"] for b in PP.peer_cohort_blockers(wb, ("heatmap",)))
+    # the cohort's average mapped: clear
+    prelim.fill_cohort_peers(wb, _cohort(cats))
+    assert PP.peer_cohort_blockers(wb, ("heatmap", "overview", "platform")) == []
+    assert not [b for b in PP.preflight(wb, ("heatmap",)) if b["gate"] == "PEER-COHORT"]
+
+
+def test_an_answered_but_empty_cohort_warns_and_does_not_halt(tmp_path):
+    from engine import page_preflight as PP
+    run, wb, cells, ev = researched_run(tmp_path)
+    prelim.fill_cohort_peers(wb, {"sub_vertical": "RB", "entities": 0, "categories": {}})
+    found = PP.peer_cohort_blockers(wb, ("heatmap",))
+    assert len(found) == 1 and found[0]["severity"] == "warn"
+    assert "PEER_COHORT_EMPTY" in found[0]["detail"]
+
+
 # ── peer metrics are researched on the focus areas only ─────────────────
 
 def test_peer_metric_probes_cover_each_peer_on_each_focus_area_and_nothing_else(tmp_path):

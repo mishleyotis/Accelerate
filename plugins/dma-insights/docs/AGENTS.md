@@ -217,7 +217,21 @@ producer may write.
 |---|---|---|---|
 | `scoring-p1-producer` … `scoring-p4-producer` | scoring | one pillar's `engine.assessment score` rows, with the AI/data overlay | the driver (`engine.pipeline`), over `engine.brief scoring-batch`, after every category gate is PASS |
 | `scoring-critic` | scoring | the SCORING_CRITIC verdict per pillar, and the rollup headline | the driver, over `scoring-batch --critic`, after the scorers return; a FAIL re-dispatches the round |
-| `technographic-scanner` (second duty) | research | `Solution_Catalogue` and `Platform_Peer_Adoption` | the driver, over `scoring-batch --solutions` |
+| `technographic-scanner` (second duty) | research | `Solution_Catalogue`, and the **peer context**: `Platform_Peer_Adoption` (every locked peer × every platform) and `Tech_Peer_Deployments` (every locked peer × every register row) | the driver, over `scoring-batch --solutions`; the `dma-pillar-scoring` workflow's solutions agent |
+
+### Peers — who maps the scores, who researches the context
+
+Owner decisions 2026-10-06 and 2026-10-13: **peer scores are an average and
+peer context is what is researched.** No agent scores a named peer one at a
+time (that was tried and reverted on 2026-10-13: it added a lane per peer and
+contradicted the decision).
+
+| What | Owner | Hook that refuses an exclusion |
+|---|---|---|
+| **Peer score, category grain** (heatmap `workbook_scores.peer_median`, focus areas, overview strip) | the driver, deterministically — `pipeline._cohort_peers` writes `get_cohort_benchmarks(sub_vertical)` (mean of the sub-vertical's assessed entities, matched by resolved code) onto every Peer_Benchmarks row before SCORING's rollup, at the PAGES refill and at version B; a cohort absence is re-asked every refill | page preflight **PEER-COHORT** blocks heatmap / overview / platform while any row was never mapped (NEEDS_CONNECTOR); an answered-but-empty cohort is `PEER_COHORT_EMPTY` (Gate_Log + driver warning) |
+| **Peer score, cell grain** (platform `gaps[].peer_score`, `top_contributors.peer_median`) | the connector's fit engine at fit time (`fit._cell_peers` → `cohort.cell_benchmarks`, same matching) — computed, never stored | CG-30/CG-31 (the page agrees with the engine); `platform-fit-producer` writes it with `peer_basis: recomputed` |
+| **Peer context** (who runs which platform / product) | `technographic-scanner` (second duty, above) | SCORING gate (tab never silently empty), `PEER_ADOPTION_OWED` on a widened set, page preflight **PEER-ADOPT**, connector AG-04 |
+| **The comparison rendered** | `heatmap-focus-producer`, `platform-fit-producer`, `overview` producers — they read the figures above, never compute or guess one | AG-04, CG-44 (peer figures cascade heatmap → overview) |
 
 ---
 

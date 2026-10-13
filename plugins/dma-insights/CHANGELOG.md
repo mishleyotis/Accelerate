@@ -24,13 +24,19 @@ never asked again.
   is re-asked until the cohort answers; a cohort FIGURE stays final. An empty
   cohort is logged `PEER_COHORT_EMPTY` (Gate_Log, non-blocking) and printed by
   the driver, never written silently.
+- **Hook, page preflight `PEER-COHORT`**: heatmap, overview and platform are
+  not spent while any Peer_Benchmarks row was never mapped from the cohort
+  (blank, an `inferred` placeholder, a non-cohort figure) — NEEDS_CONNECTOR,
+  naming `get_cohort_benchmarks`; a cohort that answered with no entity at all
+  warns before the page ships.
 - **Peer context has a named owner**: the technographic-scanner's SCORING
   duty (dispatched by `dma-pillar-scoring`) now states it in full — every
   locked peer × every platform on Platform_Peer_Adoption, every locked peer ×
   every register row on Tech_Peer_Deployments, finished when
   `engine.assessment peer-gaps` lists nothing — and that peer SCORES are the
   cohort's, never scored per peer (no per-peer scoring lane: no added
-  latency).
+  latency). `docs/AGENTS.md` § "Peers" tables who maps each peer figure, who
+  researches the context, and the hook that refuses each exclusion.
 Tests: `apps/mcp/tests/test_cohort_benchmarks.py`,
 `tests/skills/research_engine/test_peer_cohort_and_template_numbers.py`.
 

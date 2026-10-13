@@ -292,6 +292,72 @@ def peer_adoption_blockers(wb) -> list:
                 "is still owed. A competing product at the same layer is N.")}]
 
 
+#: The pages that serve a peer figure read from Peer_Benchmarks (heatmap
+#: workbook_scores / focus areas, the overview strip) or from the fit engine's
+#: cohort at cell grain (platform gaps).
+PEER_PAGES = ("heatmap", "overview", "platform")
+
+
+def peer_cohort_blockers(wb, pages) -> list:
+    """PEER-COHORT (2026-10-13): every peer figure is MAPPED from the
+    sub-vertical cohort before a page that serves one is spent.
+
+    Peer scores are the average of the entities already assessed in the
+    client's sub-vertical (owner, 2026-10-06; reaffirmed 2026-10-13: "peer
+    scores are average and peer context is what is researched"). The driver's
+    `_cohort_peers` refill runs immediately before this check. A row it could
+    not map — blank, an `inferred` placeholder, a figure from anywhere but the
+    cohort or a published table — means the cohort was never asked or the
+    connector did not answer, and the page would ship with peers excluded:
+    BLOCK (needs the connector). A row the cohort answered is mapped, figure
+    or stated absence. When the cohort answered NO entity at all
+    (R-INTERAC-20261010: the raw-spelling lookup returned zero RB entities)
+    the page is WARNED, naming PEER_COHORT_EMPTY, so the owner sees it before
+    the page ships rather than after."""
+    pages = tuple(p for p in (pages or ()) if p in PEER_PAGES)
+    if not pages:
+        return []
+    from . import prelim
+    rows = [r for r in wb.rows("Peer_Benchmarks") if _clean(r.get("Category_ID"))]
+    if not rows:
+        return [{"gate": "PEER-COHORT", "page": pages[0], "needs_connector": False,
+                 "detail": "Peer_Benchmarks has no category row: no peer figure can be "
+                           "mapped onto the heatmap, overview or platform comparison",
+                 "fix": "PRELIM writes one Peer_Benchmarks row per in-scope category "
+                        "(`engine.prelim peers`); re-run it, then the driver refills "
+                        "every row from get_cohort_benchmarks"}]
+    unmapped = [_clean(r.get("Category_ID")) for r in rows
+                if not prelim.peer_row_is_cohort_sourced(r)
+                and not _clean(r.get("Peer_Basis")).lower().startswith("table")]
+    out = []
+    if unmapped:
+        out += [{"gate": "PEER-COHORT", "page": pg, "needs_connector": True,
+                 "detail": (f"{len(unmapped)} of {len(rows)} categor(ies) carry no peer "
+                            f"figure mapped from the sub-vertical cohort "
+                            f"({', '.join(unmapped[:8])}{' ...' if len(unmapped) > 8 else ''}): "
+                            f"the page would ship with peers excluded"),
+                 "fix": ("run the driver in a session holding the connector: its refill "
+                         "calls get_cohort_benchmarks(sub_vertical) and writes the "
+                         "cohort average (or the cohort's stated reason) on every row; "
+                         "a published peer table is recorded with `engine.prelim "
+                         "peer-median --basis table`")} for pg in pages]
+        return out
+    held = [r for r in rows if not _clean(r.get("Peer_Median"))]
+    if len(held) == len(rows):
+        empty = [g for g in wb.rows("Gate_Log") if _clean(g.get("Gate")) == "PEER_COHORT_EMPTY"]
+        out += [{"gate": "PEER-COHORT", "page": pg, "needs_connector": False,
+                 "severity": "warn",
+                 "detail": ("every category's peer figure is the cohort's stated absence"
+                            + (" and the cohort answered 0 assessed entities "
+                               "(PEER_COHORT_EMPTY)" if empty else "")
+                            + f" — sub-vertical {wb.metadata().get('sub_vertical')!r}"),
+                 "fix": ("if this sub-vertical has promoted assessments the lookup is "
+                         "wrong: check `entities.sub_vertical` resolves to the run's "
+                         "code (cohort._same_subvertical); the refill re-asks on every "
+                         "run")} for pg in pages]
+    return out
+
+
 def tech_peer_blockers(wb) -> list:
     """A register row compared to peers is compared to every locked peer.
 
@@ -332,6 +398,7 @@ def preflight(wb, pages=("techstack",)) -> list:
                     f"(or retire the citation); link every PRELIM and profile row "
                     f"before PAGES, not one page at a time")})
     out += page_floors(wb, pages)
+    out += peer_cohort_blockers(wb, pages)
     if "platform" in pages:
         out += peer_adoption_blockers(wb)
     if "techstack" in pages:

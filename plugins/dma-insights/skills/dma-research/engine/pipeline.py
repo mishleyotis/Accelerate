@@ -4446,7 +4446,8 @@ class Pipeline:
                           f"[{gates}] — not a halt; the details are in Gate_Log "
                           f"(PAGE_PREFLIGHT). ET-07: the producer states unlinked "
                           f"citations on the surface; PEER-ADOPT: peer searches owed "
-                          f"on register rows the page may still drop")
+                          f"on register rows the page may still drop; PEER-COHORT: "
+                          f"the cohort answered no peer figure for any category")
         if not blockers:
             if todo:
                 L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="PASS",
@@ -4461,10 +4462,18 @@ class Pipeline:
                       blocking=True, detail=lines[:900])
         msg = (f"{len(blockers)} page blocker(s) found in the workbook before any page "
                f"agent ran: {lines}")
-        if any(b.get("needs_connector") for b in blockers):
-            raise NeedsConnector(msg + ". These need Clay and Vibe Prospecting; this "
+        need = [b for b in blockers if b.get("needs_connector")]
+        if need:
+            gates = {str(b.get("gate")) for b in need}
+            what = []
+            if gates - {"PEER-COHORT"}:
+                what.append("Clay and Vibe Prospecting")
+            if "PEER-COHORT" in gates:
+                what.append("the DMA connector (get_cohort_benchmarks — the peer "
+                            "average of the sub-vertical's assessed entities)")
+            raise NeedsConnector(msg + f". These need {' and '.join(what)}; this "
                                  "process cannot bind them — resume in a session that "
-                                 "holds both.")
+                                 "holds them.")
         raise StageRefused(msg)
 
     def _ship_pages(self, pages: tuple, version: str, *, produce: bool) -> list[str]:
