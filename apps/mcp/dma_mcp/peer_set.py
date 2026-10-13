@@ -222,6 +222,21 @@ NOT_SEARCHED = re.compile(
     r"\bsearch (?:covered|ran for) [^.;]{0,80}\bonly\b", re.I)
 
 
+def peer_coverage(rows) -> float | None:
+    """THE definition of `peer_coverage` (owner, 2026-10-13: "align to ensure
+    the same is used"): peers DEPLOYED / NAMED peers (one row per named peer),
+    rounded to 2 places — computed only when at least one row is ESTABLISHED
+    (deployed true or false); null when every row is unknown. One formula in
+    three deployables, kept identical by tests/peer_coverage_parity:
+    apps/mcp peer_set.peer_coverage (the gate, AG-04), ship_page's
+    `_peer_coverage` (computed onto every page before it is submitted) and
+    engine techscan.peer_coverage (the workbook's figure)."""
+    rows = [r for r in (rows or []) if isinstance(r, dict)]
+    if not rows or not any(r.get("deployed") is not None for r in rows):
+        return None
+    return round(sum(1 for r in rows if r.get("deployed") is True) / len(rows), 2)
+
+
 def unsearched_register_rows(payload: dict) -> list:
     """AG-04 on the tech register: a register row's peer row whose basis says
     the pair was never searched is research owed, not a null

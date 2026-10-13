@@ -391,20 +391,31 @@ def _check_peer_research(page: str, payload: dict) -> list:
                             "about a named institution is a research finding; "
                             "without a source and a date it is an assertion about "
                             "someone else's estate on a client's dashboard"))
-                if cov is not None and isinstance(rows, list) and rows:
+                if isinstance(rows, list) and rows:
+                    # ONE definition (owner, 2026-10-13): peer_set.peer_coverage
+                    # — deployed / named peers, null when nothing is established.
+                    # ship_page computes it onto every page, so a mismatch here
+                    # means a hand-built payload; the 0.05 grain is the charter's.
+                    from .peer_set import peer_coverage as _pc
+                    want = _pc(rows)
                     yes = sum(1 for r in rows
                               if isinstance(r, dict) and r.get("deployed") is True)
-                    implied = yes / len(rows)
-                    # One peer of tolerance: the producer may legitimately scope
-                    # the share to the established subset. More than that is an
-                    # arithmetic disagreement between a figure and its own basis.
-                    if abs(float(cov) - implied) > (1.0 / len(rows)) + 1e-9:
+                    if want is None and cov is not None:
+                        out.append(_reason(
+                            "AG-04", name, f"{base}.peer_coverage",
+                            f"peer_coverage is {cov} but no peer in the breakdown "
+                            "is established either way; the share is null until "
+                            "one is (a zero would claim the search established an "
+                            "absence)"))
+                    elif want is not None and (
+                            cov is None or abs(float(cov) - want) > 0.05 + 1e-9):
                         out.append(_reason(
                             "AG-04", name, f"{base}.peer_coverage",
                             f"peer_coverage {cov} disagrees with its own breakdown: "
-                            f"{yes} of {len(rows)} rows say deployed, which is "
-                            f"{implied:.3f}. State the share the breakdown supports, "
-                            "or add the rows the share is counting"))
+                            f"{yes} of {len(rows)} named peers deployed is {want}. "
+                            "peer_coverage is deployed / named peers, computed — "
+                            "never typed and never divided by the established "
+                            "subset"))
     return out
 
 

@@ -230,8 +230,9 @@ engine.cli techscan peer-record --ts TS-004 --peer "<name>" \
 institution — the class AG-04 exists to stop. A peer recorded as DEPLOYED
 carries the source that says so; AG-04 refuses the served row without one, so
 a peer claim with no url never reaches the page anyway. `peer_coverage` is
-**computed** — deployed over ESTABLISHED, with the unknowns out of the
-denominator, and null when nothing was established — and is never typed. Run the Clay peer pass over the peers'
+**computed** — deployed ÷ NAMED peers (unknowns in the denominator), null
+when nothing was established — and is never typed (one definition, owner
+2026-10-13; `ship_page` writes it, AG-04 enforces it). Run the Clay peer pass over the peers'
 domains, not the client's: `engine.cli techscan clay-plan` prints it.
 
 `techscan status` reports `rows_with_impact` and `rows_with_peers`. On the

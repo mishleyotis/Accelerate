@@ -62,10 +62,27 @@ MobilePay runs Salesforce, Marketing Cloud, Azure and Kong; The Clearing
 House runs ServiceNow, Dynatrace, Entra ID and Azure; Swish names none);
 platform and techstack re-shipped and re-promoted.
 
-**Open decision, not resolved here:** `peer_coverage` has three definitions —
-the contract text ("the established share"), connector AG-04 (deployed ÷
-all peer rows, one peer of tolerance) and `techscan.peer_state` (deployed ÷
-established). The run serves AG-04's arithmetic, the binding gate.
+**One definition of `peer_coverage`** (owner, 2026-10-13: "Align to ensure
+the same is used and that no redo of such is done"). It had three: the
+contract text ("the established share"), connector AG-04 (deployed ÷ all
+rows, one peer of slack) and `techscan.peer_state` (deployed ÷ established).
+Now: **peers deployed ÷ named peers, rounded to 2 places; null when no peer is
+established either way**.
+- `peer_set.peer_coverage` (connector) is the definition; AG-04 enforces it
+  at the 0.05 grain. The scoped (÷ established) share and a zero over an
+  all-unknown breakdown are refused.
+- `ship_page.assemble` COMPUTES it onto every platform tile and register row
+  from its own `peer_deployments` before submission, so a typed figure never
+  ships and never costs a repair round.
+- `techscan.peer_state` uses the same formula. Three copies, one per
+  deployable, held identical by `tests/skills/test_peer_coverage_parity.py`.
+- The contract text is deliberately unchanged: "the established share" reads
+  as this definition, and `contract_version` hashes `contracts_data.json`,
+  so editing it would stale every page passed under the old hash (a redo).
+  Interac's served figures already equal the formula (0 mismatches), so
+  nothing is re-shipped.
+- The stub SCORING lane records every (platform, locked peer) pair rather than
+  declaring the sheet empty — the CI walks hit the new PEER-ADOPT halt.
 
 Owner, R-INTERAC-20261010: "I see workflows failing and being restarted.
 Please diagnose and fix the above to ensure this never recurs."

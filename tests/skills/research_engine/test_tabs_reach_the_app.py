@@ -221,9 +221,10 @@ def test_a_peer_the_run_could_not_settle_is_null_not_a_negative(tmp_path):
     st = techscan.peer_state(wb, ts)
     assert st["peers_examined"] == 2
     assert st["peers_established"] == 1 and st["peers_unknown"] == 1
-    # 1 of 1 ESTABLISHED, not 1 of 2 examined — the unknown stays out of the
-    # denominator rather than reading as a peer that does not run it
-    assert st["peer_coverage"] == 1.0
+    # ONE definition since 2026-10-13 (owner): deployed / NAMED peers — 1 of
+    # 2 — the same figure AG-04 enforces and ship_page writes; the unknown
+    # peer stays on the card as its own null row, never as a "no"
+    assert st["peer_coverage"] == 0.5
     rows = {r["peer"]: r["deployed"] for r in techscan.peer_rows(wb, ts)}
     assert rows == {"Peer Alpha CU": True, "Peer Beta CU": None}
 
