@@ -282,9 +282,27 @@ platform (a CONFIRMED Tech_Register row — nCino on Salesforce, say), frame
 the solution as extending that org, not standing one up. A third-party
 product the catalogue does not carry (Blend, MeridianLink) is never the
 platform; it is an alternative the card's rebuttal weighs. `engine.assessment
-solution` refuses a platform that names no Zennify solution. Then record and `Platform_Peer_Adoption` filled where a peer's deployment can
-be examined and DECLARED (`engine.cli complete declare`) where it cannot. The
-SCORING gate does not pass with either tab silently empty.
+solution` refuses a platform that names no Zennify solution.
+
+**Then the peer context — you are the agent that owns it.** For EVERY locked
+peer × EVERY `Solution_Catalogue` platform, one `Platform_Peer_Adoption` verdict
+(`engine.assessment peer-adoption`: `Y`/`N` with the source that shows it,
+`UNKNOWN` with what was searched and came back empty, `NA` for an advisory line
+with no vendor deployment); for every locked peer × every register row, one
+`Tech_Peer_Deployments` verdict (`engine.cli techscan peer-record`). "Not
+searched" is refused at the write. `engine.assessment peer-gaps` lists what is
+still owed — finish when it lists nothing. A widened peer set re-opens the
+search (`PEER_ADOPTION_OWED`), the page preflight's PEER-ADOPT refuses the
+platform page while a pair is owed, and the SCORING gate does not pass with
+either tab silently empty; what cannot be examined is DECLARED
+(`engine.cli complete declare`).
+
+**Peer SCORES are not this duty and not yours.** A peer's maturity figure is
+the sub-vertical cohort's average — the mean of the entities the platform has
+already assessed in the client's sub-vertical (`get_cohort_benchmarks`, owner
+decision 2026-10-06), filled by the driver before every rollup and refill.
+Named peers are researched for CONTEXT (who runs which platform), never scored
+one at a time.
 
 ## What you never do
 

@@ -2,6 +2,38 @@
 
 ## 1.27.1 — 2026-10-12 — a research share always funds a whole round, and the Interac run reaches promotion
 
+**Peer scores are the sub-vertical cohort's average again — the lookup had
+been matching the raw spelling** (R-INTERAC-20261010, owner 2026-10-13:
+"ensure that peer parameters are never excluded in any new runs"; "peer scores
+are average and peer context is what is researched"). ROOT CAUSE: the
+heatmap's category peers and the platform gaps' cell peers both come from
+`get_cohort_benchmarks` — the average of the entities already assessed in the
+client's sub-vertical (owner decision 2026-10-06). Its SQL compared
+`lower(e.sub_vertical) = lower('RB')`, while entities store whatever the
+manifest wrote (`"SV1 — Regional Banks"`, `"Retail Banking"` — 61 spellings
+across 120 manifests). Interac (RB) got a cohort of zero entities, all sixteen
+categories were written `cannot_estimate`, every platform gap served
+`peer: null`, and nothing said so. Then, being cohort-sourced, those rows were
+never asked again.
+- `cohort.cohort_benchmarks` / `cell_benchmarks` match on the resolved
+  catalogue code (`_same_subvertical` → `subverticals.resolve_subvertical`);
+  an unresolvable value on either side keeps the literal comparison, an
+  ambiguous one (names two sub-verticals) is not admitted.
+- **Hook, every refill** (`pipeline._cohort_peers`, run before SCORING's
+  rollup, at PAGES preflight and at the B refill): a cohort-sourced ABSENCE
+  is re-asked until the cohort answers; a cohort FIGURE stays final. An empty
+  cohort is logged `PEER_COHORT_EMPTY` (Gate_Log, non-blocking) and printed by
+  the driver, never written silently.
+- **Peer context has a named owner**: the technographic-scanner's SCORING
+  duty (dispatched by `dma-pillar-scoring`) now states it in full — every
+  locked peer × every platform on Platform_Peer_Adoption, every locked peer ×
+  every register row on Tech_Peer_Deployments, finished when
+  `engine.assessment peer-gaps` lists nothing — and that peer SCORES are the
+  cohort's, never scored per peer (no per-peer scoring lane: no added
+  latency).
+Tests: `apps/mcp/tests/test_cohort_benchmarks.py`,
+`tests/skills/research_engine/test_peer_cohort_and_template_numbers.py`.
+
 **ET-07 reads the reason stated on the item that cites the source**
 (R-INTERAC-20261010 PAGES_B, insights on version B). IC-006 cited E-025 — a
 press item recording the predecessor's retirement, linked to no cell — and

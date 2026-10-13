@@ -61,7 +61,7 @@ For EACH row: re-strike it at or below its "to" through python3 -m engine.assess
 Return pillar ${P}, verdict "RESCORED", scored (rows re-struck), moves 0, notes.`
 
 const solutionsPrompt = (file) => `You are the technographic-scanner for DMA run ${A.run}, carrying the SCORING stage's solutions duty. Work from ${A.eng}, foreground commands, long timeouts.
-Your brief is ${file}: read it once and follow its rules exactly. Fill Solution_Catalogue (one row per platform the assessment can argue for, through engine.assessment solution) and Platform_Peer_Adoption (engine.assessment peer-adoption), DECLARING through engine.cli complete declare what cannot be examined. You score nothing and touch no pillar's rows.
+Your brief is ${file}: read it once and follow its rules exactly. Fill Solution_Catalogue (one row per platform the assessment can argue for, through engine.assessment solution) and Platform_Peer_Adoption (engine.assessment peer-adoption) for EVERY locked peer x EVERY platform until engine.assessment peer-gaps lists nothing, DECLARING through engine.cli complete declare what cannot be examined. Peer context only: peer scores are the sub-vertical cohort average the driver fills, never scored per peer. You score nothing and touch no pillar's rows.
 Return pillar ${P}, verdict "SOLUTIONS_DONE" or "BLOCKED" (with the refusal), scored 0, moves 0, notes.`
 
 // THE GOVERNOR (R-INTERAC-20261010: SCORING cost $87.52 against a $25

@@ -3504,6 +3504,9 @@ class Pipeline:
         self.opts.log(f"  [COHORT] {sv}: {len(got['filled'])} categor(ies) from "
                       f"{got.get('entities')} assessed entit(ies); "
                       f"{len(got['cannot_estimate'])} below the floor")
+        if not got["filled"] and not int(got.get("entities") or 0):
+            self.opts.log(f"  [COHORT] WARNING {sv}: the cohort answered NO assessed "
+                          f"entity — every peer figure is null (PEER_COHORT_EMPTY)")
 
     def _scoring_handoff(self) -> dict:
         """Write one scoring-workflow invocation per pillar still owed.

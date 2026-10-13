@@ -124,6 +124,45 @@ def test_the_driver_fills_from_the_connector_and_survives_its_absence(tmp_path):
                for r in run2.open().rows("Peer_Benchmarks"))
 
 
+def test_an_empty_cohort_is_logged_and_re_asked_until_it_answers(tmp_path):
+    """R-INTERAC-20261010 (2026-10-13): the cohort lookup answered zero RB
+    entities (it matched the raw sub-vertical spelling), sixteen
+    `cannot_estimate` rows were written with no line saying so, and — being
+    cohort-sourced — they were never asked again. Peer scores are the
+    cohort's average (owner, 2026-10-06); an empty answer is now logged
+    PEER_COHORT_EMPTY and re-asked on every refill, and the first refill that
+    has the average writes it."""
+    from engine import pipeline as P, pipeline_stub as S
+    run, wb, cells, ev = researched_run(tmp_path)
+    cats = [r["Category_ID"] for r in wb.rows("Peer_Benchmarks") if r.get("Category_ID")]
+    empty = {"sub_vertical": "RB", "entities": 0, "categories": {}}
+    got = prelim.fill_cohort_peers(wb, empty)
+    assert got["cannot_estimate"] == cats and not got["filled"]
+    logged = [r for r in wb.rows("Gate_Log") if r.get("Gate") == "PEER_COHORT_EMPTY"]
+    assert logged and "0 assessed entities" in logged[-1]["Detail"]
+    assert str(logged[-1]["Blocking"]).lower() in ("false", "0")
+    # a cohort-sourced ABSENCE is re-asked; a cohort FIGURE is final
+    rows = wb.rows("Peer_Benchmarks")
+    assert all(prelim.peer_row_wants_cohort(r, has_figure=True) for r in rows if r.get("Category_ID"))
+    calls = []
+
+    class Grown(S.StubReads):
+        def cohort_benchmarks(self, sv, **k):
+            calls.append(sv)
+            return _cohort(cats)
+    opts = P.Options(dispatcher=S.StubDispatcher(S.default_handlers()), reads=Grown(),
+                     shipper=S.StubShipper(), push=False, folder_root=tmp_path / "o",
+                     ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None)
+    P.Pipeline(run, opts)._cohort_peers()
+    assert calls, "a run whose peers are all cannot_estimate must ask the cohort again"
+    after = {r["Category_ID"]: r for r in run.open().rows("Peer_Benchmarks")}
+    assert all(float(after[c]["Peer_Median"]) == 2.37 for c in cats)
+    assert not any(prelim.peer_row_wants_cohort(r, has_figure=True)
+                   for r in after.values())
+    P.Pipeline(run, opts)._cohort_peers()
+    assert len(calls) == 1                           # filled: never re-asked
+
+
 # ── peer metrics are researched on the focus areas only ─────────────────
 
 def test_peer_metric_probes_cover_each_peer_on_each_focus_area_and_nothing_else(tmp_path):
