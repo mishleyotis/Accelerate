@@ -32,6 +32,18 @@ grant roles/cloudscheduler.admin               # the three mandatory Scheduler t
 grant roles/logging.configWriter               # the dmai-usage log sink (web usage lines → BigQuery)
 grant roles/bigquery.user                      # create dmai_usage; the creator owns its dataset IAM
 
+# --- Smoke probes (infra/lib/id_token.sh, used by deploy.sh and the evidence
+# smoke.sh): the deployer mints its own ID token to call private Cloud Run
+# services. Measured 2026-10-11 on the 2019ffb release: under Workload
+# Identity Federation `print-identity-token --audiences` refuses an external
+# account, and impersonating claude-deployer read IAM_PERMISSION_DENIED, so
+# every probe was NOT PROBED. Scoped to this one service account, not the
+# project: it lets the deployer mint ID tokens as itself and nothing else. ---
+gcloud iam service-accounts add-iam-policy-binding "${DEPLOYER#serviceAccount:}" \
+  --project="$PROJECT_ID" --member="$DEPLOYER" \
+  --role=roles/iam.serviceAccountOpenIdTokenCreator --quiet >/dev/null
+echo "granted roles/iam.serviceAccountOpenIdTokenCreator on claude-deployer itself"
+
 # Already granted (verified): run.services/jobs.create, cloudsql.instances/users.create,
 # storage.buckets.create, secretmanager.secrets.create, cloudbuild.builds.create,
 # iam.serviceAccounts.actAs. Artifact Registry repo creation is NOT needed —
