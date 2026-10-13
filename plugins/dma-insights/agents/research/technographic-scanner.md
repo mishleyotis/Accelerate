@@ -299,7 +299,7 @@ either tab silently empty; what cannot be examined is DECLARED
 
 **Peer SCORES are not this duty and not yours.** A peer's maturity figure is
 the sub-vertical cohort's average — the mean of the entities the platform has
-already assessed in the client's sub-vertical (`get_cohort_benchmarks`, owner
+already assessed in the client's sub-vertical (the connector's cohort benchmark read, owner
 decision 2026-10-06), filled by the driver before every rollup and refill.
 Named peers are researched for CONTEXT (who runs which platform), never scored
 one at a time.
