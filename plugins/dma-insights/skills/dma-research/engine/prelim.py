@@ -790,8 +790,27 @@ def widen_peers(wb: RunWorkbook, add: list[str], *, rule: str, owner: str,
                                "Scope": "Handoff_Lock", "Verdict": "PASS",
                                "Blocking": False, "Detail": detail}, save=False)
         wb.save()
+    # Widening re-opens every per-peer search already run against the narrower
+    # set (R-INTERAC-20261010: the adoption search had covered one peer, the
+    # widening added four, and nothing re-opened it — 28 pairs promoted as
+    # "Not searched"). Say so where the driver and the next agent look; the
+    # platform page preflight refuses until the pairs are searched.
+    from .assessment import peer_adoption_gaps, tech_peer_gaps
+    owed = peer_adoption_gaps(wb) + tech_peer_gaps(wb)
+    if owed:
+        added = [p for p in wanted if p not in have]
+        wb.append("Gate_Log", {
+            "Timestamp": _utcnow(), "Gate": "PEER_ADOPTION_OWED",
+            "Scope": "Platform_Peer_Adoption", "Verdict": "FAIL", "Blocking": True,
+            "Detail": (f"{len(owed)} peer search(es) owed (platform adoption and "
+                       f"tech register) after "
+                       f"the peer set was widened (added: {', '.join(added)}). "
+                       f"`engine.assessment peer-gaps` lists them; record each with "
+                       f"`engine.assessment peer-adoption` or `engine.cli techscan "
+                       f"peer-record`.")[:900]})
     return {"was": have, "locked_peer_set": wanted, "peer_n": len(wanted),
-            "categories": len([r for r in rows if _clean(r.get("Category_ID"))])}
+            "categories": len([r for r in rows if _clean(r.get("Category_ID"))]),
+            "adoption_owed": len(owed)}
 
 
 def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
@@ -892,7 +911,14 @@ def peer_row_wants_cohort(row: dict, *, has_figure: bool) -> bool:
     basis = _clean(row.get("Peer_Basis")).lower()
     median = _clean(row.get("Peer_Median"))
     if peer_row_is_cohort_sourced(row):
-        return False
+        # A cohort FIGURE is final for the run; a cohort ABSENCE is not —
+        # the cohort grows as entities are assessed, and a lookup that once
+        # answered nothing may have been wrong. R-INTERAC-20261010
+        # (2026-10-13): the cohort matched the raw sub-vertical spelling,
+        # answered zero RB entities, and the sixteen `cannot_estimate` rows it
+        # wrote were then never re-asked, so peers stayed excluded after the
+        # lookup was fixed.
+        return not median
     if basis.startswith("table"):
         return False
     if not median or basis.startswith("cannot_estimate"):
@@ -943,6 +969,22 @@ def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False)
                             f"get_cohort_benchmarks {today}"),
                     n=n)
         filled.append(cid)
+    if not filled and not int((cohort or {}).get("entities") or 0):
+        # Hook (2026-10-13): an EMPTY cohort is never written silently. Peer
+        # scores are the average of the sub-vertical's assessed entities
+        # (owner, 2026-10-06); zero of them is either a sub-vertical nobody
+        # has assessed yet or a lookup that failed — R-INTERAC-20261010 was
+        # the second, and sixteen null peer figures shipped with no line
+        # anywhere saying so. Recorded for the owner; the figure stays null
+        # (invariant 9) and is re-asked on every refill.
+        wb.append("Gate_Log", {
+            "Timestamp": _utcnow(), "Gate": "PEER_COHORT_EMPTY",
+            "Scope": "Peer_Benchmarks", "Verdict": "WARN", "Blocking": False,
+            "Detail": (f"get_cohort_benchmarks({sv!r}) answered 0 assessed entities; "
+                       f"{len(held)} categor(ies) recorded cannot_estimate. If this "
+                       f"sub-vertical has promoted assessments, the cohort lookup is "
+                       f"wrong — the peer figure is their average and must not be "
+                       f"null. Re-asked on every refill.")[:900]})
     return {"filled": filled, "cannot_estimate": held, "kept": kept,
             "entities": (cohort or {}).get("entities")}
 

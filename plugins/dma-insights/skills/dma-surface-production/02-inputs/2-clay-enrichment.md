@@ -189,9 +189,7 @@ and the moment you state a `peer_coverage` share, three things are required:
 - agreement between the stated share and its own breakdown to within **one peer**
   (`1 / len(rows)`)
 
-So a scan that establishes 2 of 5 peers with 3 unknown is **not 40% coverage**. It is two
-established, three unknown — state that, or state no share. Rows with `deployed: null` count
-in the denominator, so scope the share to what the breakdown supports.
+`peer_coverage` is **computed, never typed**: peers deployed ÷ NAMED peers (the rows, unknowns included), rounded to 2 places; **null** when no peer is established either way. `ship_page` writes it from the rows before every submission and AG-04 refuses any other figure (0.05 grain) — one definition, owner 2026-10-13. Two of five deployed with three unknown is **0.4** over five named peers, and the three `deployed: null` rows on the card say what was not established.
 
 This replaced a card that decided "✓ deployed" beside a NAMED credit union from
 `hashCode(row_id + peerName) % 100`. The claim cannot be manufactured, and a share with

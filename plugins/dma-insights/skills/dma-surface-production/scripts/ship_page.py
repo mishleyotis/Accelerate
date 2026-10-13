@@ -120,7 +120,36 @@ def assemble(sections: Path, page: str) -> dict:
                     if k != key:
                         merged.setdefault(k, v)
         merged[key or "rows"] = rows
+    _fill_peer_coverage(payload)
     return payload
+
+
+def _peer_coverage(rows) -> float | None:
+    """THE definition of `peer_coverage` (owner, 2026-10-13: "align to ensure
+    the same is used"): peers DEPLOYED / NAMED peers (one row per named peer),
+    rounded to 2 places — computed only when at least one row is ESTABLISHED
+    (deployed true or false); null when every row is unknown. One formula in
+    three deployables, kept identical by tests/peer_coverage_parity:
+    apps/mcp peer_set.peer_coverage (the gate, AG-04), ship_page's
+    `_peer_coverage` (computed onto every page before it is submitted) and
+    engine techscan.peer_coverage (the workbook's figure)."""
+    rows = [r for r in (rows or []) if isinstance(r, dict)]
+    if not rows or not any(r.get("deployed") is not None for r in rows):
+        return None
+    return round(sum(1 for r in rows if r.get("deployed") is True) / len(rows), 2)
+
+
+def _fill_peer_coverage(payload: dict) -> None:
+    """`peer_coverage` is computed, never typed (invariant 8): every platform
+    tile and register row that carries `peer_deployments` gets the figure
+    its own rows give, so a producer's arithmetic can never ship and never
+    costs a repair round."""
+    for sec, key in (("platform_story", "platforms"), ("techstack", "items")):
+        body = payload.get(sec)
+        items = body.get(key) if isinstance(body, dict) else None
+        for it in items if isinstance(items, list) else []:
+            if isinstance(it, dict) and isinstance(it.get("peer_deployments"), list):
+                it["peer_coverage"] = _peer_coverage(it["peer_deployments"])
 
 
 # ------------------------------------------------------------------- plan

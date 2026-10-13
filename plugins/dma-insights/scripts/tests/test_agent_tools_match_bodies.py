@@ -67,7 +67,9 @@ ALL = list(manifests())
 
 
 def test_the_roster_is_the_size_the_manifest_promises():
-    assert len(ALL) == 76
+    # 77 since 2026-10-13: + scoring/peer-cohort-mapper (maps the cohort peer
+    # average when the driver could not; scores no peer).
+    assert len(ALL) == 77
 
 
 @pytest.mark.parametrize("path,tools,dis,body", ALL,

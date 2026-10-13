@@ -391,20 +391,31 @@ def _check_peer_research(page: str, payload: dict) -> list:
                             "about a named institution is a research finding; "
                             "without a source and a date it is an assertion about "
                             "someone else's estate on a client's dashboard"))
-                if cov is not None and isinstance(rows, list) and rows:
+                if isinstance(rows, list) and rows:
+                    # ONE definition (owner, 2026-10-13): peer_set.peer_coverage
+                    # — deployed / named peers, null when nothing is established.
+                    # ship_page computes it onto every page, so a mismatch here
+                    # means a hand-built payload; the 0.05 grain is the charter's.
+                    from .peer_set import peer_coverage as _pc
+                    want = _pc(rows)
                     yes = sum(1 for r in rows
                               if isinstance(r, dict) and r.get("deployed") is True)
-                    implied = yes / len(rows)
-                    # One peer of tolerance: the producer may legitimately scope
-                    # the share to the established subset. More than that is an
-                    # arithmetic disagreement between a figure and its own basis.
-                    if abs(float(cov) - implied) > (1.0 / len(rows)) + 1e-9:
+                    if want is None and cov is not None:
+                        out.append(_reason(
+                            "AG-04", name, f"{base}.peer_coverage",
+                            f"peer_coverage is {cov} but no peer in the breakdown "
+                            "is established either way; the share is null until "
+                            "one is (a zero would claim the search established an "
+                            "absence)"))
+                    elif want is not None and (
+                            cov is None or abs(float(cov) - want) > 0.05 + 1e-9):
                         out.append(_reason(
                             "AG-04", name, f"{base}.peer_coverage",
                             f"peer_coverage {cov} disagrees with its own breakdown: "
-                            f"{yes} of {len(rows)} rows say deployed, which is "
-                            f"{implied:.3f}. State the share the breakdown supports, "
-                            "or add the rows the share is counting"))
+                            f"{yes} of {len(rows)} named peers deployed is {want}. "
+                            "peer_coverage is deployed / named peers, computed — "
+                            "never typed and never divided by the established "
+                            "subset"))
     return out
 
 
@@ -726,6 +737,57 @@ def _stated_unlinked(body: dict) -> str:
     return " ".join(p for p in parts if isinstance(p, str))
 
 
+def _r_layer_prose(r_layer) -> list:
+    if not isinstance(r_layer, dict):
+        return []
+    out = []
+    for key in ("probes_run", "domain_test", "counter", "verdict"):
+        val = r_layer.get(key)
+        out.extend(val if isinstance(val, list) else [val])
+    return [p for p in out if isinstance(p, str)]
+
+
+def _cites(node, e_id: str) -> bool:
+    if isinstance(node, str):
+        return node == e_id
+    if isinstance(node, list):
+        return any(_cites(v, e_id) for v in node)
+    if isinstance(node, dict):
+        return any(_cites(v, e_id) for k, v in node.items() if k != "r_layer")
+    return False
+
+
+def _item_stated_unlinked(body, e_id: str) -> str:
+    """The reason an ITEM states for the source it cites, in its own
+    r_layer. Sections whose contract carries reasoning per item rather than
+    per section — insights.cards[] is the measured case — have no
+    section-level r_layer: the envelope does not declare one, so the
+    remediation ET-07 used to give ("say so in this section's
+    r_layer.probes_run") named a field the shape refuses, and the stated
+    reason the producer wrote on the citing card was never read
+    (R-INTERAC-20261010, 2026-10-12, IC-006 / E-025). Only the item that
+    actually CITES the id can excuse it — a reason on another card is a
+    statement about another argument."""
+    parts = []
+
+    def walk(node):
+        if isinstance(node, list):
+            for v in node:
+                walk(v)
+        elif isinstance(node, dict):
+            if isinstance(node.get("r_layer"), dict) and _cites(node, e_id):
+                parts.extend(_r_layer_prose(node["r_layer"]))
+            for k, v in node.items():
+                if k != "r_layer":
+                    walk(v)
+
+    if isinstance(body, dict):
+        for k, v in body.items():
+            if k not in ("r_layer", "empty_state"):
+                walk(v)
+    return " ".join(parts)
+
+
 # A package row re-landed under a run-qualified id after a re-scan changed
 # its content has a TWIN, and one of the two carries the cell links. Which
 # one is not a property of the id shape, and this code used to assume it
@@ -790,6 +852,8 @@ def _check_cited_linkage(page, payload, found, cited_by, conn=None) -> list:
         body = payload.get(section)
         if isinstance(body, dict) and e_id in _stated_unlinked(body):
             continue                        # stated exception, named on the surface
+        if isinstance(body, dict) and e_id in _item_stated_unlinked(body, e_id):
+            continue                        # stated on the item that cites it
         sibling = (_sibling_with_links(conn, row.get("stored_id"))
                    if conn is not None else None)
         if sibling:
@@ -820,9 +884,11 @@ def _check_cited_linkage(page, payload, found, cited_by, conn=None) -> list:
             "repairs: re-register the source with the linked_subcap_ids it "
             "genuinely supports (the catalogue's own cell names decide "
             "which), or, if it supports none because it is a firmographic, "
-            "registry or entity-identity document, say so in this section's "
-            f"r_layer.probes_run naming {e_id} — a reason that renders beats "
-            "a link that is not true"))
+            "registry or entity-identity document, say so naming "
+            f"{e_id} in the r_layer.probes_run of the item that cites it "
+            "(or of the section, where the section carries one), or drop the "
+            "citation where the claim stands on the item's other sources — a "
+            "reason that renders beats a link that is not true"))
     return out
 
 
@@ -4336,11 +4402,25 @@ def _check_technographic_scan(conn, run_id, page, payload) -> list:
     if cited:
         try:
             cur = conn.cursor()
+            # A register cites WORKBOOK-LOCAL ids ('E-031'); the stored row
+            # is the entity-qualified one ('E-INTERACC-031', '-R2' after a
+            # re-scan). Resolve through `evidence_package_ids` — the mapping
+            # get_evidence reads — or a register that cites four Clay and
+            # Vibe Prospecting readings is told it cites none
+            # (R-INTERAC-20261010 techstack B, 2026-10-12: refused twice
+            # with E-031/E-035/E-037/E-040 all origin 'connector').
+            ids = sorted(cited)
             cur.execute(
-                """SELECT count(*) FROM evidence_index
-                    WHERE e_id = ANY(%s) AND origin::text = 'connector'
-                      AND connector_tool ~* '(clay|vibe|explorium)'""",
-                (sorted(cited),))
+                """SELECT count(*) FROM evidence_index e
+                    WHERE e.origin::text = 'connector'
+                      AND e.connector_tool ~* '(clay|vibe|explorium)'
+                      AND (e.e_id = ANY(%s)
+                           OR e.e_id IN (
+                               SELECT m.e_id FROM evidence_package_ids m
+                                 JOIN runs r ON r.entity_id = m.entity_id
+                                WHERE r.id = %s
+                                  AND m.package_local_id = ANY(%s)))""",
+                (ids, run_id, [i.upper() for i in ids]))
             if (cur.fetchone() or [0])[0]:
                 return []
         except Exception:                          # noqa: BLE001

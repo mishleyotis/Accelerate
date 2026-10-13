@@ -308,7 +308,7 @@ Per tile:
   source_url, basis}`. AG-04. A `deployed: true` row carries `source_url` and
   `as_of`; a `deployed: null` row's **basis is the content** — what was searched,
   and why neither a deployment nor its absence can be sourced. `peer_coverage` is
-  the established share — 0.2 where one of five peers was established, and left
+  computed by `ship_page`, never typed: deployed ÷ named peers — 0.2 where one of five peers runs it, and left
   **null** on the tile where none was, never written as zero. Zero would claim
   the search established an absence; null says it established nothing.
 - **`story_md`** — 90–150 words, whole sentences (501 cards shipped head-clipped

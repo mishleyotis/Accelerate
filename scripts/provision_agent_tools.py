@@ -334,6 +334,18 @@ RESEARCH_COLLECTOR = row(
         "spans through the ledger's refusals — and writes no judgement; the "
         "category orchestrator synthesises")
 
+#: THE PEER-COHORT MAPPER (2026-10-13, owner goal: "peer parameters are
+#: never excluded … an agent clearly defined for this within the workflows";
+#: owner, same day: "peer scores are average … rather than scoring peers
+#: separately"). One connector read — the sub-vertical cohort average — and
+#: one engine CLI write. No web, no search, no connector write; dispatched by
+#: the scoring workflow only while a peer figure is unmapped.
+PEER_COHORT_MAPPER = row(
+    core=["Read", "Bash"], reads="floor", reads_extra=["get_cohort_benchmarks"],
+    why="maps the run's peer scores from the sub-vertical cohort average "
+        "(get_cohort_benchmarks) through engine.page_preflight cohort-fill when "
+        "the driver could not; scores no peer and searches nothing")
+
 #: The category ORCHESTRATOR is the judgement half: it reads the collectors'
 #: evidence pack and the floors gate's own terms, writes every synthesis and
 #: declared absence through one batch per capability, and names the gap cells
@@ -518,6 +530,7 @@ ROLES = {
     "research/technographic-scanner": TECHNOGRAPHIC_SCANNER,
     "research/research-evidence-collector": RESEARCH_COLLECTOR,
     "research/research-category-orchestrator": RESEARCH_ORCHESTRATOR,
+    "scoring/peer-cohort-mapper": PEER_COHORT_MAPPER,
     # C3-1: the Sonnet challenge pass over research syntheses. It reads
     # nothing but its brief; `engine.cli fetch` over Bash is its only
     # look-up. Read/Bash/Skill only — it greps nothing and globs nothing.
@@ -717,6 +730,8 @@ MODEL_REASONS.update({
                                              "what is wrong with an evidence row, so no "
                                              "judgement rides on the tier; it never "
                                              "synthesises"),
+    "peer-cohort-mapper": ("haiku", "one connector read and one CLI write whose "
+                                    "refusals hold every rule; it judges nothing"),
     "research-category-orchestrator": ("sonnet", "judges one category's completeness "
                                                  "and writes every synthesis and absence "
                                                  "from the collectors' evidence pack — the "

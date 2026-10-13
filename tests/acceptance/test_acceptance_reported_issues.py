@@ -371,9 +371,13 @@ def test_issue4_the_hooks_name_the_templates_on_every_session():
 # ═══════════════════════════════════════════════════════════════════════════
 
 def test_issue6_the_scoring_tier_exists_and_is_five_agents():
+    """Issue 6's five (four pillar scorers + the independent critic), plus —
+    since 2026-10-13 — the peer-cohort-mapper, which scores nothing: it maps
+    the sub-vertical cohort average onto Peer_Benchmarks when the driver
+    could not. A new entry here is a visible decision, never a drift."""
     d = PLUGIN / "agents" / "scoring"
     got = sorted(p.stem for p in d.glob("*.md"))
-    assert got == ["scoring-critic", "scoring-p1-producer",
+    assert got == ["peer-cohort-mapper", "scoring-critic", "scoring-p1-producer",
                    "scoring-p2-producer", "scoring-p3-producer",
                    "scoring-p4-producer"], got
     manifest = json.loads(

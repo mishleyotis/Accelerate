@@ -63,3 +63,13 @@ def test_a_publisher_name_or_domain_is_a_label_not_prose():
              "cell_evidence.cells[248].synthesis (sim 0.591 < 0.62)"]
     paths = [f.split(" (sim")[0] for f in fails]
     assert P.prose_sg_v4_fails(paths) == ["cell_evidence.cells[248].synthesis"]
+
+
+def test_a_peer_name_on_a_peer_deployment_is_a_label_not_prose():
+    """R-INTERAC-20261010 techstack B (2026-10-12): 8 of 106 counted FAILs
+    were peer names; the basis beside each stays counted as prose."""
+    from engine import pipeline as P
+    fails = [{"path": "techstack.items[3].peer_deployments[1].peer", "similarity": 0.2},
+             {"path": "techstack.items[3].peer_deployments[1].basis", "similarity": 0.3}]
+    assert [w["path"] for w in P.prose_sg_v4_fails(fails)] == [
+        "techstack.items[3].peer_deployments[1].basis"]

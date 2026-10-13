@@ -312,11 +312,20 @@ def lane_solutions(agent, prompt_file, ctx):
     if not [r for r in wb.rows("Solution_Catalogue") if any(r.values())]:
         A.solution(wb, sol_id="SOL-01", name="Digital onboarding and account opening",
                    platform="Financial Services Cloud", categories=[wb.selected_subcaps()[0][:4]])
-    if not [r for r in wb.rows("Platform_Peer_Adoption") if any(r.values())] \
+    # A correct agent searches EVERY (recommended platform, locked peer) pair
+    # and records what came back — the PEER-ADOPT preflight halts the platform
+    # page on any pair it skipped (R-INTERAC-20261010). Declaring the whole
+    # sheet empty is only for a run with no locked peer set.
+    owed = A.peer_adoption_gaps(wb)
+    for g in owed:
+        A.peer_adoption(wb, product=g["product"], peer=g["peer"], verdict="UNKNOWN",
+                        basis=(f"stub search: no source names {g['peer']} as a "
+                               f"customer of {g['product']}"), source="")
+    if not owed and not [r for r in wb.rows("Platform_Peer_Adoption") if any(r.values())] \
             and "Platform_Peer_Adoption" not in completeness.reasons(wb):
         completeness.declare(wb, "Platform_Peer_Adoption",
-                             "no peer institution's deployment of the named products could "
-                             "be examined in this stub run, so no adoption verdict is recorded")
+                             "no peer set is locked in this stub run, so no peer "
+                             "institution's deployment of the named products is owed")
 
 
 def lane_critic(agent, prompt_file, ctx):
