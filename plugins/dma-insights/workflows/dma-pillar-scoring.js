@@ -19,7 +19,14 @@ export const meta = {
 //
 // args (engine.pipeline writes them to <root>/07_qa/scoring_workflow.json):
 //   {pillar, run, root, eng, plugin, briefs: [<scorer brief .md>, ...],
-//    critic_brief: <.md or "">, rounds, solutions_brief: <.md or "">}
+//    critic_brief: <.md or "">, rounds, solutions_brief: <.md or "">,
+//    peer_cohort: {sub_vertical, display_id, entity_name, detail} | absent}
+//
+// `peer_cohort` (2026-10-13, owner goal: "peer parameters are never
+// excluded") rides on the first invocation ONLY while a category's peer
+// figure is unmapped: the peer-cohort-mapper asks get_cohort_benchmarks in
+// session and writes the sub-vertical average. Peers are never scored one at
+// a time; a mapped run starts no such agent.
 //
 // `solutions_brief` rides on ONE invocation (the first pillar's) while the
 // Solution_Catalogue / Platform_Peer_Adoption tabs are still empty: the
@@ -64,6 +71,13 @@ const solutionsPrompt = (file) => `You are the technographic-scanner for DMA run
 Your brief is ${file}: read it once and follow its rules exactly. Fill Solution_Catalogue (one row per platform the assessment can argue for, through engine.assessment solution) and Platform_Peer_Adoption (engine.assessment peer-adoption) for EVERY locked peer x EVERY platform until engine.assessment peer-gaps lists nothing, DECLARING through engine.cli complete declare what cannot be examined. Peer context only: peer scores are the sub-vertical cohort average the driver fills, never scored per peer. You score nothing and touch no pillar's rows.
 Return pillar ${P}, verdict "SOLUTIONS_DONE" or "BLOCKED" (with the refusal), scored 0, moves 0, notes.`
 
+const peerCohortPrompt = (pc) => `You are the peer-cohort-mapper for DMA run ${A.run}. Work from ${A.eng}, foreground commands.
+Peer scores are the AVERAGE of the entities already assessed in the client's sub-vertical — never a named peer scored on its own. The driver could not map them: ${pc.detail}
+1. Call the connector's get_cohort_benchmarks with sub_vertical "${pc.sub_vertical}", exclude_display_id "${pc.display_id}", exclude_entity_name "${pc.entity_name}". Write its answer VERBATIM to a JSON file under ${A.root}/07_qa/.
+2. python3 -m engine.page_preflight cohort-fill ${R} --json <that file>
+3. If it still reports peer_cohort_blockers and the answer had entities 0: do NOT invent a figure and do NOT widen to another sub-vertical. Return verdict "COHORT_EMPTY" with the sub-vertical in notes — only the engagement owner may accept it (engine.page_preflight cohort-accept).
+Return pillar ${P}, verdict "MAPPED" | "COHORT_EMPTY" | "BLOCKED", scored 0, moves 0, notes (categories filled, entities in the cohort).`
+
 // THE GOVERNOR (R-INTERAC-20261010: SCORING cost $87.52 against a $25
 // envelope; this script logged the envelope and checked nothing). The driver
 // prices each pillar from the measured tier prices and hands its share;
@@ -74,7 +88,7 @@ Return pillar ${P}, verdict "SOLUTIONS_DONE" or "BLOCKED" (with the refusal), sc
 // critiques cannot pass the gate. An envelope the owner made non-binding
 // (an explicit --max-usd alone) is reported, not enforced.
 const BUDGET = A.budget || null
-const TIER = Object.assign({ scorer_per_row: 0.095, critic: 2.0, rescore: 0.4, solutions: 0.75 },
+const TIER = Object.assign({ scorer_per_row: 0.095, critic: 2.0, rescore: 0.4, solutions: 0.75, peer_cohort: 0.1 },
   (BUDGET && BUDGET.tier_usd) || {})
 const RATE = (BUDGET && BUDGET.usd_per_runtime_token) || 0
 const ENFORCE = !!(BUDGET && BUDGET.remaining != null && BUDGET.binding !== false)
@@ -101,6 +115,14 @@ if (A.solutions_brief && affordable(TIER.solutions, 'solutions duty')) {
     agentType: 'dma-insights:technographic-scanner',
   })
 }
+let peerCohort = null
+if (A.peer_cohort && affordable(TIER.peer_cohort, 'peer-cohort mapping')) {
+  est += TIER.peer_cohort
+  peerCohort = agent(peerCohortPrompt(A.peer_cohort), {
+    label: 'peer cohort mapping', phase: 'Score', schema: OUT, model: 'haiku',
+    agentType: 'dma-insights:peer-cohort-mapper',
+  })
+}
 const runnable = []
 const unreached = []
 ;(A.briefs || []).forEach((f, i) => {
@@ -117,6 +139,10 @@ if (unreached.length) log(`${P}: ${unreached.length} scorer brief(s) not started
 if (solutions) {
   const sol = await solutions
   log(`solutions duty: ${sol ? sol.verdict : 'agent died'}`)
+}
+if (peerCohort) {
+  const pcv = await peerCohort
+  log(`peer cohort mapping: ${pcv ? `${pcv.verdict} — ${pcv.notes || ''}` : 'agent died'}`)
 }
 if ((A.briefs || []).length && !scored.filter(Boolean).length) {
   return { pillar: P, verdict: 'AGENT_ERROR', notes: 'every scorer agent failed; nothing to critique' }

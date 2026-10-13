@@ -116,6 +116,7 @@
     "./agents/research/research-evidence-collector.md",
     "./agents/research/technographic-scanner.md",
     "./agents/scoring/scoring-critic.md",
+    "./agents/scoring/peer-cohort-mapper.md",
     "./agents/scoring/scoring-p1-producer.md",
     "./agents/scoring/scoring-p2-producer.md",
     "./agents/scoring/scoring-p3-producer.md",

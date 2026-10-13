@@ -231,7 +231,10 @@ RUNTIME_USD_PER_TOKEN = 7.5e-6
 #: checking it. `pipeline._scoring_price` prices a pillar from these;
 #: `dma-pillar-scoring.js` checks each agent against them before it starts.
 SCORING_TIER_USD = {"scorer_per_row": 0.095, "critic": 2.0, "rescore": 0.40,
-                    "solutions": 0.75}
+                    "solutions": 0.75,
+                    # the peer-cohort-mapper (2026-10-13): one connector read
+                    # and one CLI write, haiku — dispatched only when unmapped
+                    "peer_cohort": 0.10}
 
 
 #: LEAN LANES (2026-10-09, agent_run.py `lean_command`): the floor a headless

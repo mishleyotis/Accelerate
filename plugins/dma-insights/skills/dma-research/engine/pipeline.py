@@ -3508,6 +3508,21 @@ class Pipeline:
             self.opts.log(f"  [COHORT] WARNING {sv}: the cohort answered NO assessed "
                           f"entity — every peer figure is null (PEER_COHORT_EMPTY)")
 
+    def _peer_cohort_owed(self) -> dict | None:
+        """What the peer-cohort-mapper is handed, or None when every
+        category's peer figure is mapped (or the owner accepted that none
+        exists)."""
+        from . import page_preflight as PP
+        found = [b for b in PP.peer_cohort_blockers(self.wb, ("heatmap",))
+                 if b.get("severity", "block") != "warn"]
+        if not found:
+            return None
+        md = self._md()
+        return {"sub_vertical": str(md.get("sub_vertical") or ""),
+                "display_id": str(md.get("entity_id") or ""),
+                "entity_name": str(md.get("entity_name") or ""),
+                "detail": found[0]["detail"][:600]}
+
     def _scoring_handoff(self) -> dict:
         """Write one scoring-workflow invocation per pillar still owed.
 
@@ -3595,6 +3610,17 @@ class Pipeline:
             rows = self._lane_rows(sb)
             if rows:
                 inv[0]["solutions_brief"] = rows[0]["prompt_file"]
+        # THE PEER-COHORT DUTY (owner goal, 2026-10-13: "peer parameters are
+        # never excluded"): rides on the first invocation ONLY while a
+        # category's peer figure is unmapped (the driver could not bind the
+        # connector, or the cohort answered nothing). The peer-cohort-mapper
+        # asks get_cohort_benchmarks in session and writes the average through
+        # `engine.page_preflight cohort-fill`. A mapped run hands nothing — no
+        # agent, no latency.
+        if inv:
+            pc = self._peer_cohort_owed()
+            if pc:
+                inv[0]["peer_cohort"] = pc
         doc = {"workflow": str(PLUGIN / SCORING_WORKFLOW), "invocations": inv,
                "estimate": self._scoring_price(inv, env),
                "then": self.plan()["command"],
@@ -3638,7 +3664,8 @@ class Pipeline:
                 brief_usd.append(round(rows * tier["scorer_per_row"], 2))
             i["_brief_usd"] = brief_usd
             need[i["pillar"]] = round(sum(brief_usd) + rounds * (tier["critic"] + tier["rescore"])
-                                      + (tier["solutions"] if i.get("solutions_brief") else 0.0), 2)
+                                      + (tier["solutions"] if i.get("solutions_brief") else 0.0)
+                                      + (tier.get("peer_cohort", 0.10) if i.get("peer_cohort") else 0.0), 2)
         total = round(sum(need.values()), 2)
         remaining = None if not env else env.get("remaining")
         fits = remaining is None or total <= float(remaining) + 1e-9

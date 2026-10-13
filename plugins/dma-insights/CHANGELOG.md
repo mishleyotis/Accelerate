@@ -27,8 +27,18 @@ never asked again.
 - **Hook, page preflight `PEER-COHORT`**: heatmap, overview and platform are
   not spent while any Peer_Benchmarks row was never mapped from the cohort
   (blank, an `inferred` placeholder, a non-cohort figure) — NEEDS_CONNECTOR,
-  naming `get_cohort_benchmarks`; a cohort that answered with no entity at all
-  warns before the page ships.
+  naming `get_cohort_benchmarks`. A cohort that answered with no entity at all
+  STOPS those pages too ("never excluded") until the engagement owner records
+  why no peer average exists: `engine.page_preflight cohort-accept --owner
+  <email> --reason …` (then it warns and the page states the absence).
+- **Agent `scoring/peer-cohort-mapper`** (haiku; `get_cohort_benchmarks` +
+  Bash only): when the driver could not map the peer scores (no connector in
+  its process, or the cohort answered nothing) the scoring handoff puts
+  `peer_cohort` on the first pillar's invocation and `dma-pillar-scoring`
+  starts the mapper, which fetches the cohort average and writes it through
+  `engine.page_preflight cohort-fill` — the driver's own writer. It never
+  scores a peer, types a figure, widens the cohort or accepts an empty one. A
+  mapped run starts no such agent (priced at $0.10 when it does).
 - **Peer context has a named owner**: the technographic-scanner's SCORING
   duty (dispatched by `dma-pillar-scoring`) now states it in full — every
   locked peer × every platform on Platform_Peer_Adoption, every locked peer ×

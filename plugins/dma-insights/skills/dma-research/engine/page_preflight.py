@@ -345,17 +345,66 @@ def peer_cohort_blockers(wb, pages) -> list:
     held = [r for r in rows if not _clean(r.get("Peer_Median"))]
     if len(held) == len(rows):
         empty = [g for g in wb.rows("Gate_Log") if _clean(g.get("Gate")) == "PEER_COHORT_EMPTY"]
-        out += [{"gate": "PEER-COHORT", "page": pg, "needs_connector": False,
-                 "severity": "warn",
-                 "detail": ("every category's peer figure is the cohort's stated absence"
-                            + (" and the cohort answered 0 assessed entities "
-                               "(PEER_COHORT_EMPTY)" if empty else "")
-                            + f" — sub-vertical {wb.metadata().get('sub_vertical')!r}"),
-                 "fix": ("if this sub-vertical has promoted assessments the lookup is "
-                         "wrong: check `entities.sub_vertical` resolves to the run's "
-                         "code (cohort._same_subvertical); the refill re-asks on every "
-                         "run")} for pg in pages]
+        accepted = cohort_empty_accepted(wb)
+        sv = wb.metadata().get("sub_vertical")
+        detail = ("every category's peer figure is the cohort's stated absence"
+                  + (" and the cohort answered 0 assessed entities (PEER_COHORT_EMPTY)"
+                     if empty else "") + f" — sub-vertical {sv!r}")
+        if accepted:
+            out += [{"gate": "PEER-COHORT", "page": pg, "needs_connector": False,
+                     "severity": "warn",
+                     "detail": detail + f"; the owner accepted it: {accepted}",
+                     "fix": "none owed — the page states the absence and its reason"}
+                    for pg in pages]
+        else:
+            # "Never excluded" (owner goal, 2026-10-13): a page with no peer
+            # figure at all ships only on an owner's recorded decision.
+            out += [{"gate": "PEER-COHORT", "page": pg, "needs_connector": False,
+                     "detail": detail + ": the page would ship with peers excluded",
+                     "fix": ("if this sub-vertical has promoted assessments the lookup is "
+                             "wrong — check `entities.sub_vertical` resolves to the run's "
+                             "code (cohort._same_subvertical) and re-run the refill "
+                             "(the peer-cohort-mapper does it in session). If nobody in "
+                             "the sub-vertical has been assessed yet, the OWNER records "
+                             "that: `engine.page_preflight cohort-accept --run R --owner "
+                             "<email> --reason '<why no peer average exists>'`")}
+                    for pg in pages]
     return out
+
+
+ACCEPT_GATE = "PEER_COHORT_EMPTY_ACCEPTED"
+
+
+def cohort_empty_accepted(wb) -> str:
+    """The owner's recorded acceptance that no peer average exists for this
+    run's sub-vertical (nobody in it assessed yet) — '' when none."""
+    rows = [g for g in wb.rows("Gate_Log") if _clean(g.get("Gate")) == ACCEPT_GATE]
+    return _clean(rows[-1].get("Detail")) if rows else ""
+
+
+def accept_cohort_empty(wb, *, owner: str, reason: str) -> dict:
+    owner, reason = _clean(owner), _clean(reason)
+    if "@" not in owner:
+        raise ValueError("--owner is the engagement owner's email: excluding peers is "
+                         "their decision, recorded against their name")
+    if len(reason) < 40:
+        raise ValueError("--reason says why no peer average exists (>=40 chars)")
+    from . import ledger as L
+    L.append_gate(wb, gate=ACCEPT_GATE, scope="Peer_Benchmarks", verdict="PASS",
+                  blocking=False, detail=f"{owner}: {reason}"[:900])
+    return {"accepted_by": owner}
+
+
+def fill_cohort(wb, cohort: dict) -> dict:
+    """Write a `get_cohort_benchmarks` answer the in-session agent fetched
+    (the driver could not bind the connector) — the same writer the driver's
+    refill uses, so the figure, its basis and PEER_COHORT_EMPTY are identical
+    whoever asked."""
+    from . import prelim
+    if not isinstance(cohort, dict) or cohort.get("error") or "categories" not in cohort:
+        raise ValueError("not a get_cohort_benchmarks answer (needs `categories`; an "
+                         "`error` answer is not a cohort)")
+    return prelim.fill_cohort_peers(wb, cohort)
 
 
 def tech_peer_blockers(wb) -> list:
@@ -461,18 +510,38 @@ def main(argv=None) -> int:
     from . import runstate
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("check", "not-run"):
+    for name in ("check", "not-run", "cohort-fill", "cohort-accept"):
         p = sub.add_parser(name)
         p.add_argument("--run", required=True)
         p.add_argument("--root")
         if name == "check":
             p.add_argument("--page", action="append")
-        else:
+        elif name == "not-run":
             p.add_argument("--tool", required=True)
+            p.add_argument("--reason", required=True)
+        elif name == "cohort-fill":
+            p.add_argument("--json", required=True,
+                           help="file holding the get_cohort_benchmarks answer")
+        else:
+            p.add_argument("--owner", required=True)
             p.add_argument("--reason", required=True)
     a = ap.parse_args(argv)
     run = runstate.locate(a.run, a.root)
     wb = run.open()
+    if a.cmd in ("cohort-fill", "cohort-accept"):
+        try:
+            if a.cmd == "cohort-fill":
+                from pathlib import Path
+                got = fill_cohort(wb, json.loads(Path(a.json).read_text()))
+            else:
+                got = accept_cohort_empty(wb, owner=a.owner, reason=a.reason)
+        except ValueError as e:
+            print(f"REFUSED: {e}", file=sys.stderr)
+            return 2
+        left = [b for b in peer_cohort_blockers(run.open(), PEER_PAGES)
+                if b.get("severity", "block") != "warn"]
+        print(json.dumps({**got, "peer_cohort_blockers": left}, indent=2, default=str))
+        return 1 if left else 0
     if a.cmd == "not-run":
         print(json.dumps({"seq": declare_not_run(wb, tool=a.tool, reason=a.reason)}))
         return 0
