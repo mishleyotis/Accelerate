@@ -35,14 +35,14 @@ def _declare(wb, cell, *, hunted, proxy_log, tool="exa", fire=True, **kw):
 
 
 PER_CELL = {
-    "P1C1.1.1": ("a published digital strategy document — a named strategy page, an "
+    "P1C1.1.1": ("a published Acme Credit Union digital strategy document — a named strategy page, an "
                  "investor letter section or a board paper — on the site, in the "
                  "annual report and in the trade press; the searches returned only "
                  "vendor pages",
                  "hunted the leadership_title proxy class — a chief digital officer "
                  "or head of digital named anywhere; the leadership page lists "
                  "a CFO and a COO and nobody with a digital remit"),
-    "P1C1.1.2": ("a business-alignment artefact — a strategy map tying digital "
+    "P1C1.1.2": ("an Acme Credit Union business-alignment artefact — a strategy map tying digital "
                  "initiatives to lending or deposit targets — in the annual "
                  "report and investor materials; the report carries only a "
                  "mission statement",
