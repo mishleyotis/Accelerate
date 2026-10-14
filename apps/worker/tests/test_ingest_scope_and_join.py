@@ -41,11 +41,19 @@ def _engine_workbook(tmp_path, *, n=6, synthesise=2):
                      "at 52 percent in the 2025 annual report."),
             subcaps=[cell], published="2025-03-01") for i in range(3)]
         # A facet is answered only by a search that ran (the ledger refuses
-        # an answered DQ field with no Search_Log row behind it, 2026-10-11).
+        # an answered DQ field with no Search_Log row behind it, 2026-10-11),
+        # and every owed volley fires before a synthesis is written — the two
+        # this one answers NOT_RUN ran and came back empty (AAA WCNY,
+        # 2026-10-14: the write refuses volleys_incomplete).
         for facet in ("works", "value", "corroborates"):
             L.append_search(wb, subcap=cell, facet=facet,
                             query=f'"Acme Credit Union" {cell} {facet} digital banking',
                             tool="searxng", hits=3, kept=1, outcome="kept 1")
+        for facet, q in (("fails", "delayed OR descoped OR outage"),
+                         ("contradicts", "enforcement OR lawsuit OR criticism")):
+            L.append_search(wb, subcap=cell, facet=facet,
+                            query=f'"Acme Credit Union" {cell} digital banking {q}',
+                            tool="searxng", hits=0, kept=0, outcome="no hits")
         L.append_synthesis(wb, cell, {
             "Dominant_Claim": (
                 "Acme Credit Union runs member-facing digital banking on "

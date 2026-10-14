@@ -1073,12 +1073,19 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
     # envelopes read.
     paths = [(f, "workflow") for f in base.glob("*/*/subagents/workflows/wf_*/agent-*.jsonl")]
     paths += [(f, "agent") for f in base.glob("*/*/subagents/agent-*.jsonl")]
+    # THE RUN IS NAMED BY ITS ID OR ITS ROOT (AAA WCNY, 2026-10-14). A
+    # conductor without the Workflow tool wrote each rendered prompt to a
+    # brief under the run root and dispatched "Your complete brief is the file
+    # <root>/briefs/research_agents/P2C2_challenge.md": 41 agents, $28.04,
+    # none of it booked, because the prompt named the root and not the id.
+    # The root is as unique to the run as its id, so a prompt that points
+    # into it belongs to it.
+    marks = [m for m in (run.run_id, str(getattr(run, "root", "") or "")) if m]
     for f, via in sorted(paths, key=lambda p: str(p[0])):
         text = f.read_text(errors="replace")
-        if run.run_id not in text:
+        if not any(m in text for m in marks):
             continue
-        prompt = _first_prompt(text)
-        if via == "agent" and run.run_id not in prompt and str(run.root) not in prompt:
+        if via == "agent" and not any(m in _first_prompt(text) for m in marks):
             # an in-session agent belongs to the run when its PROMPT names it
             # — by run id, or by a brief under the run's own root (the
             # rendered `agent_prompts` are worked as "your brief is the file

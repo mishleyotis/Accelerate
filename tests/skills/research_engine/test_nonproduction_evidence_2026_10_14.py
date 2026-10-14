@@ -40,7 +40,7 @@ def test_nonproduction_host_reads_only_a_subdomain_label(url, bad):
 
 def test_the_write_refuses_a_staging_host(tmp_path):
     run, wb, cell = _cell(tmp_path)
-    with pytest.raises(L.LedgerRefusal, match="pre-production"):
+    with pytest.raises(L.LedgerRefusal, match="non-production host"):
         L.append_evidence(wb, source_name="Club refer-a-friend (test site)",
                           source_url="https://test.example-club.com/refer",
                           tier="T5", excerpt=SPAN, subcaps=[cell], origin="public")

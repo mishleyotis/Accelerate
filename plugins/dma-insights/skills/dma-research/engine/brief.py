@@ -1747,6 +1747,10 @@ def _challenge_cell(wb: RunWorkbook, r: dict, sub: str, register: dict) -> dict:
         # claim_label_fit and ceiling_reasoning judge the band the
         # synthesis stated; the reasoning text alone does not carry it.
         "ceiling_band": _clean(r.get("Ceiling_Band")),
+        # claim_label_fit for a CEILING_ESTIMATE is judged on its ± range,
+        # which lives in Uncertainty, not in the band word (AAA WCNY
+        # 2026-10-14: P2C3.6.4 failed for a range the packet never showed).
+        "uncertainty": _clean(r.get("Uncertainty")),
         # Evidence_Detail.Recency is what ledger.append_evidence writes.
         "recency_bands": sorted({_clean(x.get("Recency")) for x in rows
                                  if _clean(x.get("Recency"))}),

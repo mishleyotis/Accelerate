@@ -15,6 +15,40 @@
   new set is retired (counted in the Gate_Log row), so the platform page
   never argues from a ruled-out peer. Re-asserting the locked set only
   prunes such rows. Tests: `test_replace_peers_2026_10_14.py`.
+- **AAA Western and Central New York: 13 of 16 categories failed round 1
+  on 75 cells; seven root causes now refused at the write**
+  (`docs/AAA-WCNY-ROOT-CAUSES-2026-10-14.md`). Owner, 2026-10-14: "look into
+  why the categories seem to be failing … enforcing solutions that would
+  ensure these never recur."
+  - **The evidence engine searched for a domain that does not exist**
+    (`apps/evidence-engine/evidence_engine/tools.py`): `lstrip("www.")`
+    stripped the characters, so `westerncentralnyaaa.com` became
+    `esterncentralnyaaa.com` — every `site:` probe missed and the club's own
+    pages stopped matching as its own. Prefix-only now; any domain starting
+    with w was exposed. Needs the evidence service redeployed.
+  - **A declared absence the gate fails as boilerplate is refused by
+    `declare_absence`** (13 cells): the writer composes `What_We_Found` from
+    `--hunted` and now runs the gate's own predicates over it.
+  - **The orchestrator sheet's absence command matches the ledger**
+    (`workflows/dma-pillar-research.js`): it carried `--validation-question`
+    without `--inferable` (11 refusals of the sheet's own line) and told
+    evidenced cells to route a bounding negative through `absence` (22
+    refusals). A test scans every prompt surface for half the pair.
+  - **No synthesis over an owed volley nobody fired** (`ledger.append_synthesis`):
+    the gate blocks `volleys_incomplete` and the challenger fails
+    `facet_coverage`, so 10 cells paid two challenges for one search; the
+    write now names the gap for the pre-challenge repair wave.
+  - **A CEILING_ESTIMATE carries its ± `Uncertainty`**, the challenge packet
+    shows it and the challenger reads it (P2C3.6.4 failed for a range it
+    could not see).
+  - **The register refuses test/staging hosts and dates a page once**
+    (`ledger.append_evidence`): a `test.` site's "$15 gift card" and one URL
+    banded CURRENT and UNVERIFIED both failed challenges.
+  - **In-session agents briefed from a file under the run root are booked**
+    (`cost.capture_workflows`): 41 agents, $28.04, had named the root, not
+    the run id.
+  Tests: `test_aaa_wcny_root_causes_2026_10_14.py`,
+  `apps/evidence-engine/tests/test_entity_domains_2026_10_14.py`.
 
 - **Six blockers from the AAA Western and Central New York run, each closed
   at its root** (owner, 2026-10-14: "Check on what is the root cause of the
@@ -82,7 +116,8 @@
     `engine/pipeline.py`): FA rows name their cells and cite their evidence,
     but nothing linked the two, so PAGES_A refused three pages on ET-07 after
     the reports were done. The driver's page prep now runs
-    `profile.link_focus_evidence` before any page lane — after scoring, never
+    `profile.link_focus_evidence` (focus areas, and timeline events that
+    name their cells) before any page lane — after scoring, never
     at the PRELIM write, where it would put evidence on research cells nobody
     had researched yet.
   - **A version-A page citing post-checkpoint evidence halted the run**

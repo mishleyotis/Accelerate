@@ -261,6 +261,16 @@ def link_focus_evidence(wb: RunWorkbook) -> list:
         eids = [e.strip() for e in str(r.get("Evidence_IDs") or "").split(",") if e.strip()]
         for d in _link_evidence(wb, eids, cells):
             done.append({"focus": _clean(r.get("ID")), **d})
+    # Timeline events that name their cells, the same way (AAA WCNY PAGES_B:
+    # the acquisition events' E-011/E-012 were cited by why-now and the
+    # executive summary and named no cell — ET-07 on three pages).
+    for r in wb.rows("Entity_Timeline"):
+        cells = [c.strip() for c in str(r.get("SubCap_IDs") or "").split(",") if c.strip()]
+        eids = [e.strip() for e in str(r.get("Evidence_IDs") or "").split(",") if e.strip()]
+        if not cells:
+            continue
+        for d in _link_evidence(wb, eids, cells):
+            done.append({"timeline": _clean(r.get("Title"))[:60], **d})
     return done
 
 

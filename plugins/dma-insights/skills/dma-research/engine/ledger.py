@@ -91,6 +91,58 @@ def host_of(url: str | None) -> str:
     return str(url or "").split("//")[-1].split("/")[0].lower().removeprefix("www.")
 
 
+_NONPROD_LABEL = re.compile(
+    r"^(?:test|tests|testing|staging|stage|stg|dev|develop|development|uat|qa|"
+    r"sandbox|preview|demo|beta-test)[0-9-]*$")
+
+
+def nonproduction_host(url: str | None) -> bool:
+    """A host whose sub-domain label marks it test, staging, dev, uat, qa,
+    sandbox, preview or demo. Only labels LEFT of the registrable domain
+    count, so `dev.to` (a registrable domain) is not one; `test.example.com`
+    and `www.staging.example.co.uk` are."""
+    h = host_of(url)
+    labels = h.split(".")
+    if len(labels) < 3:
+        return False
+    sub = labels[:-3] if len(labels[-1]) == 2 and labels[-2] in (
+        "co", "com", "org", "net", "gov", "ac") else labels[:-2]
+    return any(_NONPROD_LABEL.match(x) for x in sub)
+
+
+def _one_date_per_page(wb: RunWorkbook, source_url: str | None,
+                       published: str | None) -> tuple[str | None, list]:
+    """One page, one publication date, one recency band (AAA WCNY,
+    2026-10-14: a phishing-warning post was CURRENT as E-109 and UNVERIFIED
+    as E-134/E-135, and the challenger failed P2C1.5.6 on the contradiction).
+
+    -> (the date this row carries, [(E_ID, Fact_ID)] of the page's undated
+    rows the caller re-dates). An omitted date inherits the page's; a stated
+    date that differs from one already registered for the page is refused;
+    a stated date on a page whose earlier rows were undated dates them too."""
+    url = str(source_url or "").strip()
+    if not url:
+        return published, []
+    same = [r for r in wb.rows("Evidence_Detail")
+            if r.get("E_ID") and str(r.get("Source_URL") or "").strip() == url]
+    dated = sorted({str(r.get("Date_Published") or "").strip()[:10] for r in same
+                    if str(r.get("Date_Published") or "").strip()})
+    mine = str(published or "").strip()
+    if not mine:
+        return (dated[0] if len(dated) == 1 else published), []
+    if dated and mine[:10] not in dated:
+        held = ", ".join(sorted({str(r["E_ID"]) for r in same
+                                 if str(r.get("Date_Published") or "").strip()}))
+        raise LedgerRefusal(
+            f"{url} is already registered dated {', '.join(dated)} ({held}); a "
+            f"page has one publication date. Register this span with that date "
+            f"(or omit --published and it is inherited); if the earlier date is "
+            f"wrong, say so to the conductor rather than banding one page twice")
+    undated = [(str(r["E_ID"]), str(r.get("Fact_ID") or "F1")) for r in same
+               if not str(r.get("Date_Published") or "").strip()]
+    return published, undated
+
+
 def is_own_host(wb: RunWorkbook, url: str | None) -> bool:
     h = host_of(url)
     return bool(h) and any(h == o or h.endswith("." + o) for o in own_hosts(wb))
@@ -413,11 +465,18 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
             "connector record's URL, or the page or domain the reading reports "
             "on (a web-crawl technographic reading cites the crawled site), "
             "and name the tool and retrieval date in --source-name")
-    if nonproduction_host(source_url):
+    # A NON-PRODUCTION HOST IS NOT THE ENTITY SPEAKING (AAA WCNY, 2026-10-14).
+    # P2C1.8.5 rested a "$15 gift card" referral reward on
+    # test.westerncentralnyaaa.com; the live site offers a $10 tour discount.
+    # A test, staging or preview host carries copy nobody published, so no
+    # span on it is citable — refused here, where the collector can still
+    # fetch the live page instead.
+    if origin == "public" and nonproduction_host(source_url):
         raise LedgerRefusal(
-            f"{nonproduction_host(source_url)} is a pre-production copy of a "
-            f"site (test/staging/dev); it is not the institution's statement and "
-            f"never citable. Cite the live page, or record nothing")
+            f"{host_of(source_url)} is a non-production host (test, staging, "
+            f"dev, uat, qa, sandbox, preview, demo): its copy was never "
+            f"published. Cite the live page that states the same thing, or "
+            f"nothing")
     # AN INTAKE DOCUMENT IS CITED BY ITS SOURCE OF RECORD, NOT ITS CACHE.
     # Measured 2026-10-11 (R-INTERAC-20261010): 46 internal rows carried the
     # local `01_intake/` path (38 bare, 8 file://) though the intake manifest
@@ -495,6 +554,7 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
             got = None
         if got and got != _dt.date.today().isoformat():
             published = got
+    published, _redate = _one_date_per_page(wb, source_url, published)
     _refuse_retrieval_date_as_published(wb, published, text, source_url)
     if not intake_checked:
         access_status = _verified_access_status(
@@ -558,6 +618,19 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
             "Anchor_Quote": anchor_quote or text, "Retrieved_At": _utcnow(),
             "Origin": origin, "Access_Status": access_status, "Conflict": conflict,
         })
+        for _e, _f in _redate:
+            wb.update_row_where(
+                "Evidence_Detail", {"E_ID": _e, "Fact_ID": _f},
+                {"Date_Published": published,
+                 "Recency": recency_band(published, wb)}, save=False)
+        if _redate:
+            wb.append("Provenance", {
+                "SubCap_ID": "", "Step": "page_dated", "Actor": "ledger",
+                "At": _utcnow(),
+                "Detail": (f"{eid} dates {source_url} {published}; the same page's "
+                           f"undated rows {sorted({e for e, _ in _redate})} now "
+                           f"carry it — one page, one date, one recency band")},
+                save=False)
         for cell in cells:
             row = wb.scoring_row(cell) or {}
             have = [i for i in _split_ids(row.get("Evidence_IDs"))
@@ -701,22 +774,7 @@ DETACH_STEP = "detach"
 #: client view would have carried a test page. A staging copy is never the
 #: institution's statement: it is refused at the write, and `retire_
 #: nonproduction_evidence` removes one registered before this rule.
-NONPRODUCTION_HOST_LABELS = frozenset({"test", "staging", "stage", "stg", "dev", "qa",
-                                       "uat", "sandbox", "preview"})
 RETIRE_STEP = "retire_nonproduction"
-
-
-def nonproduction_host(url: str | None) -> str | None:
-    """The host when `url` is on a pre-production subdomain, else None. Only a
-    SUBDOMAIN label counts (test.example.com), never a registrable domain
-    (dev.to)."""
-    from urllib.parse import urlparse
-    u = str(url or "").strip()
-    if not u:
-        return None
-    host = (urlparse(u if "//" in u else "//" + u).hostname or "").lower()
-    labels = host.split(".")
-    return host if len(labels) >= 3 and labels[0] in NONPRODUCTION_HOST_LABELS else None
 
 
 def retire_nonproduction_evidence(wb: RunWorkbook, *, why: str, actor: str | None = None,
@@ -783,7 +841,7 @@ def retire_nonproduction_evidence(wb: RunWorkbook, *, why: str, actor: str | Non
             wb.append("Provenance", {
                 "SubCap_ID": "", "Step": RETIRE_STEP,
                 "Actor": str(actor or "unattributed").strip(), "At": _utcnow(),
-                "Detail": f"retired {eid} ({nonproduction_host(url)}): {why}"[:900],
+                "Detail": f"retired {eid} ({host_of(url)}): {why}"[:900],
                 "Session": _agent_session()}, save=False)
         wb.append("Gate_Log", {"Timestamp": _utcnow(), "Gate": "EVIDENCE_RETIRED",
                                "Scope": "Evidence_Detail", "Verdict": "PASS",
@@ -833,7 +891,7 @@ def repoint_evidence(wb: RunWorkbook, eid: str, url: str, *, why: str,
             f"{eid} is on {old or 'no URL'}, not a pre-production host; repoint "
             f"moves a test/staging copy to its production page and nothing else")
     if nonproduction_host(url):
-        raise LedgerRefusal(f"{url} is itself pre-production ({nonproduction_host(url)})")
+        raise LedgerRefusal(f"{url} is itself pre-production ({host_of(url)})")
     if not _site(url) or _site(url) != _site(old):
         raise LedgerRefusal(
             f"{url} is not the same site as {old}: a different site is a "
@@ -892,7 +950,7 @@ def repoint_evidence(wb: RunWorkbook, eid: str, url: str, *, why: str,
         wb.append("Gate_Log", {"Timestamp": _utcnow(), "Gate": "EVIDENCE_REPOINTED",
                                "Scope": "Evidence_Detail", "Verdict": "PASS",
                                "Blocking": False,
-                               "Detail": f"{eid} moved off {nonproduction_host(old)} to "
+                               "Detail": f"{eid} moved off {host_of(old)} to "
                                          f"{url}; {why}"[:900]}, save=False)
         wb._dirty = True
     return {"e_id": eid, "from": old, "to": url, "cells": cells}
@@ -1788,6 +1846,22 @@ def label_fit_problems(wb: RunWorkbook, subcap: str, merged: dict,
             f"the challenger refuses it as claim_label_fit and the gate as "
             f"single_source_fact — register a second independent source, or label "
             f"the claim INFERENCE and name the step")
+    if label == "CEILING_ESTIMATE":
+        # The SKILL's table: CEILING_ESTIMATE = ids + THE UNCERTAINTY. Nothing
+        # required it, and Ceiling_Band only holds a band word, so the
+        # challenger FAILed claim_label_fit for "no +/- range" on a row that
+        # could not show one (AAA WCNY 2026-10-14, P2C3.6.4 — and the writer's
+        # first fix, Ceiling_Band '2.0 (±0.5)', was refused as off-vocabulary).
+        try:
+            u = float(str(merged.get("Uncertainty") or "").strip().lstrip("±+"))
+        except ValueError:
+            u = None
+        if u is None or not (0 < u <= 2):
+            out.append(
+                "CEILING_ESTIMATE states no uncertainty: set \"Uncertainty\" to "
+                "the ± half-width of the estimate (a number, e.g. 0.5) — the "
+                "label is the ceiling AND its range, and the challenger fails "
+                "claim_label_fit without it. Ceiling_Band stays a band word")
     if label == "INFERENCE":
         if len(row_eids) < 2 and not absence:
             out.append(
@@ -1975,6 +2049,23 @@ def append_synthesis(wb: RunWorkbook, subcap: str, record: dict,
         why = Q.accusatory(v, impact_field=field in Q.IMPACT_FIELDS)
         if why:
             problems.append(f"{field}: {why}")
+    # EVERY OWED VOLLEY FIRES BEFORE A SYNTHESIS IS PAID A CHALLENGE (AAA
+    # WCNY, 2026-10-14). The floors gate blocks `volleys_incomplete` on every
+    # cell and the challenger FAILs facet_coverage on an owed facet nobody
+    # searched — so a synthesis written over a missing volley was certain to
+    # come back: P1C1 (5 cells), P3C4 (3) and P4C4 (2) each paid a challenge,
+    # a repair collector, a second synthesis and a second challenge for a
+    # search the collector could have run the first time. Refused here, the
+    # orchestrator names the cell as a gap and the gap wave fires the facet
+    # BEFORE the challenge is bought.
+    vs = volley_status(wb, subcap)
+    if vs["missing"]:
+        problems.append(
+            f"volleys_incomplete: no logged search on {subcap} for "
+            f"{', '.join(vs['missing'])} — the gate blocks the cell and the "
+            f"challenger fails facet_coverage. Report it as a gap "
+            f"(\"{subcap}: volleys_incomplete — {', '.join(vs['missing'])}\") "
+            f"so the repair wave fires them, then synthesise")
     if problems:
         raise LedgerRefusal(
             f"{subcap}: synthesis refused — " + "; ".join(problems))
@@ -2511,6 +2602,27 @@ def declare_absence(wb: RunWorkbook, subcap: str, *, actor: str,
         "Ceiling_Band": "", "Uncertainty": 1.0,
         **dq,
     }
+    # THE GATE READS WHAT THIS WRITES (AAA WCNY, 2026-10-14). A declared
+    # absence carries a Dominant_Claim, so `floors_gate` runs its boilerplate
+    # checks over the fields composed above — and `What_We_Found` is built
+    # from --hunted. 13 cells across P2C2, P2C3, P3C1 and P4C2 were accepted
+    # here and then failed the gate as `boilerplate` ("names no figure, date,
+    # proper noun or cited id"), costing each category a repair round. The
+    # same predicates refuse here, while the writer can still name the club,
+    # a domain, a date or an E-id in --hunted.
+    for field in SYNTHESIS_REQUIRED:
+        why = Q.is_boilerplate(payload.get(field))
+        if why:
+            raise LedgerRefusal(
+                f"{subcap}: absence refused — {field} would read as boilerplate "
+                f"({why}); the floors gate fails it. Rewrite --hunted")
+    why = Q.is_fluent_but_empty(payload["What_We_Found"])
+    if why:
+        raise LedgerRefusal(
+            f"{subcap}: absence refused — What_We_Found is built from --hunted "
+            f"and {why}; the floors gate fails it as boilerplate. Name the "
+            f"entity in its own words, the site or domain searched, a date or "
+            f"the E-id of the nearest thing that came back")
     wb.set_scoring(subcap, payload)
     record_provenance(wb, subcap, "absence", actor,
                       f"{n} searches, rungs {sorted(rungs)}"
