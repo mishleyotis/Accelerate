@@ -34,6 +34,39 @@ Abstention is the accuracy feature: an assignment made under a thin margin
 is exactly the assignment that used to be wrong. Below --min-margin the
 answer is AMBIGUOUS with the contenders listed, and the producer (or a
 human) decides — fail closed, like everything else in this system.
+
+WHAT IT IS NOT WIRED INTO, AND THE NUMBER THAT DECIDED THAT (2026-09-13).
+It was proposed as a proposer inside the write path: capability-grain
+discovery returns one corpus, and something has to say which sibling cell
+each find grounds. So it was measured, against the only labelled data that
+exists — the Golden 1 reference workbook's own 723 excerpt-to-cell
+assignments, made by a real run.
+
+    candidates          corpus        top-1   says MATCH   right when it does
+    whole catalogue     catalogue     10.9%          337                16.9%
+    the category (~58)  catalogue     22.1%          448                27.2%
+    the capability (~7) catalogue     31.5%          407                49.9%
+    the capability (~7) the run's DQ  47.0%          480                57.7%
+
+    (picking at random inside the capability scores 17.7%)
+
+Restricting to the capability and feeding it the run's own DQ_Bank rather
+than the catalogue's ~100-character name line is the best it does, and
+raising --min-margin does not rescue it: precision plateaus at ~73% with
+coverage down to 26%, so no threshold makes a MATCH trustworthy.
+
+A WRONG CELL ASSIGNMENT PASSES EVERY GATE THIS SYSTEM HAS. `evidence_smear`
+and `single_source_fact` measure how evidence is DISTRIBUTED, not whether it
+is on the right cell; a bidirectional citation records what was asserted,
+not whether it was true. So a proposer that is wrong two times in five when
+it is confident would inject exactly the defect class nothing downstream can
+see. It is therefore a READ tool — for a human, an audit, or a producer
+weighing its own call — and no engine module imports it. A test pins that.
+
+To change this, change the number first: fill the feedback ledger, or give
+it a corpus that discriminates between siblings of one capability (which the
+catalogue's name line does not, because siblings are near-synonyms by
+construction). Then re-run the measurement and move the bar.
 """
 from __future__ import annotations
 
@@ -80,6 +113,45 @@ def load_catalogue(path: str) -> list:
     if not out:
         raise SystemExit("catalogue file yielded no cells — pass the JSON "
                          "get_capability_catalogue returned")
+    return out
+
+
+def catalogue_from_contract(scope=None) -> list:
+    """The catalogue in `rank`'s shape, from the repo's own pinned catalogue.
+
+    `load_catalogue` reads the JSON `get_capability_catalogue` returns, which
+    a container without the connector does not have — so the module was
+    unrunnable exactly where it was proposed to run. This builds the same
+    shape from `contract`: the cell's name, the proxy class the template
+    names for it, and the internal artefact that would settle it. Every
+    string is catalogue text; nothing here is invented.
+
+    `scope` narrows to an iterable of cell ids. Pass one: measured against
+    the Golden 1 reference, ranking over all 851 cells is right 10.9% of the
+    time and ranking inside the cell's capability 31.5% (see the module
+    docstring). A ranker asked a question it cannot answer will still answer.
+    """
+    from pathlib import Path as _P
+    import sys as _sys
+    _sys.path.insert(0, str(PLUGIN / "skills" / "dma-research"))
+    from engine import contract as C                          # noqa: PLC0415
+    names = C.subcap_names()
+    proxy = C.proxy_classes()
+    raw = json.loads(_P(C.names_path()).read_text(encoding="utf-8"))
+    artefact = raw.get("internal_artefact_that_settles_it") or {}
+    ids = sorted(scope) if scope is not None else sorted(names)
+    out = []
+    for cid in ids:
+        if cid not in names:
+            continue
+        out.append({
+            "cell_id": cid,
+            "doc": " ".join(x for x in (names.get(cid, ""),
+                                        proxy.get(cid, "").replace("_", " "),
+                                        artefact.get(cid, "")) if x),
+            "name": names.get(cid, "")})
+    if not out:
+        raise SystemExit("no cells in scope — pass ids the catalogue carries")
     return out
 
 
@@ -180,8 +252,15 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     p_rank = sub.add_parser("rank", help="rank subcaps for an excerpt")
-    p_rank.add_argument("--catalogue", required=True,
-                        help="JSON from get_capability_catalogue")
+    p_rank.add_argument("--catalogue",
+                        help="JSON from get_capability_catalogue. Omit to "
+                             "build the corpus from the repo's pinned "
+                             "catalogue instead (no connector needed)")
+    p_rank.add_argument("--capability",
+                        help="rank only inside this capability (e.g. P1C1.1). "
+                             "Measured: ranking over all 851 cells is right "
+                             "10.9%% of the time, inside the capability 31.5%% "
+                             "— see the module docstring before trusting either")
     p_rank.add_argument("--excerpt", required=True)
     p_rank.add_argument("--top", type=int, default=5)
     p_rank.add_argument("--min-margin", type=float, default=0.05)
@@ -197,8 +276,22 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
 
     if a.cmd == "rank":
-        ranked = rank(a.excerpt, load_catalogue(a.catalogue),
-                      load_feedback(), a.top)
+        if a.catalogue:
+            cat = load_catalogue(a.catalogue)
+            if a.capability:
+                cat = [c for c in cat
+                       if c["cell_id"].startswith(a.capability + ".")]
+        else:
+            scope = None
+            if a.capability:
+                from pathlib import Path as _P
+                import sys as _sys
+                _sys.path.insert(0, str(PLUGIN / "skills" / "dma-research"))
+                from engine import contract as _C               # noqa: PLC0415
+                scope = [c for c in _C.subcap_names()
+                         if c.startswith(a.capability + ".")]
+            cat = catalogue_from_contract(scope)
+        ranked = rank(a.excerpt, cat, load_feedback(), a.top)
         print(json.dumps(decide(ranked, a.min_margin), indent=1))
         return 0
     if a.cmd == "learn":

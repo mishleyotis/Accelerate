@@ -1,6 +1,6 @@
 # The MCP connector
 
-33 tools in six groups. Read tools are free, idempotent and side-effect free. Write
+34 tools in six groups. Read tools are free, idempotent and side-effect free. Write
 tools are the only path into anything the product serves. Input schemas live
 server-side in `apps/mcp` (the `server.py` signatures, validated in `dma_mcp/*`) —
 this document is the map, not the schema; the connector's own refusals are the
@@ -18,6 +18,7 @@ contract's enforcement.
 | `get_page_contract` | The payload contract for one page: field tuples plus per-field `doc` text, and the `transport` envelope (byte limits, chunking steps). |
 | `get_evidence` | Resolve e_ids to full rows. Returns `found / not_found / foreign` separately; `foreign` halts production. |
 | `get_platform_fit` | The fit score for each candidate platform, computed server-side and read by you — never recomputed, never re-ranked. |
+| `get_cohort_benchmarks` | The sub-vertical cohort's peer figure — per category by default, per CELL with `subcap_ids=[…]` (up to 500). The figure a finding, an opportunity cell or a gap row cites as its peer; null with the reason below three entities; the asking client excluded by `exclude_display_id`. |
 | `get_run_progress` | Per-page status, what is blocking promotion, and the current claim — where a resuming session sees where it left off. |
 | `get_staged_payload` | What you last submitted for a page — staged, verbatim, unredacted. The read half of submit; makes the one-section repair possible across sessions. |
 
@@ -303,3 +304,9 @@ naming the gate, the JSON path and the arithmetic. Everything else returns a str
 | Withdrawing deletes nothing; re-promoting restores | That there is a restore tool — the way back is passing the gates again |
 | Memory writes touch no serving content and cannot break a submit | That "changed" closes a finding — `record_refinement` then `resolve_finding`, deliberately two steps |
 | The contract cannot drift from the validator | That a remembered field shape is still current |
+
+## The evidence engine (a separate server, 2026-10-10)
+
+Six tools under the plugin server `evidence` (`docs/EVIDENCE-ENGINE-TOOLS.md`) return
+evidence CARDS, never serving content; a card's `item` is the `register_evidence`
+argument verbatim. The write-lock is unchanged.

@@ -11,92 +11,78 @@ These checks CANNOT be automated — they require semantic understanding.
 ## PV-01: Proof Structure Completeness
 
 ### Purpose
-Verify every subcap rationale contains all 5 proof elements.
+Verify every scored subcap's proof is complete, in the columns the engine's contract
+holds (rewritten 29-09-2026, QA audit F-L11-042 pair 35: this check used to read
+columns R, S and T of a 22-column layout the engine replaced, and `GOV-FORMAT-01`
+recorded the contradiction; the contract's columns are canonical and the contradiction
+is retired).
 
 ### Step 0 — do the inputs exist at all?
 
-Count the rows carrying a non-empty Column S or T, and check whether
-`reasoning_chain_log.json` exists. **If the answer is zero rows and no
-file, stop: do not report PV-01 as 0%.**
+Count the scored rows whose `Rationale` is non-empty, and check whether
+`07_qa/scoring.json` (the scoring packet `engine.assessment gate` writes) exists. **If
+the answer is zero rows or no packet, stop: do not report PV-01 as 0%.** The scoring
+stage did not run through the engine; the verdict is FAIL naming the missing input.
 
-Zero is not a measurement of proof quality — it is a measurement of a
-FORMAT CONTRADICTION between two skills in this plugin. `dma-assessment`
-declares the 11-column layout canonical and states "Do NOT use the legacy
-22-column (A-V) layout"; this check audits columns R, S and T, which
-exist only in that layout. Emit `GOV-FORMAT-01` at CRITICAL, name both
-skills and the columns, and set the verdict to FAIL.
+This step exists because of what happened without it: one promoted assessment scored
+0 of 709 rows against a layout that no longer existed, the verdict recorded it under
+`schema_drift_accepted`, returned PASS_WITH_NOTES, and the run reached a regulated
+dealer's dashboard telling it that its trade surveillance was Differentiating on the
+strength of a subsidiary's officer list.
 
-This happened, and the cost is the reason for this step: one promoted
-assessment scored 0 of 709 rows, the verdict recorded it under
-`schema_drift_accepted`, returned PASS_WITH_NOTES, and the run reached a
-regulated dealer's dashboard telling it that its trade surveillance was
-Differentiating on the strength of a subsidiary's officer list.
-
-Where the columns ARE present, continue below.
+Where the inputs ARE present, continue below.
 
 ### Evaluation Procedure
 
-For each subcap rationale, check across THREE data sources:
-- **Column R** (Scoring_Rationale): Human-readable narrative
-- **Column S** (Proof_Claims): Structured claim set (C1/C2/C3 format)
-- **Column T** (Proof_Links): JSON proof structure for programmatic validation
-- **reasoning_chain_log.json**: Machine-readable decision trail (Contract 8)
+For each scored subcap, check across the contract's columns and the packet:
+- **`Rationale`**: the scorer's six-heading argument — `[EVIDENCE]`, `[MATURITY MATCH]`,
+  `[GAP TO NEXT]`, `[COUNTER]`, `[CEILING]`, `[SO WHAT]`
+- **`Evidence_IDs`**: the rows the argument cites
+- **`Challenge_Verdict`**: the independent challenge recorded before scoring
+- **`Caps_Applied`**: the arithmetic string `engine.assessment score` wrote
+  (raw, adjustments, ceiling, caps, quarter-point, final)
+- **`07_qa/scoring.json`**: the same row, machine-readable
 
 Check for these 5 elements:
 
-| Element | Detection Strategy — Column R | Cross-Validation — Columns S/T + Reasoning Chain |
-|---------|-------------------------------|---------------------------------------------------|
-| Claims (C1–C3) | Look for "C1:", "C2:", "C3:" tags or 3+ distinct factual assertions | Column S must have structured C1/C2/C3 entries. Column T JSON `claims[]` array length must match. |
-| Evidence Links | Look for "E-NNN" or "E-NNN:FN" patterns | Column T JSON `claims[].evidence` arrays populated. All IDs must exist in evidence_index.csv. |
-| Rule Links | Look for "RULE_" prefix or rule name citations | Column T JSON `claims[].rule` populated. reasoning_chain `m_level_match.descriptor` populated. |
-| Counterclaim | Look for "counterargument", "however", "opposing", "rebuttal" | Column T JSON `counterclaim.text` populated (not generic filler). reasoning_chain `contradictions` array present. |
-| Constraints | Look for "ceiling", "cap", "dependency", "tier", "verified" | Column T JSON `constraints[]` array populated. reasoning_chain `ceiling_calc` and `caps_applied` populated. |
+| Element | Detection — `Rationale` | Cross-validation |
+|---------|-------------------------|------------------|
+| Claims | `[EVIDENCE]` states 3+ distinct factual assertions, each with an `E-xxx` | every cited id is in `Evidence_IDs` and resolves in `Evidence_Detail` |
+| Evidence links | `E-xxx` / `E-xxx:Fy` patterns | `Evidence_IDs` non-empty; the packet's row cites the same ids |
+| Rule link | `[MATURITY MATCH]` names the rubric descriptor the score matches | the level named is the rubric's for that score (`${CLAUDE_PLUGIN_ROOT}/skills/dma-research/engine/rubric.py`) |
+| Counterclaim | `[COUNTER]` states a specific opposing reading and its rebuttal | `Challenge_Verdict` present; a generic dismissal is a FAIL |
+| Constraints | `[CEILING]` names the evidence ceiling and the caps | `Caps_Applied` carries the arithmetic; the packet's final equals the workbook's |
 
-**Cross-validation rule**: If Column R claims PASS but Column T JSON is missing or
-inconsistent, log as MEDIUM issue — the narrative looks right but the machine-readable
-proof is incomplete, reducing auditability.
+**Cross-validation rule**: if `Rationale` reads complete but `Caps_Applied` or the packet
+disagrees with the workbook's score, log as MEDIUM — the narrative looks right but the
+machine-readable proof is inconsistent, reducing auditability.
 
 ### Chain-of-Thought Template
 
 ```
-SUBCAP: [P1C1S01]
+SUBCAP: [P1C1.1.1]
 Score: [3.5]
 
-CLAIMS CHECK:
-  C1 found (Col R): [yes/no] — "[claim text or 'missing']"
-  C2 found (Col R): [yes/no] — "[claim text or 'missing']"
-  C3 found (Col R): [yes/no] — "[claim text or 'missing']"
-  Col S structured claims match: [yes/no/missing]
-  Col T JSON claims[] count: [N] — matches Col R: [yes/no]
+CLAIMS CHECK ([EVIDENCE]):
+  distinct claims found: [N] — each with an E-id: [yes/no]
+  every cited id in Evidence_IDs and resolving: [yes/no]
   Verdict: [PASS/FAIL]
 
-EVIDENCE LINKS CHECK:
-  Links found (Col R): [E-001:F2, E-015:F1, ...]
-  All claims linked: [yes/no]
-  Col T JSON evidence arrays populated: [yes/no]
-  Links exist in evidence_index: [yes/no — cross-reference]
-  reasoning_chain evidence_considered matches: [yes/no]
+RULE LINK CHECK ([MATURITY MATCH]):
+  descriptor named: [yes/no] — "[text or 'missing']"
+  matches the rubric level for the score: [yes/no]
   Verdict: [PASS/FAIL]
 
-RULE LINKS CHECK:
-  Rules cited (Col R): [RULE_M3_CAPABILITY_ADVANCEMENT, ...]
-  Rules exist in framework: [yes/no]
-  Col T JSON claims[].rule populated: [yes/no]
-  reasoning_chain m_level_match present: [yes/no]
-  Rules correctly applied: [yes/no — explain]
+COUNTERCLAIM CHECK ([COUNTER]):
+  specific opposing reading: [yes/no] — "[text or 'missing']"
+  rebuttal cites evidence: [yes/no]
+  Challenge_Verdict present: [yes/no]
   Verdict: [PASS/FAIL]
 
-COUNTERCLAIM CHECK:
-  Counter identified (Col R): [yes/no] — "[counter text or 'missing']"
-  Counter is specific (not generic): [yes/no]
-  Col T JSON counterclaim.text populated: [yes/no]
-  Rebuttal provided: [yes/no] — "[rebuttal text or 'missing']"
-  Rebuttal cites evidence: [yes/no]
-  Verdict: [PASS/FAIL]
-
-CONSTRAINTS CHECK:
-  Applicable caps/dependencies: [list from Pass 1 results]
-  Acknowledged in rationale: [yes/no]
+CONSTRAINTS CHECK ([CEILING] / Caps_Applied):
+  ceiling and caps named: [yes/no]
+  Caps_Applied arithmetic ends at the workbook's score: [yes/no]
+  packet row agrees: [yes/no]
   Verdict: [PASS/FAIL]
 
 OVERALL: [PASS / PARTIAL (N of 5) / FAIL]
@@ -105,42 +91,40 @@ Missing elements: [list]
 
 ### Few-Shot Examples
 
-**PASS example** (all 5 elements present):
+**PASS example** (all elements present):
 ```
-P2C3S04 — Digital Account Opening: Score 3.5
+P2C2.1.1 — Digital account opening: score 3.5
 
-C1: Institution launched digital account opening in Q2 2023 with 68% completion rate (E-045:F3).
-C2: Mobile app rating improved from 3.2 to 4.1 over 18 months (E-012:F1, E-067:F2).
-C3: Digital channel now handles 42% of new account applications vs. 15% two years prior (E-045:F7).
-
-Applied RULE_M3_CAPABILITY_ADVANCEMENT: Score of M3.5 reflects measurable adoption
-beyond initial deployment (>30% channel share) with sustained quality improvement.
-
-Counterargument: Completion rate of 68% suggests 32% abandonment, possibly indicating
-UX friction that limits true maturity. However, industry average completion rate for
-comparable institutions is 55% (E-089:F2), placing this institution above median.
-
-Constraints: Evidence ceiling T3→4.0 (not binding at 3.5). No cross-pillar dependency
-triggered (P1C2 = 3.4 > 2.5 threshold). Single-source limitation does not apply (3 sources).
+[EVIDENCE] E-045 (T2, annual report 2024): digital account opening launched Q2 2023, 68 %
+completion. E-012, E-067 (T3, app stores): rating 3.2 → 4.1 over 18 months. E-045: the
+digital channel handles 42 % of new applications vs 15 % two years prior.
+[MATURITY MATCH] M3 "measurable adoption beyond deployment (>30 % channel share) with
+sustained quality improvement".
+[GAP TO NEXT] M4 needs a stated funnel target and a closed-loop fix cycle; neither is
+evidenced.
+[COUNTER] 68 % completion means 32 % abandonment — possible UX friction. Peer completion
+for comparable institutions is 55 % (E-089), so above median; the counter lowers
+confidence, not the level.
+[CEILING] T2/T3 evidence: ceiling 4.0, not binding; no cap; raw 3.5 − 0 = 3.5.
+[SO WHAT] For <entity>, the next quarter's decision is the funnel target, not the channel.
+Caps_Applied: raw 3.5; adjusted 3.5; ceiling 4.0; final 3.5 (Competing)
 ```
 
-**FAIL example** (missing Rule Links + weak Counterclaim):
+**FAIL example** (missing rule link, generic counter):
 ```
-P3C1S02 — Data Governance Framework: Score 3.0
+P4C1.1.2 — Data governance framework: score 3.0
 
-The institution has a documented data governance framework that covers key data domains.
-Evidence shows policy documents are in place (E-033) and a data steward network exists
-(E-034). The framework appears to be at a developing-to-defined stage.
-
-No significant counterarguments identified.
+The institution has a documented data governance framework covering key domains.
+Policy documents are in place (E-033) and a data steward network exists (E-034). The
+framework appears developing-to-defined. No significant counterarguments identified.
 
 ANALYSIS:
-- Claims: PARTIAL — assertions present but not tagged C1/C2/C3
-- Evidence Links: PASS — E-033, E-034 cited
-- Rule Links: FAIL — no RULE_ reference
+- Claims: PARTIAL — assertions present, one without an id
+- Evidence links: PASS — E-033, E-034 cited and resolving
+- Rule link: FAIL — no [MATURITY MATCH]; no rubric descriptor
 - Counterclaim: FAIL — generic dismissal, no specific counter or rebuttal
-- Constraints: FAIL — no cap/dependency acknowledgment
-VERDICT: FAIL (2 of 5 elements complete)
+- Constraints: FAIL — no [CEILING]; Caps_Applied blank
+VERDICT: FAIL (1 of 5 elements complete)
 ```
 
 ### Scoring Rubric
@@ -421,4 +405,4 @@ After completing all Pass 2 checks, update `qa_verdict.json` with:
 }
 ```
 
-Replace the `PENDING_LLM_PASS2` placeholders with actual results.
+Replace the `NOT_RUN` placeholders with actual results.

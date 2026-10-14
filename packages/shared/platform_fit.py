@@ -562,7 +562,8 @@ def _fusion_runs(rows) -> list:
     """
     runs, cur = [], []
     for r in rows:
-        if cur and (cur[0]["fit_score"] - r["fit_score"]) > FUSION_BAND:
+        if cur and ((cur[0]["fit_score"] - r["fit_score"]) > FUSION_BAND
+                    or _state_tier(cur[0]) != _state_tier(r)):
             runs.append(cur)
             cur = []
         cur.append(r)
@@ -577,6 +578,16 @@ def _fused_order(rows) -> list:
     for run in _fusion_runs(rows):
         out.extend(sorted(run, key=lambda r: (-r["rrf_score"], _tie_key(r))))
     return out
+
+
+#: A card the evidence cannot support (INSUFFICIENT_EVIDENCE) keeps its fit
+#: on the row but ranks after every card that is not in that state. Only
+#: evidence tiers: TOO_NARROW and OUT_OF_VERTICAL are already handled by the
+#: cell-count discard and the relevance cap. Measured 2026-10-07, Arbor Bank: MuleSoft at evidence strength 0.0
+#: across all 85 cells ranked first above READY Financial Services Cloud,
+#: and the owner reported an integration platform ranking first on every run.
+def _state_tier(row: dict) -> int:
+    return 1 if row.get("state") == STATE_INSUFFICIENT else 0
 
 
 def _tie_key(row: dict) -> tuple:
@@ -604,6 +615,19 @@ def _sequence(rows) -> list:
     """
     remaining = list(rows)
     names = {r["platform"] for r in remaining}
+    # A prerequisite in a weaker evidence state than its dependent does not
+    # reorder it. Every card naming the integration layer as its prerequisite
+    # pulled an unevidenced MuleSoft card to the top of every run (Arbor Bank,
+    # 2026-10-07); the dependency is still printed on the row, and disclosed.
+    tier = {r["platform"]: _state_tier(r) for r in remaining}
+    for r in remaining:
+        held = [d for d in (r.get("depends_on") or ())
+                if d in names and tier[d] > _state_tier(r)]
+        if held:
+            r["sequence_note"] = (
+                "names " + ", ".join(held) + " as a prerequisite, which the "
+                "evidence supports less well than this card (a weaker state), "
+                "so it does not move ahead of it")
     out, placed = [], set()
     while remaining:
         # THE BEST AVAILABLE CARD, not the first one the scan reaches. A
@@ -613,7 +637,8 @@ def _sequence(rows) -> list:
         # first emittable entry IS the highest-fit emittable one.
         progressed = False
         for r in list(remaining):
-            need = {d for d in (r.get("depends_on") or ()) if d in names}
+            need = {d for d in (r.get("depends_on") or ())
+                    if d in names and tier[d] <= _state_tier(r)}
             if need <= placed:
                 out.append(r)
                 placed.add(r["platform"])
@@ -642,7 +667,8 @@ def rank(candidates, all_gap_cells=None) -> list:
     sequencing reorders only to satisfy a declared prerequisite, and both say
     on the row when they moved it.
     """
-    scored = sorted((score(c, all_gap_cells) for c in candidates), key=_tie_key)
+    scored = sorted((score(c, all_gap_cells) for c in candidates),
+                    key=lambda r: (_state_tier(r), _tie_key(r)))
     depends = {str(c.platform): tuple(getattr(c, "depends_on", ()) or ())
                for c in candidates}
     for r in scored:
@@ -651,6 +677,9 @@ def rank(candidates, all_gap_cells=None) -> list:
 
     fuse(scored)
     scored = _fused_order(scored)
+    # Fusion reorders near-ties by fit alone, so it could lift an unevidenced
+    # card back over a READY one inside the band; the tier is re-asserted.
+    scored = sorted(scored, key=_state_tier)
     fit_order = [r["platform"] for r in scored]     # what sequencing sees
     rows = _sequence(scored)
 
@@ -681,11 +710,31 @@ def rank(candidates, all_gap_cells=None) -> list:
                 f"within the {FUSION_BAND:g}-point near-tie band. Placings: "
                 f"{placing}. Fusion only reorders cards the fit does not "
                 f"separate by more than {FUSION_BAND:g} points.")
+        # A card can move without depending on anything: it is pulled up as a
+        # prerequisite, or it is displaced when a card above it is held back.
+        # Name which — "another card waits on it" was asserted for every
+        # moved card, true or not (Shield, SWBC 2026-10-05, MEM-0564).
+        waiting = [r["platform"] for r in rows
+                   if row["platform"] in (r.get("depends_on") or ())]
+        mine = fit_order.index(row["platform"])
+        held = [r["platform"] for r in rows[i:]
+                if r.get("depends_on")
+                and fit_order.index(r["platform"]) < mine]
+        pulled = [r["platform"] for r in rows[:i - 1]
+                  if fit_order.index(r["platform"]) > mine]
         row["rank_basis"] = (
             "fit" if not moved and fused_to == fused_from else
             "sequenced: it is held behind " + ", ".join(row["depends_on"])
             if moved and row["depends_on"] else
-            "sequenced: another card on this page waits on it" if moved else
+            "sequenced: " + ", ".join(waiting) + " waits on it"
+            if moved and waiting else
+            "sequenced: moved up while " + ", ".join(held) +
+            " is held behind its prerequisite"
+            if moved and held else
+            "sequenced: moved down so " + ", ".join(pulled) +
+            " can precede the card that needs it"
+            if moved and pulled else
+            "sequenced: moved by the prerequisite repair" if moved else
             f"rank fusion within the {FUSION_BAND:g}-point near-tie band")
         row["fit_basis"] = (
             "Computed by the shared platform-fit engine: 100 x ({terms})"

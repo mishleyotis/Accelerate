@@ -68,11 +68,11 @@ Read this file during Phase 8, before any deliverable is shared. Run EVERY check
 
 ### Section E.2: Checkpoint Integrity
 
-- [ ] All checkpoint files present in `/home/claude/dma_checkpoints/`
-- [ ] Scores in `04_scores.json` match workbook scores
-- [ ] Peer benchmarks in `02_peer_benchmarks.json` match all benchmark references
-- [ ] Priority scores in `05_priorities.json` match Section 8 of report
-- [ ] No stale checkpoint data carried forward after a score revision
+- [ ] `engine.assessment gate` recorded PASS (the `Gate_Log` SCORING row) and `07_qa/scoring.json` carries every scored row with its arithmetic
+- [ ] `engine.cli validate` passes on the run's one workbook — no second copy of any figure exists to disagree with it
+- [ ] Every benchmark figure in the report resolves to a `Peer_Benchmarks` row
+- [ ] Every priority and recommendation in the report resolves to a `Recommendations` row
+- [ ] No figure carried into the report after a score revision: `engine.cli narrative preconditions` re-checks the SCORING gate on every write
 
 ### Section F: Narrative Quality
 

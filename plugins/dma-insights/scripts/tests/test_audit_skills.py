@@ -93,17 +93,75 @@ def test_the_pinned_ceiling_is_not_slack():
 # ── the resolver: no false positives, and no free pass either ──
 
 
-def test_a_plugin_level_script_reference_resolves():
-    """`scripts/agent_run.py` in a skill doc means the plugin's scripts/,
-    which is where it is. Reported broken for as long as the audit existed."""
+def test_a_bare_plugin_level_script_reference_is_ambiguous_and_reported(tmp_path):
+    """QA audit F-B04-027 (28-09-2026) counted twelve paths in the skill docs
+    that resolve only somewhere other than where the reader stands: a bare
+    `scripts/x.py` written in a skill whose own scripts/ does not hold it.
+    The audit used to resolve those at the plugin root and call them fine;
+    now it reports them, and `${CLAUDE_PLUGIN_ROOT}/scripts/x.py` — the same
+    file, named unambiguously — resolves. The control has the file where the
+    plugin root would hold it, so only the resolver decides."""
+    plugin = tmp_path / "plugin"
+    (plugin / "scripts").mkdir(parents=True)
+    (plugin / "scripts" / "agent_run.py").write_text("print('hi')\n")
+    skill = plugin / "skills" / "some-skill"
+    skill.mkdir(parents=True)
+    (skill / "SKILL.md").write_text(
+        "Run `scripts/agent_run.py`, or rather "
+        "`${CLAUDE_PLUGIN_ROOT}/scripts/agent_run.py`.\n")
+    r, out = _run(str(plugin / "skills"), "--max-broken", "0")
+    refs = [b["ref"] for b in out["broken_refs"]]
+    assert "scripts/agent_run.py" in refs, refs
+    assert "${CLAUDE_PLUGIN_ROOT}/scripts/agent_run.py" not in refs, refs
+    assert r.returncode == 1
+
+
+def test_the_shipped_skill_docs_carry_no_bare_plugin_level_reference():
+    """The twelve of F-B04-027 were qualified; the real audit must not report
+    the four that this test used to assert resolved at the plugin root."""
     _, out = audit()
-    dead = {(b["file"], b["ref"]) for b in out["broken_refs"]}
+    dead = {b["ref"] for b in out["broken_refs"]}
     for ref in ("scripts/agent_run.py", "scripts/client_memory.py",
                 "scripts/source_yield.py", "scripts/subcap_match.py"):
-        assert not any(r == ref for _, r in dead), f"{ref} still reported dead"
-    assert (SKILLS.parent / "scripts" / "agent_run.py").exists(), (
-        "the premise moved: agent_run.py is no longer at the plugin root, so "
-        "this test is asserting against a file that does not exist")
+        assert ref not in dead, f"{ref} is still written bare somewhere"
+    assert (SKILLS.parent / "scripts" / "agent_run.py").exists()
+
+
+def test_a_skill_file_over_the_line_ceiling_is_refused(tmp_path):
+    """F-B04-027: four of six SKILL.md were 766–915 lines. The ceiling is
+    500; 501 lines is refused with the file named, 500 passes."""
+    for n, rc in ((501, 1), (500, 0)):
+        skill = tmp_path / f"p{n}" / "skills" / "long-skill"
+        skill.mkdir(parents=True)
+        (skill / "SKILL.md").write_text("line\n" * n)
+        r, out = _run(str(tmp_path / f"p{n}" / "skills"), "--max-broken", "0")
+        assert out["skill_lines"] == {"long-skill": n}
+        assert out["skill_lines_ceiling"] == 500
+        assert r.returncode == rc, (n, r.stderr)
+        if rc:
+            assert out["oversized"] == {"long-skill": 501}
+            assert "over 500 lines" in r.stderr and "long-skill (501)" in r.stderr
+
+
+def test_the_shipped_skill_files_are_all_under_the_ceiling():
+    _, out = audit()
+    assert out["oversized"] == {}, out["oversized"]
+    assert set(out["skill_lines"]) >= {"dma-assessment", "dma-research",
+                                       "dma-surface-production", "dma-first-call-deck"}
+
+
+def test_a_retired_writer_named_live_in_a_reference_file_is_reported(tmp_path):
+    """The procedure moved from SKILL.md into references/ (F-B04-027), so a
+    retired writer named as live there routes an agent exactly as it did in
+    SKILL.md. The scan covers every .md under the skill."""
+    skill = tmp_path / "skills" / "ref-skill"
+    (skill / "references").mkdir(parents=True)
+    (skill / "SKILL.md").write_text("Read `references/how.md`.\n")
+    (skill / "references" / "how.md").write_text(
+        "Then run populate_workbook.py to fill the sheet.\n")
+    r, out = _run(str(tmp_path / "skills"), "--max-broken", "0")
+    assert r.returncode == 1
+    assert [x["path"] for x in out["retired_writer_refs"]] == ["ref-skill/references/how.md"]
 
 
 def test_a_sibling_rulebook_reference_resolves_from_inside_the_section():
@@ -278,6 +336,7 @@ def test_the_ceiling_flag_is_documented_in_the_usage():
     r = subprocess.run([sys.executable, str(SCRIPT), "--help"],
                        capture_output=True, text=True)
     assert "--max-broken" in r.stdout, r.stdout
+    assert "--max-lines" in r.stdout, r.stdout
 
 
 def test_bad_path_still_refuses_with_the_same_message():

@@ -1,0 +1,347 @@
+# Domain -> source-type registry for US / CA / UK financial-services evidence.
+#
+# WHY. The card's `tier` is a HINT the registry produces from the source's
+# identity (host, path shape, the name a scan gives itself), never from what
+# a producer types. The rules here are the evidence methodology's tier
+# ladder (skills/dma-research/references/evidence_methodology.md) written
+# as data, and the three lists the connector already enforces
+# (apps/mcp/dma_mcp/source_rules.py: regulatory suffixes/hosts, vendor-
+# collateral path shapes, scan producers) are copied here VERBATIM and
+# pinned equal by tests/test_registry.py, so the engine cannot hint a tier
+# the connector would refuse at registration.
+#
+# THE LADDER (methodology, "Tier Score"):
+#   T1  Regulatory / audited   - the regulator's or auditor's copy; a machine scan
+#   T2  Official disclosure    - the entity's OWN annual report, investor page,
+#                                press release, policy page (liability for misstatement)
+#   T3  Third-party analysis   - trade press, news, academic, job boards, review
+#                                sites, any unregistered third party
+#   T4  Internal unvalidated   - never produced by this engine (internal material
+#                                enters through the package, not the web)
+#   T5  Marketing / claims     - vendor collateral path shapes; the entity's own
+#                                product, about and careers pages
+#
+# Hosts are registrable names without `www.`; a subdomain of a listed host
+# qualifies, a lookalike (`ncua.gov.example.test`) never does — matching is
+# on the suffix boundary, never on a substring.
+
+version: 1
+
+# What the registry hands back, by class. Kept in one place so a tier is
+# never spelled twice.
+tiers:
+  regulator: T1                 # rung: the regulator's own copy
+  regulator_press: T2           # a regulator's newsroom item is a disclosure, not an exam
+  filing: T1                    # the filing authority's copy (EDGAR, SEDAR+, Companies House)
+  entity_owned_disclosure: T2   # own annual report / investor / press / governance
+  entity_owned_other: T5        # own product / about / careers / everything else
+  trade_press: T3
+  news: T3
+  academic: T3
+  job_board: T3
+  review_site: T3
+  vendor: T5                    # vendor collateral, L2 ceiling, corroboration required
+  scan: T1                      # machine technographic scan (contract.SCAN_TIER)
+  other: T3                     # unregistered third-party domain
+
+# ── Rung 1: regulators (T1) ───────────────────────────────────────────────
+# Identical to source_rules._REGULATORY_SUFFIX / _REGULATORY_HOST. A page a
+# regulator publishes is never vendor collateral whatever its path says
+# (source_rules.regulatory_publisher); its newsroom / press-release paths
+# are classified T2 "regulator press release" because a press notice is a
+# disclosure, not an examination record.
+regulators:
+  suffixes:
+    - .gov          # US federal and state: NCUA, FDIC, OCC, FRB, SEC, CFPB
+    - .mil
+    - .gc.ca        # Canada: OSFI, FCAC
+    - .gov.uk
+    - .europa.eu
+    - .gov.au
+    - .govt.nz
+  hosts:
+    - fca.org.uk
+    - bankofengland.co.uk
+    - prarulebook.co.uk
+    - osfi-bsif.gc.ca
+    - bank-banque-canada.ca
+    - cdic.ca
+    - finra.org
+    - sipc.org
+    - ffiec.gov
+    - bis.org
+    - iosco.org
+    - ecb.europa.eu
+    - eba.europa.eu
+    - esma.europa.eu
+  # The federal bodies the suffix rule already covers, named so a reader
+  # does not have to know them: ncua.gov, fdic.gov, occ.treas.gov,
+  # federalreserve.gov, sec.gov, consumerfinance.gov, ffiec.gov, naic.org
+  # (NAIC is a standard-setting association, not a .gov; listed below as
+  # an explicit host so it classifies as a regulator).
+  explicit_hosts:
+    - ncua.gov
+    - fdic.gov
+    - occ.treas.gov
+    - federalreserve.gov
+    - sec.gov
+    - consumerfinance.gov
+    - ffiec.gov
+    - naic.org
+  # State departments of financial institutions sit under `.gov` already
+  # (dfi.wa.gov, dfpi.ca.gov, dob.texas.gov, dfs.ny.gov ...). No per-state
+  # list is kept: the suffix rule is the rule, and a state regulator that
+  # publishes off `.gov` is added to `hosts` when met, never guessed.
+  state_dfi_note: "state regulators resolve through the .gov suffix; add an off-.gov state body to hosts, never a pattern"
+  # Path shapes on a regulator host that are a press notice (T2), not an
+  # examination, order, call report or rule (T1).
+  press_paths:
+    - "/newsroom/"
+    - "/press-release"
+    - "/press-releases"
+    - "/news-release"
+    - "/news-releases"
+    - "/press/"
+    - "/media-release"
+
+# ── Rung 1: filings (T1) ──────────────────────────────────────────────────
+# The filing authority's copy of a document the entity is liable for.
+# `sec.gov` is also a regulator host; the `/Archives` prefix is what makes
+# a URL a FILING rather than a notice, so filings are checked first.
+filings:
+  hosts:
+    - host: sec.gov
+      path_prefix: /Archives
+    - host: efts.sec.gov
+    - host: data.sec.gov
+    - host: sedarplus.ca
+    - host: companieshouse.gov.uk
+    - host: find-and-update.company-information.service.gov.uk
+
+# ── Rung 2: the entity's own site (T2 / T5) ───────────────────────────────
+# The entity's own domain is NEVER T1 (ledger refusal; CLAUDE.md "Evidence
+# tiers" adjudication, 2026-10-07). Disclosure paths are T2; everything else on
+# the own domain is T5 marketing.
+entity_owned:
+  disclosure_paths:
+    - /investor
+    - /annual
+    - /financial
+    - /report
+    - /disclosure
+    - /governance
+    - /press
+    - /news
+  # A path that matches a connector vendor-collateral shape (below) on the
+  # entity's own domain — `/press-releases/`, `/newsroom/` — is capped at
+  # T5 by `source_rules.tier_violation` at registration, which exempts only
+  # regulators. The registry returns the tier the connector accepts and
+  # names the cap in `tier_basis`; see registry.py's module note.
+
+# ── Rung 3: trade press (T3) ──────────────────────────────────────────────
+trade_press:
+  hosts:
+    - americanbanker.com
+    - bankingdive.com
+    - thefinancialbrand.com
+    - creditunions.com
+    - cutimes.com
+    - cuinsight.com
+    - cujournal.com
+    - finopotamus.com
+    - pymnts.com
+    - fintechfutures.com
+    - bankautomationnews.com
+    - insurancejournal.com
+    - thinkadvisor.com
+    - investmentnews.com
+    - wealthmanagement.com
+    - financial-planning.com
+    - riabiz.com
+    - nafcu.org
+    - cuna.org
+    - americascreditunions.org     # = cuna.org after the 2024 merger
+    - aba.com
+    - icba.org
+    - californiascreditunions.org
+    - ncuso.org
+    - callahan.com
+
+# ── Rung 3: news and wires (T3; a wire copy is syndication) ───────────────
+news:
+  hosts:
+    - reuters.com
+    - bloomberg.com
+    - wsj.com
+    - ft.com
+    - cnbc.com
+    - apnews.com
+    - prnewswire.com
+    - businesswire.com
+    - globenewswire.com
+    - newswire.ca
+  # Local newspapers are an open set and classify as `other` (T3,
+  # "unregistered third-party domain"), which is the same tier; the
+  # registry does not try to enumerate them.
+  local_news_note: "local newspapers resolve as other/T3; no enumeration"
+
+# Press-release wires: a copy on a wire is the entity's (or a vendor's) own
+# words syndicated, so dedupe prefers a non-wire origin for the cluster
+# and the card's `syndication_count` counts the copies. `is_wire: true`.
+press_release_wires:
+  - prnewswire.com
+  - businesswire.com
+  - globenewswire.com
+  - newswire.ca
+
+# ── Rung 3: academic (T3) ─────────────────────────────────────────────────
+academic:
+  hosts:
+    - arxiv.org
+    - ssrn.com
+    - semanticscholar.org
+    - openalex.org
+    - doi.org
+    - nber.org
+  # fdic.gov/analysis (Center for Financial Research) is the regulator's
+  # own publication and resolves as regulator/T1 through the suffix rule.
+  note: "fdic.gov/analysis is a regulator publication, not academic"
+
+# ── Rung 3: job boards (T3; ladder rung `careers`) ────────────────────────
+job_board:
+  hosts:
+    - indeed.com
+    - glassdoor.com
+    - lever.co
+    - greenhouse.io
+    - myworkdayjobs.com            # <tenant>.wd<n>.myworkdayjobs.com
+    - icims.com
+  host_paths:
+    - host: linkedin.com
+      path_prefix: /jobs
+
+# ── Rung 3: review sites (T3) ─────────────────────────────────────────────
+review_site:
+  hosts:
+    - apps.apple.com
+    - itunes.apple.com
+    - play.google.com
+    - trustpilot.com
+    - bbb.org
+    - wallethub.com
+    - depositaccounts.com
+    - bankrate.com
+    - nerdwallet.com
+    - g2.com
+
+# ── Rung 5: vendor collateral (T5, ceiling L2, corroboration required) ────
+# Identical to source_rules._VENDOR_COLLATERAL (regex source + what it is).
+# Shape-based on purpose: vendors are not enumerable, so a list would be
+# wrong about every vendor not on it.
+vendor_collateral_paths:
+  - pattern: "/customers?/"
+    what: "a vendor's customer-story page"
+  - pattern: "/case-stud(y|ies)/"
+    what: "a vendor case study"
+  - pattern: "/success-stor(y|ies)/"
+    what: "a vendor success story"
+  - pattern: "/testimonial"
+    what: "a vendor testimonial page"
+  - pattern: "/(press|news)-releases?/"
+    what: "a press release"
+  - pattern: "/newsroom/"
+    what: "a newsroom item"
+  - pattern: "/(products?|solutions?|platform)/"
+    what: "a vendor product or solution page"
+  - pattern: "/(blog|resources?|white-?papers?|ebooks?)/"
+    what: "vendor-published marketing content"
+
+# ── Machine technographic scans (T1, contract.SCAN_TIER) ──────────────────
+# Identical to source_rules._SCAN_PRODUCER / _SCAN_PHRASE. A scan names
+# itself in `source_name` (it characteristically has no page), so the
+# token is matched on the name and the URL together.
+scan_producers:
+  - explorium
+  - builtwith
+  - wappalyzer
+  - hubbl
+  - hg insights
+  - hginsights
+  - datanyze
+  - similartech
+  - netcraft
+  - clearbit
+  - zoominfo technologies
+  - predictleads
+  - slintel
+  - 6sense
+  - clay technographic
+scan_phrases:
+  - technographic scan
+  - technographic enrichment
+  - technology scan
+  - machine scan
+  - tech stack scan
+  - webstack scan
+  - technographics
+
+# ── site packs: the proxy-ladder probes a brief fires beside its facet
+# queries (regulator → trade press → wire), chosen by the run's sub-vertical.
+# Measured 2026-10-11: with this empty, no absence could claim a regulator
+# or trade-press rung was searched. Each entry names its ladder rung so the
+# coverage block reports the rung, not the host.
+site_pack:
+  default:
+    - {domain: prnewswire.com, rung: news}
+    - {domain: businesswire.com, rung: news}
+    - {domain: americanbanker.com, rung: trade_press}
+    - {domain: thefinancialbrand.com, rung: trade_press}
+    - {domain: bankingdive.com, rung: trade_press}
+    - {domain: pymnts.com, rung: trade_press}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
+  credit_unions:
+    - {domain: ncua.gov, rung: regulator}
+    - {domain: cuinsight.com, rung: trade_press}
+    - {domain: creditunions.com, rung: trade_press}
+    - {domain: cutimes.com, rung: trade_press}
+    - {domain: cutoday.info, rung: trade_press}
+    - {domain: prnewswire.com, rung: news}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
+  banks:
+    - {domain: fdic.gov, rung: regulator}
+    - {domain: occ.gov, rung: regulator}
+    - {domain: federalreserve.gov, rung: regulator}
+    - {domain: americanbanker.com, rung: trade_press}
+    - {domain: bankingdive.com, rung: trade_press}
+    - {domain: prnewswire.com, rung: news}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
+  lending:
+    - {domain: consumerfinance.gov, rung: regulator}
+    - {domain: hud.gov, rung: regulator}
+    - {domain: nationalmortgagenews.com, rung: trade_press}
+    - {domain: housingwire.com, rung: trade_press}
+    - {domain: americanbanker.com, rung: trade_press}
+    - {domain: prnewswire.com, rung: news}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
+  insurance:
+    - {domain: naic.org, rung: regulator}
+    - {domain: insurancejournal.com, rung: trade_press}
+    - {domain: insurancebusinessmag.com, rung: trade_press}
+    - {domain: dig-in.com, rung: trade_press}
+    - {domain: businesswire.com, rung: news}
+    - {domain: prnewswire.com, rung: news}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints
+  wealth:
+    - {domain: sec.gov, rung: regulator}
+    - {domain: finra.org, rung: regulator}
+    - {domain: riabiz.com, rung: trade_press}
+    - {domain: thinkadvisor.com, rung: trade_press}
+    - {domain: investmentnews.com, rung: trade_press}
+    - {domain: wealthmanagement.com, rung: trade_press}
+    - {domain: apps.apple.com, rung: other}   # review_site: the app listing a digital question often answers
+    - {domain: bbb.org, rung: other}          # review_site: the profile that names charter, HQ and complaints

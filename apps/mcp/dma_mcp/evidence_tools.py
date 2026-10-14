@@ -40,7 +40,9 @@ _BARE_PACKAGE = re.compile(r"^E-\d+$")
 _ROW_FIELDS = """{a}e_id, {a}entity_id, {a}source_name, {a}source_url,
                  {a}excerpt, enum_label({a}claim_type), enum_label({a}tier),
                  {a}published_date, enum_label({a}recency_band), {a}ers,
-                 enum_label({a}origin)"""
+                 enum_label({a}origin), {a}customer_attribution, {a}split_of,
+                 {a}connector_tool, {a}connector_query,
+                 {a}connector_retrieved_at"""
 _FIELDS = _ROW_FIELDS.format(a="")            # single-table selects
 _FIELDS_E = _ROW_FIELDS.format(a="e.")        # joined against the mapping
 
@@ -117,7 +119,11 @@ def get_evidence(conn, run_id, e_ids) -> dict:
             not_found.append(cited)
             continue
         (stored_id, entity_id, source_name, source_url, excerpt, claim_type,
-         tier, published_date, recency_band, ers, origin) = row
+         tier, published_date, recency_band, ers, origin) = row[:11]
+        # 0063: split-span and connector provenance. Optional in the tuple so
+        # a resolver substituted in a test (eleven columns) still resolves.
+        (attribution, split_of, c_tool, c_query,
+         c_retrieved) = (tuple(row[11:16]) + (None,) * 5)[:5]
         if entity_id != scope["entity_id"]:
             foreign.append({"e_id": cited, "belongs_to": str(entity_id)})
             continue
@@ -139,6 +145,17 @@ def get_evidence(conn, run_id, e_ids) -> dict:
             "recency_band": recency_band,
             "ers": float(ers) if ers is not None else None,
             "origin": origin,
+            # A shareable split span's customer label (None = never served
+            # to a customer when origin is internal), and the span it was
+            # split from (RC-08 / D-10).
+            "customer_attribution": attribution,
+            "split_of": split_of,
+            # A connector reading's provenance (decision 3); None otherwise.
+            "connector": ({"tool": c_tool, "query": c_query,
+                           "retrieved_at": (c_retrieved.isoformat()
+                                            if hasattr(c_retrieved, "isoformat")
+                                            else c_retrieved)}
+                          if c_tool else None),
             "linked_subcap_ids": sorted(subcaps or []),
             "seen_in_runs": sorted(str(r) for r in (runs_seen or [])),
         })

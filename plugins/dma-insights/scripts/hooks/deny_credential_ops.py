@@ -43,10 +43,33 @@ DENIALS = (
      "an x-access-token credential form"),
     (re.compile(r"\bgit\b[^\n|;&]*\bcredential\.helper\b"),
      "a git credential-helper write"),
+    # A FETCH, not a mention. Measured 2026-09-30 (SWBC, HYBRID): the rule
+    # matched the URL alone, so `engine.intake add --source-url <doc>` and
+    # `engine.cli evidence --origin internal --url <doc>` — recording where
+    # an internal document came from, which the protocol requires — were
+    # denied as "a shell fetch" although nothing was fetched. The URL now
+    # denies only beside something that retrieves it.
     (re.compile(
-        r"\bdocs\.google\.com/(?:document|spreadsheets|presentation)\b",
+        # \A: evaluated once, from the start. Unanchored, re.search retried
+        # both [\s\S]* scans at every offset — cubic on a long command, which
+        # timed the adversarial garbage test out at 60 s.
+        r"\A(?=[\s\S]*\bdocs\.google\.com/(?:document|spreadsheets|presentation)\b)"
+        r"[\s\S]*(?:\b(?:curl|wget|http|https|httpie|aria2c|lynx|w3m|links|"
+        r"xh|gsutil)\b(?!\s*[:=])|urlopen|urllib|requests\.(?:get|post)|"
+        r"httpx|fetch\s*\()",
         re.I),
      "a shell fetch of a Google Docs URL"),
+    # QA audit F-K04-039 (28-09-2026): the service-account key on disk
+    # (/root/.dma/sa.json) and the path token were readable by any Bash and
+    # named by no guard; autoapprove_builtins merely declined to approve the
+    # read, which left it a prompt. The key is read only by the plugin's own
+    # scripts inside a process (gcp_token) and never printed, copied,
+    # exported or piped.
+    (re.compile(r"\.dma/(?:sa\.json|pathtok|path_token|routine_sa[\w.-]*)\b|"
+                r"\bsa\.json\b"),
+     "the service-account key file or path token by name"),
+    (re.compile(r"\bDMA_ROUTINE_SA_KEY_B64\b|\bDMA_PATH_TOKEN\b"),
+     "the credential environment variable by name"),
 )
 
 REASON = (
@@ -62,24 +85,38 @@ REASON = (
 )
 
 
+def decide(command: str) -> str | None:
+    """The denial reason for a Bash command, or None."""
+    for rx, what in DENIALS:
+        if rx.search(command or ""):
+            return REASON.format(what=what)
+    return None
+
+
 def main() -> int:
     try:
         payload = json.load(sys.stdin)
     except Exception:
         return 0  # fail-open: the harness classifier remains the backstop
+    if not isinstance(payload, dict):
+        # NOT-A-DICT IS UNPARSED INPUT, NOT A VIOLATION. Measured 2026-09-14:
+        # a JSON list, string or null on stdin raised AttributeError here and
+        # the hook exited NON-ZERO with a traceback — a hook failing CLOSED on
+        # its own bug, which is the one failure a guard may never have.
+        return 0
     if payload.get("tool_name") != "Bash":
         return 0
-    command = (payload.get("tool_input") or {}).get("command") or ""
+    ti = payload.get("tool_input")
+    command = (ti.get("command") or "") if isinstance(ti, dict) else ""
     if not isinstance(command, str):
         return 0
-    for rx, what in DENIALS:
-        if rx.search(command):
-            print(json.dumps({"hookSpecificOutput": {
-                "hookEventName": "PreToolUse",
-                "permissionDecision": "deny",
-                "permissionDecisionReason": REASON.format(what=what),
-            }}))
-            return 0
+    reason = decide(command)
+    if reason:
+        print(json.dumps({"hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": reason,
+        }}))
     return 0
 
 

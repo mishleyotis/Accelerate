@@ -154,6 +154,32 @@ function sectionReason(key) {
   return { state, es, stub };
 }
 
+/* ── A column null in EVERY row is one absence, stated once ─────────────
+   RC-03 (gold audit 2026-10-04): absence was modelled only at SECTION grain,
+   so a populated section with a 100%-null column — peer_median, sixteen
+   categories and four pillars — rendered sixteen silent cells and its reason
+   nowhere. The section's empty_state carries the reason; the sentences of it
+   that are about the PEER column are what the grid states, once. Where the
+   run gave no such sentence the grid says only what the payload shows. */
+function peerColumnReason() {
+  const { es } = sectionReason("heatmap.workbook_scores");
+  const reason = (es && typeof es.reason === "string") ? es.reason.trim() : "";
+  const about = reason.split(/(?<=[.!?])\s+/).filter(x => /\bpeers?\b/i.test(x)).join(" ");
+  return about || "No peer median is stated at this grain in this run.";
+}
+
+function PeerColumnFoot() {
+  return (
+    <div data-peer-column-absent="true"
+         style={{ marginTop: 10, borderTop: "1px solid var(--z-sep)", paddingTop: 8,
+                  fontSize: 11.5, color: "var(--z-muted)", lineHeight: 1.55 }}>
+      <span style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".06em",
+                     marginRight: 6 }}>Peer column</span>
+      {peerColumnReason()}
+    </div>
+  );
+}
+
 /* The contract allows either shape for the workbook tables: an id-keyed object
    ({"P1C1": {score…}}, which is what the API sends) or a list of rows carrying
    their own id. Both become a list of rows with `id`. */
@@ -341,27 +367,23 @@ function ClientHeatmap({ entity, run }) {
   const route = useRoute();
   const { audience, openEvidence, openInsight, setIpSurface, setIpContext, tweaks, pushToast } = useApp();
   // Order and default, per the build owner 2026-08-14: the STANDARD heatmap
-  // opens the page, then focus areas, then the value chain. The customer
-  // audience still cannot reach the standard grid (it carries every capped and
-  // thin cell), so it opens on focus areas — the ternary that used to return
-  // "focus" on both branches now actually branches.
-  const [mode, setMode]               = useState(route.params.hm || (audience === "customer" ? "focus" : "standard"));  // standard | focus | value_chain
+  // opens the page, then focus areas, then the value chain — for every
+  // audience. The client view used to be locked out of the standard grid and
+  // opened on focus areas; the owner reversed that on 2026-10-07 ("the
+  // heatmaps should never be hidden"). The grid is the subcaps read the server
+  // already redacts for the customer audience; what stays internal is the
+  // Issues overlay, which reads the Context register (not a client page).
+  const [mode, setMode]               = useState(route.params.hm || "standard");  // standard | focus | value_chain
   const [zoom, setZoom]               = useState(route.params.zoom || "category");
   const [pillarFocus, setPillarFocus] = useState(route.params.pillar || null);
   const [catFocus, setCatFocus]       = useState(route.params.cat || null);
   const [showPeers, setShowPeers]     = useState(true);
-  const [showIssues, setShowIssues]   = useState(false);
+  const [issuesOn, setShowIssues]     = useState(false);
+  // Off for the client audience whatever the toggle last said, so switching
+  // to the client view with the overlay on does not carry it across.
+  const showIssues = issuesOn && audience !== "customer";
   const [focusArea, setFocusArea]     = useState(null);
   const [synthSubcap, setSynthSubcap] = useState(null);
-
-  // In customer mode, lock to focus / value_chain views only. `mode` belongs in
-  // the deps: with `[audience]` alone the effect had already run by the time
-  // "Standard" was clicked, so the internal grid rendered for the customer
-  // audience. The button is also disabled below — the lock should not depend on
-  // an effect winning a race.
-  useEffect(() => {
-    if (audience === "customer" && mode === "standard") setMode("focus");
-  }, [audience, mode]);
 
   // `?subcap=` is how every other page opens a cell here: `openSubcap` in
   // app-root navigates to this tab with the id as a param. Nothing consumed
@@ -413,13 +435,13 @@ function ClientHeatmap({ entity, run }) {
       <div className="page-head">
         <div>
           <div className="eyebrow">Maturity heatmap</div>
-          <h1>Where {entity.name} is today</h1>
+          <h1>Where {entityName(entity)} is today</h1>
           {/* maturityLabel returns null for a null composite, and .toLowerCase()
               on it took the whole page down. No composite, no band word. */}
           <div className="sub">{entity.subcaps.length} subcaps · {entity.subcaps.filter(s => s.thin).length} thin{overallLabel ? ` · overall maturity ${overallLabel.toLowerCase()}` : " · no overall score promoted"}</div>
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} heatmap as PDF…`, "success")}><Icon name="download" size={13} /> Export</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entityName(entity)} heatmap as PDF…`, "success")}><Icon name="download" size={13} /> Export</button>
         </div>
       </div>
 
@@ -429,15 +451,10 @@ function ClientHeatmap({ entity, run }) {
           <div className="row" style={{ gap: 6 }}>
             <span style={{ fontSize: 11, color: "var(--z-muted)", textTransform: "uppercase", letterSpacing: ".08em" }}>View</span>
             <div className="toggle-row">
-              {/* Standard · Focus areas · Value chain, in that order. The
-                  internal grid carries every cell, capped or thin, and is not
-                  part of the customer view — disabled rather than switched
-                  back a moment later. */}
+              {/* Standard · Focus areas · Value chain, in that order, for
+                  every audience. */}
               <button className={mode === "standard" ? "on" : ""}
-                disabled={audience === "customer"}
-                title={audience === "customer" ? "the full internal grid is not part of the customer view" : null}
-                style={audience === "customer" ? { opacity: .45, cursor: "not-allowed" } : null}
-                onClick={() => { if (audience !== "customer") setMode("standard"); }}><Icon name="heatmap" size={11} /> Standard</button>
+                onClick={() => setMode("standard")}><Icon name="heatmap" size={11} /> Standard</button>
               <button className={mode === "focus" ? "on" : ""} onClick={() => { setMode("focus"); setFocusArea(null); }}><Icon name="sparkle" size={11} /> Focus areas</button>
               <button className={mode === "value_chain" ? "on" : ""} onClick={() => setMode("value_chain")}><Icon name="route" size={11} /> Value chain</button>
             </div>
@@ -458,10 +475,14 @@ function ClientHeatmap({ entity, run }) {
             <span className={`switch ${showPeers ? "on" : ""}`} onClick={() => setShowPeers(p => !p)} />
             Peers
           </label>
-          <label className="row" style={{ fontSize: 11.5, cursor: "pointer" }}>
-            <span className={`switch ${showIssues ? "on" : ""}`} onClick={() => setShowIssues(p => !p)} />
-            Issues
-          </label>
+          {/* The issue register lives on Context, which the client dashboard
+              does not carry, and its "Full register" link leads there. */}
+          {audience === "customer" ? null : (
+            <label className="row" style={{ fontSize: 11.5, cursor: "pointer" }}>
+              <span className={`switch ${showIssues ? "on" : ""}`} onClick={() => setShowIssues(p => !p)} />
+              Issues
+            </label>
+          )}
           <Legend />
         </div>
 
@@ -537,7 +558,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
       <div>
         <div className="row" style={{ marginBottom: 12 }}>
           <Icon name="sparkle" size={15} style={{ color: "var(--z-dpur)" }} />
-          <div style={{ fontSize: 13, fontWeight: 600 }}>Strategic priorities for {entity.name}</div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>Strategic priorities for {entityName(entity)}</div>
           
           <span className="spacer" />
           <span style={{ fontSize: 11, color: "var(--z-muted)" }}>Click any focus area to drill in</span>
@@ -716,7 +737,7 @@ function FocusAreaView({ entity, run, focusArea, setFocusArea, subcapsForFocusAr
               involved_subcap_ids per pillar), not weights in a composite —
               calling them weights implied the focus area score was a weighted
               roll-up of pillars, which nothing in the run says. */}
-          <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5 }}>Share of the {(fa.subcaps || []).length} cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for {entity.name}.</div>
+          <div style={{ fontSize: 10.5, color: "var(--z-muted)", lineHeight: 1.5 }}>Share of the {(fa.subcaps || []).length} cells this focus area names, per pillar. Bar fill is each pillar's own promoted maturity for {entityName(entity)}.</div>
         </div>
 
         <div className="card">
@@ -961,6 +982,8 @@ function PillarHeatmap({ entity, pillars, setPillarFocus, audience }) {
           (H-06) and an adjudication about what the grid is allowed to
           publish — not something to settle by quietly starting to publish a
           pillar figure the run does not state. */}
+      {(pillars || []).length && (pillars || []).every(p => p.peer == null)
+        ? <PeerColumnFoot /> : null}
       {!anyScore ? (() => {
         const { stub } = sectionReason("heatmap.workbook_scores");
         return (
@@ -1005,6 +1028,9 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
       if (cap != null) row.capped += 1;
     });
   });
+  // Every category on screen with no peer median: one absence, said once.
+  const shownCats = rows.flatMap(p => p.cats || []);
+  const peerAllNull = showPeers && shownCats.length > 0 && shownCats.every(c => c.peer == null);
   return (
     <div className="card">
       {rows.map(p => {
@@ -1057,6 +1083,12 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
                       {shown == null
                         ? <div style={{ fontSize: 10.5, fontWeight: 600 }}><EnrichmentGap what={`${c.id} score`} audience={audience} compact /></div>
                         : <div style={{ fontSize: 13, fontWeight: 700 }}>{fx(shown, 1)}</div>}
+                      {/* ON THE FACE, not only in the title (RC-11 / D-32):
+                          the workbook states no figure for this category and
+                          the number above is the mean of its scored cells. */}
+                      {c.score == null && c.cellMean != null
+                        ? <div style={{ fontSize: 8, fontWeight: 600, lineHeight: 1.15 }}>cell mean · not a workbook figure</div>
+                        : null}
                       {c.thin > 0 ? <div style={{ fontSize: 8, fontWeight: 600 }}>{c.thin} thin</div> : null}
                     </div>
                     {showIssues && capCount > 0 ? (
@@ -1112,6 +1144,7 @@ function CategoryHeatmap({ entity, pillars, pillarFocus, showPeers, showIssues, 
           </div>
         );
       })}
+      {peerAllNull ? <PeerColumnFoot /> : null}
       <CellTip tip={cellTip.tip} />
     </div>
   );
@@ -1454,7 +1487,7 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
         </p>
         <p style={{ marginTop: 8 }}>
           Which cells belong to which business process is the producer's claim
-          about {entity.name}'s operating model. The cell grain alone cannot
+          about {entityName(entity)}'s operating model. The cell grain alone cannot
           stand it up, so nothing is drawn here until the section promotes.
         </p>
       </div>
@@ -1530,10 +1563,16 @@ function ValueChainView({ entity, subcapsForFocusArea, openSubcap, openInsight }
                 <>
                   <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(subs.length, STRIP)}, 1fr)`, gap: 2 }}>
                     {subs.slice(0, STRIP).map(s => (
-                      <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0 }}
-                        title={subcapTipText(s)}
+                      <div key={s.id} className={`hm-cell b ${DMA.helpers.maturityClass(s.score)}`} style={{ height: 18, fontSize: 9, padding: 0, border: 0, cursor: "pointer" }}
+                        title={subcapTipText(s)} role="button" tabIndex={0} aria-label={`Open ${s.id}`}
                         onMouseEnter={cellTip.show(subcapTipText(s))}
-                        onMouseLeave={cellTip.hide}>
+                        onMouseLeave={cellTip.hide}
+                        // Every cell opens its own drawer, as it does in the
+                        // grid. The swatch used to have no handler, so a click
+                        // fell through to the stage tile and only toggled it:
+                        // most cells on this view could not be opened.
+                        onClick={(e) => { e.stopPropagation(); cellTip.hide(); openSubcap({ kind: "subcap", subcap: s }); }}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); openSubcap({ kind: "subcap", subcap: s }); } }}>
                         {/* 18px tall and up to twelve to a row: no wording
                             fits in this swatch, and `fx` painted an em dash
                             into it. The swatch already carries the "nothing
@@ -1701,8 +1740,10 @@ function SynthesisDrawer({ entity, item, onClose, openEvidence, openInsight, sho
   const cit = subcap ? cellCitationsOf(subcap.id) : categoryCitationsOf(catCells);
   const linkedEv = cit.items;
 
-  // Issue caps (subcap only)
-  const caps = subcap ? DMA.issueCapsFor(subcap.id) : [];
+  // Issue caps (subcap only). The issue register is Context-page material and
+  // its caps are O1b ceilings — both withheld from the customer audience — so
+  // the customer drawer never lists them, whatever the client cache holds.
+  const caps = subcap && audience !== "customer" ? DMA.issueCapsFor(subcap.id) : [];
 
   // Peer comparison (for a category, the promoted category figures)
   const score = subcap ? numOf(subcap.score)
@@ -2159,4 +2200,5 @@ function Legend() {
 function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i); return h; }
 window.hashCode = hashCode;
 
-Object.assign(window, { ClientHeatmap, sectionReason });
+Object.assign(window, { ClientHeatmap, sectionReason, runPillarsOf, runCategoriesOf,
+                        PillarHeatmap, CategoryHeatmap });

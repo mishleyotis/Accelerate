@@ -97,7 +97,20 @@ def calculate_ers(item, all_items=None):
     }
 
 
+RETIRED = """REFUSED: calculate_ers.py is retired (2026-09-29, QA audit F-L11-042). ERS is computed where the evidence is banked: `python3 -m engine.cli ers recompute --run R --root ROOT`
+(`engine.ers explain --e-id E-xxx` shows the factors). This script scored an
+`evidence_index.json` projection no stage feeds; a typed or side-computed ERS is a
+number nobody can recompute (invariant 10).
+"""
+
+
 def main():
+    import sys as _sys
+    _sys.stderr.write(RETIRED)
+    return 1
+
+
+def _legacy_main():
     parser = argparse.ArgumentParser(description='Calculate ERS for evidence items')
     parser.add_argument('evidence_index', help='Path to evidence_index.json')
     parser.add_argument('--update', action='store_true', help='Write ERS back to JSON')
@@ -153,4 +166,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

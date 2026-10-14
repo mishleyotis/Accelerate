@@ -20,8 +20,14 @@ from . import shared_path
 from .contracts import sections
 from .evidence_tools import get_evidence
 from .identifiers import MINT_RE, find_fabricated, find_ids
-from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical, serves,
+from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical,
+                           resolve_supplementary, serves,
                            variant_subvertical)
+# The ladder-rung reader (RC-05) lives beside CG-34 in pass 1; every gate that
+# judges a search ladder reads rungs through this one definition.
+from .validation import (  # noqa: F401
+    failover_delivered, ladder_of, rung_outcome, rung_text,
+)
 
 shared_path.ensure(__file__)
 
@@ -75,13 +81,7 @@ _FORBIDDEN_BANDS = ("Transformational", "M5")
 
 # Sections whose items are ranked or causal claims (the skill's page
 # packs put an R-Layer CHALLENGE step on each of these).
-_RANKED_SECTIONS = {
-    ("overview", "findings"),
-    ("insights", "insights"),
-    ("heatmap", "focus_areas"),
-    ("heatmap", "cohort_patterns"),
-    ("platform", "recommendations"),
-}
+from .validation import RANKED_SECTIONS as _RANKED_SECTIONS  # noqa: E402  one definition
 
 # AUD-0046: CG-07 compares a numeric score beside a grain id to what the run
 # SERVES, and it read two key names. `platform.recommendations[].dma_impact[]`
@@ -185,6 +185,17 @@ def _asserts_nothing(item: dict, declared=None) -> bool:
     return named("value") and "value" in item and item.get("value") in (None, "")
 
 
+def _absent_item_carried_by_section(item: dict, declared) -> bool:
+    """A declared `state` naming a worked absence, with every list on the item
+    empty: the item asserts no find of its own."""
+    if declared is None or "state" not in declared:
+        return False
+    if item.get("state") not in ("WORKED_ABSENT", "UNWORKED"):
+        return False
+    return not any(isinstance(v, list) and v
+                   for k, v in item.items() if k != "e_ids")
+
+
 def _check_item_evidence(page: str, payload: dict) -> list:
     """AG-03 — every claim carries an evidence id, inferences included.
 
@@ -208,9 +219,24 @@ def _check_item_evidence(page: str, payload: dict) -> list:
             if not isinstance(items, list):
                 continue
             declared = item_keys(page, name, fname) or None
+            section_ladder_ok = None   # computed once, only if needed
             for i, item in enumerate(items):
                 if not isinstance(item, dict) or _asserts_nothing(item, declared):
                     continue
+                # A FIXED-MEMBERSHIP item (CG-03b: exactly three sentiment
+                # tiles) whose declared `state` says the ladder ran and found
+                # nothing, and which carries no rows, makes no claim — when the
+                # SECTION's own ladder is complete. Its item shape declares no
+                # absence keys, so this is the only route CG-03b leaves open;
+                # without it the two gates deadlock (2026-10-05, Cross
+                # Insurance: the employee tile, whose review hosts all refuse
+                # the verifier, could be neither emitted nor omitted).
+                if _absent_item_carried_by_section(item, declared):
+                    if section_ladder_ok is None:
+                        section_ladder_ok = not _ladder_gaps(
+                            body, _mandatory_families(page, name))
+                    if section_ladder_ok:
+                        continue
                 if any(item.get(k) for k in ev_keys):
                     continue
                 shown = " or ".join(repr(k) for k in ev_keys)
@@ -809,6 +835,87 @@ def _check_cited_linkage(page, payload, found, cited_by, conn=None) -> list:
 _DATED_BANDS = ("CURRENT", "RECENT", "DATED", "STALE", "ARCHIVAL")
 
 
+# ── CG-10 · an UNVERIFIED rung is not a date the evidence already holds ──
+#
+# RC-04 (SWBC gold audit 2026-10-04; slices OH-07, XC-02). Pass 1's
+# `_records_absence` accepts `recency_band: "UNVERIFIED"` as a recorded date
+# absence and never looks at what the item cites. SWBC stated `founded: 1976`
+# with as_of null and band UNVERIFIED while its own cited excerpt (E-CC-1283)
+# reads "April 1, 1976". The rung recorded a search that was never needed.
+_MONTH = (r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|"
+          r"July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|"
+          r"Dec(?:ember)?)")
+_FULL_DATE = re.compile(
+    r"\b(?:(?:19|20)\d{2}-\d{2}-\d{2}"
+    rf"|{_MONTH}\.? \d{{1,2}}(?:st|nd|rd|th)?,? (?:19|20)\d{{2}}"
+    rf"|\d{{1,2}}(?:st|nd|rd|th)? {_MONTH} (?:19|20)\d{{2}}"
+    r"|\d{1,2}/\d{1,2}/(?:19|20)\d{2})\b")
+_UNDATED_RUNGS = frozenset(("UNVERIFIED", "undated"))
+_ITEM_CITE_KEYS = ("source_e_id", "e_id", "e_ids", "supporting_e_ids")
+
+
+def _item_cites(item) -> list:
+    out = []
+    for k in _ITEM_CITE_KEYS:
+        v = item.get(k)
+        out.extend([v] if isinstance(v, str) else
+                   [x for x in (v or []) if isinstance(x, str)]
+                   if isinstance(v, list) else [])
+    return out
+
+
+def _check_undated_rung_against_evidence(page, payload, found) -> list:
+    """CG-10 — a dating field left null on an UNVERIFIED/undated rung is
+    refused when an evidence row the item cites carries a published_date, or
+    an excerpt holding a full calendar date. The message names the date."""
+    from .validation import _ITEM_DATING, _RUNG_KEYS
+    if not isinstance(payload, dict):
+        return []
+    rows = {}
+    for r in found or []:
+        for k in (r.get("e_id"), r.get("stored_id")):
+            if k:
+                rows[k] = r
+    out = []
+    for section, body in payload.items():
+        entry = _ITEM_DATING.get(f"{page}.{section}")
+        if not entry or not isinstance(body, dict):
+            continue
+        container, _, field = entry[0].partition("[*].")
+        items = body.get(container)
+        for i, item in enumerate(items if isinstance(items, list) else []):
+            if not isinstance(item, dict) or item.get(field) is not None:
+                continue
+            if item.get("quarantined") and item.get("quarantine_reason"):
+                continue
+            if not any(isinstance(item.get(k), str)
+                       and item[k].strip() in _UNDATED_RUNGS
+                       for k in _RUNG_KEYS):
+                continue
+            for e in _item_cites(item):
+                row = rows.get(e.split(":")[0]) or rows.get(e)
+                if not row:
+                    continue
+                date = row.get("published_date")
+                where = "its published_date"
+                if not date:
+                    m = _FULL_DATE.search(str(row.get("excerpt") or ""))
+                    date = m.group(0) if m else None
+                    where = "its excerpt"
+                if not date:
+                    continue
+                out.append(_reason(
+                    "CG-10", section, f"{section}.{container}[{i}].{field}",
+                    f"{field} is null on an UNVERIFIED rung, but the evidence "
+                    f"this item cites ({e}) carries a date in {where}: "
+                    f"{date!r}. UNVERIFIED records a date nobody could "
+                    f"establish; this one is on the page already registered. "
+                    f"State {field} from it (the date the figure is true as "
+                    f"of), with the band it computes to."))
+                break
+    return out
+
+
 def _check_evidence_dating(found, cited_by) -> list:
     out = []
     for row in found:
@@ -826,6 +933,82 @@ def _check_evidence_dating(found, cited_by) -> list:
             "UNVERIFIED, never current: re-register the row with the date "
             "the source states, or leave the band at UNVERIFIED so the "
             "surface can say the date was not established"))
+    return out
+
+
+# ── ET-10 · a FACT rests on a T1 or T2 source ─────────────────────────
+#
+# The label is derived from provenance, never typed. Measured 28-09-2026
+# (QA audit F-J04-004, regression seed 2): 77 of 285 FACT rows on one
+# staged heatmap sat on T3/T4 because the research CLI defaulted the label
+# to FACT and nothing compared it with the tier. The engine's ledger now
+# refuses the same shape at the write (`contract.FACT_TIERS`); this is the
+# submit-time twin, over the rows `get_evidence` resolved, so a package
+# ingested from an older engine cannot promote the shape either.
+FACT_TIERS = ("T1", "T2")
+
+
+def _check_fact_tier(found, cited_by) -> list:
+    out = []
+    for row in found:
+        if str(row.get("claim_type") or "").upper() != "FACT":
+            continue
+        tier = str(row.get("tier") or "").upper()
+        if tier in FACT_TIERS:
+            continue
+        e_id = row.get("e_id")
+        section = cited_by.get(e_id) or cited_by.get(row.get("stored_id"))
+        out.append(_reason(
+            "ET-10", section, f"{section}.e_ids",
+            f"{e_id} is labelled FACT on a {tier or 'untiered'} source — a "
+            f"FACT rests on T1 or T2 (contract.FACT_TIERS). Re-register the "
+            f"row as INFERENCE with the question that would confirm it, or "
+            f"cite the T1/T2 source that states it"))
+    return out
+
+
+# ── ET-11 · a machine technographic scan is a T1 source ───────────────
+#
+# Machine-generated, timestamped, objective deployment data is T1 by the
+# research tier ladder; filed lower it caps the ceiling its cells can reach
+# (T3 → L4, T4 → L2.5) and understates T1 in the evidence census. Measured
+# 28-09-2026 (QA audit F-J04-015): 5 of 6 technographic rows on one staged
+# heatmap sat at T3. The engine's ledger refuses the shape at the write
+# (`contract.SCAN_TIER`, `contract.SCAN_SOURCE_TOKENS`); this is the
+# submit-time twin over the rows `get_evidence` resolved. The tokens are a
+# copy of the engine's and apps/mcp/tests/test_scan_tier.py holds the two
+# equal, so the rule cannot drift between the write and the submit.
+SCAN_TIER = "T1"
+SCAN_SOURCE_TOKENS = ("hubbl", "builtwith", "wappalyzer", "similartech",
+                      "datanyze", "appsruntheworld", "explorium",
+                      "technographic", "technographics")
+_SCAN_RE = re.compile(r"(?<![a-z0-9])(" + "|".join(
+    re.escape(t) for t in SCAN_SOURCE_TOKENS) + r")(?![a-z0-9])")
+
+
+def _scan_source(name, url) -> str | None:
+    m = _SCAN_RE.search(f"{name or ''} {url or ''}".lower())
+    return m.group(1) if m else None
+
+
+def _check_scan_tier(found, cited_by) -> list:
+    out = []
+    for row in found:
+        tok = _scan_source(row.get("source_name"), row.get("source_url"))
+        if not tok:
+            continue
+        tier = str(row.get("tier") or "").upper()
+        if tier == SCAN_TIER:
+            continue
+        e_id = row.get("e_id")
+        section = cited_by.get(e_id) or cited_by.get(row.get("stored_id"))
+        out.append(_reason(
+            "ET-11", section, f"{section}.e_ids",
+            f"{e_id} names the technographic scan provider '{tok}' and is "
+            f"filed at {tier or 'untiered'} — a machine technographic scan "
+            f"is T1 (contract.SCAN_TIER). Re-register the row at T1, or "
+            f"under the source that actually states the claim if this is "
+            f"reportage about a scan rather than the scan itself"))
     return out
 
 
@@ -952,25 +1135,73 @@ def check_cell_id_shape(page: str, payload: dict) -> list:
     return out
 
 
-def _entity_subvertical(conn, run_id):
+def _entity_scope(conn, run_id) -> tuple:
+    """(primary code, supplementary codes, raw primary) for the run's entity.
+
+    The supplementary codes are `entities.supplementary_sub_verticals`
+    (0061): the other sub-verticals a multi-line-of-business entity is bound
+    to, whose variant cells are its own too. Resolved through the shared
+    core's `resolve_supplementary`, the same call the API's serve path
+    makes, so the gate and the filter admit the same cells."""
     cur = conn.cursor()
-    cur.execute("""SELECT e.sub_vertical FROM runs r
-                     JOIN entities e ON e.id = r.entity_id
+    cur.execute("""SELECT e.sub_vertical, e.supplementary_sub_verticals
+                     FROM runs r JOIN entities e ON e.id = r.entity_id
                     WHERE r.id = %s""", (run_id,))
     row = cur.fetchone()
-    return resolve_subvertical(row[0]) if row else None
+    if not row:
+        return None, (), None
+    code = resolve_subvertical(row[0])
+    return code, resolve_supplementary(row[1], code), row[0]
 
 
-def _check_subvertical_scope(page, payload, entity_code) -> list:
-    """ET-05. Silent when the entity's sub-vertical is not in the
+def _entity_subvertical(conn, run_id):
+    return _entity_scope(conn, run_id)[0]
+
+
+def _check_subvertical_scope(page, payload, entity_code,
+                             supplementary=(), raw_sub_vertical=None) -> list:
+    """ET-05. Refuses nothing when the entity's sub-vertical is not in the
     vocabulary — not knowing who you are is not grounds for refusing a
-    citation (the API's `serves` makes the same one-sided choice)."""
-    if not entity_code or not isinstance(payload, dict):
+    citation (the API's `serves` makes the same one-sided choice).
+
+    But it is no longer SILENT about it. A run whose sub-vertical does not
+    resolve had every variant citation pass this gate with nothing recorded,
+    which reads exactly like a run whose citations were all checked and all
+    belonged — SWBC promoted with `sub_vertical` NULL and the gate's silence
+    was the only trace. So an unresolved entity whose payload cites variant
+    cells gets ONE recorded warning per page (severity `warn`, never a
+    block) naming what went unchecked.
+
+    A variant of the primary OR of a supplementary sub-vertical the entity
+    is bound to (0061) is the entity's own; any other is refused."""
+    if not isinstance(payload, dict):
         return []
+    if not entity_code:
+        unchecked = sorted({cell for _p, _k, cell in
+                            _iter_cell_citations(payload)
+                            if variant_subvertical(cell)})
+        if not unchecked:
+            return []
+        stated = (f"{raw_sub_vertical!r}" if raw_sub_vertical not in (None, "")
+                  else "not stated")
+        r = _reason(
+            "ET-05", page, page,
+            f"sub-vertical scope NOT CHECKED on {page}: the entity's "
+            f"sub-vertical is {stated} and resolves to no catalogue code, so "
+            f"{len(unchecked)} variant cell citation(s) "
+            f"({', '.join(unchecked[:5])}{'…' if len(unchecked) > 5 else ''}) "
+            "were admitted without knowing whose they are. Nothing is refused "
+            "for this; set the entity's sub-vertical (and any supplementary "
+            "sub-verticals) so the check can run")
+        r["severity"] = "warn"
+        return [r]
     out, seen = [], set()
     mine = SUBVERTICAL_NAMES.get(entity_code, entity_code)
+    if supplementary:
+        mine += " (also bound to " + ", ".join(
+            SUBVERTICAL_NAMES.get(c, c) for c in supplementary) + ")"
     for path, _key, cell in _iter_cell_citations(payload):
-        if serves(cell, entity_code):
+        if serves(cell, entity_code, supplementary):
             continue
         owner = variant_subvertical(cell)
         section = path.split(".")[0]
@@ -1075,7 +1306,8 @@ def _discard_anchor_cells(item):
                         yield key, cell
 
 
-def _check_candidate_vertical(page, payload, entity_code) -> list:
+def _check_candidate_vertical(page, payload, entity_code,
+                              supplementary=()) -> list:
     """ET-06. Silent when the entity's sub-vertical is not in the
     vocabulary — the same one-sided choice ET-05 and the API's `serves`
     make: not knowing who you are is not grounds for refusing anything."""
@@ -1088,7 +1320,7 @@ def _check_candidate_vertical(page, payload, entity_code) -> list:
         prose = " ".join(str(v) for k, v in item.items()
                          if isinstance(v, str) and k != "platform")
         foreign = [(key, cell) for key, cell in _discard_anchor_cells(item)
-                   if not serves(cell, entity_code)]
+                   if not serves(cell, entity_code, supplementary)]
         if foreign:
             key, cell = foreign[0]
             owner = SUBVERTICAL_NAMES.get(variant_subvertical(cell),
@@ -1385,12 +1617,11 @@ def _served_figures(conn, run_id) -> dict:
 
 #: What an r_layer verdict may say. AUD-0045: AG-01 asserted a verdict was
 #: PRESENT and never read it, so a self-REJECTED recommendation passed the
-#: one hard rule the template states.
-_ACCEPTING_VERDICTS = {"SHIP", "SUPPORTED", "HOLDS", "CONFIRMED", "PASS",
-                       "ACCEPT", "ACCEPTED", "SHIP_LOW_CONF"}
-_REJECTING_VERDICTS = {"REJECT", "REJECTED", "DROP", "DROPPED", "REFUTED",
-                       "FAIL", "FAILED", "NOT_SUPPORTED", "UNSUPPORTED",
-                       "WITHDRAWN"}
+#: one hard rule the template states. The vocabularies LIVE in validation.py
+#: since 2026-10-07 so pass 1 — the pure check ship_page.py replays locally —
+#: reads the verdict too; a vocabulary only the server knew sent Arbor Bank's
+#: cohort_patterns to the connector to learn that WITHDRAWN is a rejection.
+from .validation import _ACCEPTING_VERDICTS, _REJECTING_VERDICTS  # noqa: E402,F401
 
 
 def _walk_strings(node, path):
@@ -1403,6 +1634,35 @@ def _walk_strings(node, path):
     elif isinstance(node, list):
         for i, item in enumerate(node):
             yield from _walk_strings(item, f"{path}[{i}]")
+
+
+# MEM-0541 (GATE_FIRES_ON_VERBATIM_SPAN). In PROSE a token is a citation only
+# in the run's own evidence-id shapes — E-<digits>, E-<TOKEN>-<digits>,
+# E-CC-<digits> (each with an optional -R<n> revision), EV-<scope>-<digits>,
+# INT-<label> — never `E-` + any word. The one recogniser still FINDS the
+# token (identifiers.EID_TOKEN_RE); this narrows which found tokens a
+# sentence is taken to cite. Measured on SWBC: a verbatim BrokerCheck span
+# "NO VALID CONTACT/E-MAIL" was blocked as an unresolvable id while CG-27
+# forbade rewriting it. Keyed citations are untouched.
+#
+# WIDENED 2026-10-04 (fix2/gates; review of fix/mcp-gates-contract). The
+# first cut enumerated shapes and enumerated too few: the stored package
+# namespace (apps/worker/dma_worker/evidence_ids.py STORED_PACKAGE) carries
+# the cross-entity escape `-{ENT6}` (E-UNK-007-1FCA91, E-BCU-006-R2-1FCA91)
+# and tokens that start with a digit (E-1STNB-012), and those were dropped
+# before get_evidence was asked — an unresolvable or FOREIGN citation of
+# that shape then passed silently, and `foreign` halts production
+# (invariant 4). So the rule is now subtractive, not enumerative: every token
+# the one recogniser finds is a citation EXCEPT an E-/EV- token with no digit
+# anywhere in it. Every id the system mints or stores carries a number (the
+# package's local number, the mint sequence, the connector sequence); the
+# words this exists for (E-MAIL, E-SIGN, E-COMMERCE, EV-CHARGING) carry none.
+# INT-{label} stays a citation whatever its label, as before.
+_PROSE_WORD_NOT_ID = re.compile(r"^(?:E|EV)-[A-Z-]+$")
+
+
+def _is_prose_citation(token: str) -> bool:
+    return not _PROSE_WORD_NOT_ID.match(token)
 
 
 def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
@@ -1422,15 +1682,18 @@ def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
     claimed: dict = {}
     for path, text in _walk_strings(payload, ""):
         for e in find_ids(text):
-            if e in already:
+            if e in already or not _is_prose_citation(e):
                 continue
             claimed.setdefault(e, path.lstrip("."))
     if not claimed:
         return []
     split = get_evidence(conn, run_id, sorted(claimed))
     allowed = {row.get("e_id") for row in split.get("found", [])}
+    # A foreign id is reported once, as the contamination it is (below) —
+    # not also as an unresolvable one, which would read as a typo to fix.
+    foreign = {f.get("e_id") for f in split.get("foreign", [])}
     out = []
-    for e in find_fabricated(sorted(claimed), allowed):
+    for e in find_fabricated(sorted(claimed), allowed | foreign):
         section = claimed[e].split(".")[0] or "payload"
         gate = "ET-02" if MINT_RE.match(e.split(":")[0]) else "ET-01"
         out.append(_reason(
@@ -1476,6 +1739,36 @@ _V4_SKIP_KEYS = frozenset((
     "sources_searched", "plain_label", "justification", "empty_state",
     "note", "rationale",
 ))
+
+
+def _v4_fields(payload: dict) -> list:
+    """(path, text, scope_kind, scope_id) for every prose field SG-V4 reads.
+
+    The skip list applies to a string sitting DIRECTLY on an object as much
+    as to one under a nested key: until 2026-10-07 the direct-field loop
+    handed `obj[k]` to `_iter_prose` as a bare string, which only consults
+    `_V4_SKIP_KEYS` while descending a dict, so every `r_layer` note,
+    `rationale`, `empty_state` sentence and `closure_condition` on an object
+    was embedded and failed grounding (Arbor Bank heatmap: 789 FAILs, most on
+    producer metadata). One collector, one skip rule."""
+    fields = []
+    for name, body in (payload or {}).items():
+        if not isinstance(body, dict):
+            continue
+        for path, obj in _walk(body, name):
+            # an object UNDER a skipped key (r_layer.counter, provenance.x)
+            # is producer metadata all the way down
+            if any(seg in _V4_SKIP_KEYS
+                   for seg in re.sub(r"\[\d+\]", "", path).split(".")[1:]):
+                continue
+            kind, sid = _scope_for(obj)
+            for k, v in obj.items():
+                if k in _V4_SKIP_KEYS:
+                    continue
+                if isinstance(v, str):
+                    for p, text in _iter_prose(v, f"{path}.{k}"):
+                        fields.append((p, text, kind, sid))
+    return fields
 
 
 def _iter_prose(node, path):
@@ -1877,7 +2170,7 @@ def _check_peer_scores_cascade(conn, run_id, page, payload) -> list:
             else None)
         # Silence is only a finding when the run demonstrably HAS peer data.
         # An unstaged sibling proves nothing; promotion re-gates every page.
-        if peers and not _says_it_searched(payload.get("scores")):
+        if peers and not _names_a_reason(payload.get("scores")):
             out.append(_reason(
                 "CG-44", "scores", "overview.scores.pillars[].peer_median",
                 f"the heatmap carries {len(peers)} focus area(s) with a peer "
@@ -1893,6 +2186,31 @@ def _check_peer_scores_cascade(conn, run_id, page, payload) -> list:
     for i, r in enumerate(rows):
         pid = r.get("pillar_id") or r.get("pillar") or f"[{i}]"
         score, peer = _num(r.get("score")), _num(r.get("peer_median"))
+        delta_stated = _num(r.get("delta"))
+        if score is None and peer is not None and delta_stated is not None:
+            # The mirror of the delta branch below, and the hole this gate
+            # had: `score is None` used to skip every check, so a strip could
+            # serve four EMPTY BARS beside a peer tick and pass. Measured on
+            # Golden 1, 2026-09-02: all four pillars null while the workbook
+            # stated 2.40/2.11/2.25/2.25 twice over, the heatmap already
+            # served those same figures with their source cells, and the
+            # composite on this very section was their mean. Nothing was
+            # missing — the bar simply had no number to draw.
+            #
+            # A row that states a peer median AND a delta has the score in
+            # hand: it is the addition. Invariant 9 cuts both ways — a
+            # derived value with its operands present is computed, never
+            # left null.
+            out.append(_reason(
+                "CG-44", "scores", f"overview.scores.pillars[{i}].score",
+                f"{pid} leaves its score empty while stating a peer median "
+                f"({peer}) and a delta ({delta_stated:+.2f}). The score is "
+                f"the addition — it is {round(peer + delta_stated, 2)}. This "
+                f"renders as an EMPTY BAR beside a peer tick, which reads to "
+                f"a client as 'not assessed' for a pillar the run scored. "
+                f"Serve the figure; if the workbook truly states none at "
+                f"this grain, then the delta beside it cannot stand either."))
+            continue
         if score is None or peer is None:
             continue
         want = round(score - peer, 4)
@@ -2760,6 +3078,181 @@ def _check_customer_empty_state_prose(page, payload) -> list:
     return out[:6]
 
 
+# ── CG-52 · prose a customer reads names no pipeline tool ─────────────
+#
+# Build owner, 2026-10-07: "It is the customer view that lacks heatmap
+# details for most clients … Ensure no recurrence." Two causes were found.
+# The web app locked the customer out of the heatmap grid (fixed in
+# pages-d3-heatmap.jsx, pinned by apps/web/tests/heatmap-customer-view.test.js).
+# The other is this gate's: producers wrote the search tools into the prose a
+# customer reads ("An Exa search found…", "Tavily returned…", "NOT_RUN"), and
+# the serve layer's pipeline-vocabulary net deletes the WHOLE FIELD for the
+# customer. Measured across the eight promoted clients the connector could
+# enumerate that day: 118 of 4,341 cell syntheses served empty to the customer,
+# 36 of 216 on one client, with 755 "Exa" hits across the heatmap bodies.
+#
+# The net is right to delete them, and it is a backstop: the repair for a bad
+# sentence is a better sentence from the producer, not a blank drawer. So the
+# same term list (packages/shared/internal_ids.PIPELINE_TERMS — the serve net
+# reads it too) is refused here, at submit, on every heatmap section a
+# customer is served and on every customer-served section's narrative_thread
+# and empty_state.
+_CG52_ALL_KEYS_PAGES = frozenset({"heatmap"})
+_CG52_KEYS = frozenset({"narrative_thread", "empty_state"})
+
+
+def _check_customer_pipeline_vocabulary(page, payload) -> list:
+    """CG-52 - prose a customer is served names no pipeline tool."""
+    if not isinstance(payload, dict):
+        return []
+    hits = []
+    for section, body in payload.items():
+        if not isinstance(body, dict):
+            continue
+        keys = None if page in _CG52_ALL_KEYS_PAGES else _CG52_KEYS
+        for path, term in internal_ids.customer_prose_hits(
+                page, section, body, body.get("internal_only") or (), keys=keys):
+            hits.append((section, path, term))
+    if not hits:
+        return []
+    out = []
+    for section, path, term in hits[:8]:
+        out.append(_reason(
+            "CG-52", section, f"{page}.{section}.{path}",
+            f"this field reaches the CUSTOMER audience and names the pipeline "
+            f"term {term!r}. The serve layer deletes any customer field that "
+            f"names one (redaction's pipeline-vocabulary net), so as written "
+            f"the customer reads nothing here - on the heatmap that is an "
+            f"empty cell synthesis in the evidence drawer. Rewrite it in the "
+            f"client's terms: say what the search found or did not find "
+            f"('a web search of the bank's newsroom and regulator filings "
+            f"found no…'), never which tool ran it; a status like NOT_RUN "
+            f"becomes 'not assessed in this run' with the reason. The tool "
+            f"belongs in sources_searched or r_layer, which no customer is "
+            f"served."
+            + (f" {len(hits)} field(s) in this payload, first 8 listed."
+               if len(hits) > 8 else "")))
+    return out
+
+
+# ── CG-51 · a run that holds a peer set argues the techstack against it ──
+#
+# The owner, reviewing a promoted run: "the tech stack does not enforce peer
+# comparison; even the narrative itself does not include this." Measured on
+# Golden 1: 56 register rows, ZERO carrying peer_deployments, and a techstack
+# narrative_thread that never compares the estate to a peer — yet the page
+# passed every gate. The T3 peer fields (dma_impact, peer_coverage,
+# peer_deployments) are declared OPTIONAL on the register row
+# (surface-map.md:86), so an estate with a full peer set on the workbook can
+# ship a peer-blind techstack page and nothing says a word. AG-04 only checks
+# a row that ALREADY carries peer_coverage, so a row with none is invisible to
+# it — present-but-optional-and-ungated, the same shape CG-44 fixed on the
+# overview strip.
+#
+# Fixed the same way CG-44 is: a CASCADE that is SILENT unless the run
+# demonstrably HOLDS a peer set — a peer with a score recorded for THIS run,
+# or a register row that already carries peer_deployments. When it does, the
+# page owes two things it was letting itself skip, and the owner named both:
+#
+#   1. STRUCTURED REACH — at least one register row carries a non-empty
+#      peer_deployments[]. Peer figures the run holds must reach the register
+#      a reader clicks into, not sit unrendered on the workbook.
+#   2. NARRATIVE REACH — the section narrative_thread speaks to peers at all
+#      (names a peer the run holds, or uses the word). A page that tabulates a
+#      peer comparison in its rows and never mentions it in its story is the
+#      second complaint exactly.
+#
+# It does NOT invent a peer set: with no recorded peer and no peer_deployments
+# anywhere, the run genuinely has nothing to compare against and the gate is
+# silent — an absence the workbook itself declares is not this gate's to
+# manufacture.
+_PEER_WORD = re.compile(r"\bpeers?\b|\bbenchmark", re.I)
+
+
+def _run_peer_names(conn, run_id) -> set:
+    """The peers this run has a recorded score for, normalised. Empty on any
+    read failure — a gate that cannot read its peer set must not block a run
+    on the strength of a set it never saw (the discipline _check_foreign_
+    entity_prose keeps)."""
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT DISTINCT peer_name FROM peer_scores WHERE run_id = %s",
+            (run_id,))
+        return {_norm_name(r[0]) for r in cur.fetchall() if r[0]}
+    except Exception:                                          # noqa: BLE001
+        return set()
+
+
+def _techstack_peer_findings(section, peer_names, has_recorded_peers) -> list:
+    """CG-51, the pure core: given the techstack section, the peer names the
+    run holds, and whether the run has ANY recorded peer, decide whether the
+    page argues the estate against its peers. No connection, so a unit test
+    drives it with payload dicts alone."""
+    if not isinstance(section, dict):
+        return []
+    items = section.get("items")
+    items = items if isinstance(items, list) else []
+
+    # peer_deployments on any row is itself proof the run holds peers,
+    # independent of the recorded set — and the peer names inside it enrich
+    # the narrative check.
+    rows_with_peers, payload_peer_names = [], set()
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        dep = it.get("peer_deployments")
+        if isinstance(dep, list) and dep:
+            rows_with_peers.append(it)
+            for d in dep:
+                if isinstance(d, dict) and isinstance(d.get("peer"), str):
+                    payload_peer_names.add(_norm_name(d["peer"]))
+
+    if not (has_recorded_peers or rows_with_peers):
+        return []
+
+    out = []
+    if not rows_with_peers:
+        held = f"{len(peer_names)} peer(s) with a recorded score" \
+            if peer_names else "peer figures the run holds"
+        out.append(_reason(
+            "CG-51", "techstack",
+            "techstack.techstack.items[].peer_deployments",
+            f"this run holds a peer set ({held}) and not one register row "
+            f"carries peer_deployments[] — the estate is never compared to "
+            f"the peers the workbook already measured. peer_deployments is "
+            f"declared optional on the row, which is exactly why a peer-blind "
+            f"register passed every other gate; put the comparison the run "
+            f"holds onto the rows it bears on, or state on the section why "
+            f"area-level peers do not reach this estate."))
+
+    thread = section.get("narrative_thread")
+    known = {n for n in (peer_names | payload_peer_names) if n}
+    if isinstance(thread, str) and thread.strip():
+        low = _norm_name(thread)
+        if not (any(n in low for n in known) or _PEER_WORD.search(thread)):
+            out.append(_reason(
+                "CG-51", "techstack", "techstack.techstack.narrative_thread",
+                "the run holds a peer set and the techstack narrative never "
+                "compares the estate to a peer — it names none of the peers "
+                "the run measured and does not use the word. A register that "
+                "carries peer figures under a story that ignores them is the "
+                "half-told page the owner named: the coverage argument has to "
+                "say where this estate sits relative to its peers, not only "
+                "tabulate them."))
+    return out
+
+
+def _check_techstack_peer_comparison(conn, run_id, page, payload) -> list:
+    if page != "techstack" or not isinstance(payload, dict):
+        return []
+    section = payload.get("techstack")
+    if not isinstance(section, dict):
+        return []
+    peer_names = _run_peer_names(conn, run_id) if conn is not None else set()
+    return _techstack_peer_findings(section, peer_names, bool(peer_names))
+
+
 #: The depth floors, and what each is a floor ON. Every one is already in the
 #: contract's own field docs; none had a reader until 2026-08-23.
 DEPTH_FLOORS = {
@@ -2800,13 +3293,64 @@ def _depth_count(page, section, body):
     return 0
 
 
-def _says_it_searched(body) -> bool:
-    """Does this section name the work behind a thin result?
+def _mandatory_families(page, section) -> list:
+    """The source families a section's ladder must work to an outcome —
+    contract data (`mandatory_families` on the section), never code."""
+    try:
+        spec = (sections(page) or {}).get(section) or {}
+    except Exception:
+        return []
+    fams = spec.get("mandatory_families") if isinstance(spec, dict) else None
+    return fams if isinstance(fams, list) else []
 
-    The empty-state discipline the rest of the payload already keeps: an
-    absence names its search and its closure condition. `thin` alone counts
-    only when something travels with it — a bare boolean is an assertion.
+
+def _ladder_gaps(body, families) -> list:
+    """What keeps this section's ladder from being COMPLETE, in words; [] when
+    it is complete.
+
+    RC-05 (SWBC gold audit, 2026-10-04; slices S-05, S-07). This was
+    `_says_it_searched`, which returned True for any empty_state.reason, any
+    40-character empty_state string, or any r_layer.probes_run — and r_layer is
+    mandatory on every section, so the floor never bit. A ladder now means:
+    `sources_searched` rungs, each stating an outcome, at least one terminal,
+    and every mandatory family covered by a terminal rung.
     """
+    rungs = ladder_of(body)
+    if not rungs:
+        return ["no sources_searched ladder (r_layer probes, a reason or a "
+                "thin flag are not a ladder)"]
+    gaps = []
+    outcomes = [(r, rung_outcome(r)) for r in rungs]
+    silent = [rung_text(r)[:60] for r, o in outcomes if o is None]
+    if silent:
+        gaps.append("rungs with no outcome: " + "; ".join(
+            repr(s) for s in silent[:4]))
+    if not any(o == "terminal" for _, o in outcomes):
+        gaps.append("no rung reached a terminal outcome (RESOLVED, "
+                    "VERIFIED_ABSENT, REFUSED + ALTERNATE_TRIED)")
+    for fam in families:
+        rx = re.compile(fam.get("match") or re.escape(fam.get("family", "")),
+                        re.I)
+        if not any(o == "terminal" and rx.search(rung_text(r))
+                   for r, o in outcomes):
+            gaps.append(f"mandatory family {fam.get('family')!r} has no rung "
+                        f"worked to a terminal outcome")
+    return gaps
+
+
+def _says_it_searched(body, page=None, section=None) -> bool:
+    """Predicate over `_ladder_gaps`: the section's ladder is complete."""
+    return isinstance(body, dict) and not _ladder_gaps(
+        body, _mandatory_families(page, section) if page else [])
+
+
+def _names_a_reason(body) -> bool:
+    """The OLD `_says_it_searched`, kept for the one gate whose escape is a
+    stated REASON rather than a search: CG-44's "state on the section why
+    area-level peers do not reach this strip". A peer cascade's absence is
+    explained, not searched for, so the ladder rule does not apply there."""
+    if not isinstance(body, dict):
+        return False
     if body.get("thin") is True and (
             body.get("empty_state") or body.get("searches")
             or body.get("sources_searched") or body.get("r_layer")):
@@ -2819,9 +3363,7 @@ def _says_it_searched(body) -> bool:
     if isinstance(es, str) and len(es.strip()) >= 40:
         return True
     r = body.get("r_layer")
-    if isinstance(r, dict) and (r.get("probes_run") or r.get("searches")):
-        return True
-    return False
+    return isinstance(r, dict) and bool(r.get("probes_run") or r.get("searches"))
 
 
 #: Read in this order, first hit wins. `dated_on` leads because it is the
@@ -3343,16 +3885,81 @@ def _check_depth_floors(page, payload):
             continue
         need, unit, why = floor
         got = _depth_count(page, section, body)
-        if got < need and not _says_it_searched(body):
+        if got >= need:
+            continue
+        gaps = _ladder_gaps(body, _mandatory_families(page, section))
+        if gaps:
             out.append(_reason(
                 "CG-40", section, f"{page}.{section}",
-                f"serves {got} {unit} against a floor of {need}, and names no "
-                f"search. {why}. Either serve the floor — the enrichment "
-                f"connectors are what this depth comes from — or keep what "
-                f"you have and set thin/empty_state naming the queries you "
-                f"ran and what would change the answer. A thin section that "
-                f"says so is fine; a thin section that is silent is "
-                f"indistinguishable from one nobody worked."))
+                f"serves {got} {unit} against a floor of {need}, and its "
+                f"ladder is not complete: {'; '.join(gaps)}. {why}. Either "
+                f"serve the floor — the enrichment connectors are what this "
+                f"depth comes from — or keep what you have and record the "
+                f"ladder in empty_state.sources_searched, one rung per route, "
+                f"each with its outcome. A thin section whose ladder is "
+                f"complete is fine; one that says it searched while its rungs "
+                f"read 'not retrieved' is indistinguishable from one nobody "
+                f"worked."))
+    return out
+
+
+# ── CG-40b · a WORKED_ABSENT alert shows the ladder that worked it ─────
+#
+# RC-05 (SWBC gold audit, 2026-10-04; slice HM-05). The H3 contract: "WORKED_
+# ABSENT (the ladder ran across all mandatory sources and found nothing — a
+# FINDING about the client)" and "LOG EVERY QUERY". SWBC promoted 190
+# WORKED_ABSENT alerts, 87 with queries_run [] and every one with a NOT_RUN
+# connector tier. The tier-10 CONTRADICTORY requirement is NOT enforced here:
+# the Baxter and Logix gold runs log none, so it needs an owner call first.
+_NOT_RUN_RE = re.compile(r"\bNOT[ _]RUN\b")
+
+
+def _check_worked_absent_ladder(page, payload) -> list:
+    if page != "heatmap" or not isinstance(payload, dict):
+        return []
+    body = payload.get("alerts")
+    alerts = body.get("alerts") if isinstance(body, dict) else None
+    out = []
+    for i, a in enumerate(alerts if isinstance(alerts, list) else []):
+        if not isinstance(a, dict) or a.get("state") != "WORKED_ABSENT":
+            continue
+        q = a.get("queries_run")
+        if not (isinstance(q, list) and any(
+                isinstance(x, str) and x.strip() for x in q)):
+            out.append(_reason(
+                "CG-40b", "alerts", f"alerts.alerts[{i}].queries_run",
+                f"{a.get('subcap_id') or 'this alert'} is WORKED_ABSENT with "
+                f"no query logged. WORKED_ABSENT is a finding about the "
+                f"client — the ladder ran across the mandatory sources and "
+                f"found nothing — and the contract says LOG EVERY QUERY. "
+                f"Log the queries the ladder ran, or set the state to "
+                f"UNWORKED until it runs."))
+            continue
+        # A NOT_RUN tier with no failover recorded — the RCA's rule, kept
+        # narrow on purpose: a source that REFUSED retrieval (an HTTP 403 on
+        # the entity's own site, recorded as such) is an honest rung and the
+        # Logix gold run carries one on every alert; a NOT_RUN whose failover
+        # ran (WebSearch in place of Exa, owner default 2026-10-04) is worked.
+        # fix2/gates: rung_outcome now reads a failover's OWN outcome, so a
+        # NOT_RUN tier whose failover finished reads terminal and is not
+        # here, and one whose failover also failed ("fell back to WebSearch:
+        # NOT RUN") reads open and is. A failover rung with no outcome of its
+        # own is complete only when the ladder carries the WebSearch/WebFetch
+        # rung it handed over to, worked to a terminal outcome — merely
+        # naming a failover no longer exempts the rung.
+        ladder = a.get("sources_searched") or []
+        open_rungs = [rung_text(r)[:80] for r in ladder
+                      if rung_outcome(r) == "open"
+                      and _NOT_RUN_RE.search(rung_text(r))
+                      and not failover_delivered(r, ladder)]
+        if open_rungs:
+            out.append(_reason(
+                "CG-40b", "alerts", f"alerts.alerts[{i}].sources_searched",
+                f"{a.get('subcap_id') or 'this alert'} is WORKED_ABSENT while "
+                f"a rung did not complete ({open_rungs[0]!r}: NOT_RUN, not "
+                f"fetched or blocked, with no failover recorded). Run the "
+                f"tier, or record the failover that ran in its place and its "
+                f"outcome, or the alert is UNWORKED."))
     return out
 
 def validate_pass2(conn, run_id, page: str, payload: dict,
@@ -3382,6 +3989,10 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         split = get_evidence(conn, run_id, sorted(cited))
         reasons.extend(_check_excerpt_completeness(split.get("found", []), cited))
         reasons.extend(_check_evidence_dating(split.get("found", []), cited))
+        reasons.extend(_check_undated_rung_against_evidence(
+            page, payload, split.get("found", [])))
+        reasons.extend(_check_fact_tier(split.get("found", []), cited))
+        reasons.extend(_check_scan_tier(split.get("found", []), cited))
         reasons.extend(_check_financial_figures_are_quoted(
             split.get("found", []), cited, payload))
         reasons.extend(_check_cited_linkage(page, payload,
@@ -3420,6 +4031,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_recommendations_reach_the_platform_page(
         conn, run_id, page, payload))
     reasons.extend(_check_depth_floors(page, payload))
+    reasons.extend(_check_worked_absent_ladder(page, payload))
     reasons.extend(_check_contact_enrichment_baseline(page, payload))
     reasons.extend(_check_sentiment_projections_agree(
         conn, run_id, page, payload))
@@ -3429,7 +4041,10 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_prose_counts_what_is_served(page, payload))
     reasons.extend(_check_values_fit_their_columns(page, payload))
     reasons.extend(_check_customer_empty_state_prose(page, payload))
+    reasons.extend(_check_customer_pipeline_vocabulary(page, payload))
     reasons.extend(_check_named_product_is_in_its_excerpt(
+        conn, run_id, page, payload))
+    reasons.extend(_check_techstack_peer_comparison(
         conn, run_id, page, payload))
 
     served = _served_figures(conn, run_id)
@@ -3531,36 +4146,20 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
                                 "yourself you took"))
                             continue
                         # AUD-0045: the gate checked that a verdict EXISTS
-                        # and never what it SAID, so a recommendation whose
-                        # own reasoning layer concluded REJECT shipped as a
-                        # recommendation. The template's one hard rule —
-                        # a self-rejected item is not published — was
-                        # enforced by nothing.
-                        verdict = str(rl.get("verdict") or "").strip().upper()
-                        if verdict in _REJECTING_VERDICTS:
-                            reasons.append(_reason(
-                                "AG-01", name,
-                                f"{name}.{fname}[{i}].r_layer.verdict",
-                                f"this item's own reasoning layer concluded "
-                                f"{verdict} and it is still being published. "
-                                f"A rejected hypothesis is a step in the "
-                                f"work, not a recommendation: drop the item, "
-                                f"or change the verdict because the reasoning "
-                                f"changed — never because the item is "
-                                f"inconvenient to lose."))
-                        elif verdict not in _ACCEPTING_VERDICTS:
-                            reasons.append(_reason(
-                                "AG-01", name,
-                                f"{name}.{fname}[{i}].r_layer.verdict",
-                                f"r_layer.verdict is {rl.get('verdict')!r}, "
-                                f"which is not in the vocabulary "
-                                f"{sorted(_ACCEPTING_VERDICTS | _REJECTING_VERDICTS)}. "
-                                f"A verdict nobody can read is a verdict "
-                                f"nobody can check."))
+                        # and never what it SAID. What the verdict SAYS —
+                        # rl.get("verdict") against _REJECTING_VERDICTS and
+                        # _ACCEPTING_VERDICTS — is judged in pass 1
+                        # (validation.check_r_layer_verdicts), the pure
+                        # check the local precheck replays; only the
+                        # presence rule needs the item-shape knowledge that
+                        # lives here.
 
     # ── AG-03: every claim-bearing item cites evidence ─────────────────
     reasons.extend(_check_item_evidence(page, payload))
     reasons.extend(_check_peer_research(page, payload))
+    # RC-10: AG-04 / CG-44 against the IDENTIFIED peer set, scored or not.
+    from .peer_set import check_named_peer_set
+    reasons.extend(check_named_peer_set(conn, run_id, page, payload))
     reasons.extend(_check_rank_against_score(page, payload))
     # ET-08 runs BEFORE the cell gates below, because those all skip a
     # value they cannot parse as an id: a cell-link field holding a name
@@ -3569,9 +4168,17 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     # One read of the entity's sub-vertical, two gates: ET-05 scopes the
     # cells a sentence may cite, ET-06 scopes the candidates a shortlist
     # may contain.
-    entity_code = _entity_subvertical(conn, run_id)
-    reasons.extend(_check_subvertical_scope(page, payload, entity_code))
-    reasons.extend(_check_candidate_vertical(page, payload, entity_code))
+    entity_code, supplementary, raw_sv = _entity_scope(conn, run_id)
+    reasons.extend(_check_subvertical_scope(page, payload, entity_code,
+                                            supplementary, raw_sv))
+    reasons.extend(_check_candidate_vertical(page, payload, entity_code,
+                                             supplementary))
+    # RC-06: the same primary code decides O2's firmographic set and the C3
+    # regulator family.
+    reasons.extend(_check_subvertical_must_present(page, payload, entity_code))
+    reasons.extend(_check_cagr_rule(page, payload))
+    reasons.extend(_check_technographic_scan(conn, run_id, page, payload))
+    reasons.extend(_check_c3_regulator_family(page, payload, entity_code))
     reasons.extend(_check_cell_linkage(page, payload, _run_cells(conn, run_id)))
     reasons.extend(_check_safeguard_gate_ids(conn, page, payload))
     # AG-05 needs the OTHER half of the pair: the timeline lives on context
@@ -3581,10 +4188,337 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
         sibling = _live_submission(
             conn, run_id, "overview" if page == "context" else "context")
         reasons.extend(_check_event_direction(page, payload, sibling))
+        reasons.extend(_check_o2_c3_agreement(page, payload, sibling))
 
     sg = _run_s8(conn, run_id, page, payload)
     sg.extend(_run_v4(conn, run_id, page, payload, encoder))
     return reasons, sg
+
+
+# ── RC-06 · sub-vertical and entity shape, as machine contract ─────────
+def _firmographics_spec() -> dict:
+    return sections("overview")["firmographics"]["fields"]["fields"]
+
+
+def _check_subvertical_must_present(page, payload, code) -> list:
+    """CG-18c — the run's primary sub-vertical's firmographic set is present
+    (stated, or held within the ceiling), read from
+    `must_present_by_subvertical`. RC-06 (SWBC, 2026-10-04; D-04): the SV7 set
+    lived only in prose and a held generic `revenue` satisfied it. Held SV
+    members count against CG-18b's ceiling together with the generic set."""
+    from .validation import (_held_ceiling_reason, _member_groups,
+                             _member_states, _norm_member,
+                             held_share_exceeded)
+    if page != "overview" or not isinstance(payload, dict):
+        return []
+    body = payload.get("firmographics")
+    if not isinstance(body, dict) or not code:
+        return []
+    spec = _firmographics_spec()
+    by = spec.get("must_present_by_subvertical") or {}
+    if code not in by:
+        return []
+    out = []
+    want_set = by[code]
+    if not want_set:
+        if body.get("sub_vertical_undefined") is not True:
+            out.append(_reason(
+                "CG-18c", "firmographics", "firmographics.sub_vertical_"
+                "undefined",
+                f"the run's sub-vertical ({code}) has no defined firmographic "
+                f"set in research, and the section does not say so. Emit "
+                f"sub_vertical_undefined: true and say so on the surface — "
+                f"never borrow another sub-vertical's metrics."))
+        return out
+    val = body.get("fields")
+    if not isinstance(val, list) or (not val and body.get("empty_state")):
+        return []
+    key = spec.get("must_present_key", "field")
+    stated, held, _empty = _member_states(val, key)
+    for want in want_set:
+        aliases = want if isinstance(want, (list, tuple)) else [want]
+        if any(_norm_member(a) in stated | held for a in aliases):
+            continue
+        out.append(_reason(
+            "CG-18c", "firmographics", "firmographics.fields",
+            f"the run's primary sub-vertical is {code} "
+            f"({SUBVERTICAL_NAMES.get(code, code)}) and its must-present "
+            f"member {' | '.join(aliases)} is neither stated nor held. The "
+            f"sub-vertical decides WHICH fields: a generic 'revenue' does not "
+            f"stand in for it. State it with its provenance (a scoped figure "
+            f"whose unit names the entity is admissible), or hold it with the "
+            f"registry route searched — within the held ceiling."))
+    union = _member_groups(spec, want_set)
+    over = held_share_exceeded(spec, val, union)
+    if over and not held_share_exceeded(spec, val, _member_groups(spec)):
+        out.append(_held_ceiling_reason("firmographics", "fields", over[0],
+                                        len(union), over[1]))
+    return out
+
+
+# ── CG-18f · CAGR: ranked, and served only when corroborated ──────────
+# Owner decision 2026-10-05 (SWBC): "compute every CAGR candidate, rank them
+# by validity, and serve only the corroborated figure". The field promoted
+# held with "no consolidated financials" while the same page carried eight
+# dated points of a series a CAGR is computed from — nobody had computed it,
+# ranked it or said why it was not served.
+_CORROBORATED = re.compile(r"corroborat", re.I)
+_RATE = re.compile(r"-?\d+(?:\.\d+)?\s*(?:%|percent)", re.I)
+
+
+def _dated_points(series) -> int:
+    pts = series.get("series") if isinstance(series, dict) else None
+    return sum(1 for p in (pts or []) if isinstance(p, dict)
+               and isinstance(p.get("value"), (int, float))
+               and str(p.get("as_of") or p.get("period") or "").strip())
+
+
+def _check_cagr_rule(page, payload) -> list:
+    """CG-18f — a CAGR is served only corroborated, and held only ranked."""
+    if page != "overview" or not isinstance(payload, dict):
+        return []
+    body = payload.get("firmographics")
+    if not isinstance(body, dict):
+        return []
+    item = _o2_field(body.get("fields"), "cagr")
+    if not isinstance(item, dict):
+        return []
+    path = "firmographics.fields[cagr]"
+    held = item.get("value") in (None, "", [])
+    if not held:
+        if not _CORROBORATED.search(str(item.get("unit") or "")):
+            return [_reason(
+                "CG-18f", "firmographics", path,
+                "a CAGR is served only when a second, independent source "
+                "corroborates it (owner decision 2026-10-05). Name it in the "
+                "unit — what grew, over which window, whose scope, and "
+                "'corroborated by <source>' — or hold the field with the "
+                "ranked candidates.")]
+        return []
+    points = _dated_points(payload.get("financial_series"))
+    reason = str(item.get("quarantine_reason") or "")
+    if points >= 2 and not (_CORROBORATED.search(reason)
+                            and _RATE.search(reason)):
+        return [_reason(
+            "CG-18f", "firmographics", path,
+            f"the CAGR is held while overview.financial_series carries "
+            f"{points} dated points a growth rate is computed from. Compute "
+            f"every candidate (that series, a connector headcount or revenue "
+            f"history, any self-stated series), rank them by validity, and "
+            f"serve the corroborated one. Held is admissible only when none "
+            f"is corroborated, and the reason must then state each "
+            f"candidate's rate and why it was not corroborated.")]
+    return []
+
+
+# ── ET-12 · the register is built on a machine technographic scan ─────
+# SWBC 2026-10-05: Clay was called for contacts only and Vibe Prospecting
+# never; the tech register promoted from postings and pages, so a material
+# detection (an integration platform under the run's rank-1 argument) was
+# never weighed. A scan that genuinely could not run is a recorded NOT_RUN
+# naming both tools and why, never silence.
+_SCAN_TOOL = re.compile(r"clay|vibe|explorium", re.I)
+
+
+def _check_technographic_scan(conn, run_id, page, payload) -> list:
+    if page != "techstack" or not isinstance(payload, dict):
+        return []
+    body = payload.get("techstack")
+    if not isinstance(body, dict) or not body.get("items"):
+        return []            # an empty register states its empty_state
+    cited = set()
+    for _path, obj in _walk(body, "techstack"):
+        for key in _EV_KEYS:
+            val = obj.get(key)
+            for e in ([val] if isinstance(val, str) else (val or [])):
+                if isinstance(e, str) and e.strip():
+                    cited.add(e.strip())
+    if cited:
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                """SELECT count(*) FROM evidence_index
+                    WHERE e_id = ANY(%s) AND origin::text = 'connector'
+                      AND connector_tool ~* '(clay|vibe|explorium)'""",
+                (sorted(cited),))
+            if (cur.fetchone() or [0])[0]:
+                return []
+        except Exception:                          # noqa: BLE001
+            return []        # no store to read: promotion re-gates
+    probes = (body.get("r_layer") or {}).get("probes_run") \
+        if isinstance(body.get("r_layer"), dict) else None
+    for p in probes or []:
+        t = str(p)
+        if "NOT_RUN" in t and re.search(r"clay", t, re.I) \
+                and re.search(r"vibe|explorium", t, re.I):
+            return []
+    return [_reason(
+        "ET-12", "techstack", "techstack.e_ids",
+        "the register cites no machine technographic scan. Run Clay's "
+        "company Tech Stack and Vibe Prospecting's enrich-business "
+        "technographics, register each reading under origin 'connector' "
+        "with kind 'technographic' (T1; a scan-only row stays INFERRED), "
+        "and cite it on the rows it detects. If a scan genuinely could not "
+        "run, record it in r_layer.probes_run as NOT_RUN naming Clay and "
+        "Vibe Prospecting and the reason.")]
+
+
+# Regulators by canonical key, for the O2 <-> C3 comparison. State offices
+# are matched by full name and by their initials (Illinois Department of
+# Financial and Professional Regulation <-> IDFPR), the way both pages write
+# them.
+_FEDERAL_REGULATORS = (
+    ("Financial Industry Regulatory Authority",
+     r"Financial Industry Regulatory Authority|\bFINRA\b"),
+    ("Securities and Exchange Commission",
+     r"Securities and Exchange Commission|\bSEC\b"),
+    ("National Credit Union Administration",
+     r"National Credit Union Administration|\bNCUA\b"),
+    ("Office of the Comptroller of the Currency",
+     r"Comptroller of the Currency|\bOCC\b"),
+    ("Federal Deposit Insurance Corporation",
+     r"Federal Deposit Insurance Corporation|\bFDIC\b"),
+    ("Federal Reserve", r"Federal Reserve"),
+    ("Consumer Financial Protection Bureau",
+     r"Consumer Financial Protection Bureau|\bCFPB\b"),
+    ("Farm Credit Administration", r"Farm Credit Administration"),
+    ("Commodity Futures Trading Commission",
+     r"Commodity Futures Trading Commission|\bCFTC\b"),
+)
+_STATE_OFFICE = re.compile(
+    r"\b((?:[A-Z][a-z]+ ){1,3}(?:Department|Division|Office) of "
+    r"(?:the )?[A-Z][a-z]+(?: (?:[A-Z][a-z]+|and|&))*)")
+_MINOR = {"of", "and", "&", "the"}
+
+
+def _office_acronyms(name: str) -> set:
+    words = [w for w in name.split() if w.lower() not in _MINOR]
+    full = "".join(w[0] for w in words).upper()
+    return {full, full[1:]} if len(full) > 3 else {full}
+
+
+def _regulators_in(text: str) -> list:
+    """[(display name, matcher)] for every regulator named in the text."""
+    text = str(text or "")
+    out = []
+    for name, rx in _FEDERAL_REGULATORS:
+        if re.search(rx, text):
+            out.append((name, re.compile(rx)))
+    for m in _STATE_OFFICE.finditer(text):
+        name = m.group(1).strip()
+        alts = [re.escape(name)] + [rf"\b{a}\b" for a in _office_acronyms(name)]
+        out.append((name, re.compile("|".join(alts), re.I)))
+    return out
+
+
+def _o2_field(fields, name):
+    for item in fields or []:
+        if isinstance(item, dict) and str(item.get("field") or "").lower() == name:
+            return item
+    return None
+
+
+def _check_o2_c3_agreement(page, payload, sibling) -> list:
+    """CG-18e — O2's charter and primary_regulator agree with C3.
+
+    RC-06 (SWBC gold audit, 2026-10-04; D-04, D-26). SWBC's O2 held both
+    while context.regulatory_standing stated them, and the pages named
+    different regulator sets. Runs on whichever page lands second; with no
+    staged sibling there is nothing to compare (promotion re-gates both)."""
+    if page == "overview":
+        o2, c3 = payload.get("firmographics"), (sibling or {}).get(
+            "regulatory_standing") if isinstance(sibling, dict) else None
+        section = "firmographics"
+    elif page == "context":
+        c3 = payload.get("regulatory_standing")
+        o2 = (sibling or {}).get("firmographics") \
+            if isinstance(sibling, dict) else None
+        section = "regulatory_standing"
+    else:
+        return []
+    if not isinstance(o2, dict) or not isinstance(c3, dict):
+        return []
+    fields = o2.get("fields") if isinstance(o2.get("fields"), list) else []
+    out = []
+    c3_states = {
+        "charter": str(c3.get("license_type") or "").strip(),
+        "primary_regulator": str(c3.get("primary_regulator") or "").strip(),
+    }
+    for fname, c3_value in c3_states.items():
+        item = _o2_field(fields, fname)
+        if not c3_value or not isinstance(item, dict):
+            continue
+        if item.get("value") in (None, "", []):
+            out.append(_reason(
+                "CG-18e", section, f"firmographics.fields[{fname}]",
+                f"overview.firmographics holds {fname!r} while "
+                f"context.regulatory_standing states it ("
+                f"{'license_type' if fname == 'charter' else fname}: "
+                f"{c3_value[:90]!r}). One institution has one answer: state "
+                f"it on the strip as the card states it — a structural "
+                f"answer ('not chartered', 'regulated by line') is a value."))
+    reg = _o2_field(fields, "primary_regulator")
+    if isinstance(reg, dict) and reg.get("value") not in (None, "", []) \
+            and c3_states["primary_regulator"]:
+        o2_text = str(reg.get("value"))
+        c3_text = " ".join([c3_states["primary_regulator"]] + [
+            str(x) for x in (c3.get("additional_regulators") or [])])
+        foreign = [n for n, rx in _regulators_in(o2_text)
+                   if not rx.search(c3_text)]
+        missing = [n for n, rx in _regulators_in(c3_states["primary_regulator"])
+                   if not rx.search(o2_text)]
+        if foreign or missing:
+            out.append(_reason(
+                "CG-18e", section, "firmographics.fields[primary_regulator]",
+                "the strip and the regulatory card name different regulators: "
+                + "; ".join(
+                    ([f"named on O2 and on neither C3 list: "
+                      f"{', '.join(foreign)}"] if foreign else [])
+                    + ([f"C3's primary regulator missing from O2: "
+                        f"{', '.join(missing)}"] if missing else []))
+                + ". A disagreement here is a contradiction, not variation — "
+                  "reconcile both pages to the regulator's own registry."))
+    return out
+
+
+def _check_c3_regulator_family(page, payload, code) -> list:
+    """ET-05b — C3's ladder works the primary sub-vertical's regulator family.
+
+    RC-06 (SWBC gold audit, 2026-10-04; D-26, slices CTX-07/09): an IB-primary
+    run left the state insurance departments 'not searched'. A rung naming a
+    regulator of the family must exist and must not be open."""
+    if page != "context" or not isinstance(payload, dict) or not code:
+        return []
+    body = payload.get("regulatory_standing")
+    if not isinstance(body, dict):
+        return []
+    fam = (sections("context")["regulatory_standing"]
+           .get("regulator_family_by_subvertical") or {}).get(code)
+    if not fam:
+        return []
+    rx = re.compile(fam, re.I)
+    ladder = []
+    ae = body.get("absence_of_enforcement")
+    if isinstance(ae, dict):
+        ladder += list(ae.get("sources_searched") or [])
+    ladder += list(ladder_of(body))
+    named = [r for r in ladder if rx.search(rung_text(r))]
+    if any(rung_outcome(r) != "open" for r in named):
+        return []
+    left_open = rung_text(named[0])[:100] if named else None
+    return [_reason(
+        "ET-05b", "regulatory_standing",
+        "regulatory_standing.absence_of_enforcement.sources_searched",
+        f"the run's primary sub-vertical is {code} "
+        f"({SUBVERTICAL_NAMES.get(code, code)}) and "
+        + (f"its regulator family's only rung was left open ({left_open!r})"
+           if named else "no rung names a regulator of its family")
+        + f". The card's first job is the regulator this sub-vertical answers "
+          f"to (for insurance intermediaries and carriers, the state "
+          f"departments of insurance and the NAIC): search its orders and "
+          f"licence records by every name the entity trades under and record "
+          f"the outcome, or record the refusal and the alternate route "
+          f"tried.")]
 
 
 def _check_safeguard_gate_ids(conn, page, payload) -> list:
@@ -3644,6 +4578,22 @@ def _check_safeguard_gate_ids(conn, page, payload) -> list:
     return out
 
 
+_SELF_PUBLISHED = re.compile(
+    r"\bnps\b|net promoter|\breported by\b|\bsays\b|self[- ]reported|"
+    r"company[- ]reported|self[- ]published|as reported\b", re.I)
+
+
+def _self_published(row) -> bool:
+    """A rating the institution published about itself: a self_reported flag,
+    a T4/T5 tier on the row, or a source that says it is relayed from the
+    company. 'nps' alone was the old test and stays inside this one."""
+    if row.get("self_reported") is True:
+        return True
+    if str(row.get("tier") or "").upper() in ("T4", "T5"):
+        return True
+    return bool(_SELF_PUBLISHED.search(str(row.get("source") or "")))
+
+
 def _run_s8(conn, run_id, page, payload) -> list:
     """SG-S8 — sentiment resting on one line discloses and still promotes.
 
@@ -3676,9 +4626,20 @@ def _run_s8(conn, run_id, page, payload) -> list:
     rated = [r for r in rows if r.get("rating") is not None]
     audiences = sorted({str(r.get("audience") or "").lower() for r in rated} - {""})
     # A self-published figure standing alone is thin whatever the count: it is
-    # one voice about itself.
+    # one voice about itself. RC-05 (SWBC, 2026-10-04; slice S-07): the test
+    # was the substring 'nps', so "Google reviews ... as reported by SWBC" was
+    # an independent line. Classified from the row now (`_self_published`).
+    tiers = {}
+    ids = sorted({r.get("e_id") for r in rated if isinstance(r.get("e_id"), str)})
+    if ids:
+        try:
+            tiers = {row.get("e_id"): row.get("tier") for row in
+                     get_evidence(conn, run_id, ids).get("found", [])}
+        except Exception:
+            tiers = {}             # the row-level reading still stands
     self_published = all(
-        str(r.get("source") or "").lower().find("nps") >= 0 for r in rated) if rated else False
+        _self_published(r) or str(tiers.get(r.get("e_id")) or "").upper()
+        in ("T4", "T5") for r in rated) if rated else False
 
     if not rated:
         result, detail = "NOT_RUN", {"page": page, "reason": "No rated rows"}
@@ -3741,16 +4702,7 @@ def _run_v4(conn, run_id, page, payload, encoder) -> list:
         return [{"gate_id": "SG-V4", "result": "NOT_RUN", "page": page,
                  "not_run_reason": "No centroids for this run"}]
 
-    fields = []          # (path, text, scope_kind, scope_id)
-    for name, body in payload.items():
-        if not isinstance(body, dict):
-            continue
-        for path, obj in _walk(body, name):
-            kind, sid = _scope_for(obj)
-            for k, v in obj.items():
-                if isinstance(v, str):
-                    for p, text in _iter_prose(v, f"{path}.{k}"):
-                        fields.append((p, text, kind, sid))
+    fields = _v4_fields(payload)
 
     checked = failed = abstained = 0
     for path, text, kind, sid in fields:

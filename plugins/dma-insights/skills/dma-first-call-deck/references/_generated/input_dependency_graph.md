@@ -342,11 +342,11 @@ _Slide 9 is static — no editable roles; no input dependencies._
 |---|---|---|---|
 | Sh9 | `p2_name` | set_shape_text (text content) | text |
 
-### Static: `STATIC_COLORS['s10_legend_act_acc']` = `#F97316`
+### Static: `STATIC_COLORS['s10_legend_act_acc']` = `#FFCB99`
 
 | Shape | Role | Transform | Writes |
 |---|---|---|---|
-| Sh27 | `legend_act_acc` | STATIC_COLORS['s10_legend_act_acc'] | — |
+| Sh27 | `legend_act_acc` | STATIC_COLORS['s10_legend_act_acc'] | fill, border |
 
 ### Static: `STATIC_COLORS['s10_legend_act_bg']` = `#FFF3E8`
 
@@ -354,11 +354,11 @@ _Slide 9 is static — no editable roles; no input dependencies._
 |---|---|---|---|
 | Sh26 | `legend_act_bg` | STATIC_COLORS['s10_legend_act_bg'] | — |
 
-### Static: `STATIC_COLORS['s10_legend_bld_acc']` = `#8094C0`
+### Static: `STATIC_COLORS['s10_legend_bld_acc']` = `#62D7B8`
 
 | Shape | Role | Transform | Writes |
 |---|---|---|---|
-| Sh30 | `legend_bld_acc` | STATIC_COLORS['s10_legend_bld_acc'] | — |
+| Sh30 | `legend_bld_acc` | STATIC_COLORS['s10_legend_bld_acc'] | fill, border |
 
 ### Static: `STATIC_COLORS['s10_legend_bld_bg']` = `#F2F4F9`
 
@@ -370,7 +370,7 @@ _Slide 9 is static — no editable roles; no input dependencies._
 
 | Shape | Role | Transform | Writes |
 |---|---|---|---|
-| Sh33 | `legend_cmp_acc` | STATIC_COLORS['s10_legend_cmp_acc'] | — |
+| Sh33 | `legend_cmp_acc` | STATIC_COLORS['s10_legend_cmp_acc'] | fill, border |
 
 ### Static: `STATIC_COLORS['s10_legend_cmp_bg']` = `#E6F5F3`
 
@@ -841,7 +841,7 @@ _Slide 9 is static — no editable roles; no input dependencies._
 | Sh146 | `median_line_cap16` | STATIC_COLORS['median_stroke'] | — |
 | Sh154 | `median_line_cap17` | STATIC_COLORS['median_stroke'] | — |
 
-### Static: `STATIC_COLORS['s14_legend_act_acc']` = `#F97316`
+### Static: `STATIC_COLORS['s14_legend_act_acc']` = `#FFCB99`
 
 | Shape | Role | Transform | Writes |
 |---|---|---|---|
@@ -853,7 +853,7 @@ _Slide 9 is static — no editable roles; no input dependencies._
 |---|---|---|---|
 | Sh2 | `legend_act_bg` | STATIC_COLORS['s14_legend_act_bg'] | fill, border |
 
-### Static: `STATIC_COLORS['s14_legend_bld_acc']` = `#8094C0`
+### Static: `STATIC_COLORS['s14_legend_bld_acc']` = `#62D7B8`
 
 | Shape | Role | Transform | Writes |
 |---|---|---|---|
@@ -877,7 +877,7 @@ _Slide 9 is static — no editable roles; no input dependencies._
 |---|---|---|---|
 | Sh8 | `legend_cmp_bg` | STATIC_COLORS['s14_legend_cmp_bg'] | fill, border |
 
-### Static: `STATIC_COLORS['s14_legend_dif_acc']` = `#185F60`
+### Static: `STATIC_COLORS['s14_legend_dif_acc']` = `#139F94`
 
 | Shape | Role | Transform | Writes |
 |---|---|---|---|
@@ -1264,10 +1264,10 @@ CRITICAL: Slide 14 Sh24 (level_label_cap01) [text_color]
 1. `s14.scores[0]` = first capability score (Digital Strategy & Vision per
    `CAPABILITY_ORDER`).
 2. Score 2.45 → Building → label_text #4E5E8A (per `brand_level_tables.md`).
-3. Actual `#F97316` is the Activating `accent/label_text` color.
+3. Actual `#F97316` is the Activating `label_text` color.
 4. This is a classic stale-edit problem: the editor wrote the `Activating`
    palette but the score is `Building`. Either the editor was run with an
-   older input where this capability was below 1.5, or the editor's
+   older input where this capability was below 2.0, or the editor's
    `score_to_level_4tier` call used the wrong score.
 
 ### Example 3 — Template drift (static color changed)

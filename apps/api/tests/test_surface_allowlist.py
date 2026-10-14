@@ -114,9 +114,61 @@ def test_the_serve_rules_tag_moved():
     """The ETag carries the rules version. Changing what is served without
     changing the tag serves the old body from every cache that has one."""
     from dma_api import pages
-    assert pages.SERVE_RULES == "serve-rules@10", (
+    assert pages.SERVE_RULES.startswith("serve-rules@13."), (
         "the allowlist changed what is served; bump SERVE_RULES or caches "
         "keep answering with the body that carried the ceilings table")
+
+
+def test_the_tag_carries_the_customer_allowlist_itself():
+    """2026-10-08, First Tech: the value chain's keys joined the customer
+    allowlist (2026-10-07) and SERVE_RULES stayed @12, so every browser that
+    had opened the client heatmap sent If-None-Match, got 304 and kept the
+    stage-less body — "did not promote" on a section the API was serving.
+    The tag now fingerprints customer_allowlist.json, so the next change to
+    what a client may receive moves the tag without anyone remembering to."""
+    import hashlib
+    from dma_api import pages
+    allow = Path(pages.__file__).with_name("customer_allowlist.json")
+    want = hashlib.sha256(allow.read_bytes()).hexdigest()[:8]
+    assert pages.SERVE_RULES.endswith("." + want)
+    assert pages._allowlist_fingerprint() == want
+
+
+def test_serve_rules_13_names_the_client_value_chain():
+    from dma_api import pages
+    src = Path(pages.__file__).read_text()
+    block = src[src.index("#   @13 "):src.index("SERVE_RULES = f")]
+    for needle in ("value chain", "chains", "SERVER_DERIVED", "304"):
+        assert needle in block, f"@13 does not name {needle!r}"
+
+
+def test_serve_rules_12_is_one_bump_naming_every_round1_body_change():
+    """2026-10-04: five fix branches changed customer bodies under an unmoved
+    promoted_at and were merged before any deploy. They share ONE bump — a
+    second (@13) would be a version no reader ever held — and its policy
+    comment names each change, so the next reader of the tag can say what a
+    body cached under @11 is missing."""
+    import re
+    src = (Path(__file__).resolve().parents[1] / "dma_api"
+           / "pages.py").read_text()
+    # @12 deployed 2026-10-04; @13 is the one bump after it (value chain).
+    assert len(re.findall(r"#\s+@13\b", src)) == 1, "one @13 entry"
+    assert not re.search(r"#\s+@1[4-9]\b", src)
+    block = src[src.index("#   @12 "):src.index("#   @13 ")]
+    for change, needle in (
+            ("decision 1, reduced sentiment card", "overview.sentiment"),
+            ("decision 1, reduced sentiment card", "REDUCED card"),
+            ("D4 techstack filter", "D4"),
+            ("D4 techstack filter", "CONFIRMED and ABSENT"),
+            ("estate_reach over-redaction", "estate_reach"),
+            ("H5 withheld-target gate rows", "D-34"),
+            ("split-span evidence scope", "customer attribution"),
+            ("split spans bound to the promotion", "attribution_bound"),
+            ("P3 landscape GAPS detail", "_gaps_detail"),
+            ("P3 landscape GAPS detail", "GAPS tile"),
+            ("enrichment count rule", "STATED values"),
+            ("context tile state", "context_tiles[].state")):
+        assert needle in block, f"@12 does not name {change} ({needle!r})"
 
 
 def test_build_page_has_no_fail_open_audience_default():

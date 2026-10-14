@@ -51,21 +51,66 @@ try:
 except ImportError:
     jsonschema = None
 
+# The workbook's sheet contract and the manifest schema are the engine's
+# (skills/dma-research/engine): one owner for both. Measured 28-09-2026
+# (QA audit F-J01-006 / F-N01-019): this script required v3-era tab names
+# and a manifest shape no writer produced, so every v7 run failed it.
+_ENGINE_ROOT = Path(__file__).resolve().parents[2] / "dma-research"
+if str(_ENGINE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ENGINE_ROOT))
+try:
+    from engine import assemble as _assemble
+    from engine import contract as _contract
+except Exception as _e:                                          # noqa: BLE001
+    sys.exit(f"{Path(__file__).name}: the engine (skills/dma-research/engine) "
+             f"is not importable, so neither the sheet contract nor the manifest "
+             f"schema can be read: {_e}")
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
+#: The tabs an audit needs, by their CANONICAL v7 names. Each is resolved
+#: through the engine's contract (`resolve_tab`), so a package carrying the
+#: legacy governance name (P1_Scoring_Detail, Evidence_Index, Summary,
+#: QA_Validation_Log) or an ingest alias (Evidence_Master, ...) still
+#: resolves. Calculation_Chain, Contradiction_Log and Absent_Evidence_Log
+#: have no v7 sheet: the checks that read them report NOT_RUN; they are not
+#: required.
 REQUIRED_WORKBOOK_TABS = [
-    "Summary", "Calculation_Chain",
-    "P1_Scoring_Detail", "P2_Scoring_Detail",
-    "P3_Scoring_Detail", "P4_Scoring_Detail",
-    "Evidence_Index", "Caps_Applied_Log",
-    "Contradiction_Log", "Absent_Evidence_Log",
-    "QA_Validation_Log",
+    "Pillar_Summary",
+    "P1_Subcap_Scoring", "P2_Subcap_Scoring",
+    "P3_Subcap_Scoring", "P4_Subcap_Scoring",
+    "Evidence_Detail", "Caps_Applied_Log", "Gate_Log",
 ]
 
 PILLAR_NAMES = ["P1", "P2", "P3", "P4"]
 
-SCORING_DETAIL_SHEETS = [f"{p}_Scoring_Detail" for p in PILLAR_NAMES]
+#: This skill's own output schemas, loaded and applied rather than cited.
+SCHEMA_DIR = Path(__file__).resolve().parents[1] / "schemas"
+
+
+def schema_problems(doc, schema_name: str) -> list[str]:
+    """Every way `doc` departs from schemas/<schema_name>, or []. Without
+    jsonschema the one entry says the check did not run."""
+    if jsonschema is None:
+        return [f"NOT_RUN: jsonschema is not installed, {schema_name} was not applied"]
+    schema = json.loads((SCHEMA_DIR / schema_name).read_text(encoding="utf-8"))
+    v = jsonschema.Draft7Validator(schema)
+    return [f"{'/'.join(str(p) for p in e.absolute_path) or '<root>'}: {e.message}"
+            for e in sorted(v.iter_errors(doc), key=lambda e: [str(p) for p in e.absolute_path])]
+
+
+SCORING_DETAIL_SHEETS = [f"{p}_Subcap_Scoring" for p in PILLAR_NAMES]
+
+
+def resolve_tab(wb, wanted):
+    """The tab in `wb` that IS the canonical sheet `wanted`, or None."""
+    return _contract.resolve_tab(list(wb.sheetnames), wanted)
+
+
+def scoring_sheets(wb):
+    """The actual tab names of the pillar scoring sheets the workbook has."""
+    return [n for n in (resolve_tab(wb, c) for c in SCORING_DETAIL_SHEETS) if n]
 
 VALID_CAP_TYPES = {
     "EVIDENCE_CEILING", "SENTIMENT", "REGULATORY",
@@ -257,28 +302,35 @@ def run_input_validation(files, manifest, wb):
                             "Generate run_manifest.json from Layer 1"))
         return results, issues  # Fatal — stop
 
-    # IV-02: schema valid (check required top-level keys)
-    required_keys = {"run_id", "institution_name", "sub_vertical", "overall_score",
-                     "pillar_scores", "evidence_count"}
-    manifest_keys = set(manifest.keys()) if manifest else set()
-    missing = required_keys - manifest_keys
-    if not missing:
-        results.append(CheckResult("IV-02", "PASS", "CRITICAL", "run_manifest schema valid"))
+    # IV-02: the manifest is the engine's (run_manifest_v3) and satisfies the
+    # engine's schema — the ONE schema, checked the way its writer checks it.
+    problems = _assemble.validate_manifest(manifest)
+    if not problems:
+        results.append(CheckResult("IV-02", "PASS", "CRITICAL", "run_manifest schema valid",
+                                   _assemble.MANIFEST_SCHEMA_VERSION))
     else:
         results.append(CheckResult("IV-02", "FAIL", "CRITICAL", "run_manifest schema valid",
-                                   f"Missing keys: {missing}"))
+                                   "; ".join(problems)[:400]))
         issues.append(Issue("CRITICAL", "INPUT_VALIDATION", "IV-02", "run_manifest.json",
-                            f"Missing required fields: {missing}",
-                            "Key check", "Add missing fields to manifest"))
+                            f"{len(problems)} schema violation(s): {problems[0][:160]}",
+                            f"engine/schemas/run_manifest.schema.json "
+                            f"({_assemble.MANIFEST_SCHEMA_VERSION})",
+                            "Write the manifest with engine.assemble (package / "
+                            "checkpoint / the governance exporter); a hand-built "
+                            "or run_manifest_v2 file is not one"))
 
     # IV-03: overall score matches pillar weighted average
-    if manifest and "pillar_scores" in manifest and "overall_score" in manifest:
-        pillars = manifest["pillar_scores"]
+    _scores = (manifest or {}).get("scores") or {}
+    if not _scores or _scores.get("overall") is None:
+        results.append(not_run("IV-03", "Overall score matches pillar average",
+                               "the manifest's scores are null: the run is not scored"))
+    else:
+        pillars = _scores.get("pillars") or {}
         if isinstance(pillars, dict) and len(pillars) >= 4:
-            pillar_vals = [float(pillars.get(p, 0)) for p in PILLAR_NAMES]
+            pillar_vals = [float(pillars.get(p) or 0) for p in PILLAR_NAMES]
             # Default equal weights if not specified
             computed = sum(pillar_vals) / len(pillar_vals)
-            overall = float(manifest["overall_score"])
+            overall = float(_scores["overall"])
             delta = abs(computed - overall)
             if delta <= 0.02:
                 results.append(CheckResult("IV-03", "PASS", "CRITICAL",
@@ -294,13 +346,10 @@ def run_input_validation(files, manifest, wb):
                     "Recalculate overall from pillar scores with correct weights"))
 
     # IV-04: evidence total = sum of tier distribution
-    if manifest and "evidence_count" in manifest:
-        # Try both flat and nested formats
-        total = int(manifest.get("evidence_count", 0))
-        tier_dist = manifest.get("tier_distribution", {})
-        if not tier_dist:
-            em = manifest.get("evidence_metrics", {})
-            tier_dist = em.get("tier_distribution", {})
+    _em = (manifest or {}).get("evidence_metrics") or {}
+    if manifest and "total_items" in _em:
+        total = int(_em.get("total_items") or 0)
+        tier_dist = _em.get("tier_distribution") or {}
         if tier_dist:
             tier_sum = sum(int(v) for v in tier_dist.values())
             if tier_sum == total:
@@ -330,8 +379,7 @@ def run_input_validation(files, manifest, wb):
 
     # IV-08: Workbook present with required tabs
     if wb:
-        present_tabs = set(wb.sheetnames)
-        missing_tabs = [t for t in REQUIRED_WORKBOOK_TABS if t not in present_tabs]
+        missing_tabs = [t for t in REQUIRED_WORKBOOK_TABS if not resolve_tab(wb, t)]
         if not missing_tabs:
             results.append(CheckResult("IV-08", "PASS", "CRITICAL",
                 "Workbook has all required tabs"))
@@ -360,11 +408,9 @@ def run_input_validation(files, manifest, wb):
             "Provide assessment report draft (.docx)"))
 
     # IV-10: Rubric version match (manifest vs workbook Summary)
-    if wb and manifest and "Summary" in wb.sheetnames:
-        summary_data, _ = sheet_to_dicts(wb["Summary"])
-        # Try to find version info in summary — implementation depends on workbook format
-        manifest_version = str(manifest.get("assessment_skill_version",
-                               manifest.get("versions", {}).get("rubric", "unknown")))
+    if wb and manifest and resolve_tab(wb, "Pillar_Summary"):
+        summary_data, _ = sheet_to_dicts(wb[resolve_tab(wb, "Pillar_Summary")])
+        manifest_version = str(manifest.get("engine_version") or "unknown")
         results.append(CheckResult("IV-10", "PASS", "HIGH",
             "Rubric version check", f"Manifest version: {manifest_version} (manual verify recommended)"))
 
@@ -380,9 +426,7 @@ def run_score_integrity(wb):
     all_rationales = []
     pillar_subcaps = defaultdict(list)
 
-    for sheet_name in SCORING_DETAIL_SHEETS:
-        if sheet_name not in wb.sheetnames:
-            continue
+    for sheet_name in scoring_sheets(wb):
         pillar = sheet_name.split("_")[0]  # P1, P2, P3, P4
         rows, headers = sheet_to_dicts(wb[sheet_name])
         for row in rows:
@@ -820,9 +864,7 @@ def run_evidence_traceability(wb, evidence_index_rows):
     # Collect all evidence IDs cited in scoring sheets
     cited_ids = set()
     subcap_evidence = defaultdict(set)
-    for sheet_name in SCORING_DETAIL_SHEETS:
-        if sheet_name not in wb.sheetnames:
-            continue
+    for sheet_name in scoring_sheets(wb):
         rows, _ = sheet_to_dicts(wb[sheet_name])
         for row in rows:
             sid = None
@@ -899,9 +941,7 @@ def run_evidence_traceability(wb, evidence_index_rows):
 
     # ET-05: Evidence_Tier in scoring matches Evidence_Index tier
     tier_mismatches = []
-    for sheet_name in SCORING_DETAIL_SHEETS:
-        if sheet_name not in wb.sheetnames:
-            continue
+    for sheet_name in scoring_sheets(wb):
         rows, _ = sheet_to_dicts(wb[sheet_name])
         for row in rows:
             for k, v in row.items():
@@ -946,9 +986,7 @@ def run_aggregation_checks(wb):
     subcap_data = defaultdict(list)  # capability_id -> [subcap rows]
     pillar_subcaps = defaultdict(list)
 
-    for sheet_name in SCORING_DETAIL_SHEETS:
-        if sheet_name not in wb.sheetnames:
-            continue
+    for sheet_name in scoring_sheets(wb):
         pillar = sheet_name.split("_")[0]
         rows, _ = sheet_to_dicts(wb[sheet_name])
         for row in rows:
@@ -1410,9 +1448,7 @@ def run_confidence_ers_checks(wb, evidence_index_rows):
     issues = []
 
     all_subcaps = []
-    for sheet_name in SCORING_DETAIL_SHEETS:
-        if sheet_name not in wb.sheetnames:
-            continue
+    for sheet_name in scoring_sheets(wb):
         rows, _ = sheet_to_dicts(wb[sheet_name])
         all_subcaps.extend(rows)
 
@@ -1568,9 +1604,7 @@ def run_distributional_checks(wb):
     pillar_rationales = defaultdict(list)
     all_evidence_citations = Counter()
 
-    for sheet_name in SCORING_DETAIL_SHEETS:
-        if sheet_name not in wb.sheetnames:
-            continue
+    for sheet_name in scoring_sheets(wb):
         pillar = sheet_name.split("_")[0]
         rows, _ = sheet_to_dicts(wb[sheet_name])
 
@@ -1754,9 +1788,7 @@ def run_distributional_checks(wb):
     # DC-07: Score-Confidence Alignment
     high_score_low_conf = 0
     low_score_high_conf = 0
-    for sheet_name in SCORING_DETAIL_SHEETS:
-        if sheet_name not in wb.sheetnames:
-            continue
+    for sheet_name in scoring_sheets(wb):
         rows, _ = sheet_to_dicts(wb[sheet_name])
         for row in rows:
             score_val = None
@@ -2015,10 +2047,12 @@ def generate_qa_verdict(manifest, all_results, all_issues, verdict, recommendati
         narrative_result = "PASS_WITH_NOTES"
 
     qa_verdict = {
-        "run_id": manifest.get("run_id", "DMA-XXXX-00000000-0000"),
-        "institution_name": manifest.get("institution_name", "Unknown"),
+        "run_id": manifest.get("run_id") or "UNKNOWN",
+        "institution_name": ((manifest.get("institution") or {}).get("name")
+                             if isinstance(manifest.get("institution"), dict)
+                             else None) or "Unknown",
         "audit_date": datetime.utcnow().isoformat() + "Z",
-        "governance_skill_version": "2.1",
+        "governance_skill_version": _contract.plugin_version() or "unknown",
         "verdict": verdict,
         "recommendation": recommendation,
         "issue_count_by_severity": {
@@ -2043,19 +2077,19 @@ def generate_qa_verdict(manifest, all_results, all_issues, verdict, recommendati
         },
         "distributional_flags": dist_flags,
         "proof_verification": {
-            "PV01_structure_complete": "PENDING_LLM_PASS2",
-            "PV02_rule_links_valid": "PENDING_LLM_PASS2",
-            "PV03_counterclaim_documented": "PENDING_LLM_PASS2",
+            "PV01_structure_complete": NOT_RUN,
+            "PV02_rule_links_valid": NOT_RUN,
+            "PV03_counterclaim_documented": NOT_RUN,
             "proof_issues": [],
         },
         "critic_resolution": {
-            "CR01_findings_addressed": "PENDING_LLM_PASS2",
+            "CR01_findings_addressed": NOT_RUN,
             "critic_issues": [],
         },
         "narrative_audit_result": narrative_result,
         "narrative_issues": narrative_issues,
         "sign_off": {
-            "auditor_id": "gov_auditor_v2.1_automated",
+            "auditor_id": f"gov_auditor_v{_contract.plugin_version() or 'unknown'}_automated",
             "auditor_name": "DMA Governance Auditor (Pass 1 — Automated)",
             "organization": "DMA Program",
             "verdict_date": datetime.utcnow().isoformat() + "Z",
@@ -2187,11 +2221,17 @@ def run_audit(assessment_dir, output_dir=None):
             writer.writerow(issue.to_csv_row())
     print(f"📄 {issues_path}")
 
-    # 3. audit_summary.json
+    # 3. audit_summary.json — after the verdict has been built and checked
+    # against its schema, so the summary can say whether it conforms.
+    qa_verdict = generate_qa_verdict(manifest, all_results, all_issues, verdict, recommendation)
+    # Conformance to schemas/qa_verdict.schema.json is CHECKED, not asserted
+    # in a docstring: until 28-09-2026 the schema had no loader (F-J02-011).
+    violations = schema_problems(qa_verdict, "qa_verdict.schema.json")
     summary = {
         "audit_date": datetime.utcnow().isoformat() + "Z",
+        "qa_verdict_schema_violations": violations,
         "assessment_dir": str(assessment_dir),
-        "governance_skill_version": "2.1",
+        "governance_skill_version": _contract.plugin_version() or "unknown",
         "checks_run": len(all_results) - len(not_ran),
         "checks_declared": len(all_results),
         "checks_passed": total_pass,
@@ -2221,12 +2261,16 @@ def run_audit(assessment_dir, output_dir=None):
         json.dump(summary, f, indent=2)
     print(f"📄 {summary_path}")
 
-    # 4. qa_verdict.json (schema-compliant — Pass 1 fields populated, Pass 2 fields pending)
-    qa_verdict = generate_qa_verdict(manifest, all_results, all_issues, verdict, recommendation)
+    # 4. qa_verdict.json (Pass 1 fields populated; Pass 2 fields NOT_RUN until the LLM pass)
     verdict_path = output_dir / "qa_verdict.json"
     with open(verdict_path, "w") as f:
         json.dump(qa_verdict, f, indent=2)
     print(f"📄 {verdict_path}")
+    if violations:
+        print("gov_auditor: qa_verdict.json departs from schemas/qa_verdict.schema.json:",
+              file=sys.stderr)
+        for v in violations:
+            print(f"  {v}", file=sys.stderr)
 
     return summary
 

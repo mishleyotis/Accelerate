@@ -263,3 +263,19 @@ def test_reused_local_id_with_changed_content_never_aliases(conns):
     cur.execute("""SELECT DISTINCT e_id FROM evidence_subcap_links
                     WHERE run_id = %s""", (res2.run_id,))
     assert [r[0] for r in cur.fetchall()] == ["E-SDB-001-R2"]
+
+
+def test_the_raw_composite_is_kept_beside_the_2dp_one(conns):
+    """0064, owner decision A: `runs.composite` stays NUMERIC(4,2), rounded
+    once here, and `runs.composite_raw` keeps what the workbook states, so a
+    band read from it is the band of the raw score. 1.996 rounds to 2.00 and
+    would band Building; the raw value bands Activating."""
+    worker, _admin = conns
+    wb = _workbook()
+    wb.composite = Decimal("1.996")
+    res = persist_package(worker, manifest=MANIFEST, workbook=wb,
+                          source_folder_id="synthetic", evidence=EVIDENCE)
+    cur = worker.cursor()
+    cur.execute("""SELECT composite, composite_raw, composite_raw_backfilled
+                     FROM runs WHERE id = %s""", (res.run_id,))
+    assert [str(v) for v in cur.fetchone()] == ["2.00", "1.996", "False"]

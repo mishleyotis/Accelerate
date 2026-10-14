@@ -1,7 +1,6 @@
 # Evidence Methodology & Quality Framework
 
-Read this file at the START of Batch 1 before collecting any evidence, and reference
-continuously during Batches 2-3 (subcap research). This file governs HOW evidence is
+Read this file before your first card, and refer to it while working cells. This file governs HOW evidence is
 collected, extracted, classified, scored, and stored.
 
 ---
@@ -31,10 +30,21 @@ ERS ranges from 1.0 (lowest quality) to 5.0 (highest quality).
 | T5 — Marketing/Claims | 1.0 | Explicitly promotional, no accountability |
 
 **Critical Tier Classification Rules:**
-- **Hubbl scans, BuiltWith, Wappalyzer = T1** (machine-generated, timestamped, objective)
+- **Hubbl scans, BuiltWith, Wappalyzer = T1** (machine-generated, timestamped, objective) — the ledger refuses a scan source at any other tier (`contract.SCAN_TIER`) and the connector's ET-11 refuses it at submit
 - **Structured discovery notes with specific tech/metrics = T2** (formal engagement outputs)
 - **NEVER classify Hubbl as T4.** This is the most common misclassification — it suppresses
   scores via T4 ceilings when the data is actually machine-verified deployment evidence.
+- **The entity's own domain is never T1.** T1 is the regulator's or auditor's copy of a
+  filing (FDIC/NCUA/SEC/state register). The entity's own annual report, investor page,
+  press release or policy page is **T2** (official disclosure); its product, about and
+  careers pages are **T5** (marketing). The ledger refuses a public T1 whose URL sits on
+  the Firmographics `website` host (Arbor Bank, 2026-10-06: six own-site pages filed T1
+  carried FACT labels and lifted ceilings a marketing page cannot carry), and the
+  assessment caps a cell whose every source is the own site (CAP-OWN).
+- **A mis-filed tier is re-tiered, never edited in the sheet:** `python3 -m engine.cli
+  retier --run <R> --e-id E-NNN --tier T2 --reason "<the rung it sits on>"` re-derives
+  the claim label (a FACT cannot rest on T3 or weaker), recomputes ERS for the register,
+  and writes a Provenance row and a non-blocking `RETIER` Gate_Log row.
 
 **Recency Score** (weight: 25%):
 | Age | Score | Label |
@@ -136,10 +146,10 @@ E-015: Gesa Credit Union Annual Report 2024 (T2, CURRENT) [KB-US-050]
     → Specificity: 4.0 (specific, documented absence)
 ```
 
-### Key Principle: One `web_fetch` on a Rich Document Can Populate 20+ Subcaps
+### Key Principle: One Rich Document Can Populate 20+ Subcaps
 
-This is why `web_fetch` on annual reports, 10-Ks, investor presentations, and regulatory
-filings is critical. A single rich document yields multiple high-ERS facts mapped across
+This is why reading annual reports, 10-Ks, investor presentations, and regulatory
+filings (as windows, through `engine.cli fetch`) is critical. A single rich document yields multiple high-ERS facts mapped across
 pillars. Always prioritize fetching these document types when found in search results.
 
 **Documents Worth Fetching in Full**:

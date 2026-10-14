@@ -870,11 +870,11 @@
 
   /* ── Financial trajectory ──────────────────────────────────────────
      SOURCE: 00_entity_profile/financial_baseline.json + entity_profile.json
-     FIELDS: total_assets[], net_income[], nim[], employees, branches, fy[] */
+     FIELDS: series_values[] (total assets here), net_income[], nim[], employees, branches, fy[] */
   const FINANCIALS = {
     "fce-001": {
       currency: "USD", unit: "B", fy: ["FY2021","FY2022","FY2023","FY2024","FY2025"],
-      total_assets: [9.8, 10.4, 11.1, 11.6, 12.2],     // $B
+      series_values: [9.8, 10.4, 11.1, 11.6, 12.2],     // $B
       net_income_m: [188, 214, 199, 221, 243],          // $M
       nim_pct: [3.05, 3.12, 2.98, 3.04, 3.10],
       employees: [1640, 1680, 1710, 1755, 1788],
@@ -1225,7 +1225,8 @@
     getInsight: id => (LIVE ? (liveField(null, "insightCards") || [])
                             : INSIGHT_CARDS).find(c => c.id === id),
     getEvidence: id => (LIVE ? (liveField(null, "evidence") || [])
-                             : EVIDENCE).find(e => e.id === id),
+                             : EVIDENCE).find(e => e.id === id
+                               || (e.aliases || []).includes(id)),
     getSubcap: (entity, id) => entity && entity.subcaps ? entity.subcaps.find(s => s.id === id) : null,
     getCategory: id => CATEGORIES.find(c => c.id === id),
     getPlatform: id => PLATFORMS.find(p => p.id === id),

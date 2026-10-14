@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /internal/
+Disallow: /events
+Sitemap: https://www.example-fcu.test/sitemap.xml

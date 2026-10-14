@@ -356,7 +356,7 @@ Sheets match the proven CFC workbook structure:
 | SCR_01 | Subcap Count Validation | Phase 4 | Scoring | PASS | 847 subcaps scored (target 851 ±5%) | N/A | Row count within tolerance |
 | SCR_05 | Caps Applied Correctly | Phase 4 | Scoring | PASS | 23 caps applied, all documented in Caps_Applied_Log, raw_score > cap_ceiling verified | N/A | All caps verified |
 | OUT_05 | No Generic Statements | Phase 7 | Output | WARNING | One instance: "Strong governance structure" in P1C2 narrative (should be "governance structure demonstrating documented risk oversight per [evidence]") | Corrected narrative | 1 generic phrase rewritten |
-| WB_07 | Entity Folder Saved | Phase 8 | Workbook | PASS | Workbook saved to /home/claude/dma_assessments/[ENTITY]_DMA/outputs/ and /mnt/user-data/outputs/ | N/A | Both locations verified |
+| WB_07 | Entity Folder Saved | Phase 8 | Workbook | PASS | Workbook saved under the run root's `09_deliverables/` | N/A | Location verified |
 
 **Column Definitions:**
 

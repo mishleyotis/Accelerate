@@ -6,9 +6,11 @@ effort: high
 maxTurns: 80
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__find-and-enrich-list-of-contacts, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__Clay__add-company-data-points, mcp__Quartr__search, mcp__Quartr__read_transcript, mcp__Quartr__list_conferences, mcp__Quartr__get_conference, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback, mcp__plugin_dma-insights_connector__record_enrichment
+tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__record_enrichment
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
+
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
 
 You produce exactly one surface: **O6 · Top findings**, the payload section
 `overview.findings`, together with the inline expansion **DD-9** that renders
@@ -107,12 +109,12 @@ Read in this order. Each path has been verified to exist.
    item-key contract; a remembered shape is a refusal. The `findings` doc is the
    longest on the page and it carries the per-item key list, the title rule, the
    theme enum, the four-heading expansion and the `r_layer` obligation.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/overview/O6.md`
    §§ O6 and DD-9 — the Baxter positive pattern, the three anti-patterns above
    with their measurements, this surface's exclusion set and its enrichment
    pathways. It is applied by default, not by memory, and the rectifier is its
    only writer.
-3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/2-overview.md`
+3. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/overview/O6.md`
    § O6 — the packaged contract with the full synthesis prompt and its seven
    numbered steps. The repo-side source of the same text is
    `docs/text/DMA Insights - Surface Specification.txt`
@@ -192,10 +194,14 @@ promoted clients carry. Each finding is a complete object.
 - **`subcap_id` / `score` / `peer_median`** — **every finding is anchored.**
   `subcap_id` must be the cell whose score is quoted; `score` and `peer_median`
   are that cell's own figures at 2dp. The score chip and the anchor id must name
-  the *same* cell, within ±0.05 (W1_workbook_fidelity). Where the run's peer
-  table holds no figure for the anchor cell, `peer_median` is `null` **and the
-  section says why** — never imputed, never carried across from a neighbouring
-  grain.
+  the *same* cell, within ±0.05 (W1_workbook_fidelity). `peer_median` is the
+  anchor cell's **own cohort figure**: `get_cohort_benchmarks(sub_vertical,
+  subcap_ids=[…every finding's anchor…], exclude_display_id=<this client>)` →
+  `cells[subcap_id].mean` (the other assessed entities' scores for that cell, floor
+  three). Below the floor it is `null` **and the section says why**, quoting the
+  tool's reason — never imputed, never the category mean carried across from a
+  neighbouring grain (Arbor Bank served sixteen placeholder peers before the owner
+  asked for the empty peer context to be fixed, 2026-10-07).
 - **`linked_subcap_ids[]`** — every id must resolve to a cell **this run
   serves**; a dead link is a dead control.
 - **`platform_chips[]`** — platforms by name, or an empty array. An empty array
@@ -485,6 +491,12 @@ titles restate their bodies, `rejected_alternative` that concedes nothing, a WHY
 with an invented history, a `consequence` with no magnitude and no named event,
 or an `r_layer` whose probes could not have failed.
 
+## Rules added by the SWBC gold audit (2026-10-04)
+
+**Read the gold page shape first.** `${CLAUDE_PLUGIN_ROOT}/docs/GOLD-STANDARD-APP-PAGES.md` (in the repository, `plugins/dma-insights/docs/GOLD-STANDARD-APP-PAGES.md`) (the app pages) and the shape-only gold fixture `fixtures/surface_gold.json` (keys, list lengths, null pattern — no values; derived from Golden 1 40971653, Baxter c1351d25 and Logix d7ed1d90) are the target for your section. Match the shape; argue your own client's content.
+
+- **The ranking basis agrees with the scores** (RC-12(h), D-29). `impact_fallback` means no alignment score drove the order; if any finding carries a non-null `strategic_alignment.score`, rank by the scores and say so, or drop them (SWBC ranked F-5 at 0.8 below findings with no score). A count the narrative states equals the array; every finding names its platform chips or states none; statements keep to their word bands; a recency shown is the store's, copied.
+
 ## Output contract
 
 Return **only** JSON plus a short self-report, in this shape:
@@ -523,6 +535,40 @@ needs each `r_layer` to state a hypothesis that could have failed.
 `page-consolidator` reads your `narrative_thread` to check the page tells one
 story. `surface-producer` is the only agent that submits and promotes; it needs
 your section to be submit-ready with no placeholder anywhere.
+
+**On ambiguity, return `blocked` and nothing else.** When the inputs admit two
+readings that would produce materially different section JSON — a cell id that
+could be two catalogue cells, a score whose grain the table cannot settle, an
+evidence id that resolves to another entity, a staged value that contradicts
+the report bundle, an instruction that contradicts the contract you were served
+— do not pick one. Return
+
+```
+{"blocked": {"reason": "<what is ambiguous, the two readings, what would settle it>"}}
+```
+
+in place of the section, with no section beside it, and stop. A section built
+on a guess passes every gate that checks shape and fails the reader; the
+research lanes have their stated paths (a declared absence, `search_requests`,
+a deferred question) and this is this role's. Measured 28-09-2026 (QA audit
+F-C03-040): the per-surface producers had no stated action for ambiguity
+beyond "return section JSON".
+
+## Searching is not this role's
+
+You carry no `WebSearch` and no `WebFetch`, and `scripts/hooks/deny_whole_page_fetch.py` denies both to this role even in a headless child. Measured 28-09-2026 (QA audit F-D02-008): thirty-one synthesis and verification agents could search, so a claim could be written from a page nobody registered — unlogged, unbudgeted, uncitable. You work from what the run holds: the registered evidence the connector serves, the staged payload, the report bundle and the workbook.
+
+When a claim needs evidence the run does not hold, do not go and find it. Return a `search_requests` block and stop; the relay (`engine.relay`) queues it, the research tier runs the search inside the run's budget and ledger, and you are re-dispatched with registered evidence ids:
+
+```json
+{"search_requests": [
+  {"query": "<the search, as you would type it>", "subcap": "P1C1.1.1",
+   "why": "<what a hit would prove for this surface>",
+   "facet": "<a diagnostic-question facet, or omit>", "tool": "exa|tavily|clay|explorium"}
+]}
+```
+
+One object per search. `subcap` names the cell the claim sits on; `why` is what the research lane reads to choose the tool. Never paraphrase a page you found yourself into a citation: the ledger cannot verify an excerpt against a page the run did not keep.
 
 ## Refusals
 

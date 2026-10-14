@@ -6,6 +6,7 @@ verification); what tests pin here is the logic that must not drift — slug
 matching that finds exactly one client folder or refuses loudly, and the
 export mapping that keeps Google-native files downloadable.
 """
+import json
 import sys
 from pathlib import Path
 
@@ -64,6 +65,29 @@ def test_ambiguous_partials_refuse_instead_of_guessing(monkeypatch):
     with pytest.raises(SystemExit) as e:
         drive_fetch._find_client_folder("tok", "baxter-cu")
     assert "multiple" in str(e.value)
+
+
+def test_two_folders_of_one_identity_refuse_and_name_the_pin(monkeypatch):
+    monkeypatch.delenv("DMA_CLIENT_FOLDER", raising=False)
+    _with_children(monkeypatch, ["IMA Financial - DMA", "IMA Financial Group - DMA"])
+    with pytest.raises(SystemExit) as e:
+        drive_fetch._find_client_folder("tok", "IMA Financial Group")
+    assert "multiple" in str(e.value) and "DMA_CLIENT_FOLDER" in str(e.value)
+
+
+def test_the_owners_pin_chooses_and_never_redirects(monkeypatch):
+    rows = _with_children(monkeypatch, ["IMA Financial - DMA", "IMA Financial Group - DMA",
+                                        "Thrivent - DMA"])
+    monkeypatch.setenv("DMA_CLIENT_FOLDER", "IMA Financial Group - DMA")
+    assert drive_fetch._find_client_folder("tok", "IMA Financial Group")["id"] == rows[1]["id"]
+    monkeypatch.setenv("DMA_CLIENT_FOLDER", rows[0]["id"])
+    assert drive_fetch._find_client_folder("tok", "IMA Financial Group")["name"] == "IMA Financial - DMA"
+    monkeypatch.setenv("DMA_CLIENT_FOLDER", "Thrivent - DMA")
+    with pytest.raises(SystemExit, match="never redirects"):
+        drive_fetch._find_client_folder("tok", "IMA Financial Group")
+    monkeypatch.setenv("DMA_CLIENT_FOLDER", "IMA Financial Grp - DMA")
+    with pytest.raises(SystemExit, match="names no single folder"):
+        drive_fetch._find_client_folder("tok", "IMA Financial Group")
 
 
 def test_google_native_files_have_export_targets():
@@ -138,6 +162,10 @@ def test_push_memory_heals_a_variant_name(monkeypatch, tmp_path):
     import json
     monkeypatch.setattr(drive_fetch, "MEMORY_DIR", tmp_path)
     (tmp_path / "t-rowe-price-group-inc.md").write_text("# memory")
+    # the version this session pulled: the fake GET below answers {} for
+    # the remote, so the pulled md5 (None) matches and the push proceeds
+    (tmp_path / "t-rowe-price-group-inc.pulled.json").write_text(
+        json.dumps({"id": "m1", "md5Checksum": None}))
     monkeypatch.setattr(drive_fetch, "_token", lambda: "tok")
     monkeypatch.setattr(drive_fetch, "_find_client_folder",
                         lambda tok, c: {"id": "fld", "name": "T. Rowe Price - DMA"})
@@ -465,3 +493,76 @@ def test_the_taxonomy_is_never_restated_in_drive_fetch():
     for lit in literals:
         assert "10_overview" not in lit and "30_heatmap" not in lit, (
             f"the folder taxonomy is restated in a literal: {lit!r}")
+
+
+# ── F-G05-017 · the push carries the version the session pulled ──────────
+
+def _memory_push_env(monkeypatch, tmp_path, remote_md5, pulled=None):
+    import io
+    monkeypatch.setattr(drive_fetch, "MEMORY_DIR", tmp_path)
+    (tmp_path / "acme-cu.md").write_text("# memory")
+    if pulled is not None:
+        (tmp_path / "acme-cu.pulled.json").write_text(json.dumps(pulled))
+    monkeypatch.setattr(drive_fetch, "_token", lambda: "tok")
+    monkeypatch.setattr(drive_fetch, "_find_client_folder",
+                        lambda tok, c: {"id": "fld", "name": "Acme CU - DMA"})
+    monkeypatch.setattr(drive_fetch, "_find_memory_file",
+                        lambda tok, fid, c: {"id": "m1", "name": "acme-cu — synthesis memory.md"})
+    calls = []
+
+    class _Resp:
+        def __init__(self, body):
+            self.body = body
+
+        def __enter__(self):
+            return io.BytesIO(self.body)
+
+        def __exit__(self, *a):
+            return False
+
+    def fake_req(tok, url, data=None, method="GET", ctype=None):
+        calls.append((method, url))
+        if method == "GET":
+            return _Resp(json.dumps({"id": "m1", "md5Checksum": remote_md5,
+                                     "modifiedTime": "2026-09-28T10:00:00Z"}).encode())
+        return _Resp(b"{}")
+    monkeypatch.setattr(drive_fetch, "_req", fake_req)
+    return calls
+
+
+def test_a_push_without_a_pull_is_refused(monkeypatch, tmp_path):
+    import pytest
+    calls = _memory_push_env(monkeypatch, tmp_path, "abc")
+    with pytest.raises(SystemExit, match="never pulled"):
+        drive_fetch.push_memory("acme-cu")
+    assert not [c for c in calls if c[0] == "PATCH"], "nothing was written"
+
+
+def test_a_push_after_the_remote_moved_is_refused_and_force_records_it(monkeypatch, tmp_path):
+    import pytest
+    calls = _memory_push_env(monkeypatch, tmp_path, "new-md5",
+                             pulled={"id": "m1", "md5Checksum": "old-md5",
+                                     "modifiedTime": "2026-09-27T09:00:00Z"})
+    with pytest.raises(SystemExit, match="changed in Drive since it was pulled"):
+        drive_fetch.push_memory("acme-cu")
+    assert not [c for c in calls if c[0] == "PATCH"]
+    assert drive_fetch.push_memory("acme-cu", force=True) == 0
+    assert [c for c in calls if c[0] == "PATCH"], "forced: written"
+    rec = json.loads((tmp_path / "acme-cu.pulled.json").read_text())
+    assert rec["forced"] is True and rec["md5Checksum"] == "new-md5"
+
+
+def test_a_push_on_the_pulled_version_proceeds_and_re_records(monkeypatch, tmp_path):
+    calls = _memory_push_env(monkeypatch, tmp_path, "same",
+                             pulled={"id": "m1", "md5Checksum": "same"})
+    assert drive_fetch.push_memory("acme-cu") == 0
+    assert [c for c in calls if c[0] == "PATCH"]
+    rec = json.loads((tmp_path / "acme-cu.pulled.json").read_text())
+    assert rec["md5Checksum"] == "same" and rec["forced"] is False
+
+
+def test_pull_records_the_version_it_landed():
+    src = Path(drive_fetch.__file__).read_text()
+    body = src[src.index("def pull("):src.index("def pull_ledgers(")]
+    assert "_record_pulled(_slug(client), _file_version(tok, mem[\"id\"]))" in body
+    assert "--force" in src and "push_memory(a.client, force=a.force)" in src

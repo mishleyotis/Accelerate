@@ -148,10 +148,17 @@ def test_excluded_sections_stay_out_of_the_census(census):
 
 def test_exclusions_match_the_api_never_served_allowlist(census):
     """The plugin census and the serving boundary must agree, both ways."""
-    text = REDACTION.read_text()
-    block = text[text.index("NEVER_SERVED = frozenset(("):]
-    block = block[:block.index("))")]
-    api_side = set(re.findall(r'\("([a-z_]+)",\s*"([a-z_]+)"\)', block))
+    # The set the api serves from is defined once, in
+    # packages/shared/internal_ids.py (redaction.py re-exports it, and the
+    # connector's CG-52 reads it too) — read the VALUE, not the source text.
+    import importlib.util
+    shared = REDACTION.parents[3] / "packages" / "shared" / "internal_ids.py"
+    spec = importlib.util.spec_from_file_location("_internal_ids_census", shared)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert "NEVER_SERVED = internal_ids.NEVER_SERVED" in REDACTION.read_text(), (
+        "redaction.py no longer serves the shared NEVER_SERVED set")
+    api_side = set(mod.NEVER_SERVED)
     census_side = {(page, name)
                    for page, names in census["excluded"].items()
                    if not page.startswith("_")

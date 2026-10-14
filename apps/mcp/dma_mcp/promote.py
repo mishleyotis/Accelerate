@@ -20,6 +20,8 @@ from collections import Counter
 from pathlib import Path
 
 from . import ledger
+from . import promote_checks
+from . import rejections
 from .contracts import PAGES, SERVING_TABLES
 from .validation import validate_pass1
 
@@ -133,6 +135,23 @@ def _value(source, ctx, section, item):
     raise ValueError(f"unknown source {source!r}")
 
 
+def _package_aliases(cur, entity_id) -> dict:
+    """package_local_id -> stored e_id for this entity (evidence_package_ids,
+    0036). Empty when the entity has no mappings or the table cannot be
+    read — an unmapped id is then written as given and the FK still judges
+    it, so the fallback never widens what promotes."""
+    if not entity_id:
+        return {}
+    try:
+        cur.execute("SELECT package_local_id, e_id FROM evidence_package_ids "
+                    "WHERE entity_id = %s", (entity_id,))
+        rows = cur.fetchall() or []
+    except Exception:                              # noqa: BLE001
+        return {}
+    return {str(a): str(b) for a, b in rows
+            if isinstance(a, str) and isinstance(b, str) and a != b}
+
+
 def _expand_h4_maps(section_payload: dict) -> list:
     """heatmap.workbook_scores: the contract's two required fields are
     OBJECT MAPS (pillars {P1..: {...}}, categories {PxCy: {...}}), not a
@@ -163,7 +182,7 @@ def _promoted_sections(live):
                     yield (page, name)
 
 
-def promote_run(conn, run_id) -> dict:
+def promote_run(conn, run_id, expected_revision=None) -> dict:
     registry = writer_registry()
     cur = conn.cursor()
     try:
@@ -174,6 +193,20 @@ def promote_run(conn, run_id) -> dict:
             conn.rollback()
             return {"promoted": False, "error": "unknown_run"}
         entity_id = row[0]
+
+        # IS THIS CONNECTOR THE ONE THE REPOSITORY'S GATES ASSUME? MEM-0039,
+        # MEM-0562: "fixed" was asserted from the repository while production
+        # ran an older copy, and a promote was nearly made against it. The
+        # connector cannot see the repository, so the caller states what its
+        # gates assumed (`expected_revision`, from
+        # promote_checks.local_revision); a mismatch refuses before anything
+        # is read. Without one the check is RECORDED as unchecked on the
+        # result — never reported as a match.
+        revision_refusal, revision_record = \
+            promote_checks.revision_check(expected_revision)
+        if revision_refusal:
+            conn.rollback()
+            return revision_refusal
 
         cur.execute(
             """SELECT enum_label(page), enum_label(status), id, payload,
@@ -246,9 +279,27 @@ def promote_run(conn, run_id) -> dict:
         refusing = {}
         families: dict = {}          # page -> {gate_id: count}, complete
         totals: dict = {}            # page -> how many blocking reasons
+        # …AND WHAT PASS 1 CANNOT SEE (RC-13, SWBC gold audit 2026-10-04).
+        # validate_pass1 is pure; the checks that depend on the world — the
+        # fit engine today (CG-30/CG-31), the run's own status (CG-STALE),
+        # the committed gold shape (CG-PAR) — ran once at submit, or never,
+        # and were carried forward on retained rows. They join pass 1's
+        # reasons per page and refuse the same way. promote_checks.py.
+        for sub in live.values():
+            sub["payload"] = promote_checks.payload_json(sub["payload"])
+        try:
+            world, world_report = promote_checks.extra_reasons(conn, run_id,
+                                                               live)
+        except Exception as exc:                  # noqa: BLE001
+            world = {p: [{"gate_id": "revalidation", "severity": "block",
+                          "message": f"the promote-time re-checks raised "
+                                     f"{type(exc).__name__}; unchecked is "
+                                     "not clean"}] for p in live}
+            world_report = {"error": str(exc)[:200]}
         for page, sub in sorted(live.items()):
             try:
-                now = validate_pass1(page, sub["payload"] or {})
+                now = validate_pass1(page, sub["payload"] or {}) \
+                    + world.get(page, [])
             except Exception as exc:      # noqa: BLE001
                 # A re-validation that CRASHED established nothing. It must
                 # not read as a clean page — that is the
@@ -293,6 +344,12 @@ def promote_run(conn, run_id) -> dict:
                 "blocking_total": totals,
                 "blocking_by_gate": families,
                 "truncated": {p: totals[p] > len(refusing[p]) for p in refusing},
+                # CG-PAR's measure of the whole run (structural gap count,
+                # the gold runs it was held to and the one left out, the
+                # count/fill WARNINGS, what was disclosed rather than
+                # refused) — so a parity refusal can be scoped in one read.
+                "promote_checks": world_report,
+                **revision_record,
                 "hint": (
                     "These pages hold a PASS issued by an earlier gate set and "
                     "do not pass today's. A retained verdict is a DATED "
@@ -370,6 +427,16 @@ def promote_run(conn, run_id) -> dict:
         cur.execute("""UPDATE runs SET is_active = FALSE, status = 'SUPERSEDED'
                         WHERE entity_id = %s AND is_active AND id <> %s""",
                     (entity_id, run_id))
+        # Their open rejections are no longer work (QA audit F-O04-007,
+        # 28-09-2026: 199 tickets on a superseded run led every producer
+        # session's "read this first" list for 25 days). Inside the
+        # transaction, so a rolled-back promote closes nothing; never fatal,
+        # so a bookkeeping failure cannot un-promote — it is reported.
+        closed_superseded, closed_error = [], None
+        try:
+            closed_superseded = rejections.close_superseded(cur, entity_id, run_id)
+        except Exception as e:            # noqa: BLE001 — reported, not silent
+            closed_error = str(e)[:200]
         # A successful promote is the ONLY way back from withdrawal (0042).
         # Clearing the three columns here rather than in a restore tool is
         # deliberate: a run was withdrawn because what it served was wrong,
@@ -429,7 +496,9 @@ def promote_run(conn, run_id) -> dict:
                # reads, which is the exact state that let 98 alerts reach a
                # dashboard unremarked in the first place.
                "open_alerts": alerts,
-               "stats": stats}
+               "stats": stats,
+               "promote_checks": world_report,
+               **revision_record}
         # The drift flag, DISCLOSED and never blocking. A promote carrying
         # five of seven facets forward is better than no promote; refusing it
         # would strand the five. The refusal lives on "is this client done?",
@@ -452,6 +521,9 @@ def promote_run(conn, run_id) -> dict:
             out["enrichment_error"] = str(e)[:200]
         if ledger_error:
             out["enrichment_ledger_error"] = ledger_error
+        out["rejections_closed_as_superseded"] = closed_superseded
+        if closed_error:
+            out["rejections_close_error"] = closed_error
         if refresh_error:
             out["directory_refresh_error"] = refresh_error
         if stale_verdicts:
@@ -542,6 +614,8 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
             exprs.append("%s")
             per_row_sources.append(c)
     date_leaves = _date_paths().get((writer["page"], writer["section"]), set())
+    aliases = (_package_aliases(cur, ctx.get("entity_id"))
+               if any(c["column"] == "e_id" for c in per_row_sources) else {})
     written = 0
     for item in rows:
         values = []
@@ -549,6 +623,13 @@ def _write_section(cur, writer, ctx, section_payload) -> int:
             v = _value(c["source"], ctx, section_payload, item)
             if v is ...:
                 v = None
+            if c["column"] == "e_id" and isinstance(v, str) and v in aliases:
+                # The producer cites the package-LOCAL id (E-001); the FK
+                # names the stored one (E-ARBORBAN-001). Resolved here, in
+                # the one place the column is bound, rather than by each
+                # producer remapping its rows: Arbor Bank's evidence_age
+                # promote failed on this FK with 232 rows to remap by hand.
+                v = aliases[v]
             # An envelope-only row is a carrier for the section's declared
             # absence, not a queue entry: it takes no lifecycle state, so it
             # cannot be counted as an open alert on a run that raised none.
