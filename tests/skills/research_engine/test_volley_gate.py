@@ -94,7 +94,12 @@ def test_an_evidenced_cell_still_owes_its_volleys(tmp_path):
     # facet with no logged search, 2026-10-11) — and the gate still blocks
     rec["DQ_Value"] = "NOT_RUN: the value volley was never fired on this cell"
     rec["DQ_Corroborates"] = "NOT_RUN: the corroborates volley was never fired on this cell"
-    synthesise(wb, cell, rec)
+    # the write refuses it now, naming the gap (AAA WCNY, 2026-10-14) …
+    with pytest.raises(LedgerRefusal, match="volleys_incomplete"):
+        synthesise(wb, cell, rec)
+    # … and a row that reached the sheet around the ledger still blocks
+    wb.set_scoring(cell, {k: v for k, v in rec.items()
+                          if k != "Challenge_Verdict"})
     v = floors_gate.run(wb, "P1C1", require_synthesis=True, qa_dir=run.qa_dir)
     assert any(x["subcap"] == cell for x in v["volleys_incomplete"])
     assert "volleys_incomplete" in v["blocking"]
