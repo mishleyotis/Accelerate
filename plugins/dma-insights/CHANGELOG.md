@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **A locked peer set the owner ruled out had no path but withdrawal**
+  (`engine/prelim.py`): at AAA Western and Central New York (2026-10-14) the
+  PRELIM conductor locked five other AAA clubs and the owner ruled "No AAA
+  clubs at all"; `widen-peers` only adds and `lock_peer_set` refuses any
+  different set. `engine.prelim replace-peers` swaps the set wholesale under
+  `widen-peers`' guards — only while no Peer_Median, quartile or Peer_Scores
+  is written against it, only with the owner, reason and selection rule
+  recorded (Provenance and a non-blocking `PEER_SET_REPLACED` Gate_Log row).
+  The locked basis token stays; every grid row's `Peer_Basis` carries the
+  new rule, and every `Tech_Peer_Deployments` row about a peer outside the
+  new set is retired (counted in the Gate_Log row), so the platform page
+  never argues from a ruled-out peer. Re-asserting the locked set only
+  prunes such rows. Tests: `test_replace_peers_2026_10_14.py`.
 - **AAA Western and Central New York: 13 of 16 categories failed round 1
   on 75 cells; seven root causes now refused at the write**
   (`docs/AAA-WCNY-ROOT-CAUSES-2026-10-14.md`). Owner, 2026-10-14: "look into

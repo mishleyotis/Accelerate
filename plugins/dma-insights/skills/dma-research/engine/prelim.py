@@ -794,6 +794,86 @@ def widen_peers(wb: RunWorkbook, add: list[str], *, rule: str, owner: str,
             "categories": len([r for r in rows if _clean(r.get("Category_ID"))])}
 
 
+def replace_peers(wb: RunWorkbook, peers_: list[str], *, rule: str, owner: str,
+                  why: str) -> dict:
+    """Replace a LOCKED set wholesale, on the engagement owner's word, while
+    no peer figure has been written against it.
+
+    AAA Western and Central New York (2026-10-14): the PRELIM conductor
+    locked five other AAA clubs; the owner ruled "No AAA clubs at all" — the
+    set must be upstate NY insurance agencies instead. `widen_peers` only
+    adds, so the owner's decision had no path short of withdrawing the run.
+    The lock's reason (a cohort must not change under figures computed
+    against it) holds no less here: the same guards as `widen_peers` — every
+    Peer_Median, quartile and Peer_Scores cell blank, the owner named, the
+    reason and the new selection rule recorded in Provenance and Gate_Log.
+    The basis TOKEN stays the one locked; the rule on every grid row is the
+    new one, so no row still argues for the set it no longer names.
+
+    Tech_Peer_Deployments rows about a peer outside the new set are retired
+    (counted in the Gate_Log detail): left in place, the platform page would
+    argue "a peer runs this" from a peer the owner ruled out. Re-asserting
+    the locked set is refused unless such rows remain — then it only prunes
+    them, which is how a set replaced before this rule existed is cleaned."""
+    lock = wb.handoff_lock()
+    have = [p for p in str(lock.get("locked_peer_set") or "").split("|") if p]
+    if not have:
+        raise PrelimRefusal("no peer set is locked; freeze one with `engine.prelim peers`")
+    wanted = sorted({_clean(n) for n in peers_ if _clean(n)})
+    if not wanted:
+        raise PrelimRefusal("name the replacement peers (--peer)")
+    if len(_clean(owner)) < 3:
+        raise PrelimRefusal("name the engagement owner who approved the replacement (--owner)")
+    if len(_clean(why)) < 20:
+        raise PrelimRefusal("say why the set is replaced (--why, >=20 chars)")
+    if len(_clean(rule)) < 40:
+        raise PrelimRefusal(
+            "the selection rule for the replacement set is too short; say what "
+            "makes these the comparison set (>=40 chars)")
+    keep = {w.lower() for w in wanted}
+    stale = sorted({_clean(r.get("Peer")) for r in wb.rows("Tech_Peer_Deployments")
+                    if _clean(r.get("Peer")) and _clean(r.get("Peer")).lower() not in keep})
+    if wanted == sorted(have) and not stale:
+        raise PrelimRefusal(f"the named set is the locked set {have}; nothing to replace")
+    rows = wb.rows("Peer_Benchmarks")
+    figured = sorted({_clean(r.get("Category_ID")) for r in rows
+                      if any(_clean(r.get(k)) for k in
+                             ("Peer_Median", "Peer_P25", "Peer_P75", "Peer_Scores"))})
+    if figured:
+        raise PrelimRefusal(
+            f"peer figures are already written against the locked set "
+            f"({', '.join(figured[:6])}); replacing it now would change the cohort "
+            f"under them. Withdraw the run and re-research, or keep the set.")
+    basis = _clean(lock.get("peer_basis")) or "inferred"
+    names = ", ".join(_grid_name(n) for n in wanted)
+    with wb.transaction("replace_peers"):
+        wb.update_row("Handoff_Lock", "Key", "locked_peer_set",
+                      {"Value": "|".join(wanted)}, save=False)
+        wb.update_row("Handoff_Lock", "Key", "peer_n", {"Value": len(wanted)}, save=False)
+        for r in rows:
+            cid = _clean(r.get("Category_ID"))
+            if cid:
+                wb.update_row("Peer_Benchmarks", "Category_ID", cid,
+                              {"Peer_Names": names, "Peer_N": len(wanted),
+                               "Peer_Basis": f"{basis}: {_clean(rule)}"}, save=False)
+        retired = sum(wb.delete_rows_where("Tech_Peer_Deployments", {"Peer": p}, save=False)
+                      for p in stale)
+        detail = (f"peer set replaced by {_clean(owner)}: {', '.join(have)} -> "
+                  f"{', '.join(wanted)}; {retired} Tech_Peer_Deployments row(s) retired "
+                  f"for {', '.join(stale) or 'no peer'}. Rule: {_clean(rule)}. "
+                  f"Why: {_clean(why)}")[:900]
+        wb.append("Provenance", {"SubCap_ID": "", "Step": "replace_peers",
+                                 "Actor": _clean(owner), "At": _utcnow(),
+                                 "Detail": detail}, save=False)
+        wb.append("Gate_Log", {"Timestamp": _utcnow(), "Gate": "PEER_SET_REPLACED",
+                               "Scope": "Handoff_Lock", "Verdict": "PASS",
+                               "Blocking": False, "Detail": detail}, save=False)
+        wb.save()
+    return {"was": have, "locked_peer_set": wanted, "peer_n": len(wanted),
+            "categories": len([r for r in rows if _clean(r.get("Category_ID"))]),
+            "peer_deployments_retired": retired, "retired_peers": stale}
+
+
 def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
                 basis: str, source: str, peer_scores: str = "",
                 n: int | None = None) -> dict:
@@ -1154,6 +1234,14 @@ def main(argv=None) -> int:
     w.add_argument("--owner", required=True)
     w.add_argument("--why", required=True)
 
+    rp = common(sub.add_parser(
+        "replace-peers", help="replace a locked set wholesale on the engagement "
+                              "owner's word, while no peer figure is written"))
+    rp.add_argument("--peer", action="append", required=True)
+    rp.add_argument("--rule", required=True)
+    rp.add_argument("--owner", required=True)
+    rp.add_argument("--why", required=True)
+
     m = common(sub.add_parser("peer-median"))
     m.add_argument("--category", required=True)
     m.add_argument("--median"); m.add_argument("--p25"); m.add_argument("--p75")
@@ -1228,6 +1316,9 @@ def main(argv=None) -> int:
         elif a.cmd == "widen-peers":
             print(json.dumps(widen_peers(wb, a.peer, rule=a.rule, owner=a.owner,
                                          why=a.why), indent=2, default=str))
+        elif a.cmd == "replace-peers":
+            print(json.dumps(replace_peers(wb, a.peer, rule=a.rule, owner=a.owner,
+                                           why=a.why), indent=2, default=str))
         elif a.cmd == "peer-median":
             print(json.dumps(peer_median(wb, category=a.category, median=a.median,
                                          p25=a.p25, p75=a.p75, basis=a.basis,
