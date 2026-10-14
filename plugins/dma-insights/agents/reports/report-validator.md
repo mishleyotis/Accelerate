@@ -94,6 +94,18 @@ line, an engine refusal, and the six dimensions above. Over-length is at
 most a note. (Owner, 2026-10-06: a six-peer set failed Client Research §4
 four rounds running on "3 to 5", and no rewrite could clear it.)
 
+**Two scales, both correct — never ask one to become the other.** The
+`Maturity_Rubric` tab is the 1.0–5.0 SCORE scale with five LEVELS (M1
+Foundational … M5 Leading; owner adjudication GSY-11, `engine/rubric.py`), and
+a score is stated beside its level ("2.25 (M2)", as the gold reference does).
+The four display BANDS (strict less-than on the raw score: <2 Activating,
+<3 Building, <4 Competing, ≥4 Differentiating) are what the app renders. A
+rationale that says "2.5 is the M3 floor" is right on the rubric. What fails:
+a fifth BAND, the banned band word, or a band boundary stated at a rubric cut.
+Never raise an upstream item to rewrite the rubric into bands. (AAA WCNY,
+2026-10-14: an assessment §2 REVISE demanded exactly that, and three critic
+rationales were flagged for using the rubric correctly.)
+
 Peer SCORES are the sub-vertical cohort mean of entities already assessed
 (`Peer_Benchmarks`, basis `recomputed`). Do not ask for a per-peer score, and
 do not ask for a peer metric outside the run's focus areas.

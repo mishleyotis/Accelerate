@@ -246,7 +246,11 @@ tool call is the cost this removes.
    **The ceilings are defaults now, and they bite.** `--max-usd` is $5 per
    pillar in scope and STOPS the run; `--max-rounds 10`; `--stall-rounds 2`
    ends a stage after two rounds that advance nothing; `--max-wall-min 240`;
-   `--enrichment-heals 1`. Name one only to change it. `STOPPED_BUDGET` exits
+   `--enrichment-heals 1`. Name one only to change it. **Driving it from a
+   session's background shell? Pass `--max-wall-min 110`**: a background Bash
+   task is killed at two hours, and a driver killed mid-stage leaves its lanes
+   unbooked and its stage unrecorded (AAA WCNY, 2026-10-14); at 110 it stops
+   itself cleanly and `run` again continues from the same stage. `STOPPED_BUDGET` exits
    1, the spend is remembered on disk, and a re-run REFUSES before dispatch —
    a second process does not get a second budget. Raising `--max-usd` is how
    a run continues past it, and that raise is a person's decision, not yours;

@@ -597,6 +597,7 @@ class RunWorkbook:
             "prelim_completed_at": "",
             "empty_sheet_reasons": "",
             "critic_moves": "",
+            "uniform_attested": "",
             "evidence_freeze": "",
             # The Slack request this run answers, when it came from one.
             # `engine.cli start --slack-channel/--slack-thread-ts/

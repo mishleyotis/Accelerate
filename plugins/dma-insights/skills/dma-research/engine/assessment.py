@@ -914,6 +914,124 @@ def critique(wb: RunWorkbook, *, pillar: str, verdict: str, actor: str,
             "scored_rows": len(scored), "moves": len(parsed)}
 
 
+# ── differentiation ──────────────────────────────────────────────────────
+#
+# AAA Western and Central New York (2026-10-14): every pillar's critic had
+# PASSED and every cell was scored when the gate blocked on
+# `no_differentiation` (P1C1.4, three evidenced cells at 2.0). The scorer
+# brief hands only unscored rows and critic moves, and a PASSED pillar got
+# no critic lane — so the term was routed to nobody, rounds 3-5 dispatched
+# nothing, and the stall guard stopped the stage. Nor could an honestly
+# uniform capability be cleared without a person. Both halves are fixed
+# here: `differentiation` is the one reading the gate and the critic brief
+# share, and `attest_uniform` lets an independent critic record that the
+# identical scores are what each cell's own evidence supports. The
+# attestation is bound to the scores it saw: re-scoring any cell lapses it.
+
+UNIFORM_ATTESTED = "SCORING_UNIFORM_ATTESTED"
+
+
+def _cap_scores(wb: RunWorkbook) -> tuple[dict[str, list[float]], set[str]]:
+    """{capability: [scores]} and the capabilities with an EVIDENCED scored
+    cell — only those are held to the differentiation rule."""
+    declared_set = L.declared_absences(wb)
+    by_cap: dict[str, list[float]] = {}
+    evidenced: set[str] = set()
+    for r in wb.scoring_rows():
+        cell = _clean(r.get("SubCap_ID"))
+        sc = _num(r.get("Score"))
+        if not cell or sc is None:
+            continue
+        cap = cell.rsplit(".", 1)[0]
+        by_cap.setdefault(cap, []).append(sc)
+        eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
+                if i and i != C.NO_EVIDENCE]
+        if eids or not L.is_declared_absent(r, declared=declared_set):
+            evidenced.add(cap)
+    return by_cap, evidenced
+
+
+def uniform_attestations(wb: RunWorkbook) -> dict[str, dict]:
+    try:
+        got = json.loads(_clean(wb.metadata().get("uniform_attested")) or "{}")
+    except ValueError:
+        got = {}
+    return got if isinstance(got, dict) else {}
+
+
+def differentiation(wb: RunWorkbook) -> dict[str, list[str]]:
+    """The differentiation reading, pure (no Gate_Log write): `no_differentiation`
+    blocks, `low_differentiation` is disclosed, `attested` names the uniform
+    capabilities an independent critic vouched for at their current scores."""
+    by_cap, evidenced = _cap_scores(wb)
+    att = uniform_attestations(wb)
+    out: dict[str, list[str]] = {"no_differentiation": [], "low_differentiation": [],
+                                 "attested": []}
+    for cap, scores in sorted(by_cap.items()):
+        if len(scores) < 3:
+            continue
+        top = Counter(scores).most_common(1)[0][1]
+        # A capability whose every scored cell is a DECLARED absence with
+        # no evidence is scored at the same evidence-floor by construction
+        # (measured 2026-10-01, Cross Insurance, degraded run: 38 such
+        # capabilities blocked SCORING). Uniform scores there are the
+        # honest result, and demanding spread would demand invented
+        # scores — so it is disclosed as low_differentiation, never
+        # blocking. Any capability with an evidenced cell keeps the rule.
+        # Likewise a capability held entirely at the scale floor: an
+        # identical 1.0 cannot be inflation (there is nothing below it),
+        # and evidenced cells there — stale, undated or single T4 rows —
+        # are re-derived to the floor by the scoring critic, whose
+        # verdict is what polices them (measured 2026-10-01, Cross
+        # Insurance: the critic itself held P1C1.1 / P2C3.1 / P2C3.5 at
+        # 1.0, and the gate then refused the critic's own result).
+        at_floor = all(abs(x - 1.0) < 1e-9 for x in scores)
+        if top == len(scores) and cap in evidenced and not at_floor:
+            a = att.get(cap) or {}
+            if sorted(float(x) for x in (a.get("scores") or [])) == sorted(scores):
+                out["attested"].append(cap)
+                out["low_differentiation"].append(cap)
+            else:
+                out["no_differentiation"].append(cap)
+        elif top == len(scores) or top / len(scores) > 0.6:
+            out["low_differentiation"].append(cap)
+    return out
+
+
+def attest_uniform(wb: RunWorkbook, *, cap: str, actor: str, note: str) -> dict:
+    """An independent critic's record that a capability's identical scores
+    are honest — each cell re-derived from its own evidence and landing on
+    the same score. Refused from the pillar's own scorer, under 80
+    characters, or for a capability the gate does not hold as uniform."""
+    require_stage(wb)
+    cap = _clean(cap).upper()
+    pillar = cap[:2]
+    if pillar not in ("P1", "P2", "P3", "P4") or "." not in cap:
+        raise ScoringRefusal(f"--cap {cap!r} is not a capability id like P1C1.4")
+    if len(_clean(note)) < 80:
+        raise ScoringRefusal("an attestation under 80 characters is a rubber stamp — say, "
+                             "cell by cell, which evidence puts each one at the same score")
+    scorers = {_clean(r.get("Actor")).lower() for r in wb.rows("Provenance")
+               if _clean(r.get("Step")) == "score"
+               and str(r.get("SubCap_ID") or "").startswith(pillar)}
+    if _clean(actor).lower() in scorers:
+        raise ScoringRefusal(f"{actor} struck scores on {pillar} and cannot attest its "
+                             f"uniformity; the attestation is independent by record")
+    if cap not in differentiation(wb)["no_differentiation"]:
+        raise ScoringRefusal(f"{cap} is not held as uniformly scored on evidenced cells; "
+                             f"there is nothing to attest")
+    scores = sorted(_cap_scores(wb)[0][cap])
+    with wb.transaction(f"attest_uniform {cap}"):
+        book = uniform_attestations(wb)
+        book[cap] = {"scores": scores, "by": _clean(actor), "note": _clean(note)[:400],
+                     "at": L._utcnow()}
+        wb.set_metadata("uniform_attested", json.dumps(book, sort_keys=True), save=False)
+        wb._dirty = True
+    L.append_gate(wb, gate=UNIFORM_ATTESTED, scope=cap, verdict="PASS",
+                  detail=f"{actor}: scores {scores}; {_clean(note)[:400]}", blocking=False)
+    return {"cap": cap, "scores": scores, "attested_by": actor}
+
+
 # ── rollup ───────────────────────────────────────────────────────────────
 
 def _weights(wb: RunWorkbook) -> dict[str, float]:
@@ -1225,10 +1343,6 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
     ss = {_clean(r.get("subcap_id")): r for r in wb.rows("Subcap_Scores")}
     cl = {_clean(r.get("subcap_id")) for r in wb.rows("Caps_Applied_Log")}
     declared_set = L.declared_absences(wb)
-    by_cap: dict[str, list[float]] = {}
-    # capabilities with at least one EVIDENCED scored cell — only these can
-    # be held to the differentiation rule (see below)
-    cap_evidenced: set[str] = set()
     for r in wb.scoring_rows():
         cell = _clean(r.get("SubCap_ID"))
         if not cell:
@@ -1241,12 +1355,9 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
             continue
         if not (1.0 <= sc <= 5.0):
             f["score_off_scale"].append(cell)
-        by_cap.setdefault(cell.rsplit(".", 1)[0], []).append(sc)
         eids = [i.split(":")[0] for i in _split_ids(r.get("Evidence_IDs"))
                 if i and i != C.NO_EVIDENCE]
         declared = L.is_declared_absent(r, declared=declared_set)
-        if eids or not declared:
-            cap_evidenced.add(cell.rsplit(".", 1)[0])
         if eids and _clean(r.get("Challenge_Verdict")).upper() != "PASS":
             f["unchallenged_scored"].append(cell)
         if not eids and not declared:
@@ -1288,28 +1399,9 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
                 # out of band — the gate catches it too (AUD-0052, evidence-tied
                 # overlay).
                 f["overlay_incomplete"].append(cell)
-    for cap, scores in sorted(by_cap.items()):
-        if len(scores) >= 3:
-            top = Counter(scores).most_common(1)[0][1]
-            # A capability whose every scored cell is a DECLARED absence with
-            # no evidence is scored at the same evidence-floor by construction
-            # (measured 2026-10-01, Cross Insurance, degraded run: 38 such
-            # capabilities blocked SCORING). Uniform scores there are the
-            # honest result, and demanding spread would demand invented
-            # scores — so it is disclosed as low_differentiation, never
-            # blocking. Any capability with an evidenced cell keeps the rule.
-            # Likewise a capability held entirely at the scale floor: an
-            # identical 1.0 cannot be inflation (there is nothing below it),
-            # and evidenced cells there — stale, undated or single T4 rows —
-            # are re-derived to the floor by the scoring critic, whose
-            # verdict is what polices them (measured 2026-10-01, Cross
-            # Insurance: the critic itself held P1C1.1 / P2C3.1 / P2C3.5 at
-            # 1.0, and the gate then refused the critic's own result).
-            at_floor = all(abs(x - 1.0) < 1e-9 for x in scores)
-            if top == len(scores) and cap in cap_evidenced and not at_floor:
-                f["no_differentiation"].append(cap)
-            elif top == len(scores) or top / len(scores) > 0.6:
-                f["low_differentiation"].append(cap)
+    diff = differentiation(wb)
+    f["no_differentiation"] = diff["no_differentiation"]
+    f["low_differentiation"] = diff["low_differentiation"]
     pillars_in_scope = sorted({c[:2] for c in wb.selected_subcaps()})
     critics = {}
     for g in wb.rows("Gate_Log"):
@@ -1362,6 +1454,7 @@ def gate(wb: RunWorkbook, qa_dir: Path | None = None) -> dict:
            "subcaps": len(wb.selected_subcaps()), "scored": got["scored"],
            "overall": got["overall"], "blocking": sorted(blocking),
            "advisory": [k for k in ("low_differentiation",) if f[k]],
+           "differentiation_attested": diff["attested"],
            "finding_keys": sorted(f), **f}
     if qa_dir is not None:
         # A hashed, versioned packet: the run manifest vouches for it
@@ -1432,6 +1525,11 @@ def main(argv=None) -> int:
     cr.add_argument("--actor", required=True); cr.add_argument("--note", required=True)
     cr.add_argument("--move", action="append", default=[],
                     help="CELL:TARGET[:why], repeatable — required on a FAIL")
+    au = common(sub.add_parser("attest-uniform", help="an independent critic's record "
+                                                      "that a capability's identical "
+                                                      "scores are honest"))
+    au.add_argument("--cap", required=True); au.add_argument("--actor", required=True)
+    au.add_argument("--note", required=True)
     mv = common(sub.add_parser("moves", help="the scoring critic's pending moves "
                                              "(rows still above their target)"))
     mv.add_argument("--pillar", default="")
@@ -1477,6 +1575,8 @@ def main(argv=None) -> int:
         elif a.cmd == "critique":
             out = critique(wb, pillar=a.pillar, verdict=a.verdict, actor=a.actor,
                            note=a.note, moves=a.move)
+        elif a.cmd == "attest-uniform":
+            out = attest_uniform(wb, cap=a.cap, actor=a.actor, note=a.note)
         elif a.cmd == "moves":
             out = pending_moves(wb, a.pillar)
         elif a.cmd == "rollup":

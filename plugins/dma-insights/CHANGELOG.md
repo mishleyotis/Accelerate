@@ -16,6 +16,102 @@
   never argues from a ruled-out peer. Re-asserting the locked set only
   prunes such rows. Tests: `test_replace_peers_2026_10_14.py`.
 
+- **Six blockers from the AAA Western and Central New York run, each closed
+  at its root** (owner, 2026-10-14: "Check on what is the root cause of the
+  blocker and fix this to ensure it never recurs"):
+  - **SCORING stalled on `no_differentiation`** (`engine/assessment.py`,
+    `engine/brief.py`): the gate demanded spread on a capability whose cells
+    are genuinely alike, and the critic batch skipped every pillar that had
+    already PASSED, so no agent was ever sent the term. Critic packets now
+    carry `undifferentiated_capabilities` (a PASSED pillar is re-sent while it
+    has one), and `engine.assessment attest-uniform --cap --actor --note`
+    records a re-derived uniform score: refused from the pillar's own scorer,
+    under 80 characters, or for a cap the gate does not flag; the scores are
+    stored, so any later change re-opens the term. Non-blocking
+    `SCORING_UNIFORM_ATTESTED` Gate_Log row. The critic is told never to move
+    a score only to create spread.
+  - **A test/staging page was registered as evidence** (`engine/ledger.py`,
+    `engine/cli.py`): `append_evidence` refuses a pre-production subdomain
+    (`test.`, `staging.`, `dev.`, `qa.`, `uat.`… — a registrable domain like
+    dev.to never counts). `retire-nonproduction` removes an uncited one with
+    both directions of its links; a cited one is kept and the refusal names
+    `engine.cli repoint --e-id --url --why`, which moves it to the production
+    copy of the same page only after `engine.cli fetch` has read it and the
+    excerpt is verbatim there (same site, never another source). Gate_Log
+    `EVIDENCE_RETIRED` / `EVIDENCE_REPOINTED` (repoint also rewrites the
+    scorer's `Subcap_Scores.source_urls`); `detach`/`retire` now clear
+    `Source_URLs` with `""` (openpyxl ignores `None`).
+  - **HANDOFF refused an empty Enrichment_Needed hours after PRELIM**
+    (`engine/prelim.py`, `engine/pipeline.py`): the connector had never seen
+    the client, so `seed-enrichment` rightly wrote nothing — and nothing else
+    accounted for the tab. `prelim.complete` now refuses an empty, undeclared
+    Enrichment_Needed (its fix line names the new-client declaration), and the
+    driver raises it as a PRELIM stage failure, before a research lane is paid
+    for.
+  - **Tech_Register rows cited no evidence, found only in REPORTS**
+    (`engine/techscan.py`, `engine/prelim.py`): ten rows carried a URL and no
+    E-id; the validator caught it with the register frozen. `techscan.record`
+    now links a URL-only row to a registered span on that URL that names the
+    product (never a span about something else), and PRELIM's
+    `tech_baseline` stays OPEN while any non-ABSENT row cites nothing.
+  - **$28 of in-session agents went unbooked** (`engine/cost.py`): a recording
+    agent whose prompt named its brief path rather than the run id was skipped
+    by `capture_workflows`; the run root now counts as naming the run.
+  - **REPORTS stopped at "$51.78 of $40" with $25.89 spent**
+    (`engine/pipeline.py`): with a dispatcher that books its own spend
+    (`agent_run.py`), `_count` still added each batch to the driver's
+    unrecorded delta until the stage ended, so `_family_usd` read every
+    mid-stage batch twice. The recorded marker now moves with a self-booked
+    batch.
+  - **A driver killed at the background-shell cap lost $10 of lanes**
+    (`scripts/agent_run.py`): each lane is booked to the ledger as it
+    completes, priced from the stream's own usage when the result event never
+    arrives (`usd_basis`), and the docs say `--max-wall-min 110` in a session
+    background shell.
+  - **A header or markup detection had no span to cite**
+    (`engine/fetch.py`): `html_text` drops headers, `<meta>` and hrefs, so
+    Drupal (x-generator), Cloudflare (server) and UKG (the careers link to
+    recruiting.ultipro.com) could never be cited. An HTML fetch now appends a
+    "Technology markers" block (server / x-generator / x-powered-by headers,
+    the generator meta tag, third-party hosts linked or loaded — `//host`
+    included — eight a sentence so each is a 50-500 character span) AFTER the
+    prose, and a re-read that is a SUPERSET of the held text replaces it
+    (nothing verified against the old text is lost; anything else still goes
+    to `.alt.txt`).
+  - **Focus-area evidence named no cell** (`engine/profile.py`,
+    `engine/pipeline.py`): FA rows name their cells and cite their evidence,
+    but nothing linked the two, so PAGES_A refused three pages on ET-07 after
+    the reports were done. The driver's page prep now runs
+    `profile.link_focus_evidence` before any page lane — after scoring, never
+    at the PRELIM write, where it would put evidence on research cells nobody
+    had researched yet.
+  - **A version-A page citing post-checkpoint evidence halted the run**
+    (`engine/pipeline.py`): R-INTERAC needed the owner's `--defer-to-b`, and
+    AAA WCNY halted the same way. A version-A verdict whose ET-01 names E-ids
+    that resolve in the run's own register (registered after INGEST_A) now
+    moves the page to version B by itself, with a `PAGES_DEFERRED_TO_B`
+    Gate_Log row.
+  - **The package gate refused a declared financial absence**
+    (`engine/gold_standard.py`): `completeness declare --sheet
+    Financial_Trends` is the engine's documented route for an institution
+    that publishes no statements, and PRELIM accepted it, but GS-WB-FINANCIALS
+    refused the empty sheet. An EMPTY Financial_Trends with a declared reason
+    (>= 40 chars) is no longer a finding; a thin series still is.
+  - **Report sections parked on upstream items were never re-reviewed**
+    (`engine/brief.py`, `agents/reports/report-validator.md`): the validator
+    packet now carries `upstream_to_recheck` (each parked item, re-checked
+    first) and the run's `owner_decisions` (Gate_Log `OWNER_DECISION*`), and
+    the validator is told the five-level score rubric and the four display
+    bands are both correct (owner, 2026-10-14: GSY-11 stands — recorded in
+    the charter) — an assessment §2 REVISE had demanded the rubric be
+    rewritten into bands.
+  Tests: `test_fetch_tech_markers_2026_10_14.py`, `test_auto_defer_to_b_2026_10_14.py`,
+  `test_tech_rows_cited_2026_10_14.py`, `test_gold_standard.py`,
+  `test_differentiation_routing_2026_10_14.py`,
+  `test_nonproduction_evidence_2026_10_14.py`,
+  `test_enrichment_owed_2026_10_14.py`, `test_tech_rows_cited_2026_10_14.py`,
+  `test_agent_run_lane_cost_2026_10_14.py`, `test_owner_visibility_2026_10_09.py`.
+
 ## 1.27.1 — 2026-10-12 — a research share always funds a whole round, and the Interac run reaches promotion
 
 Owner, R-INTERAC-20261010: "I see workflows failing and being restarted.

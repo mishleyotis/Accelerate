@@ -713,7 +713,27 @@ def _summarise(event: dict, st: dict) -> None:
     st["events"] = st.get("events", 0) + 1
     kind = event.get("type")
     if kind == "assistant":
-        for block in (event.get("message") or {}).get("content") or []:
+        # THE STREAM'S OWN USAGE, per message (one message can arrive as
+        # several events, one per content block, all carrying the same usage:
+        # count each message id once). AAA Western and Central New York,
+        # 2026-10-14: four scorer lanes timed out, emitted no result event,
+        # and their spend reached no ledger — a lane killed before its result
+        # is priced from this instead of being left at zero.
+        msg = event.get("message") or {}
+        mid = msg.get("id")
+        if mid != st.get("_last_mid"):
+            st["_last_mid"] = mid
+            tok = _tokens_of(msg.get("usage"))
+            if tok:
+                acc = st.setdefault("stream_tokens", {})
+                for k, v in tok.items():
+                    acc[k] = acc.get(k, 0) + v
+                st["stream_turns"] = st.get("stream_turns", 0) + 1
+            tier = next((t for t in ("opus", "sonnet", "haiku")
+                         if t in str(msg.get("model") or "").lower()), "")
+            if tier:
+                st["stream_model"] = tier
+        for block in msg.get("content") or []:
             btype = block.get("type")
             if btype == "tool_use":
                 st["tools"] = st.get("tools", 0) + 1
@@ -784,6 +804,37 @@ def _model_of(model_usage) -> str:
         if tier in str(top).lower():
             return tier
     return ""
+
+
+def _stream_usd(st: dict):
+    """Price the stream's own usage on the engine's rate card, or None."""
+    tok = st.get("stream_tokens")
+    if not tok:
+        return None
+    try:
+        eng = Path(__file__).resolve().parents[1] / "skills" / "dma-research"
+        if str(eng) not in sys.path:
+            sys.path.insert(0, str(eng))
+        from engine import cost as _cost                     # noqa: PLC0415
+        return round(float(_cost.cost_of(model=st.get("stream_model") or "sonnet",
+                                         **tok)["total_usd"]), 4)
+    except Exception:                                        # noqa: BLE001
+        return None
+
+
+def _lane_usage(st: dict) -> dict:
+    """turns / usd / tokens / model for one lane: the CLI's result event when
+    it came, else the lane's own stream — never a silent zero."""
+    if st.get("total_cost_usd") is not None:
+        return {"turns": st.get("num_turns"), "usd": st.get("total_cost_usd"),
+                "tokens": st.get("tokens"), "model": st.get("model"),
+                "usd_basis": "result"}
+    usd = _stream_usd(st)
+    if usd is not None:
+        st["usd_basis"] = "stream"
+    return {"turns": st.get("stream_turns"), "usd": usd,
+            "tokens": st.get("stream_tokens"), "model": st.get("stream_model"),
+            "usd_basis": "stream" if usd is not None else None}
 
 
 def _child_env(name: str, actor: str | None = None) -> dict:
@@ -954,12 +1005,14 @@ def _dispatch_streaming_one(name: str, prompt: str, timeout: int, repo_root: Pat
         if timed_out:
             result = kill_group(proc.pid, proc=proc)
             st.update(state="timeout", doing=f"exceeded {timeout}s; group {result}")
+            use = _lane_usage(st)
             flush_status()
             return {"agent": name, "label": label, "code": 124,
                     "stdout": _final_text(events, "".join(raw)),
                     "stderr": "".join(err_parts), "note":
                     f"DISPATCH TIMEOUT: {name} exceeded {timeout}s (process group "
-                    f"{result}) — treat as a failed stage, never as an empty verdict"}
+                    f"{result}) — treat as a failed stage, never as an empty verdict",
+                    **use}
         rc = proc.wait()
     except BaseException:
         # Interrupted (a signal handler raised, or anything else): the lane
@@ -978,10 +1031,10 @@ def _dispatch_streaming_one(name: str, prompt: str, timeout: int, repo_root: Pat
     flush_status()
     # The child's own usage rides up to the batch summary and the cost
     # ledger (`--record-run`): turns and USD from the CLI's result event.
+    use = _lane_usage(st)
+    flush_status()
     return {"agent": name, "label": label, "code": code, "stdout": out, "stderr": err,
-            "note": note, "turns": st.get("num_turns"),
-            "usd": st.get("total_cost_usd"),
-            "tokens": st.get("tokens"), "model": st.get("model")}
+            "note": note, **use}
 
 
 def watch(logs: Path, once: bool = False, interval: float = 3.0) -> int:
@@ -1213,6 +1266,34 @@ def _record_cost(record: dict, summary: dict, repo_root: Path) -> dict:
             "detail": (r.stdout if r.returncode == 0 else r.stderr).strip()[-400:]}
 
 
+def _record_lane_cost(record: dict, res: dict, repo_root: Path) -> dict:
+    """Book ONE finished lane's spend the moment it finishes. Until
+    2026-10-14 a batch booked its lanes only when the whole batch returned,
+    so a driver killed mid-batch (AAA Western and Central New York: the
+    2-hour background cap) lost every finished lane's cost with it."""
+    if res.get("usd") is None:
+        return {"recorded": False, "detail": "lane carried no usage"}
+    eng = repo_root / "plugins" / "dma-insights" / "skills" / "dma-research"
+    label = res.get("label") or res["agent"]
+    cmd = [sys.executable, "-m", "engine.cost", "record",
+           "--run", str(record["run"]), "--stage", str(record["stage"]),
+           "--elapsed-s", str(res.get("elapsed_s") or 0), "--lanes", "1",
+           "--attempts", str(res.get("attempts", 1)), "--usd", str(res["usd"]),
+           "--note", f"agent_run lane {label}: code {res['code']}"
+                     f" (usd from {res.get('usd_basis') or 'result'})"]
+    if record.get("root"):
+        cmd += ["--root", str(record["root"])]
+    if res.get("turns"):
+        cmd += ["--turns", str(res["turns"])]
+    if res.get("tokens"):
+        cmd += ["--tokens", json.dumps(res["tokens"], sort_keys=True)]
+    if res.get("model"):
+        cmd += ["--model", str(res["model"])]
+    r = subprocess.run(cmd, cwd=eng, capture_output=True, text=True)
+    return {"recorded": r.returncode == 0,
+            "detail": (r.stdout if r.returncode == 0 else r.stderr).strip()[-400:]}
+
+
 def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
               allowed: str, out_dir: Path | None,
               logs: Path | None = None, *, retries: int = 0,
@@ -1251,6 +1332,8 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
                 res = fut.result()
                 results.append(res)
                 done += 1
+                if record:
+                    res["cost_record"] = _record_lane_cost(record, res, repo_root)
                 # Each lane's transcript goes to its OWN file: sixteen children
                 # writing one stream produces a transcript nobody can read, and
                 # the orchestrator needs each verdict whole to relay it.
@@ -1307,7 +1390,8 @@ def run_batch(rows: list, lanes: int, timeout: int, repo_root: Path,
         timing_out.parent.mkdir(parents=True, exist_ok=True)
         timing_out.write_text(json.dumps(summary, indent=2, sort_keys=True))
     if record:
-        summary["cost_record"] = _record_cost(record, summary, repo_root)
+        summary["cost_record"] = _record_cost(
+            record, dict(summary, usd=None, turns=None, tokens=None, model=None), repo_root)
     print(json.dumps(summary, indent=2, sort_keys=True))
     if failed:
         print(f"\n{len(failed)} of {len(rows)} lane(s) failed. A batch is "

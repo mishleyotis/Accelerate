@@ -300,6 +300,49 @@ def test_financial_trends_sheet_with_too_few_years_is_caught(tmp_path):
     assert "GS-WB-FINANCIALS" in {f["code"] for f in GS.workbook_findings(wb)}
 
 
+def _declare_financials_absent(w, reason):
+    import json as _json
+    ws = w["Financial_Trends"]
+    ws.delete_rows(2, ws.max_row)
+    md = w["Run_Metadata"] if "Run_Metadata" in w.sheetnames else w.create_sheet("Run_Metadata")
+    if md.max_row < 1 or md.cell(1, 1).value != "Key":
+        md.append(["Key", "Value"])
+    md.append(["empty_sheet_reasons", _json.dumps({"Financial_Trends": reason})])
+
+
+def test_a_declared_absent_financial_series_is_not_a_finding(tmp_path):
+    """AAA WCNY (2026-10-14): the club publishes no statements; PRELIM accepted
+    the declaration and the package gate refused the empty sheet it explained."""
+    wb = _gold_workbook(tmp_path / "wb.xlsx")
+    w = openpyxl.load_workbook(wb)
+    _declare_financials_absent(w, "the club publishes no financial statements: not an SEC "
+                                  "registrant, not a Form 990 filer, no annual report")
+    w.save(wb)
+    assert "GS-WB-FINANCIALS" not in {f["code"] for f in GS.workbook_findings(wb)}
+
+
+def test_a_thin_series_still_fails_even_when_declared(tmp_path):
+    wb = _gold_workbook(tmp_path / "wb.xlsx")
+    w = openpyxl.load_workbook(wb)
+    ws = w["Financial_Trends"]
+    for col in (5, 6, 7):
+        ws.cell(1, col).value = None
+    md = w["Run_Metadata"] if "Run_Metadata" in w.sheetnames else w.create_sheet("Run_Metadata")
+    md.append(["empty_sheet_reasons",
+               '{"Financial_Trends": "the club publishes no financial statements at all, anywhere"}'])
+    w.save(wb)
+    assert "GS-WB-FINANCIALS" in {f["code"] for f in GS.workbook_findings(wb)}
+
+
+def test_a_filler_reason_does_not_excuse_an_empty_series(tmp_path):
+    wb = _gold_workbook(tmp_path / "wb.xlsx")
+    w = openpyxl.load_workbook(wb)
+    _declare_financials_absent(w, "none")
+    w.save(wb)
+    codes = {f["code"] for f in GS.workbook_findings(wb)}
+    assert "GS-WB-FINANCIALS" in codes
+
+
 def test_report_without_financial_trajectory_is_caught(tmp_path):
     body = [("Heading 1", "1. Executive Summary"),
             ("Normal", "Overall 2.25. coverage disclosed. AI and data overlay. "

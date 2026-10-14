@@ -441,6 +441,26 @@ def _section_state(wb: RunWorkbook, key: str, spec: dict,
                            f"scan: {scan['detail']}"),
                 "fix": _SCAN_FIX,
             }
+    if kind == "tech" and n >= need and not signed_off:
+        # A ROW CITES WHAT SAW IT (AAA WCNY, 2026-10-14): ten register rows
+        # went in with a Source_URL and no E-id, PRELIM closed, and the report
+        # validator found it in REPORTS — with the register frozen, so nothing
+        # could be registered to repair it. Caught here, while the scanner
+        # that saw each row is still the one writing.
+        uncited = [r.get("TS_ID") for r in wb.rows("Tech_Register")
+                   if r.get("TS_ID")
+                   and str(r.get("Status") or "").upper() != "ABSENT"
+                   and not str(r.get("Evidence_IDs") or "").strip()]
+        if uncited:
+            return {
+                "section": key, "status": "OPEN",
+                "detail": (f"{len(uncited)} non-ABSENT {sheet} row(s) cite no "
+                           f"registered evidence: {', '.join(uncited[:12])}"),
+                "fix": ("register what saw each row (`engine.cli evidence` / "
+                        "`engine.cli fetch` then evidence), then `engine.cli "
+                        "techscan restrike --ts <TS> --status … --method … "
+                        "--basis … --provider … --evidence-id <E>`"),
+            }
     if n >= need:
         return {"section": key, "status": "RESEARCHED",
                 "detail": (f"{n} row(s) in {sheet}"
@@ -1124,6 +1144,34 @@ def enrichment_state(wb: RunWorkbook) -> dict:
     return {"facets": facets, "gaps_open": gaps_open, "seeded": bool(facets)}
 
 
+def enrichment_owed(wb: RunWorkbook) -> str:
+    """Why PRELIM may not close over an unaccounted Enrichment_Needed, or "".
+
+    AAA Western and Central New York (2026-10-14): the connector knew nothing
+    of the client (`get_client_state` → unknown_entity), so `seed-enrichment`
+    rightly wrote no row (a new client is seeded nothing) — but nothing then
+    accounted for the tab, PRELIM closed, sixteen categories researched and
+    scored, and the HANDOFF completeness check refused the empty tab hours
+    later, after the money was spent. The tab is PRELIM's to account for:
+    rows (seeded, or `engine.profile enrichment-needed` for what the run
+    found it owes), or a declared reason it is empty — a new client's
+    declaration says the connector holds no state for it.
+    """
+    from . import completeness as _cp                    # noqa: PLC0415
+    rows = [r for r in wb.rows("Enrichment_Needed")
+            if any(" ".join(str(v or "").split()) for v in r.values())]
+    if rows or "Enrichment_Needed" in _cp.reasons(wb):
+        return ""
+    return ("PRELIM cannot be signed off with Enrichment_Needed empty and "
+            "undeclared — HANDOFF's completeness check refuses it after every "
+            "category has been paid for. Record what the run still owes or "
+            "resolved: " + _cp.FILLED_BY["Enrichment_Needed"] + ". A new "
+            "client (get_client_state answered unknown_entity, no did_you_mean) "
+            "seeds nothing; say so: python3 -m engine.completeness declare "
+            "--sheet Enrichment_Needed --reason 'new client: the connector "
+            "holds no facet state or staged gaps for this entity'.")
+
+
 def complete(wb: RunWorkbook) -> dict:
     """Sign PRELIM off — refusing while anything is open."""
     st = state(wb)
@@ -1131,6 +1179,9 @@ def complete(wb: RunWorkbook) -> dict:
         raise PrelimRefusal(
             "PRELIM cannot be signed off with open sections: "
             + ", ".join(st["open"]))
+    owed = enrichment_owed(wb)
+    if owed:
+        raise PrelimRefusal(owed)
     wb.set_metadata("prelim_status", "COMPLETE")
     wb.set_metadata("prelim_completed_at", _utcnow())
     return {**state(wb), "signed_off_at": _utcnow()}

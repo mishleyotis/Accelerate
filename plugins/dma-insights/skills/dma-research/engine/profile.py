@@ -244,6 +244,50 @@ def focus(wb: RunWorkbook, *, fa_id: str, title: str, quote: str, document: str,
     return {"id": fa_id, "cells": cell_ids, "rows": len(wb.rows("Focus_Areas"))}
 
 
+def link_focus_evidence(wb: RunWorkbook) -> list:
+    """Link every focus area's evidence to the cells the focus area names.
+
+    AAA WCNY (2026-10-14): FA-01/02/03 named their cells and cited
+    E-002/E-013/E-008, none of which named a cell, so PAGES_A refused three
+    pages on ET-07 after the reports were written. A focus row that names its
+    cells has said which cells its evidence supports. Run by the driver
+    BEFORE the page lanes (after scoring) — never at the PRELIM write, where
+    it would put evidence on a research cell before anyone researched it."""
+    done = []
+    for r in wb.rows("Focus_Areas"):
+        if not _clean(r.get("ID")):
+            continue
+        cells = [c.strip() for c in str(r.get("Cells") or "").split(",") if c.strip()]
+        eids = [e.strip() for e in str(r.get("Evidence_IDs") or "").split(",") if e.strip()]
+        for d in _link_evidence(wb, eids, cells):
+            done.append({"focus": _clean(r.get("ID")), **d})
+    return done
+
+
+def _link_evidence(wb: RunWorkbook, eids, cells) -> list:
+    """Attach each registered row to the named cells that do not cite it yet;
+    a write the ledger refuses is left for `page_preflight` to name."""
+    from . import ledger as _L
+    from .workbook import _split_ids
+    register = wb.evidence_index()
+    done = []
+    for e in eids:
+        e0 = str(e).split(":")[0]
+        if e0 not in register:
+            continue
+        todo = [c for c in cells
+                if e0 not in [i.split(":")[0] for i in _split_ids(
+                    (wb.scoring_row(c) or {}).get("Evidence_IDs"))]]
+        if not todo:
+            continue
+        try:
+            _L.attach_evidence(wb, e0, todo, actor="profile.focus")
+            done.append({"e_id": e0, "cells": todo})
+        except _L.LedgerRefusal:
+            continue
+    return done
+
+
 # ── issue register ───────────────────────────────────────────────────────
 
 def cap_for_severity(wb: RunWorkbook, severity: str) -> str:

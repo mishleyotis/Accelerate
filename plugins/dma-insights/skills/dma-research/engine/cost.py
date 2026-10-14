@@ -1077,9 +1077,14 @@ def capture_workflows(run, *, base: Path | None = None) -> dict:
         text = f.read_text(errors="replace")
         if run.run_id not in text:
             continue
-        if via == "agent" and run.run_id not in _first_prompt(text):
+        prompt = _first_prompt(text)
+        if via == "agent" and run.run_id not in prompt and str(run.root) not in prompt:
             # an in-session agent belongs to the run when its PROMPT names it
-            # — a helper that merely read the run's files is not its spend
+            # — by run id, or by a brief under the run's own root (the
+            # rendered `agent_prompts` are worked as "your brief is the file
+            # <root>/briefs/…"; AAA Western and Central New York, 2026-10-14:
+            # 41 such agents, $28.04, never reached the ledger) — a helper
+            # that merely read the run's files is not its spend
             continue
         aid = f.stem[len("agent-"):]
         try:

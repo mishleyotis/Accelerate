@@ -945,6 +945,11 @@ RUN_METADATA_KEYS = (
     # (engine.assessment.critic_moves): routed to the scorers, enforced by
     # `score`, and blocking at the SCORING gate until applied.
     "critic_moves",
+    # The scoring critic's uniformity attestations {cap: {scores, by, note}}
+    # (engine.assessment.attest_uniform, 2026-10-14): a uniform capability an
+    # independent critic vouched for at exactly these scores is disclosed as
+    # low_differentiation, not blocked; re-scoring any cell lapses it.
+    "uniform_attested",
     # The REPORTS evidence freeze (ledger.freeze / thaw, 2026-10-09): the
     # reason and time the register was frozen, or blank when open.
     "evidence_freeze",

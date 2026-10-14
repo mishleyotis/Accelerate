@@ -265,6 +265,48 @@ def _iso_day(v: str) -> str | None:
     return f"{m.group(1)}-{m.group(2)}-{m.group(3)}" if m else None
 
 
+#: Response headers that name the technology serving a page.
+_TECH_HEADERS = ("server", "x-generator", "x-powered-by")
+
+
+def tech_markers(markup: str, headers=None, url: str = "") -> str:
+    """The technology a response names about itself, as one plain-text block
+    appended AFTER the page's prose (so no prose offset moves).
+
+    AAA WCNY (2026-10-14): Drupal (x-generator), Cloudflare (server header)
+    and UKG (the careers link to recruiting.ultipro.com) were real detections
+    that no register row could cite — `html_text` drops headers, `<meta>` and
+    hrefs, so no span existed to verify. A technographic row now cites the
+    marker line the fetch cached."""
+    from urllib.parse import urlparse
+    parts = []
+    for h in _TECH_HEADERS:
+        v = (headers.get(h) if headers is not None else None) or ""
+        v = " ".join(str(v).split())
+        if v:
+            parts.append(f"{h}: {v}.")
+    m = re.search(r'(?is)<meta[^>]+name=["\']generator["\'][^>]*content=["\']([^"\']+)', markup or "") \
+        or re.search(r'(?is)<meta[^>]+content=["\']([^"\']+)["\'][^>]*name=["\']generator', markup or "")
+    if m:
+        parts.append(f"meta generator: {' '.join(m.group(1).split())}.")
+    own = (urlparse(url).hostname or "").lower().removeprefix("www.")
+    hosts = []
+    for h in re.findall(r'(?i)(?:href|src|action)=["\'](?:https?:)?//([^/"\':?#]+)', markup or ""):
+        h = h.lower().removeprefix("www.")
+        if own and (h == own or h.endswith("." + own) or own.endswith("." + h)):
+            continue
+        if h not in hosts:
+            hosts.append(h)
+    # Eight hosts a sentence, so any one sentence is a citable 50-500
+    # character span (a single 25-host list ran past the excerpt ceiling).
+    hosts = hosts[:32]
+    for i in range(0, len(hosts), 8):
+        parts.append("third-party hosts linked or loaded: " + ", ".join(hosts[i:i + 8]) + ".")
+    if not parts:
+        return ""
+    return "Technology markers in this response (machine read): " + " ".join(parts)
+
+
 def _http_text(url: str) -> str | None:
     """GET the URL, hand back TEXT, None on failure with the reason recorded.
 
@@ -295,6 +337,7 @@ def _http_text(url: str) -> str | None:
         with urllib.request.urlopen(req, timeout=30) as r:
             raw = r.read(20_000_000)
             ctype = (r.headers.get("Content-Type") or "").lower()
+            rheaders = r.headers
     except Exception as exc:                                # noqa: BLE001
         # WHY it failed, not merely THAT it failed.
         _http_text.last_error = describe_error(exc, url)
@@ -309,7 +352,9 @@ def _http_text(url: str) -> str | None:
         return text
     markup = raw.decode("utf-8", "replace")
     _http_text.last_published = published_date(markup, url)
-    return html_text(markup)
+    text = html_text(markup)
+    marks = tech_markers(markup, rheaders, url)
+    return f"{text}\n\n{marks}\n" if marks else text
 
 
 _http_text.last_error = None
@@ -385,8 +430,12 @@ def store_text(run, url: str, text: str, *, content_type: str = "",
     # cookie wall) is replaced, because nothing could have been verified
     # against it.
     existing = cached_text(run, url)
+    # A SUPERSET replaces: a re-read that carries the held text whole (the
+    # technology-marker block appended, 2026-10-14) loses nothing a row was
+    # verified against, so it is the better copy, not an alternative.
+    superset = existing is not None and normalise(existing) in normalise(text)
     if existing is not None and len(existing.strip()) >= KEEP_CACHED_MIN_CHARS \
-            and normalise(existing) != normalise(text):
+            and normalise(existing) != normalise(text) and not superset:
         (d / f"{key}.alt.txt").write_text(text, encoding="utf-8")
         meta = json.loads((d / f"{key}.json").read_text(encoding="utf-8")) \
             if (d / f"{key}.json").exists() else {"url": url}

@@ -468,6 +468,11 @@ def close_prelim(run, *, entity="Acme Credit Union", link_prelim=False):
         "enforcement searched under the current name via Tavily and Exa on "
         "2026-08-29; no consent order, enforcement action, suit or breach "
         "names the entity"))
+    # PRELIM accounts for Enrichment_Needed before it signs off (2026-10-14):
+    # the fixture's connector state is all-current, so nothing is owed.
+    prelim.seed_enrichment(wb, {"enrichment": {"facets": [
+        {"facet": f, "state": "current"} for f in ("leadership", "firmographics",
+                                                   "techstack", "sentiment")]}})
     prelim.complete(wb)
     return eid
 

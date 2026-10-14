@@ -182,3 +182,22 @@ def test_a_degraded_run_in_a_session_without_workflow_runs_the_lanes_itself(tmp_
     assert out["outcome"] != "AWAITING_WORKFLOW", "no workflow handed to a session that cannot run one"
     assert any("NO Workflow tool" in m for m in logs), logs
     assert "no Workflow tool" in p.owner_update(out)
+
+
+def test_an_agent_whose_prompt_is_a_brief_under_the_run_root_is_charged(tmp_path):
+    """AAA Western and Central New York (2026-10-14): 41 in-session agents
+    were prompted "Your complete brief is the file <root>/briefs/…" — the
+    rendered agent_prompts — and none was charged ($28.04), because the
+    prompt named the run's root, not its id."""
+    run = new_run(tmp_path, n=3, prelim=False)
+    sub = tmp_path / "proj" / "sess" / "subagents"
+    _agent(sub, "brief", f"Your complete brief is the file {run.root}/briefs/research_agents/"
+                         f"P1C1_collect1.md. Read it in full first.",
+           {"agentType": "dma-insights:research-evidence-collector",
+            "description": "P1C1 collect"})
+    # the brief it reads names the run, as every rendered prompt does
+    (sub / "agent-brief.jsonl").write_text((sub / "agent-brief.jsonl").read_text() + "\n"
+                                           + json.dumps({"type": "user", "message": {
+                                               "content": f"brief text for DMA run {run.run_id}"}}))
+    got = cost.capture_workflows(run, base=tmp_path)
+    assert got["captured"] == 1 and got["by_via"]["agent"] == 1, got

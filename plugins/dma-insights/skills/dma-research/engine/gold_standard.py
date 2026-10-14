@@ -328,6 +328,28 @@ def workbook_findings(path) -> list[Finding]:
     # sheets, so the floor is depth-of-series, NOT a mandated sheet name: at
     # least one sheet must show >=5 distinct fiscal years co-occurring with
     # financial metrics.
+    # A DECLARED ABSENCE IS THE OTHER HONEST ANSWER (AAA WCNY, 2026-10-14):
+    # `engine.completeness declare --sheet Financial_Trends` is the engine's
+    # documented route "for an institution that publishes fewer" — PRELIM
+    # accepts it — and this gate refused the package for the empty sheet the
+    # declaration explains. The declaration counts only for an EMPTY sheet
+    # with a real reason (>= 40 chars); a thin series still fails.
+    fin_declared = ""
+    if "Run_Metadata" in wb.sheetnames:
+        _, md_rows = rows("Run_Metadata")
+        md = {_norm(r[0]): r[1] for r in md_rows if r and r[0]}
+        try:
+            declared = json.loads(_norm(md.get("empty_sheet_reasons")) or "{}") or {}
+        except ValueError:
+            declared = {}
+        fin_declared = _norm(declared.get("Financial_Trends") or "")
+        if len(fin_declared) < 40:
+            fin_declared = ""
+    fin_rows = []
+    if "Financial_Trends" in wb.sheetnames:
+        _, fin_rows = rows("Financial_Trends")
+        fin_rows = [r for r in fin_rows if r and any(_norm(c) for c in r)]
+    fin_absent_declared = bool(fin_declared) and not fin_rows
     year_re = re.compile(r"(?<!\d)20[0-3]\d(?!\d)")  # matches FY2020, 2020, 2020-24
     fin_re = re.compile(r"revenue|asset|income|deposit|loan|equity|eps|cagr|"
                         r"net charge|roe|roa|dividend|margin|capital", re.I)
@@ -343,7 +365,7 @@ def workbook_findings(path) -> list[Finding]:
                 kw = kw or bool(fin_re.search(t))
         if kw and len(yrs) > best_years:
             best_years, best_sheet = len(yrs), sh
-    if best_years < 5:
+    if best_years < 5 and not fin_absent_declared:
         out.append(Finding("GS-WB-FINANCIALS",
             f"no 5-year financial trajectory in the workbook (deepest series: "
             f"{best_years} fiscal year(s) in {best_sheet!r})", "GSY-18"))
@@ -352,7 +374,7 @@ def workbook_findings(path) -> list[Finding]:
     # >=5 fiscal-year columns, >=5 metric rows, and a growth/CAGR/trend column.
     fin_sheet = next((s for s in wb.sheetnames if s.lower()
                       in ("financial_trends", "financials", "financial_summary")), None)
-    if fin_sheet:
+    if fin_sheet and not fin_absent_declared:
         hdr, data = rows(fin_sheet)
         hdr_n = [_norm(h) for h in hdr]
         if "Fiscal_Year" in hdr_n and "Metric" in hdr_n:

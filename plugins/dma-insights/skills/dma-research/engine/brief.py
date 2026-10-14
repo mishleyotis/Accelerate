@@ -1608,6 +1608,12 @@ def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
         "declared through `engine.prelim declare` (with a ladder); "
         "`engine.prelim complete` refuses while one is OPEN",
         "PRELIM searches are logged `engine.cli search … --prelim` (no cell yet)",
+        "Enrichment_Needed is PRELIM's to account for: `engine.prelim "
+        "seed-enrichment` from the connector's client state (a client the "
+        "server has never seen seeds nothing: declare it), else `engine.profile "
+        "enrichment-needed` rows or `engine.completeness declare --sheet "
+        "Enrichment_Needed`; `engine.prelim complete` refuses an empty, "
+        "undeclared tab, because HANDOFF would refuse it after research is paid for",
     ]
     conductor = _bound({
         "agent": "research-conductor", "shared": sh,
@@ -1975,10 +1981,25 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
             if sub in wb.selected_subcaps() and r.get("Score") in (None, ""):
                 unscored_by_p[sub[:2]] = unscored_by_p.get(sub[:2], 0) + 1
         pending = A.critic_moves(wb)
+        # A PASSED pillar still owes its critic when the gate holds one of its
+        # capabilities as uniformly scored on evidenced cells — nobody else is
+        # handed that term (AAA Western and Central New York, 2026-10-14:
+        # rounds 3-5 dispatched nothing and the stall guard stopped SCORING).
+        undiff: dict[str, list[str]] = {}
+        for cap in A.differentiation(wb)["no_differentiation"]:
+            undiff.setdefault(cap[:2], []).append(cap)
         for pillar in pillars:
             if unscored_by_p.get(pillar) or verdicts.get(pillar) == "PASS" and not any(
-                    c.startswith(pillar) for c in pending):
+                    c.startswith(pillar) for c in pending) and not undiff.get(pillar):
                 continue
+            diff_rules = ([
+                f"capabilities {', '.join(undiff[pillar])} carry IDENTICAL scores on "
+                f"evidenced cells (the gate's no_differentiation): re-derive each cell "
+                f"from its OWN evidence and rubric. Where cells honestly differ, --move "
+                f"the one that flatters; where the identical scores are what each cell's "
+                f"evidence supports, record it: python3 -m engine.assessment attest-uniform "
+                f"{e} --cap <CAP> --actor scoring-critic --note '<80+ chars, cell by cell>'. "
+                f"Never move a score only to create spread."] if undiff.get(pillar) else [])
             packet = _bound({
                 "agent": "scoring-critic", "shared": {k: sh.get(k) for k in (
                     "run_id", "entity", "sub_vertical", "evidence_mode", "stage", "run_root")},
@@ -1989,7 +2010,8 @@ def scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, critic: bool = False,
                     f"you re-derived and what moved>' [--move CELL:TARGET:why …]"],
                 "pillar": pillar,
                 "previous_verdict": verdicts.get(pillar),
-                "rules": [
+                "undifferentiated_capabilities": undiff.get(pillar) or [],
+                "rules": diff_rules + [
                     f"critique pillar {pillar} ONLY; re-derive a sample of its scores "
                     f"from their rationales and rubric descriptors and hunt the score "
                     f"that flatters",
@@ -2266,7 +2288,27 @@ def report_batch(wb: RunWorkbook, *, run, out_dir: Path, validator: bool = False
                                                for x in (v.get("sections") or [])]}
                               for k, v in st["reports"].items()},
             "templates_read_before_reviewing": templates,
+            # A section parked on an upstream item leaves the writer loop, so
+            # only a fresh review brings it back (AAA WCNY 2026-10-14: four
+            # sections waited on items the conductor had already supplied).
+            "upstream_to_recheck": [
+                {"report": u["report"], "section": u["section"], "kind": u.get("kind"),
+                 "detail": str(u.get("detail") or "")[:300]}
+                for u in (st.get("upstream") or [])][:16],
+            # What the engagement owner has ruled on this run: an upstream
+            # item an owner decision answers is closed by it.
+            "owner_decisions": [
+                {"gate": r.get("Gate"), "scope": r.get("Scope"),
+                 "detail": str(r.get("Detail") or "")[:600]}
+                for r in wb.rows("Gate_Log")
+                if str(r.get("Gate") or "").upper().startswith("OWNER_DECISION")][-8:],
             "rules": [
+                "an item an `owner_decisions` entry answers is supplied: review "
+                "the section on what the owner ruled, never against it",
+                "FIRST re-check every `upstream_to_recheck` item against the "
+                "sheets as they are now: where it is supplied, review that "
+                "section afresh (PASS, or REVISE with writer-fixable notes and no "
+                "--upstream); where it is not, leave the section as it stands",
                 "six named dimensions per section, then the whole-report "
                 "adversarial pass (cross-section contradiction, prose figures vs "
                 "sheets, the strongest case the assessment is wrong)",

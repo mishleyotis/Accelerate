@@ -413,6 +413,11 @@ def append_evidence(wb: RunWorkbook, *, source_name: str, source_url: str | None
             "connector record's URL, or the page or domain the reading reports "
             "on (a web-crawl technographic reading cites the crawled site), "
             "and name the tool and retrieval date in --source-name")
+    if nonproduction_host(source_url):
+        raise LedgerRefusal(
+            f"{nonproduction_host(source_url)} is a pre-production copy of a "
+            f"site (test/staging/dev); it is not the institution's statement and "
+            f"never citable. Cite the live page, or record nothing")
     # AN INTAKE DOCUMENT IS CITED BY ITS SOURCE OF RECORD, NOT ITS CACHE.
     # Measured 2026-10-11 (R-INTERAC-20261010): 46 internal rows carried the
     # local `01_intake/` path (38 bare, 8 file://) though the intake manifest
@@ -689,6 +694,210 @@ def attach_evidence(wb: RunWorkbook, eid: str, subcaps, *,
 DETACH_STEP = "detach"
 
 
+#: The first host label of a pre-production copy of a site. AAA Western and
+#: Central New York (2026-10-14): E-194 cited test.westerncentralnyaaa.com —
+#: a staging page with a $15 gift-card offer the live site contradicts — and
+#: every Evidence_Detail row ships in the package's evidence index, so the
+#: client view would have carried a test page. A staging copy is never the
+#: institution's statement: it is refused at the write, and `retire_
+#: nonproduction_evidence` removes one registered before this rule.
+NONPRODUCTION_HOST_LABELS = frozenset({"test", "staging", "stage", "stg", "dev", "qa",
+                                       "uat", "sandbox", "preview"})
+RETIRE_STEP = "retire_nonproduction"
+
+
+def nonproduction_host(url: str | None) -> str | None:
+    """The host when `url` is on a pre-production subdomain, else None. Only a
+    SUBDOMAIN label counts (test.example.com), never a registrable domain
+    (dev.to)."""
+    from urllib.parse import urlparse
+    u = str(url or "").strip()
+    if not u:
+        return None
+    host = (urlparse(u if "//" in u else "//" + u).hostname or "").lower()
+    labels = host.split(".")
+    return host if len(labels) >= 3 and labels[0] in NONPRODUCTION_HOST_LABELS else None
+
+
+def retire_nonproduction_evidence(wb: RunWorkbook, *, why: str, actor: str | None = None,
+                                  dry_run: bool = False) -> dict:
+    """Remove every registered row whose Source_URL is a pre-production host,
+    with both directions of every link — unless some prose still cites it,
+    in which case it is KEPT and named (re-synthesise that prose first;
+    removing a row prose relies on would orphan the citation)."""
+    why = str(why or "").strip()
+    if len(why) < 20:
+        raise LedgerRefusal("retire needs --why (>=20 chars)")
+    register = wb.evidence_index()
+    targets = {eid: row for eid, row in register.items()
+               if nonproduction_host(row.get("Source_URL"))}
+    link_cols = {"Evidence_IDs", "Source_URLs", "SubCap_IDs", "E_ID"}
+    skip_sheets = {"Evidence_Detail", "Provenance", "Gate_Log", "Search_Log"}
+    retired, kept = [], {}
+    for eid, row in sorted(targets.items()):
+        pat = re.compile(rf"(?<![\w-]){re.escape(eid)}(?![\w])")
+        cited = []
+        for sheet in C.SHEETS:
+            if sheet in skip_sheets:
+                continue
+            try:
+                rows = wb.rows(sheet)
+            except Exception:                                   # noqa: BLE001
+                continue
+            for r in rows:
+                if any(k not in link_cols and isinstance(v, str) and pat.search(v)
+                       for k, v in r.items()):
+                    cited.append(sheet)
+                    break
+        if cited:
+            kept[eid] = sorted(set(cited))
+            continue
+        retired.append(eid)
+    fix = ({eid: (f"cited prose relies on {eid}: if the production page carries "
+                  f"the same span, `engine.cli fetch --url <production url>` then "
+                  f"`engine.cli repoint --e-id {eid} --url <production url> --why …`; "
+                  f"otherwise re-synthesise the citing cells first")
+            for eid in kept})
+    if dry_run or not retired:
+        return {"retired": [] if dry_run else retired, "would_retire": retired if dry_run else [],
+                "kept_cited": kept, "fix": fix}
+    with wb.transaction("retire_nonproduction"):
+        for eid in retired:
+            row = targets[eid]
+            url = str(row.get("Source_URL") or "").strip()
+            for sr in wb.scoring_rows():
+                cell = str(sr.get("SubCap_ID") or "").strip()
+                have = [i for i in _split_ids(sr.get("Evidence_IDs")) if i and i != C.NO_EVIDENCE]
+                if eid not in [i.split(":")[0] for i in have]:
+                    continue
+                keep = [i for i in have if i.split(":")[0] != eid]
+                still = {str((register.get(i.split(":")[0]) or {}).get("Source_URL") or "").strip()
+                         for i in keep}
+                urls = [u for u in _split_ids(sr.get("Source_URLs"))
+                        if u and (u != url or u in still)]
+                # "" and not None: openpyxl ignores value=None, so a None
+                # never clears the cell (the URL outlived its row).
+                wb.set_scoring(cell, {"Evidence_IDs": ", ".join(keep) or C.NO_EVIDENCE,
+                                      "Source_URLs": ", ".join(urls)}, save=False)
+            wb.delete_rows_where("Evidence_Detail", {"E_ID": eid}, save=False)
+            wb.append("Provenance", {
+                "SubCap_ID": "", "Step": RETIRE_STEP,
+                "Actor": str(actor or "unattributed").strip(), "At": _utcnow(),
+                "Detail": f"retired {eid} ({nonproduction_host(url)}): {why}"[:900],
+                "Session": _agent_session()}, save=False)
+        wb.append("Gate_Log", {"Timestamp": _utcnow(), "Gate": "EVIDENCE_RETIRED",
+                               "Scope": "Evidence_Detail", "Verdict": "PASS",
+                               "Blocking": False,
+                               "Detail": f"{len(retired)} non-production row(s) retired: "
+                                         f"{', '.join(retired)}; {why}"[:900]}, save=False)
+        wb._dirty = True
+    wb.recompute_coverage()
+    return {"retired": retired, "would_retire": [], "kept_cited": kept, "fix": fix}
+
+
+REPOINT_STEP = "repoint_evidence"
+
+
+def _site(url: str) -> str:
+    """The registrable part of a host (last two labels) — what makes a
+    pre-production copy and its production page the same site."""
+    from urllib.parse import urlparse
+    u = str(url or "").strip()
+    host = (urlparse(u if "//" in u else "//" + u).hostname or "").lower()
+    parts = [p for p in host.split(".") if p]
+    return ".".join(parts[-2:])
+
+
+def repoint_evidence(wb: RunWorkbook, eid: str, url: str, *, why: str,
+                     run=None, actor: str | None = None) -> dict:
+    """Move a CITED pre-production row to the production copy of the same
+    page — the repair `retire_nonproduction_evidence` names for a row prose
+    still relies on (AAA WCNY E-194, 2026-10-14: a synthesis, a score and a
+    report section cited a test.<site> page whose production twin carries the
+    identical span; retiring it would orphan all three).
+
+    Refused unless the row's host IS pre-production, the new URL is not, both
+    are the same site, and `engine.cli fetch` has read the new URL and the
+    excerpt is verbatim in it. Nothing else on the row changes."""
+    why = str(why or "").strip()
+    if len(why) < 20:
+        raise LedgerRefusal("repoint needs --why (>=20 chars)")
+    eid = str(eid or "").strip()
+    row = wb.evidence_index().get(eid)
+    if row is None:
+        raise LedgerRefusal(f"{eid} is not a registered row")
+    old = str(row.get("Source_URL") or "").strip()
+    url = str(url or "").strip()
+    if not nonproduction_host(old):
+        raise LedgerRefusal(
+            f"{eid} is on {old or 'no URL'}, not a pre-production host; repoint "
+            f"moves a test/staging copy to its production page and nothing else")
+    if nonproduction_host(url):
+        raise LedgerRefusal(f"{url} is itself pre-production ({nonproduction_host(url)})")
+    if not _site(url) or _site(url) != _site(old):
+        raise LedgerRefusal(
+            f"{url} is not the same site as {old}: a different site is a "
+            f"different source — register it, do not relabel this one")
+    from . import fetch as _fetch
+    _run = _run_of(wb, run)
+    page = _fetch.cached_text(_run, url)
+    where = f"--run {getattr(_run, 'run_id', '<R>')}"
+    if page is None:
+        raise LedgerRefusal(
+            f"nothing in this run has read {url}: `engine.cli fetch {where} "
+            f"--url {url} --query '<the excerpt>'` first, so the span is "
+            f"checked against the production page rather than assumed")
+    if _fetch.normalise(str(row.get("Excerpt") or "")) not in _fetch.normalise(page):
+        raise LedgerRefusal(
+            f"excerpt_not_verbatim: {eid}'s span is not on {url}; the production "
+            f"page says something else, so this is a different source")
+    register = wb.evidence_index()
+    cells = []
+    with wb.transaction("repoint_evidence"):
+        wb.update_row("Evidence_Detail", "E_ID", eid, {"Source_URL": url}, save=False)
+        for sr in wb.scoring_rows():
+            have = [i.split(":")[0] for i in _split_ids(sr.get("Evidence_IDs"))]
+            if eid not in have:
+                continue
+            others = {str((register.get(i) or {}).get("Source_URL") or "").strip()
+                      for i in have if i != eid}
+            urls = [u for u in _split_ids(sr.get("Source_URLs"))
+                    if u and (u != old or u in others)]
+            if url not in urls:
+                urls.append(url)
+            cell = str(sr.get("SubCap_ID") or "").strip()
+            wb.set_scoring(cell, {"Source_URLs": ", ".join(urls)}, save=False)
+            cells.append(cell)
+        # The scorer's snapshot of the row's sources (Subcap_Scores.source_urls)
+        # is a citation surface too: it ships in the package.
+        for sc in wb.rows("Subcap_Scores"):
+            sid = str(sc.get("subcap_id") or "").strip()
+            have = [i.split(":")[0] for i in _split_ids(sc.get("evidence_ids"))]
+            if not sid or eid not in have:
+                continue
+            others = {str((register.get(i) or {}).get("Source_URL") or "").strip()
+                      for i in have if i != eid}
+            urls = [u for u in _split_ids(sc.get("source_urls"))
+                    if u and (u != old or u in others)]
+            if url not in urls:
+                urls.append(url)
+            wb.update_row("Subcap_Scores", "subcap_id", sid,
+                          {"source_urls": ", ".join(urls)}, save=False)
+        wb.append("Provenance", {
+            "SubCap_ID": ", ".join(cells), "Step": REPOINT_STEP,
+            "Actor": str(actor or "unattributed").strip(), "At": _utcnow(),
+            "Detail": f"{eid}: {old} -> {url} (span verified on the production "
+                      f"page): {why}"[:900],
+            "Session": _agent_session()}, save=False)
+        wb.append("Gate_Log", {"Timestamp": _utcnow(), "Gate": "EVIDENCE_REPOINTED",
+                               "Scope": "Evidence_Detail", "Verdict": "PASS",
+                               "Blocking": False,
+                               "Detail": f"{eid} moved off {nonproduction_host(old)} to "
+                                         f"{url}; {why}"[:900]}, save=False)
+        wb._dirty = True
+    return {"e_id": eid, "from": old, "to": url, "cells": cells}
+
+
 def detach_evidence(wb: RunWorkbook, eid: str, subcap: str, *,
                     why: str, actor: str | None = None) -> dict:
     """Take back a citation a repair wave put on a DECLARED ABSENCE, when the
@@ -732,8 +941,10 @@ def detach_evidence(wb: RunWorkbook, eid: str, subcap: str, *,
              for i in keep}
     urls = [u for u in _split_ids(sr.get("Source_URLs")) if u and (u != url or u in still)]
     with wb.transaction("detach_evidence"):
+        # "" and not None: openpyxl ignores value=None, so the detached
+        # row's URL used to stay on the cell (found 2026-10-14).
         wb.set_scoring(subcap, {"Evidence_IDs": ", ".join(keep) or C.NO_EVIDENCE,
-                                "Source_URLs": ", ".join(urls) or None}, save=False)
+                                "Source_URLs": ", ".join(urls)}, save=False)
         if row:
             named = [s.split(":")[0].strip() for s in _split_ids(row.get("SubCap_IDs"))
                      if str(s).strip() and s.split(":")[0].strip() != subcap]

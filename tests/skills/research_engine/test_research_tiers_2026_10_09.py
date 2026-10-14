@@ -110,6 +110,39 @@ def test_prelim_spend_is_not_read_as_research_spend(tmp_path):
     assert p._family_usd("PRELIM") == pytest.approx(5.71, abs=0.01)
 
 
+def test_a_self_booked_batch_is_not_counted_twice_mid_stage(tmp_path):
+    """AAA WCNY 2026-10-14: REPORTS stopped at "$51.78 of $40.00" with $25.89
+    in the ledger — every batch the dispatcher had booked was counted again as
+    the driver's unrecorded delta until the stage ended."""
+    run = new_run(tmp_path, n=6)
+    preflight.record(run, preflight_doc())
+    disp = S.StubDispatcher(handlers={})
+    disp.records_cost = True
+    p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
+                                  push=False, folder_root=tmp_path / "out", ingest_poll_s=0,
+                                  sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
+                                  research_mode="workflow"))
+    p._running_stage = "REPORTS"
+    for usd in (7.28, 4.99, 7.54):
+        cost.record(run, stage="REPORTS", elapsed_s=60, usd=usd)   # the dispatcher's own row
+        p._count({"dispatched": 1, "usd": usd, "turns": 40})        # and the summary it returns
+    assert p._family_usd("REPORTS") == pytest.approx(19.81, abs=0.01)
+    assert p._spend_kw(cost) == {}, "nothing is left unrecorded for the stage-end row"
+
+
+def test_a_dispatcher_that_does_not_book_still_counts_its_spend(tmp_path):
+    run = new_run(tmp_path, n=6)
+    preflight.record(run, preflight_doc())
+    disp = S.StubDispatcher(handlers={})
+    p = P.Pipeline(run, P.Options(dispatcher=disp, reads=S.StubReads(), shipper=S.StubShipper(),
+                                  push=False, folder_root=tmp_path / "out", ingest_poll_s=0,
+                                  sleep=lambda s: None, log=lambda s: None, until="RESEARCH",
+                                  research_mode="workflow"))
+    p._running_stage = "REPORTS"
+    p._count({"dispatched": 1, "usd": 3.5, "turns": 10})
+    assert p._family_usd("REPORTS") == pytest.approx(3.5, abs=0.01)
+
+
 # ── 3. the handoff carries the tiers, the share and the governor's rate ────
 
 def _handoff(tmp_path, **opts):

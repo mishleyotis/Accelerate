@@ -536,6 +536,13 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   prompt names the run are priced into the ledger (the IMA PRELIM relay,
   $8.85, had never been: the run is at $27.26 of $25). MEM-0637..0640.
 
+- **Rubric levels vs display bands** (user, 2026-10-14, AAA WCNY): GSY-11
+  stands. `Maturity_Rubric` keeps five SCORE levels on the 1–5 scale (M1
+  Foundational … M5 Leading, `engine/rubric.py`); invariant 6 governs the
+  display BANDS — four, strict less-than — and the banned band word. A fifth
+  rubric level is not a fifth band; never ask to rewrite the rubric into bands
+  (`agents/reports/report-validator.md` says the same).
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

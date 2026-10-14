@@ -79,6 +79,27 @@ def _slug(s: str) -> str:
 
 # ── recording, with the vocabulary enforced at the write ────────────────
 
+def _registered_for(wb: RunWorkbook, product: str, vendor: str | None,
+                    urls) -> list[str]:
+    """Registered rows on one of `urls` whose excerpt NAMES the product (or
+    its vendor) — the citation a URL-only row meant (AAA WCNY, 2026-10-14:
+    ten rows carried a URL and no E-id). A row on the same page that is about
+    something else is not linked: a homepage newsletter span does not
+    evidence the CMS that renders it."""
+    want = {str(u or "").strip().rstrip("/") for u in urls if str(u or "").strip()}
+    if not want:
+        return []
+    toks = [t for t in (_vendor_tokens({"Product": product, "Vendor": vendor}) or [])
+            if len(t) >= 3]
+    out = []
+    for eid, row in wb.evidence_index().items():
+        if str(row.get("Source_URL") or "").strip().rstrip("/") not in want:
+            continue
+        text = str(row.get("Excerpt") or "").lower()
+        if toks and any(t.lower() in text for t in toks):
+            out.append(eid)
+    return sorted(out)
+
 def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
            status: str, method: str, basis: str, providers=None, subcaps=None,
            evidence_ids=None, source_urls=None,
@@ -116,6 +137,8 @@ def record(wb: RunWorkbook, *, product: str, vendor: str | None, layer: str,
     if bad:
         raise ScanRefused(f"provider(s) {bad} not in {C.TECH_PROVIDERS}")
     eids = [e.strip() for e in (evidence_ids or []) if str(e).strip()]
+    if not eids and source_urls:
+        eids = _registered_for(wb, product, vendor, source_urls)
     if status == "CONFIRMED":
         register = wb.evidence_index()
         if not eids:

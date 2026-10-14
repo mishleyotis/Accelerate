@@ -51,6 +51,17 @@ python3 -m engine.pipeline run    --run $RUN --root $ROOT --max-wall-min 240 --l
 python3 -m engine.pipeline status --run $RUN --root $ROOT --watch
 ```
 
+From a Claude Code session's background shell, pass `--max-wall-min 110`: the
+shell kills a background task at two hours, so the driver must stop itself
+first (it books every lane as it finishes, and `run` resumes the stage).
+
+Repairs the driver's refusals name (2026-10-14, AAA Western and Central New York):
+`engine.assessment attest-uniform --cap … --actor <critic> --note …` when a
+capability's scores are genuinely uniform (`no_differentiation`, routed to the
+critic); `engine.cli retire-nonproduction --why …` for an uncited row on a
+test/staging host, and `engine.cli repoint --e-id … --url <production> --why …`
+for a cited one once `engine.cli fetch` has read the production page.
+
 Preventive gates the driver runs on its own (2026-10-07, after Arbor Bank): PRELIM
 does not close while the sub-vertical firmographic set has blank members; REPORTS
 runs the enforcement sweep (`07_qa/enforcement_rungs.json`) before any writer;

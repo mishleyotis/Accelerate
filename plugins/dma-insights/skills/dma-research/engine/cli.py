@@ -528,6 +528,20 @@ def main(argv=None) -> int:
     gl.add_argument("--detail", default="")
     gl.add_argument("--blocking", action="store_true")
 
+    rn = common(sub.add_parser(
+        "retire-nonproduction", help="remove every registered row whose source is a "
+                                     "test/staging/dev copy of a site, with its cell "
+                                     "links; a row prose still cites is kept and named"))
+    rn.add_argument("--why", required=True)
+    rn.add_argument("--dry-run", action="store_true")
+
+    rp = common(sub.add_parser(
+        "repoint", help="move a cited row off a test/staging host to the production "
+                        "copy of the same page, once fetch has verified the span there"))
+    rp.add_argument("--e-id", required=True)
+    rp.add_argument("--url", required=True)
+    rp.add_argument("--why", required=True)
+
     rt = common(sub.add_parser(
         "retier", help="move one registered row to another tier, with the "
                        "cascade the tier carries (claim label re-derived, ERS "
@@ -1008,6 +1022,24 @@ def main(argv=None) -> int:
             print(f"REFUSED: {exc}", file=sys.stderr)
             return 1
         print(json.dumps({"gate": a.gate, "scope": a.scope, "verdict": a.verdict}))
+        return 0
+    if a.cmd == "retire-nonproduction":
+        try:
+            out = ledger.retire_nonproduction_evidence(wb, why=a.why, actor=_actor(a),
+                                                       dry_run=a.dry_run)
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
+        return 0
+    if a.cmd == "repoint":
+        try:
+            out = ledger.repoint_evidence(wb, a.e_id, a.url, why=a.why, run=run,
+                                          actor=_actor(a))
+        except ledger.LedgerRefusal as exc:
+            print(f"REFUSED: {exc}", file=sys.stderr)
+            return 1
+        print(json.dumps(out, indent=2))
         return 0
     if a.cmd == "retier":
         try:

@@ -2211,11 +2211,22 @@ class Pipeline:
         # `dispatched` and `attempts` out of that dict and drop the one figure
         # that could stop a runaway run.
         usd = summary.get("usd")
+        turns = summary.get("turns")
+        # A dispatcher that books its own spend (agent_run.py) has ALREADY put
+        # this money in the ledger, so the recorded marker moves with it.
+        # Until 2026-10-14 it moved only when the stage ended, and mid-stage
+        # `_family_usd` read every batch twice — ledger row + "unrecorded"
+        # delta: AAA WCNY's REPORTS stopped at "$51.78 of $40" with $25.89
+        # actually spent.
+        booked = bool(getattr(self.opts.dispatcher, "records_cost", False))
         if usd is not None:
             self._spent_usd += float(usd)
-        turns = summary.get("turns")
+            if booked:
+                self._recorded_usd += float(usd)
         if turns is not None:
             self._spent_turns += int(turns)
+            if booked:
+                self._recorded_turns += int(turns)
 
     # ── STAGES ─────────────────────────────────────────────────────────
     def _stage_prelim(self) -> str:
@@ -2240,7 +2251,12 @@ class Pipeline:
                 st = self._await_prelim(set(orch["owed"]))
             if not st["open"]:
                 if st["recorded_status"] != "COMPLETE":
-                    prelim.complete(self.wb)
+                    try:
+                        prelim.complete(self.wb)
+                    except prelim.PrelimRefusal as e:
+                        # Refused HERE, before one research lane is paid
+                        # for — not at HANDOFF after all sixteen are.
+                        raise StageRefused(f"PRELIM sign-off refused: {e}") from e
                 return f"PRELIM closed after {r + 1} round(s)"
             if self._stalled("PRELIM"):
                 break
@@ -4519,6 +4535,8 @@ class Pipeline:
             todo = still
             if todo and not produce:
                 break                     # a restage from disk is not retried by lanes
+        halted = self._auto_defer_to_b(halted, verdicts, version)
+        todo = list(self._auto_defer_to_b({p: "" for p in todo}, verdicts, version))
         if halted:
             raise StageRefused(
                 f"page(s) halted on version {version} — not retried, because a retry "
@@ -4561,6 +4579,11 @@ class Pipeline:
             self._handoff_clear(f"PAGES_{version}:{','.join(pages)}")
             return shipped
         halted = {p: w for p in todo if (w := self._no_retry(p))}
+        halted = self._auto_defer_to_b(halted, verdicts, version)
+        todo = [p for p in todo if p not in (self.state.get("deferred_to_b") or [])
+                or version != "A"]
+        if not todo:
+            return shipped
         if halted:
             raise StageRefused(
                 f"page(s) halted on version {version} — not retried, because a retry "
@@ -4659,6 +4682,68 @@ class Pipeline:
         `_ship_pages` before any lane, which stops the driver with
         NEEDS_CONNECTOR rather than failing the stage."""
         self._cohort_peers()
+        # Focus-area evidence names its focus area's cells (ET-07), linked
+        # here — after scoring, before any page lane (AAA WCNY, 2026-10-14).
+        from . import profile as _profile
+        try:
+            linked = _profile.link_focus_evidence(self.wb)
+        except Exception as e:                       # noqa: BLE001
+            linked = []
+            self.opts.log(f"  (focus evidence not linked: {e.__class__.__name__}: {str(e)[:120]})")
+        if linked:
+            self.wb.save()
+            self.opts.log("  [PAGES] focus evidence linked to its cells: " + ", ".join(
+                f"{d['e_id']}->{len(d['cells'])} cell(s)" for d in linked))
+
+    _UNRESOLVED_RE = re.compile(r"\b(E-\d+)\b does not resolve")
+
+    def _post_checkpoint_ids(self, reasons) -> list:
+        """E-ids a verdict says do not resolve AT THE SERVER that DO resolve
+        in this run's own register: registered after version A was ingested,
+        so no repair on A can ever make them resolve."""
+        have = self.wb.evidence_index()
+        out = []
+        for r in reasons or []:
+            gid = str(r.get("gate_id") if isinstance(r, dict) else "")
+            msg = str(r.get("message") if isinstance(r, dict) else r)
+            if gid and gid != "ET-01":
+                continue
+            for e in self._UNRESOLVED_RE.findall(msg):
+                if e in have and e not in out:
+                    out.append(e)
+        return out
+
+    def _auto_defer_to_b(self, pages: dict, verdicts: dict, version: str) -> dict:
+        """Move a version-A page whose verdict rests on post-checkpoint evidence
+        to version B, and return the pages that still halt.
+
+        AAA WCNY (2026-10-14), after R-INTERAC (2026-10-12) needed the owner's
+        `--defer-to-b`: techstack cited E-249..E-252, registered while the
+        reports serviced an evidence upstream item, i.e. after INGEST_A. On A
+        they cannot resolve whatever the page does; on B they are in the
+        package. Recorded in Gate_Log, never silent."""
+        if version != "A" or not pages:
+            return pages
+        keep = {}
+        moved = list(self.state.get("deferred_to_b") or [])
+        for p, w in pages.items():
+            ids = self._post_checkpoint_ids(verdicts.get(p) or [])
+            if not ids or p not in PAGES_A:
+                keep[p] = w
+                continue
+            if p not in moved:
+                moved.append(p)
+                L.append_gate(self.wb, gate="PAGES_DEFERRED_TO_B", scope=p, verdict="PASS",
+                              blocking=False,
+                              detail=(f"{p} moved to version B automatically: its version-A "
+                                      f"verdict cites {', '.join(ids[:8])}, registered after "
+                                      f"INGEST_A, which no version-A repair can resolve"))
+                self.opts.log(f"  [PAGES_A] {p} deferred to B: cites {', '.join(ids[:6])} "
+                              f"registered after version A")
+        if moved != list(self.state.get("deferred_to_b") or []):
+            self.state["deferred_to_b"] = moved
+            self._save_state()
+        return keep
 
     def _deferred(self) -> tuple:
         """PAGES_A pages moved to version B — by this invocation's flag or a
