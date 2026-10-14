@@ -808,7 +808,13 @@ def replace_peers(wb: RunWorkbook, peers_: list[str], *, rule: str, owner: str,
     Peer_Median, quartile and Peer_Scores cell blank, the owner named, the
     reason and the new selection rule recorded in Provenance and Gate_Log.
     The basis TOKEN stays the one locked; the rule on every grid row is the
-    new one, so no row still argues for the set it no longer names."""
+    new one, so no row still argues for the set it no longer names.
+
+    Tech_Peer_Deployments rows about a peer outside the new set are retired
+    (counted in the Gate_Log detail): left in place, the platform page would
+    argue "a peer runs this" from a peer the owner ruled out. Re-asserting
+    the locked set is refused unless such rows remain — then it only prunes
+    them, which is how a set replaced before this rule existed is cleaned."""
     lock = wb.handoff_lock()
     have = [p for p in str(lock.get("locked_peer_set") or "").split("|") if p]
     if not have:
@@ -824,7 +830,10 @@ def replace_peers(wb: RunWorkbook, peers_: list[str], *, rule: str, owner: str,
         raise PrelimRefusal(
             "the selection rule for the replacement set is too short; say what "
             "makes these the comparison set (>=40 chars)")
-    if wanted == sorted(have):
+    keep = {w.lower() for w in wanted}
+    stale = sorted({_clean(r.get("Peer")) for r in wb.rows("Tech_Peer_Deployments")
+                    if _clean(r.get("Peer")) and _clean(r.get("Peer")).lower() not in keep})
+    if wanted == sorted(have) and not stale:
         raise PrelimRefusal(f"the named set is the locked set {have}; nothing to replace")
     rows = wb.rows("Peer_Benchmarks")
     figured = sorted({_clean(r.get("Category_ID")) for r in rows
@@ -847,8 +856,12 @@ def replace_peers(wb: RunWorkbook, peers_: list[str], *, rule: str, owner: str,
                 wb.update_row("Peer_Benchmarks", "Category_ID", cid,
                               {"Peer_Names": names, "Peer_N": len(wanted),
                                "Peer_Basis": f"{basis}: {_clean(rule)}"}, save=False)
+        retired = sum(wb.delete_rows_where("Tech_Peer_Deployments", {"Peer": p}, save=False)
+                      for p in stale)
         detail = (f"peer set replaced by {_clean(owner)}: {', '.join(have)} -> "
-                  f"{', '.join(wanted)}. Rule: {_clean(rule)}. Why: {_clean(why)}")[:900]
+                  f"{', '.join(wanted)}; {retired} Tech_Peer_Deployments row(s) retired "
+                  f"for {', '.join(stale) or 'no peer'}. Rule: {_clean(rule)}. "
+                  f"Why: {_clean(why)}")[:900]
         wb.append("Provenance", {"SubCap_ID": "", "Step": "replace_peers",
                                  "Actor": _clean(owner), "At": _utcnow(),
                                  "Detail": detail}, save=False)
@@ -857,7 +870,8 @@ def replace_peers(wb: RunWorkbook, peers_: list[str], *, rule: str, owner: str,
                                "Blocking": False, "Detail": detail}, save=False)
         wb.save()
     return {"was": have, "locked_peer_set": wanted, "peer_n": len(wanted),
-            "categories": len([r for r in rows if _clean(r.get("Category_ID"))])}
+            "categories": len([r for r in rows if _clean(r.get("Category_ID"))]),
+            "peer_deployments_retired": retired, "retired_peers": stale}
 
 
 def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,

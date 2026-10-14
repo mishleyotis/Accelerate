@@ -78,6 +78,41 @@ def test_replacing_needs_owner_reason_rule_and_a_different_set(tmp_path):
         _replace(run.open(), peers=[" "])
 
 
+def _peer_dep(wb, peer, deployed="yes"):
+    wb.append("Tech_Peer_Deployments", {
+        "TS_ID": "TS-001", "Peer": peer, "Deployed": deployed,
+        "Basis": "careers posting names the platform in the stack",
+        "Source_URL": "https://example.com/job", "As_Of": "2026-10-14"})
+
+
+def test_deployment_rows_of_a_ruled_out_peer_are_retired(tmp_path):
+    run = _locked(tmp_path)
+    wb = run.open()
+    _peer_dep(wb, "Club A")
+    _peer_dep(wb, "Club B", deployed="unknown")
+    _peer_dep(wb, "Agency X")
+    out = _replace(run.open())
+    assert out["peer_deployments_retired"] == 2
+    assert out["retired_peers"] == ["Club A", "Club B"]
+    left = [r["Peer"] for r in run.open().rows("Tech_Peer_Deployments")]
+    assert left == ["Agency X"]
+    detail = next(r["Detail"] for r in run.open().rows("Gate_Log")
+                  if r.get("Gate") == "PEER_SET_REPLACED")
+    assert "2 Tech_Peer_Deployments row(s) retired" in detail
+
+
+def test_reasserting_the_locked_set_only_prunes_stale_peer_rows(tmp_path):
+    run = _locked(tmp_path)
+    _replace(run.open())                       # replaced, nothing to retire
+    _peer_dep(run.open(), "Club C")            # a stale row left behind
+    out = _replace(run.open())                 # same set again: prunes it
+    assert out["locked_peer_set"] == ["Agency X", "Agency Y", "Agency Z"]
+    assert out["peer_deployments_retired"] == 1
+    assert not run.open().rows("Tech_Peer_Deployments")
+    with pytest.raises(PR.PrelimRefusal, match="nothing to replace"):
+        _replace(run.open())                   # and now there is nothing left
+
+
 def test_replace_refuses_with_no_lock(tmp_path):
     run = new_run(tmp_path, n=4, prelim=False, folder=False)
     with pytest.raises(PR.PrelimRefusal, match="no peer set is locked"):

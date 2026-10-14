@@ -11,7 +11,10 @@
   is written against it, only with the owner, reason and selection rule
   recorded (Provenance and a non-blocking `PEER_SET_REPLACED` Gate_Log row).
   The locked basis token stays; every grid row's `Peer_Basis` carries the
-  new rule. Tests: `test_replace_peers_2026_10_14.py`.
+  new rule, and every `Tech_Peer_Deployments` row about a peer outside the
+  new set is retired (counted in the Gate_Log row), so the platform page
+  never argues from a ruled-out peer. Re-asserting the locked set only
+  prunes such rows. Tests: `test_replace_peers_2026_10_14.py`.
 
 ## 1.27.1 — 2026-10-12 — a research share always funds a whole round, and the Interac run reaches promotion
 
