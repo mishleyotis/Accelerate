@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime as _dt
+import re
 import time
 from dataclasses import dataclass, field
 
@@ -41,11 +42,27 @@ from .types import Document, EntityRef
 PAID_SOURCES = ("tavily", "exa", "firecrawl", "brave_api", "mojeek_api")
 
 
+def _bare_domain(x) -> str:
+    """The domain as the caller named it, minus a leading `www.` PREFIX.
+
+    `str.lstrip("www.")` strips the CHARACTERS w and '.', not the prefix:
+    measured 2026-10-14 on AAA Western and Central New York, whose domain
+    `westerncentralnyaaa.com` became `esterncentralnyaaa.com`. Every
+    `site:` probe then asked about a domain that does not exist and
+    `registry.is_own_host` stopped recognising the club's own pages, so
+    the collectors were handed national-AAA and sister-club cards instead.
+    Any client whose domain starts with w (Webster, Wintrust, WSFS …) was
+    exposed the same way."""
+    d = str(x or "").strip().lower()
+    d = re.sub(r"^[a-z]+://", "", d).split("/")[0]
+    return d.removeprefix("www.")
+
+
 def entity_ref(d: dict | None) -> EntityRef | None:
     if not d:
         return None
     return EntityRef(legal_name=str(d.get("legal_name") or d.get("name") or ""),
-                     domains=[str(x).lower().lstrip("www.") for x in (d.get("domains") or [])],
+                     domains=[_bare_domain(x) for x in (d.get("domains") or [])],
                      aliases=list(d.get("aliases") or []), location=d.get("location"),
                      charter=d.get("charter"), cik=d.get("cik"), ticker=d.get("ticker"),
                      sub_vertical=d.get("sub_vertical"))
