@@ -1,5 +1,18 @@
 # dma-insights — plugin changelog
 
+## Unreleased
+
+- **A locked peer set the owner ruled out had no path but withdrawal**
+  (`engine/prelim.py`): at AAA Western and Central New York (2026-10-14) the
+  PRELIM conductor locked five other AAA clubs and the owner ruled "No AAA
+  clubs at all"; `widen-peers` only adds and `lock_peer_set` refuses any
+  different set. `engine.prelim replace-peers` swaps the set wholesale under
+  `widen-peers`' guards — only while no Peer_Median, quartile or Peer_Scores
+  is written against it, only with the owner, reason and selection rule
+  recorded (Provenance and a non-blocking `PEER_SET_REPLACED` Gate_Log row).
+  The locked basis token stays; every grid row's `Peer_Basis` carries the
+  new rule. Tests: `test_replace_peers_2026_10_14.py`.
+
 ## 1.27.1 — 2026-10-12 — a research share always funds a whole round, and the Interac run reaches promotion
 
 Owner, R-INTERAC-20261010: "I see workflows failing and being restarted.
