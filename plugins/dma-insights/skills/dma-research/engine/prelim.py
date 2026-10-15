@@ -794,6 +794,11 @@ def widen_peers(wb: RunWorkbook, add: list[str], *, rule: str, owner: str,
             "categories": len([r for r in rows if _clean(r.get("Category_ID"))])}
 
 
+def _peer_key(name) -> str:
+    """A peer's firm name, case- and space-folded, without its parenthetical."""
+    return re.sub(r"\s+", " ", re.sub(r"\(.*", "", _clean(name))).strip().lower()
+
+
 def replace_peers(wb: RunWorkbook, peers_: list[str], *, rule: str, owner: str,
                   why: str) -> dict:
     """Replace a LOCKED set wholesale, on the engagement owner's word, while
@@ -830,13 +835,18 @@ def replace_peers(wb: RunWorkbook, peers_: list[str], *, rule: str, owner: str,
         raise PrelimRefusal(
             "the selection rule for the replacement set is too short; say what "
             "makes these the comparison set (>=40 chars)")
-    keep = {w.lower() for w in wanted}
+    # A peer is matched by its FIRM NAME, the text before any parenthetical:
+    # the sheets spell the same firm with and without its CRD, city and AUM
+    # ("Godsey & Gibb Wealth Management (CRD 105650, Richmond VA)" beside the
+    # lock's "…, ~USD 1.6B, Schwab custody)"), and an exact match retired a
+    # kept peer's rows on Verus (2026-10-15).
+    keep = {_peer_key(w) for w in wanted}
     # Platform_Peer_Adoption carries the same peers (the platform page's
     # "a peer runs this" rows): Verus (2026-10-15) dropped Heartwood and five
     # of its adoption rows stayed, still argued from a peer the owner ruled out.
     peer_sheets = ("Tech_Peer_Deployments", "Platform_Peer_Adoption")
     stale = sorted({_clean(r.get("Peer")) for sh in peer_sheets for r in wb.rows(sh)
-                    if _clean(r.get("Peer")) and _clean(r.get("Peer")).lower() not in keep})
+                    if _clean(r.get("Peer")) and _peer_key(r.get("Peer")) not in keep})
     if wanted == sorted(have) and not stale:
         raise PrelimRefusal(f"the named set is the locked set {have}; nothing to replace")
     rows = wb.rows("Peer_Benchmarks")

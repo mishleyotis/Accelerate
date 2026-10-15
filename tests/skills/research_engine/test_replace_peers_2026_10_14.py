@@ -125,7 +125,7 @@ def test_adoption_rows_of_a_ruled_out_peer_are_retired(tmp_path):
     rows stayed, so the platform page still argued from a ruled-out peer."""
     run = _locked(tmp_path)
     wb = run.open()
-    for peer in ("Club A", "Agency X"):
+    for peer in ("Club A", "Agency X", "Agency Y (CRD 1, Richmond VA)"):
         wb.append("Platform_Peer_Adoption", {
             "Product / Layer": "Financial Services Cloud", "Peer": peer,
             "Verdict": "UNKNOWN", "Basis": "one search naming the peer and platform",
@@ -133,8 +133,9 @@ def test_adoption_rows_of_a_ruled_out_peer_are_retired(tmp_path):
     out = _replace(run.open())
     assert out["peer_adoption_retired"] == 1
     assert "Club A" in out["retired_peers"]
+    # a kept peer spelled with its details is the same firm, never retired
     left = [r["Peer"] for r in run.open().rows("Platform_Peer_Adoption")]
-    assert left == ["Agency X"]
+    assert left == ["Agency X", "Agency Y (CRD 1, Richmond VA)"]
     detail = next(r["Detail"] for r in run.open().rows("Gate_Log")
                   if r.get("Gate") == "PEER_SET_REPLACED")
     assert "1 Platform_Peer_Adoption row(s) retired" in detail
