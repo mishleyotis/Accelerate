@@ -279,3 +279,35 @@ def test_the_banks_own_page_still_contradicts_a_claimed_row(tmp_path):
         subcaps=[cells[0]], published="2026-01-10")
     hits = [c for c in techscan.contradictions(wb) if c["token"] == "Pipewise"]
     assert hits and own in hits[0]["evidence_ids"], hits
+
+
+# ── restrike corrects a conflated vendor in place ────────────────────────
+
+def test_restrike_corrects_a_conflated_vendor_in_place(tmp_path):
+    """Verus (2026-10-15): TS-006 read 'Google; New Relic' for Google Tag
+    Manager, and restrike kept whatever vendor the row had, so the only
+    repair was a hand edit of the workbook."""
+    run, wb, cells = _run_with_scan(tmp_path)
+    ts = techscan.record(wb, product="Google Tag Manager",
+                         vendor="Google; New Relic", layer="DATA",
+                         status="INFERRED", method="technographic_scan",
+                         providers=["clay"],
+                         basis="Clay scan of acme.example detects Google Tag Manager")
+    with pytest.raises(ScanRefused, match="more than one company"):
+        techscan.restrike(wb, ts, status="INFERRED", method="technographic_scan",
+                          basis="Clay scan of acme.example detects Google Tag Manager",
+                          providers=["clay"], vendor="Google; New Relic")
+    n = len(wb.rows("Tech_Register"))
+    techscan.restrike(wb, ts, status="INFERRED", method="technographic_scan",
+                      basis="Clay scan of acme.example detects Google Tag Manager",
+                      providers=["clay"], vendor="Google")
+    rows = wb.rows("Tech_Register")
+    assert len(rows) == n
+    row = next(r for r in rows if r["TS_ID"] == ts)
+    assert row["Vendor"] == "Google"
+    assert row["Product"] == "Google Tag Manager"
+    # omitted, the vendor is kept
+    techscan.restrike(wb, ts, status="INFERRED", method="technographic_scan",
+                      basis="Clay scan of acme.example detects Google Tag Manager",
+                      providers=["clay"])
+    assert next(r for r in wb.rows("Tech_Register") if r["TS_ID"] == ts)["Vendor"] == "Google"

@@ -289,23 +289,35 @@ def contradictions(wb: RunWorkbook) -> list[dict]:
 
 def restrike(wb: RunWorkbook, ts_id: str, *, status: str, method: str,
              basis: str, providers, evidence_ids=None, product: str | None = None,
-             impact: str | None = None, actor: str = "") -> dict:
+             impact: str | None = None, vendor: str | None = None,
+             actor: str = "") -> dict:
     """Correct one register row IN PLACE, under the same refusals `record`
     applies. `record` only appends, so before this a wrong row could be
     corrected only by hand-editing the workbook, and a second row for the
-    same product double-counts its layer."""
+    same product double-counts its layer.
+
+    `vendor` corrects a conflated vendor (Verus, 2026-10-15: TS-006
+    'Google; New Relic' for Google Tag Manager — New Relic is its own row,
+    TS-015). Omitted, the row keeps the vendor it has."""
     row = next((r for r in wb.rows("Tech_Register")
                 if str(r.get("TS_ID") or "").upper() == str(ts_id).upper()), None)
     if row is None:
         raise ScanRefused(f"{ts_id} is not on Tech_Register")
     # Validate exactly as a new row would be, without appending it.
     probe = _Probe(wb)
-    record(probe, product=product or row["Product"], vendor=row.get("Vendor"),
+    new_vendor = vendor.strip() if vendor is not None and vendor.strip() else None
+    if new_vendor and re.search(r"[;|]", new_vendor):
+        raise ScanRefused(f"vendor {new_vendor!r} names more than one company: "
+                          f"a register row is one product from one vendor")
+    record(probe, product=product or row["Product"],
+           vendor=new_vendor or row.get("Vendor"),
            layer=row["Layer"], status=status, method=method, basis=basis,
            providers=providers, evidence_ids=evidence_ids, impact=impact)
     vals = {k: v for k, v in probe.row.items()
             if k not in ("TS_ID", "Layer", "Vendor", "Subcap_IDs", "SubCap_IDs",
                          "Source_URLs", "As_Of") and (v is not None or k == "DMA_Impact")}
+    if new_vendor:
+        vals["Vendor"] = new_vendor
     if impact is None:
         vals.pop("DMA_Impact", None)
     vals["As_Of"] = _utcnow()[:10]
@@ -938,6 +950,7 @@ def main(argv=None) -> int:
                            choices=C.TECH_PROVIDERS, required=True)
             s.add_argument("--evidence-id", action="append", default=[])
             s.add_argument("--product")
+            s.add_argument("--vendor", help="correct the row's vendor (one company)")
             s.add_argument("--impact")
         if name == "render":
             s.add_argument("--out")
@@ -957,7 +970,7 @@ def main(argv=None) -> int:
         print(json.dumps(restrike(wb, a.ts, status=a.status, method=a.method,
                                   basis=a.basis, providers=a.provider,
                                   evidence_ids=a.evidence_id, product=a.product,
-                                  impact=a.impact,
+                                  impact=a.impact, vendor=a.vendor,
                                   actor=os.environ.get("DMA_ACTOR", "")), indent=2))
         return 0
     if a.cmd == "reconcile":
