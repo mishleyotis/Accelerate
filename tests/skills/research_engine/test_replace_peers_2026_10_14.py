@@ -117,3 +117,24 @@ def test_replace_refuses_with_no_lock(tmp_path):
     run = new_run(tmp_path, n=4, prelim=False, folder=False)
     with pytest.raises(PR.PrelimRefusal, match="no peer set is locked"):
         _replace(run.open())
+
+
+def test_adoption_rows_of_a_ruled_out_peer_are_retired(tmp_path):
+    """Verus (2026-10-15): the owner dropped an acquired peer; its
+    Tech_Peer_Deployments rows were retired but five Platform_Peer_Adoption
+    rows stayed, so the platform page still argued from a ruled-out peer."""
+    run = _locked(tmp_path)
+    wb = run.open()
+    for peer in ("Club A", "Agency X"):
+        wb.append("Platform_Peer_Adoption", {
+            "Product / Layer": "Financial Services Cloud", "Peer": peer,
+            "Verdict": "UNKNOWN", "Basis": "one search naming the peer and platform",
+            "Source": "not established", "As at": "2026-10-15"})
+    out = _replace(run.open())
+    assert out["peer_adoption_retired"] == 1
+    assert "Club A" in out["retired_peers"]
+    left = [r["Peer"] for r in run.open().rows("Platform_Peer_Adoption")]
+    assert left == ["Agency X"]
+    detail = next(r["Detail"] for r in run.open().rows("Gate_Log")
+                  if r.get("Gate") == "PEER_SET_REPLACED")
+    assert "1 Platform_Peer_Adoption row(s) retired" in detail
