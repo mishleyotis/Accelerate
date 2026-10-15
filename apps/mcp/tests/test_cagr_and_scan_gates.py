@@ -113,3 +113,16 @@ def test_other_pages_are_untouched():
 def test_an_empty_register_is_left_to_its_empty_state():
     body = {"techstack": {"items": [], "empty_state": {"reason": "x"}}}
     assert _check_technographic_scan(_Conn(0), "run", "techstack", body) == []
+
+
+def test_a_scan_cited_by_its_package_local_id_is_looked_up_through_the_mapping():
+    """Verus Financial Partners, 2026-10-15: the register cited the Clay and
+    Vibe rows as E-084/E-085/E-071 (the workbook's local ids); the store held
+    them as E-VERUSFIN-084 and so on; the query matched the stored form only
+    and the server refused a register that demonstrably cited both scans."""
+    conn = _Conn(1)
+    assert _check_technographic_scan(conn, "run-9b66", "techstack",
+                                     _techstack(e_ids=("E-084", "E-071"))) == []
+    assert "evidence_package_ids" in conn.cur.sql, "local ids resolve through the mapping"
+    assert "connector_tool" in conn.cur.sql
+    assert "e.e_id = ANY" in conn.cur.sql, "the stored form still matches directly"

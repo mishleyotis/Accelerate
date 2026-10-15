@@ -4336,11 +4336,26 @@ def _check_technographic_scan(conn, run_id, page, payload) -> list:
     if cited:
         try:
             cur = conn.cursor()
+            # A cited id is either the STORED id (E-VERUSFIN-084) or the
+            # package-LOCAL one the workbook ships (E-084), which every other
+            # gate resolves through `evidence_package_ids` for this run's
+            # entity (evidence_tools._resolve). This query matched only the
+            # stored form: Verus Financial Partners (2026-10-15) cited the
+            # Clay and Vibe scan rows as E-084/E-085/E-071, the local checks
+            # passed, and the server refused the register as citing no scan
+            # it demonstrably cited.
+            ids = sorted(cited)
             cur.execute(
-                """SELECT count(*) FROM evidence_index
-                    WHERE e_id = ANY(%s) AND origin::text = 'connector'
-                      AND connector_tool ~* '(clay|vibe|explorium)'""",
-                (sorted(cited),))
+                """SELECT count(*) FROM evidence_index e
+                    WHERE e.origin::text = 'connector'
+                      AND e.connector_tool ~* '(clay|vibe|explorium)'
+                      AND (e.e_id = ANY(%s)
+                           OR e.e_id IN (
+                               SELECT m.e_id FROM evidence_package_ids m
+                                 JOIN runs r ON r.entity_id = m.entity_id
+                                WHERE r.id = %s
+                                  AND upper(m.package_local_id) = ANY(%s)))""",
+                (ids, run_id, [i.upper() for i in ids]))
             if (cur.fetchone() or [0])[0]:
                 return []
         except Exception:                          # noqa: BLE001
