@@ -169,3 +169,47 @@ def test_peer_n_is_the_count_of_scored_peers():
     assert out == {"P1C2": 4, "P1C3": 1, "P1C1": 0}
     assert ("P2C1", {"Peer_N": 5}) not in writes and all(c != "P2C2" for c, _ in writes), \
         "a table or cohort row keeps its own count"
+
+
+def test_a_half_applied_reopen_is_completed_and_a_second_run_is_idempotent():
+    """The first --reopen on Verus wrote promoted_at and connector_run_id_prev
+    and died on a Run_Metadata key the sheet does not have, before its state
+    was saved. The next run must complete it, not refuse it as unpromoted."""
+    md = {"connector_run_id": "run-B", "connector_run_id_prev": "run-B", "promoted_at": ""}
+    sets, gates, logged = [], [], []
+    orig = P.L.append_gate
+    P.L.append_gate = lambda wb, **kw: gates.append(kw)
+    try:
+        d = SimpleNamespace(state={"pages": {}}, wb=object(),
+                            opts=SimpleNamespace(reopen="peer figures recorded",
+                                                 reproduce=("overview",), log=logged.append),
+                            _md=lambda: md, _set_md=lambda k, v: sets.append((k, v)),
+                            _save_state=lambda: None)
+        P.Pipeline._apply_reopen(d)
+        assert sets == [], "metadata already written by the half-applied re-open"
+        assert d.state["reopen"]["reproduce"] == ["overview"]
+        assert gates and gates[-1]["gate"] == "OWNER_REOPEN"
+        # same reason again, still not promoted: nothing happens
+        P.Pipeline._apply_reopen(d)
+        assert len(gates) == 1 and len(d.state["reopens"]) == 1
+        # a promoted run re-opens with its metadata written, no unknown key
+        md2 = {"connector_run_id": "run-C", "connector_run_id_prev": "run-B",
+               "promoted_at": "2026-10-15T20:00:00Z"}
+        d2 = SimpleNamespace(state={"pages": {}}, wb=object(),
+                             opts=SimpleNamespace(reopen="again", reproduce=(), log=logged.append),
+                             _md=lambda: md2, _set_md=lambda k, v: sets.append((k, v)),
+                             _save_state=lambda: None)
+        P.Pipeline._apply_reopen(d2)
+        assert sets == [("promoted_at", ""), ("connector_run_id_prev", "run-C")]
+        # a run never promoted, with no half-applied trace, is refused
+        md3 = {"connector_run_id": "run-D", "connector_run_id_prev": "run-C", "promoted_at": ""}
+        d3 = SimpleNamespace(state={"pages": {}}, wb=object(),
+                             opts=SimpleNamespace(reopen="x", reproduce=(), log=logged.append),
+                             _md=lambda: md3, _set_md=lambda k, v: None, _save_state=lambda: None)
+        try:
+            P.Pipeline._apply_reopen(d3)
+            assert False, "an unpromoted run has nothing to re-open"
+        except P.StageRefused as e:
+            assert "not promoted" in str(e)
+    finally:
+        P.L.append_gate = orig

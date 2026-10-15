@@ -4867,7 +4867,14 @@ class Pipeline:
             and not str(md.get("promoted_at") or "").strip()
         if already:
             return
-        if not str(md.get("promoted_at") or "").strip():
+        promoted = bool(str(md.get("promoted_at") or "").strip())
+        # A re-open that wrote its metadata and died before its state was
+        # saved (Verus, 2026-10-15: Run_Metadata has no `reopened_at` key)
+        # reads as "prev == cur, not promoted"; only a re-open sets that.
+        half_applied = (not promoted and bool(str(md.get("connector_run_id") or "").strip())
+                        and str(md.get("connector_run_id_prev") or "")
+                        == str(md.get("connector_run_id") or ""))
+        if not promoted and not half_applied:
             raise StageRefused("--reopen names a run that is not promoted: there is "
                                "nothing to re-open; run the driver without the flag")
         reproduce = tuple(self.opts.reproduce or ())
@@ -4875,9 +4882,9 @@ class Pipeline:
         if unknown:
             raise StageRefused(f"--reproduce names no page of this run: {', '.join(unknown)}")
         rec = apply_reopen(self.state, dict(md), reproduce=reproduce, why=why, now=_utcnow())
-        self._set_md("promoted_at", "")
-        self._set_md("connector_run_id_prev", str(md.get("connector_run_id") or ""))
-        self._set_md("reopened_at", rec["at"])
+        if promoted:
+            self._set_md("promoted_at", "")
+            self._set_md("connector_run_id_prev", str(md.get("connector_run_id") or ""))
         self._save_state()
         try:
             L.append_gate(self.wb, gate="OWNER_REOPEN", scope="run", verdict="PASS",
