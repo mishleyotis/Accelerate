@@ -63,3 +63,50 @@ def test_a_publisher_name_or_domain_is_a_label_not_prose():
              "cell_evidence.cells[248].synthesis (sim 0.591 < 0.62)"]
     paths = [f.split(" (sim")[0] for f in fails]
     assert P.prose_sg_v4_fails(paths) == ["cell_evidence.cells[248].synthesis"]
+
+
+def test_a_raised_budget_judges_the_stored_verdict_without_a_submit(monkeypatch=None):
+    """WORKFLOW-OPTIMIZATION §9 item 6. Verus (2026-10-15): the connector had
+    passed insights (68 prose misses) and platform (182); the budget was
+    raised to 200 and both were handed back as repairs instead of passing."""
+    from types import SimpleNamespace
+    logged = []
+    gates = []
+    monkeypatch_target = P.L
+    orig = monkeypatch_target.append_gate
+    monkeypatch_target.append_gate = lambda wb, **kw: gates.append(kw)
+    try:
+        state = {"pages": {
+            "insights": {"version": "B", "status": "sg_v4_over_budget", "sg_v4_fails": 68,
+                         "versions": {"B": "sg_v4_over_budget"}, "shipped_mtime": {"B": 1.0}},
+            "platform": {"version": "B", "status": "sg_v4_over_budget", "sg_v4_fails": 182,
+                         "versions": {"B": "sg_v4_over_budget"}},
+            "overview": {"version": "B", "status": "local_precheck_fail", "n_reasons": 1,
+                         "versions": {"B": "local_precheck_fail"}},
+        }}
+        d = SimpleNamespace(state=state, wb=object(),
+                            opts=SimpleNamespace(sg_v4_budget=200, log=logged.append),
+                            _save_state=lambda: None)
+        passed = P.Pipeline._rejudge_sg_v4(d, ("overview", "insights", "platform"), "B")
+        assert passed == ["insights", "platform"]
+        assert state["pages"]["insights"]["versions"]["B"] == "pass"
+        assert state["pages"]["platform"]["status"] == "pass"
+        assert state["pages"]["overview"]["status"] == "local_precheck_fail"
+        assert [g["scope"] for g in gates] == ["insights", "platform"]
+        assert all(g["gate"] == "SG_V4_BUDGET_RAISED" and g["blocking"] is False for g in gates)
+        assert [w["sg_v4_prose_fails"] for w in state["waivers"]] == [68, 182]
+        # the default budget admits neither; a stored count above the raise stays
+        tight = SimpleNamespace(state={"pages": {"platform": {
+            "version": "B", "status": "sg_v4_over_budget", "sg_v4_fails": 182}}},
+            wb=object(), opts=SimpleNamespace(sg_v4_budget=8, log=logged.append),
+            _save_state=lambda: None)
+        assert P.Pipeline._rejudge_sg_v4(tight, ("platform",), "B") == []
+        assert tight.state["pages"]["platform"]["status"] == "sg_v4_over_budget"
+        # a verdict from another version is not this version's
+        other = SimpleNamespace(state={"pages": {"platform": {
+            "version": "A", "status": "sg_v4_over_budget", "sg_v4_fails": 3}}},
+            wb=object(), opts=SimpleNamespace(sg_v4_budget=200, log=logged.append),
+            _save_state=lambda: None)
+        assert P.Pipeline._rejudge_sg_v4(other, ("platform",), "B") == []
+    finally:
+        monkeypatch_target.append_gate = orig

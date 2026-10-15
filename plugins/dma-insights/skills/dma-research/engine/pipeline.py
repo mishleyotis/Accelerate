@@ -4463,6 +4463,54 @@ class Pipeline:
                                  "holds both.")
         raise StageRefused(msg)
 
+    def _rejudge_sg_v4(self, pages: tuple, version: str) -> list[str]:
+        """Judge a stored SG-V4 verdict against the CURRENT budget, no submit.
+
+        WORKFLOW-OPTIMIZATION-2026-10-09 §9 item 6: the connector PASSED the
+        page (SG-V4 discloses and promotes) and the driver's own budget held
+        it back; a person then raises `--sg-v4-budget`. Reshipping the same
+        files buys a submit for a verdict the connector already gave, and a
+        REPAIR lane rewrites prose nobody asked to change (Verus Financial
+        Partners, 2026-10-15: insights 68 and platform 182 prose misses were
+        handed back as repairs after the budget was raised to 200). The
+        stored count (prose only, `prose_sg_v4_fails` at ship time) is
+        re-read; a page within the budget passes on the files it shipped,
+        recorded exactly as a raise at ship time is."""
+        passed = []
+        for p in pages:
+            rec = (self.state.get("pages") or {}).get(p) or {}
+            if rec.get("status") != "sg_v4_over_budget" or rec.get("version") != version:
+                continue
+            n = rec.get("sg_v4_fails")
+            if not isinstance(n, int) or n > self.opts.sg_v4_budget:
+                continue
+            rec["status"] = "pass"
+            rec.setdefault("versions", {})[version] = "pass"
+            rec["reasons"] = []
+            rec["n_history"] = ((rec.get("n_history") or [])
+                                + [[version, "pass", 0, n, "sg_v4_rejudged"]])[-8:]
+            self.state.setdefault("waivers", []).append(
+                {"at": _utcnow(), "page": p, "version": version,
+                 "sg_v4_budget": self.opts.sg_v4_budget, "sg_v4_prose_fails": n,
+                 "rejudged": True})
+            try:
+                L.append_gate(self.wb, gate="SG_V4_BUDGET_RAISED", scope=p, verdict="FAIL",
+                              detail=(f"OWNER_DECISION: {n} prose SG-V4 FAILs admitted on "
+                                      f"{p} (version {version}) under --sg-v4-budget "
+                                      f"{self.opts.sg_v4_budget}, default "
+                                      f"{Options.sg_v4_budget}, judged from the stored "
+                                      f"verdict without a second submit; disclosed on the "
+                                      f"page by the connector (invariant 12)")[:900],
+                              blocking=False)
+            except Exception as e:                   # noqa: BLE001
+                self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+            self.opts.log(f"  [PAGES_{version}] {p}: {n} prose SG-V4 miss(es) within the "
+                          f"raised budget {self.opts.sg_v4_budget} — passes on the stored verdict")
+            passed.append(p)
+        if passed:
+            self._save_state()
+        return passed
+
     def _ship_pages(self, pages: tuple, version: str, *, produce: bool) -> list[str]:
         """Produce (lanes) and ship each page until it passes or the retries
         are spent. A FAIL re-dispatches ONLY that page, with the verdict's
@@ -4480,6 +4528,7 @@ class Pipeline:
                 verdicts = json.loads(verdicts_file.read_text())
             except ValueError:
                 verdicts = {}
+        self._rejudge_sg_v4(pages, version)
         if produce and self.opts.pages_mode == "workflow":
             return self._ship_pages_workflow(pages, version, connector_run,
                                              verdicts, verdicts_file)
