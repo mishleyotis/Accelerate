@@ -156,6 +156,13 @@
     platform-fit engine's inputs under platform and overview pages that had
     passed, and `promote_run` refused them on CG-30. A deferred page now ships
     FIRST (its refusal still held until every other page has had its turn).
+  - **Converted facets were promoted as `never_enriched`**
+    (`engine/pipeline.py`, `engine/pipeline_stub.py`): firmographics and
+    techstack are formatted from the workbook, so no page producer called
+    `record_enrichment` for them; they promoted at version 0 and the connector
+    refused to call the client done, though Clay and the web passes had run.
+    PROMOTE now records both facets first, from the workbook's own provenance
+    (source, rows, run), skipping a facet the connector already holds current.
   - **The package gate refused a declared financial absence**
     (`engine/gold_standard.py`): `completeness declare --sheet
     Financial_Trends` is the engine's documented route for an institution

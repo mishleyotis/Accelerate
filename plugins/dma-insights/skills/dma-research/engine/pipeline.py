@@ -473,6 +473,9 @@ class McpReads:
     def run_progress(self, run_id: str) -> dict:
         return self._call("get_run_progress", {"run_id": run_id})
 
+    def client_state(self, display_id: str) -> dict:
+        return self._call("get_client_state", {"display_id": display_id})
+
 
 class ShipPageShipper:
     """Connector WRITES only through ship_page.py (claim, submit) and, for
@@ -528,6 +531,16 @@ class ShipPageShipper:
         r = subprocess.run([sys.executable, str(MCP_RAW), "call", "promote_run",
                             "--args", json.dumps({"run_id": connector_run})],
                            capture_output=True, text=True, timeout=600)
+        try:
+            return json.loads((r.stdout or "").strip() or "{}")
+        except ValueError:
+            return {"_error": (r.stdout or r.stderr)[-300:]}
+
+    def record_enrichment(self, **args) -> dict:
+        """The enrichment ledger's write, on the same audited path as promote."""
+        r = subprocess.run([sys.executable, str(MCP_RAW), "call", "record_enrichment",
+                            "--args", json.dumps(args)],
+                           capture_output=True, text=True, timeout=300)
         try:
             return json.loads((r.stdout or "").strip() or "{}")
         except ValueError:
@@ -4902,9 +4915,82 @@ class Pipeline:
                                f"{', '.join(restaged + shipped) or 'none'}")
         return f"restaged {', '.join(restaged)}; shipped {', '.join(shipped)} to version B"
 
+    #: Facets whose sections are CONVERTED from the workbook: no producer
+    #: enriches them, so no producer records them (AAA WCNY, 2026-10-15:
+    #: promoted at version 0 and served as `never_enriched`, blocking the
+    #: client being called done, though Clay and the web passes had run).
+    WORKBOOK_FACETS = ("firmographics", "techstack")
+
+    def _workbook_facets(self) -> list[dict]:
+        """What the workbook says each converted facet was enriched from."""
+        reg = self.wb.evidence_index()
+        tools = ("clay", "vibe", "explorium", "indeed", "edgar", "cfpb")
+
+        def sources(eids, extra=()):
+            got = set(extra)
+            for e in eids:
+                row = reg.get(e.split(":")[0]) or {}
+                name = str(row.get("Source_Name") or "").lower()
+                if str(row.get("Origin") or "").lower() == "connector":
+                    got.update(t for t in tools if t in name)
+                else:
+                    got.add("web")
+            return "+".join(sorted(got)) or "workbook"
+        out = []
+        firm = [r for r in self.wb.rows("Firmographics")
+                if str(r.get("State") or "").upper() == "STATED"]
+        eids = [x.strip() for r in firm for x in str(r.get("Evidence") or "").split(",")
+                if x.strip().startswith("E-")]
+        out.append({"facet": "firmographics", "source": sources(eids),
+                    "rows_written": len(firm)})
+        tech = [r for r in self.wb.rows("Tech_Register") if str(r.get("TS_ID") or "").strip()]
+        provs = {p.strip().lower() for r in tech
+                 for p in str(r.get("Providers") or "").split(",") if p.strip()}
+        teids = [x.strip() for r in tech for x in str(r.get("Evidence_IDs") or "").split(",")
+                 if x.strip().startswith("E-")]
+        out.append({"facet": "techstack", "source": sources(teids, provs),
+                    "rows_written": len(tech)})
+        return out
+
+    def _record_workbook_facets(self, connector_run: str) -> list[dict]:
+        rec = getattr(self.opts.shipper, "record_enrichment", None)
+        if rec is None:
+            return []
+        md = self._md()
+        display_id = str(md.get("entity_id") or "").strip()
+        current = set()
+        read = getattr(self.opts.reads, "client_state", None)
+        if read is not None and display_id:
+            try:
+                cs = read(display_id) or {}
+                current = {f.get("facet") for f in ((cs.get("enrichment") or {}).get("facets") or [])
+                           if f.get("state") == "current"}
+            except Exception:                        # noqa: BLE001
+                current = set()
+        done = []
+        for f in self._workbook_facets():
+            if f["facet"] in current:
+                continue
+            res = rec(display_id=display_id, facet=f["facet"], source=f["source"],
+                      run_id=connector_run, rows_written=f["rows_written"],
+                      note=(f"engine.pipeline {self.run.run_id}: recorded from the workbook "
+                            f"before promote — a converted section no producer records"))
+            ok = isinstance(res, dict) and res.get("enrichment_version") is not None
+            L.append_gate(self.wb, gate="ENRICHMENT_RECORDED", scope=f["facet"],
+                          verdict="PASS" if ok else "NOT_RUN", blocking=False,
+                          detail=(f"{f['facet']}: source {f['source']}, {f['rows_written']} row(s)"
+                                  + ("" if ok else f"; connector said {str(res)[:200]}")))
+            done.append({**f, "recorded": ok})
+        return done
+
     def _stage_promote(self) -> str:
         self._reset_counters()
         connector_run = str(self._md().get("connector_run_id") or "")
+        rec = self._record_workbook_facets(connector_run)
+        if rec:
+            self.opts.log("  [PROMOTE] enrichment recorded: " + ", ".join(
+                f"{r['facet']} ({r['source']}, {r['rows_written']} rows)"
+                + ("" if r["recorded"] else " NOT RECORDED") for r in rec))
         res = self.opts.shipper.promote(connector_run)
         if not res.get("promoted"):
             raise StageRefused(f"promote_run refused: {json.dumps(res)[:400]}")

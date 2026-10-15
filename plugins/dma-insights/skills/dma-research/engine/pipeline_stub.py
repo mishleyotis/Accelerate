@@ -641,6 +641,10 @@ class StubShipper:
         Path(verdicts_out).write_text(json.dumps({page: res}))
         return res
 
+    def record_enrichment(self, **args):
+        self.__dict__.setdefault("enrichments", []).append(args)
+        return {"enrichment_version": len(self.enrichments), "facet": args.get("facet")}
+
     def promote(self, connector_run):
         self.promotions.append(connector_run)
         if self.refuse_promote:
