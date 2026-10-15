@@ -7,6 +7,7 @@ and every page said "no peer benchmark"; and the platform producers scored the
 overview served 2 tiles. Both passed every gate — the parity gate only warns
 on list length.
 """
+import inspect
 import json
 
 import pytest
@@ -100,3 +101,52 @@ def test_an_overview_with_too_few_tiles_is_failed_before_submission(tmp_path):
     assert any("CG-COMPLETE overview.opportunity.tiles: 2 tile(s)" in r for r in reasons)
     (sd / "overview.opportunity.json").write_text(json.dumps({"tiles": [{"platform": "x"}] * 5}))
     assert not [r for r in pl._completeness("overview") if "tiles" in r]
+
+
+# ── the owed section goes to its OWNER, never to the assembler alone ──────
+
+def test_section_owners_come_from_the_roster():
+    from engine import brief
+    own = brief.section_owners("overview")
+    assert own["overview.opportunity"] == "overview-opportunity-producer"
+    assert own["overview.scores"] == "overview-hero-producer"
+    assert brief.section_owners("platform")["platform.platform_story"] == "platform-fit-producer"
+
+
+def test_a_page_on_disk_that_owes_a_section_is_produced_not_restaged(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    pl = _pipe(run, tmp_path)
+    sd = pl._sections_dir()
+    sd.mkdir(parents=True, exist_ok=True)
+    (sd / "overview.ceilings.json").write_text("{}")          # on disk, partly
+    owed = pl._owed_sections("overview")
+    assert "overview.opportunity" in owed and "overview.scores" in owed
+    assert "overview.ceilings" not in owed
+    src = inspect.getsource(P.Pipeline._ship_pages)
+    assert "only_sections" in src and "_owed_sections" in src
+    # a retry of an owing page runs the producer phases, not assemble alone
+    assert "brief.PAGE_PHASES, [p for p in todo if p in owed]" in src
+
+
+def test_fragments_dispatch_only_the_owners_of_owed_sections(tmp_path):
+    from engine import brief
+    run, wb, cells, ev = researched_run(tmp_path)
+    out = brief.page_batch(wb, run=run, out_dir=tmp_path / "b", connector_run="r-1",
+                           contract_file=tmp_path / "c.json", pages=["overview"],
+                           phase="fragments", sections_dir=tmp_path / "s",
+                           only_sections={"overview": ["overview.opportunity",
+                                                       "overview.scores"]})
+    names = " ".join(str(w) for w in out["briefs"])
+    assert "overview-opportunity-producer" in names and "overview-hero-producer" in names
+    assert "overview-people-producer" not in names and out["lanes"] == 2
+
+
+def test_platform_with_fewer_cards_than_tiles_is_not_shipped(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    pl = _pipe(run, tmp_path)
+    (run.qa_dir / P.Pipeline.SHORTLIST).write_text(json.dumps(
+        {"tiles_wanted": 5, "ready": 22, "shortlist": []}))
+    sd = pl._sections_dir(); sd.mkdir(parents=True, exist_ok=True)
+    (sd / "platform.platform_story.json").write_text(json.dumps({"platforms": [{}, {}]}))
+    det = pl._completeness_detail("platform")
+    assert det and det[0][0] == "platform.platform_story" and "CG-COMPLETE" in det[0][1]

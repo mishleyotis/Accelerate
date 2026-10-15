@@ -4438,6 +4438,21 @@ class Pipeline:
         """Contract shortfalls a page must not ship with, read from its own
         section files before it is submitted (the connector's parity gate only
         WARNS on list length — owner decision 2026-10-04 — so these passed)."""
+        return [m for _, m in self._completeness_detail(page)]
+
+    def _owed_sections(self, page: str) -> list[str]:
+        """Sections a page cannot ship without that only their per-surface
+        producer can write: a producer-owned section with no file, or one a
+        CG-COMPLETE check names. These go to their OWNER, never to the
+        assembler alone (AAA WCNY, 2026-10-15)."""
+        from . import brief
+        sd = self._sections_dir()
+        owners = brief.section_owners(page)
+        owed = {sec for sec in owners if not (sd / f"{sec}.json").is_file()}
+        owed |= {sec for sec, _ in self._completeness_detail(page)}
+        return sorted(owed)
+
+    def _completeness_detail(self, page: str) -> list[tuple[str, str]]:
         out = []
         sd = self._sections_dir()
 
@@ -4456,11 +4471,25 @@ class Pipeline:
             tiles = op.get("tiles") if isinstance(op.get("tiles"), list) else []
             want = int((sl or {}).get("tiles_wanted") or 0)
             if sl and len(tiles) < want:
-                out.append(
+                out.append(("overview.opportunity",
                     f"CG-COMPLETE overview.opportunity.tiles: {len(tiles)} tile(s); the "
                     f"full-catalogue fit engine has {sl.get('ready')} READY platform(s) "
                     f"({self.run.qa_dir / self.SHORTLIST}). Serve the top {want} as tiles "
-                    f"and give each a platform card, in the engine's spelling.")
+                    f"and give each a platform card, in the engine's spelling."))
+        if page == "platform":
+            try:
+                sl = json.loads((self.run.qa_dir / Pipeline.SHORTLIST).read_text())
+            except (OSError, ValueError):
+                sl = None
+            want = int((sl or {}).get("tiles_wanted") or 0)
+            story = sec("platform.platform_story") or {}
+            cards = story.get("platforms") if isinstance(story.get("platforms"), list) else []
+            if sl and len(cards) < want:
+                out.append(("platform.platform_story",
+                    f"CG-COMPLETE platform.platform_story.platforms: {len(cards)} card(s); "
+                    f"the overview serves the top {want} of {sl.get('ready')} READY "
+                    f"catalogue platforms and every tile needs its card "
+                    f"({self.run.qa_dir / Pipeline.SHORTLIST})."))
         if page in ("overview", "heatmap"):
             have = [r for r in self.wb.rows("Peer_Benchmarks")
                     if str(r.get("Peer_Median") or "").strip()]
@@ -4468,11 +4497,11 @@ class Pipeline:
                 body = sec("overview.scores" if page == "overview" else "heatmap.workbook_scores") or {}
                 txt = json.dumps(body)
                 if '"peer_median": null' in txt or '"peer_median":null' in txt:
-                    out.append(
+                    out.append(("overview.scores" if page == "overview" else "heatmap.workbook_scores",
                         f"CG-COMPLETE {page} peer figures: Peer_Benchmarks carries "
                         f"{len(have)} categor(ies) with a peer median ({str(have[0].get('Peer_Basis'))[:60]}) "
                         f"and this page serves peer_median null. Serve the workbook's figures "
-                        f"with their basis, as the reports state them.")
+                        f"with their basis, as the reports state them."))
         return out
 
     def _ship_one(self, p: str, version: str, connector_run: str, verdicts: dict) -> bool:
@@ -4717,13 +4746,26 @@ class Pipeline:
                 # overwrite the repair and re-pay every producer. A retry is
                 # a repair: the assembler alone, carrying the verdict's reasons.
                 on_disk = {p for p in todo if list(self._sections_dir().glob(f"{p}.*.json"))}
+                # A page on disk that still owes a producer-owned section is
+                # NOT done: its owners run, then the page is challenged,
+                # consolidated and assembled — the assembler alone cannot
+                # write a section only a producer can (AAA WCNY, 2026-10-15:
+                # 2 tiles restored from a backup, CG-COMPLETE twice).
+                owed = {p: self._owed_sections(p) for p in todo}
+                owed = {p: v for p, v in owed.items() if v}
                 if attempt == 0:
-                    groups = [(brief.PAGE_PHASES, [p for p in todo if p not in on_disk])]
-                    if on_disk:
+                    fresh = [p for p in todo if p not in on_disk or p in owed]
+                    groups = [(brief.PAGE_PHASES, fresh)]
+                    ship_first = sorted(on_disk - set(owed))
+                    if ship_first:
                         self.opts.log(f"  [PAGES_{version}] on disk, shipping first: "
-                                      f"{', '.join(sorted(on_disk))}")
+                                      f"{', '.join(ship_first)}")
                 else:
-                    groups = [(("assemble",), list(todo))]
+                    groups = [(brief.PAGE_PHASES, [p for p in todo if p in owed]),
+                              (("assemble",), [p for p in todo if p not in owed])]
+                for p, v in owed.items():
+                    self.opts.log(f"  [PAGES_{version}] {p} owes {', '.join(v)} — "
+                                  f"dispatching its producer(s)")
                 for phases, pg in groups:
                     if not pg:
                         continue
@@ -4734,7 +4776,9 @@ class Pipeline:
                                              contract_file=self._sections_dir() / "contracts",   # a dir: <page>.json each
                                              verdicts_file=verdicts_file if verdicts else None,
                                              pages=pg, phase=phase,
-                                             sections_dir=self._sections_dir())
+                                             sections_dir=self._sections_dir(),
+                                             only_sections={p: owed[p] for p in pg
+                                                            if p in owed} or None)
                         if not b.get("lanes"):
                             continue
                         self.opts.log(f"  [PAGES_{version}] {phase}: {b['lanes']} lane(s)")

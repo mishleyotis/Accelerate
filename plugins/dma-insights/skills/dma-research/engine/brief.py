@@ -2713,10 +2713,26 @@ def page_producers(page: str) -> list[str]:
                   if f.stem != f"{page}-surface-producer") if d.is_dir() else []
 
 
+def section_owners(page: str) -> dict[str, str]:
+    """`<page>.<section>` -> the per-surface producer whose definition names
+    it in backticks (its frontmatter description is the roster's contract)."""
+    out: dict[str, str] = {}
+    d = PLUGIN_ROOT / "agents" / "production" / page
+    for agent in page_producers(page):
+        try:
+            head = (d / f"{agent}.md").read_text(encoding="utf-8").split("\n---", 1)[0]
+        except OSError:
+            continue
+        for m in re.finditer(rf"`({re.escape(page)}\.[a-z_]+)`", head):
+            out.setdefault(m.group(1), agent)
+    return out
+
+
 def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                contract_file: Path, verdicts_file: Path | None = None,
                pages: list[str] | None = None, phase: str = "assemble",
-               sections_dir: Path | None = None) -> dict:
+               sections_dir: Path | None = None,
+               only_sections: dict | None = None) -> dict:
     """One `<page>-surface-producer` lane per page: the connector run id,
     the PATH of the page contract, the reasons the last verdict gave for
     that page — and NO payload bytes. A prompt that carries a payload is the
@@ -2886,7 +2902,16 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
         }, "waiting_on", "last_verdict_reasons")
         produce = list(sp["produce"])
         if phase == "fragments":
-            for agent in page_producers(page):
+            agents = page_producers(page)
+            owed = (only_sections or {}).get(page)
+            if owed:
+                # Only the producers that own an owed section: a page whose
+                # other sections are sound is not re-paid in full (AAA WCNY,
+                # 2026-10-15: the assembler alone was sent to fill tiles it
+                # cannot produce, and restored the stale ones).
+                own = section_owners(page)
+                agents = sorted({own[x] for x in owed if x in own}) or agents
+            for agent in agents:
                 lanes.append((f"page-{page}-{agent}", {
                     **packet, "agent": agent,
                     "role": (f"You are ONE per-surface producer for the {page} page. Write "
