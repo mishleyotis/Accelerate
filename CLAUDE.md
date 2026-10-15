@@ -561,6 +561,16 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   page from disk and re-promotes. Tests:
   `tests/skills/research_engine/test_peer_figures_gate_2026_10_15.py`,
   `apps/mcp/tests/test_peer_scores_cascade.py`.
+  Same day, while the re-opened run was in REPORTS: **a Run_Metadata write
+  holds the workbook lock** (`engine.narrative thaw` cleared the freeze key
+  unlocked and a report writer's save put the old freeze back;
+  `set_metadata` now runs inside `transaction()`,
+  `test_metadata_write_is_locked_2026_10_15.py`); **`techscan peer-record`
+  supersedes the (product, peer) row** instead of appending beside it
+  (`test_peer_record_supersedes_2026_10_15.py`); **a later run of the same
+  `--reopen` widens `--reproduce`** (TS-004 Calendly was restruck ABSENT →
+  CONFIRMED mid-REPORTS, so techstack and insights moved from restage to
+  reproduce; a narrower list changes nothing).
 
 ## Open decisions — leave open, do not resolve silently
 
