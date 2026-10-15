@@ -703,6 +703,9 @@ class Options:
     defer_to_b: tuple = ()
     # Supersede version B with a fresh ingest (owner decision; the reason).
     reingest_b: str = ""
+    # Let --reingest-b supersede a PROMOTED version (owner decision): the
+    # corrected run is promoted in its place; the old one is retained.
+    supersede_promoted: bool = False
     ingest_poll_s: float = 60.0
     ingest_timeout_s: float = 3600.0
     folder_root: Path | None = None
@@ -1665,8 +1668,13 @@ class Pipeline:
         if len(why) < 20:
             raise StageRefused("--reingest-b needs a reason (>= 20 chars)")
         md = self._md()
-        if str(md.get("promoted_at") or "").strip():
-            raise StageRefused("the run is promoted; a re-ingest would supersede a served version")
+        promoted_at = str(md.get("promoted_at") or "").strip()
+        if promoted_at and not getattr(self.opts, "supersede_promoted", False):
+            raise StageRefused(
+                "the run is promoted; a re-ingest would supersede a served version. "
+                "When the owner has asked for the served version to be corrected, "
+                "repeat with --supersede-promoted (recorded as SUPERSEDE_PROMOTED; "
+                "the served version stays live until the new one promotes)")
         cur = str(md.get("connector_run_id") or "")
         ok, _ = self.done("INGEST_B")
         if not ok:
@@ -1675,6 +1683,19 @@ class Pipeline:
         if cur and cur not in sup:
             sup.append(cur)
         self.state["superseded_runs"] = sup
+        if promoted_at:
+            # The served version stays served until PROMOTE replaces it; the
+            # marker is cleared so the PROMOTE predicate reads false again
+            # (AAA WCNY, 2026-10-15: peers and platforms corrected after the
+            # first promotion had no path to the client).
+            self.state.setdefault("superseded_promotions", []).append(
+                {"run_id": cur, "promoted_at": promoted_at, "why": why})
+            (self.state.get("connector") or {}).pop("promoted", None)
+            self._set_md("promoted_at", "")
+            L.append_gate(self.wb, gate="SUPERSEDE_PROMOTED", scope="run", verdict="PASS",
+                          blocking=False,
+                          detail=f"promoted version {cur} ({promoted_at}) to be superseded "
+                                 f"by a corrected one at the owner's request: {why}"[:900])
         self.state.pop("package", None)
         for p, rec in (self.state.get("pages") or {}).items():
             for k in ("versions", "shipped_mtime", "attempts_by_version"):
@@ -5330,7 +5351,8 @@ def _build_opts(a) -> Options:
                                     if getattr(a, "sg_v4_budget", None) is not None
                                     else Options.sg_v4_budget),
                    defer_to_b=tuple(getattr(a, "defer_to_b", None) or ()),
-                   reingest_b=str(getattr(a, "reingest_b", None) or ""))
+                   reingest_b=str(getattr(a, "reingest_b", None) or ""),
+                   supersede_promoted=bool(getattr(a, "supersede_promoted", False)))
 
 
 def _research_mode(a) -> str:
@@ -5385,6 +5407,10 @@ def main(argv=None) -> int:
                    help="supersede version B: re-package, re-ingest and reship every "
                         "page, so a repair made after INGEST_B reaches the connector "
                         "(an owner decision; recorded as REINGEST_B)")
+    r.add_argument("--supersede-promoted", action="store_true",
+                   help="with --reingest-b: allowed on a PROMOTED run, whose served "
+                        "version is replaced at PROMOTE by the corrected one (an owner "
+                        "decision; recorded as SUPERSEDE_PROMOTED)")
     r.add_argument("--defer-to-b", action="append", choices=PAGES_A, default=[],
                    help="move a version-A page to version B (an owner decision, "
                         "logged): for a page whose A verdict rests on evidence "

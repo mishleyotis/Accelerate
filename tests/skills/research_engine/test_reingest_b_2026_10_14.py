@@ -65,3 +65,30 @@ def test_reingest_is_applied_once_per_reason():
 def test_package_links_focus_and_timeline_evidence_first():
     src = inspect.getsource(P.Pipeline._stage_package)
     assert src.index("link_focus_evidence") < src.index("assemble.package")
+
+
+def test_a_promoted_run_is_superseded_only_on_the_owners_flag(tmp_path):
+    """AAA WCNY, 2026-10-15: peers and platforms corrected after the first
+    promotion had no route to the client. The guard stays; the owner's
+    --supersede-promoted opens it, logged, and PROMOTE runs again."""
+    run, wb, cells, ev = researched_run(tmp_path)
+    pl = _pipe(run, tmp_path, supersede_promoted=True)
+    _as_if_b_ingested(pl)
+    pl._set_md("promoted_at", "2026-10-14T00:00:00Z")
+    pl.state.setdefault("connector", {})["promoted"] = {"run_id": "x"}
+    r = pl.reingest_b("peer table and full-catalogue platforms added after promotion")
+    assert r["reingest"] is True
+    assert not str(pl._md().get("promoted_at") or "").strip()
+    assert pl.done("PROMOTE")[0] is False
+    assert pl.state["superseded_promotions"][0]["promoted_at"] == "2026-10-14T00:00:00Z"
+    gates = [g.get("Gate") for g in run.open().rows("Gate_Log")]
+    assert "SUPERSEDE_PROMOTED" in gates and "REINGEST_B" in gates
+
+
+def test_the_refusal_names_the_flag(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    pl = _pipe(run, tmp_path)
+    _as_if_b_ingested(pl)
+    pl._set_md("promoted_at", "2026-10-14T00:00:00Z")
+    with pytest.raises(P.StageRefused, match="--supersede-promoted"):
+        pl.reingest_b("links added after version B must reach the connector's ET-07")

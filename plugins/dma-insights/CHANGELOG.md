@@ -218,6 +218,7 @@ gate term reaches an agent able to close it, two rules a challenger kept
 having to state that the engine could check at the write, and one contract
 rule HANDOFF enforced that the write never did:
 
+  - **A promoted run can be corrected, on the owner's flag.** `--reingest-b` refused once the run was promoted, so the peer and platform repair had no route to the client. `--supersede-promoted` (with `--reingest-b WHY`) clears the promotion marker, logs `SUPERSEDE_PROMOTED`, re-ingests and promotes the corrected version in its place; without the flag the refusal now names it.
 - **The share** (`engine/pipeline.py`): with the envelope funding the scope,
   shares were `remaining × cells / total` — blind to the ~$1.40 orchestrator
   and challenge every category pays whatever its size. P3C2/P3C4 got $0.81,
