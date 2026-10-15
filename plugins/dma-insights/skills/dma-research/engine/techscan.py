@@ -423,13 +423,28 @@ def peer_record(wb: RunWorkbook, *, ts_id: str, peer: str,
             "no url never reaches the page anyway — record it as not "
             "deployed, or find the source.")
     word = {True: "yes", False: "no", None: "unknown"}[deployed]
-    wb.append("Tech_Peer_Deployments", {
+    values = {
         "TS_ID": ts_id, "Peer": str(peer).strip(),
         "Deployed": word,
         "Basis": str(basis).strip(),
         "Source_URL": source_url or None,
         "As_Of": as_of or _utcnow()[:10],
-    })
+    }
+    # ONE row per (product, peer) — the latest reading SUPERSEDES (Verus,
+    # 2026-10-15: Kanawha's TS-002 was re-recorded with the portal hrefs
+    # registered and the stale row, whose Basis credited a link target to
+    # an id that carries only the menu label, sat beside it; a reader of
+    # the sheet could pick up either). Duplicates an earlier append left
+    # are collapsed to the row that is then rewritten.
+    stored = [str(r.get("Peer") or "").strip() for r in wb.rows("Tech_Peer_Deployments")
+              if str(r.get("TS_ID")) == ts_id
+              and str(r.get("Peer") or "").strip().lower() == values["Peer"].lower()]
+    if stored:
+        match = {"TS_ID": ts_id, "Peer": stored[0]}
+        wb.delete_rows_where("Tech_Peer_Deployments", match, keep_first=True)
+        wb.update_row_where("Tech_Peer_Deployments", match, values)
+    else:
+        wb.append("Tech_Peer_Deployments", values)
     return peer_state(wb, ts_id)
 
 
