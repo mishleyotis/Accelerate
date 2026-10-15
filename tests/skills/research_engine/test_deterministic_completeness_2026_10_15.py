@@ -11,6 +11,7 @@ The AAA WCNY defects, by control:
                           cards cover the shortlist top N, promote audit
 """
 import json
+from pathlib import Path
 
 import pytest
 
@@ -402,3 +403,25 @@ def test_naming_an_owned_vendor_while_selling_beside_it_is_not_optimizing():
     assert any("already runs MuleSoft" in m for m in out)
     ok = _est_secs(recs="Salesforce org health check and FSC entitlement verify; reuse MuleSoft APIs")
     assert not [m for _, m in _check("platform", ok, shortlist=EST) if "TITLE" in m]
+
+
+def test_the_estate_plan_travels_as_a_path_under_the_packet_ceiling(tmp_path):
+    from engine import brief
+    # pytest's own tmp_path: under xdist it is /tmp/pytest-of-root/pytest-N/
+    # popen-gwN/test_…, the depth CI runs at (the acceptance brief test's root)
+    deep = tmp_path
+    run, wb, cells, ev = researched_run(deep)
+    (run.qa_dir / P.Pipeline.SHORTLIST).write_text(json.dumps(EST))
+    sd = deep / "s"
+    sd.mkdir(parents=True, exist_ok=True)
+    (sd / "platform.platform_story.json").write_text(json.dumps({"platforms": CARDS}))
+    for page in ("platform", "overview"):
+        out = brief.page_batch(wb, run=run, out_dir=deep / f"b{page}", connector_run="R",
+                               contract_file=deep / "c.json", pages=[page], phase="assemble",
+                               sections_dir=sd)
+        w = out["briefs"][0]
+        assert w["chars"] <= brief.BRIEF_CHAR_CEILING, (page, w["chars"])
+        text = Path(w["prompt_file"]).read_text()
+        assert f"estate_plan_{page}.json" in text
+        plan = json.loads((run.qa_dir / f"estate_plan_{page}.json").read_text())
+        assert ("cards_required" in plan) if page == "platform" else ("tiles" in plan)

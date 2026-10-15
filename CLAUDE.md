@@ -565,6 +565,28 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   `test_deterministic_completeness_2026_10_15.py`,
   `apps/mcp/tests/test_promote_completeness.py`.
 
+- **Optimize what the client owns before proposing anything new** (user,
+  2026-10-15, on AAA WCNY's FSC and MuleSoft tiles: "Be more thorough in
+  optimization. I feel you are banking on selling. Mention clearly to verify
+  FSC rollout ... check Zennify's strengths and strategic alignment"). The
+  contract's own discard rule ("discard ... when the client already runs it at
+  the layer in question") is enforced from the estate, deterministically: the
+  fit engine serves `in_estate` / `vendor_in_estate` / `replaces_in_estate` per
+  platform from the techstack register and the L3 catalogue (exact token-set
+  identity, `apps/mcp/dma_mcp/fit.py`, vendored as `engine/estate.py` and held
+  equal by test); an owned platform or a replacement is a discard with its
+  reason and never a tile or a ranked card; a tile extending an org the client
+  owns says to VERIFY its rollout and entitlement; every owned catalogue vendor
+  has a recommendation whose TITLE optimizes it; the estate sweep blocks a
+  vendor the client's own evidence names with no register row (dismissal needs
+  a reason). The plan is computed by the engine and handed to lanes as a file
+  (`07_qa/estate_plan_<page>.json`), because lanes load the INSTALLED plugin's
+  agent definitions. `--repage PAGE --repage-why WHY` re-opens pages on the
+  current version; PROMOTE is current only when it postdates every page ship.
+  Tests: `test_deterministic_completeness_2026_10_15.py`,
+  `test_estate_2026_10_15.py`, `apps/mcp/tests/test_fit_estate.py`,
+  `apps/mcp/tests/test_promote_completeness.py`.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

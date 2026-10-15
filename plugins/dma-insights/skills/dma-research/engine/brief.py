@@ -2736,6 +2736,26 @@ def section_owner_sets(page: str) -> dict[str, list[str]]:
     return out
 
 
+def _estate_keys(run, page: str, sdir) -> dict:
+    if run is None or page not in ("platform", "overview"):
+        return {}
+    out = {}
+    # Paths RELATIVE to shared.run_root: the packet names the directory once.
+    rel = Path(run.qa_dir).name
+    if (Path(run.qa_dir) / "platform_shortlist.json").is_file():
+        out["platform_shortlist"] = f"{rel}/platform_shortlist.json"
+    plan = _estate_plan(run, page, sdir)
+    if plan:
+        # The PATH, not the bytes: the plan for a real run is kilobytes, and
+        # the page packet carries paths to bounded artefacts (the contract,
+        # the shortlist) under its ceiling.
+        path = Path(run.qa_dir) / f"estate_plan_{page}.json"
+        path.write_text(json.dumps(plan, indent=1))
+        out["estate_plan"] = f"{rel}/{path.name}"
+        out["estate_plan_rule"] = "serve exactly this plan; anything else is refused"
+    return out
+
+
 def _estate_plan(run, page: str, sdir) -> dict | None:
     if run is None or page not in ("platform", "overview"):
         return None
@@ -2848,9 +2868,8 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                     (v.get("workbook_tabs") or []) + (v.get("report_sections") or [])
                     + (v.get("enrichment_sources") or [])) or v["disposition"]))
                 for k, v in sp["sections"].items()},
-            "format_only_sections": sp["convert"],
             "produce_sections": sp["produce"],
-            "server_sections": sp["server"],
+            **({"server_sections": sp["server"]} if sp["server"] else {}),
             # Card-grain, as a SUMMARY: how many cards take each route, and the
             # cards a producer must NOT author (the connector writes them, or
             # the app computes them). The full card map — item keys, tab
@@ -2883,19 +2902,18 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
             # char 300 — and four page repairs "did not converge". Reasons are
             # trimmed LAST, cut at 1,500, and the verdict file is named.
             "last_verdict_reasons": [str(r)[:1500] for r in (reasons or [])][:12],
-            "last_verdict_file": str(verdicts_file) if verdicts_file else None,
+            **({"last_verdict_file": str(verdicts_file)} if verdicts_file else {}),
             # The full-catalogue fit (AAA WCNY, 2026-10-15): platform cards and
             # overview tiles start here, never from the report's recommendations.
-            "platform_shortlist": (str(run.qa_dir / "platform_shortlist.json")
-                                   if run is not None and page in ("platform", "overview")
-                                   and (run.qa_dir / "platform_shortlist.json").is_file()
-                                   else None),
-            # The deterministic estate plan (page_completeness.estate_plan): the
-            # exact cards, tiles, discards, verify wording and optimizations the
-            # driver's precheck and the connector will hold the page to. In
-            # the PACKET because a lane loads the INSTALLED plugin's agent
-            # definitions, which may predate the guidance (AAA WCNY, 2026-10-15).
-            "estate_plan": _estate_plan(run, page, sdir),
+            # The full-catalogue shortlist and the deterministic estate plan
+            # (page_completeness.estate_plan): the exact cards, tiles, discards,
+            # verify wording and optimizations the driver's precheck and the
+            # connector will hold the page to. In the PACKET because a lane
+            # loads the INSTALLED plugin's agent definitions, which may predate
+            # the guidance (AAA WCNY, 2026-10-15). Present only when they carry
+            # content: a null key is packet bytes, and the page brief sits near
+            # its ceiling on a long root (CI, 2026-10-06; xdist, 2026-10-15).
+            **_estate_keys(run, page, sdir),
             "rules": [
                 "read `get_memory_digest` and the contract FILE before authoring; "
                 "the payload shape is law — never invent a field",
@@ -2905,7 +2923,7 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "repair that path, not the page",
                 "the workbook is the source: every figure comes from a tab in "
                 "`recording_map_tabs`, every citation from Evidence_Detail",
-                "`format_only_sections` (see section_plan) are FORMATTED from the "
+                "format_only sections (see section_plan) are FORMATTED from the "
                 "workbook tab or report section named there — do NOT re-synthesise "
                 "them and do NOT re-challenge them; the research layer already "
                 "challenged that content. Only `produce_sections` need new "
@@ -2956,7 +2974,7 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                     **packet, "agent": "finding-challenger",
                     "role": (f"Challenge the PRODUCE sections of the {page} page only: "
                              + ", ".join(f"`{sdir}/{x}.json`" for x in produce)
-                             + ". `format_only_sections` were challenged at research and "
+                             + ". format_only sections (section_plan) were challenged at research and "
                                "are not yours. Return your challenge report as your final "
                                "message; the driver saves it for the consolidator.")},
                     f"Page {page} — challenge"))

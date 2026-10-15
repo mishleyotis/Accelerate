@@ -123,6 +123,9 @@ def test_a_banked_connector_scan_closes_it_and_satisfies_the_page_preflight(tmp_
     assert _state(wb, "tech_baseline")["status"] == "RESEARCHED"
     # the page preflight reads the same facts: no ET-07, no ET-12, no CG-50;
     # CG-40 is excused by the scan (the ladder states the depth the scan found)
+    # the driver writes the catalogue copy the estate sweep reads at page
+    # prep; without one the sweep refuses (pinned elsewhere)
+    (run.qa_dir / PP.CATALOGUE_FILE).write_text("[]")
     assert [b["gate"] for b in PP.preflight(wb)] == []
 
 
