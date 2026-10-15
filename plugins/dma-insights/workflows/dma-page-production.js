@@ -52,10 +52,25 @@ ${report || '(the challenger returned nothing: treat every produce section as un
 --- END ---
 Return page ${p.page}, status "CONSOLIDATED", and in notes the FULL consolidated changes (per section: the JSON path and its new value, or the whole section): the assembler applies them.`
 
+// A verdict reason is an object from the driver ({gate_id, section, path,
+// message, severity}); `${r}` printed "[object Object]" and every repair
+// lane read only what its brief file happened to carry (Verus, 2026-10-15:
+// a relay result passed in last_verdict never reached the assembler).
+const reasonLine = (r) => {
+  if (r == null) return ''
+  if (typeof r === 'string') return r
+  const parts = []
+  if (r.severity && r.severity !== 'block') parts.push(`[${r.severity}]`)
+  if (r.gate_id) parts.push(r.gate_id)
+  if (r.path) parts.push(r.path + ':')
+  parts.push(r.message || JSON.stringify(r))
+  return parts.join(' ')
+}
+
 const assemblePrompt = (p, consolidated) => `You are ${p.page}-surface-producer. ${common(p)}
 Your brief is ${p.assemble_brief}: read it and follow its role and rules exactly.
 ${p.repair
-    ? `REPAIR: this page failed its last verdict. Fix exactly what these reasons name, and change nothing else:\n${(p.last_verdict || []).map(r => `- ${r}`).join('\n') || '- (see last_verdict_reasons in the brief)'}`
+    ? `REPAIR: this page failed its last verdict. Fix exactly what these reasons name, and change nothing else:\n${(p.last_verdict || []).map(r => `- ${reasonLine(r)}`).join('\n') || '- (see last_verdict_reasons in the brief)'}`
     : 'Assemble the page from the per-surface files on disk.'}
 ${consolidated ? `Apply these consolidated changes, and save them verbatim to ${A.qa_dir}/consolidated_${p.page}.md for the record:\n--- CONSOLIDATED ---\n${consolidated}\n--- END ---` : ''}
 Leave every final section at the path in the brief's \`output\`. Return page ${p.page}, status "ASSEMBLED" or "BLOCKED" (with the reason), the files you left, one-line notes.`
