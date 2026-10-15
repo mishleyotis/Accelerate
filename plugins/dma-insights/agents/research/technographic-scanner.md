@@ -211,7 +211,7 @@ Not a description of the product. The question is *so what*: name the cells,
 name the direction, name what would settle it.
 
 **The peers — PEER COMPARISON, not the peer benchmark** (owner,
-2026-10-15; `docs/PEER-BENCHMARK-VS-COMPARISON.md`). The *benchmark* is the
+2026-10-15; `${CLAUDE_PLUGIN_ROOT}/docs/PEER-BENCHMARK-VS-COMPARISON.md`). The *benchmark* is the
 sub-vertical average of already-assessed entities (`get_cohort_benchmarks`)
 and names no one; you never research it. The *comparison* is the SELECTED
 peers the run locked in `Handoff_Lock`, researched **only with regard to the
