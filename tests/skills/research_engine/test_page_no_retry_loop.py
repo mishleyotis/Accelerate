@@ -88,3 +88,33 @@ def test_a_repair_that_cleared_pass_1_and_first_met_pass_2_is_not_a_stall():
               "n_history": [["A", "local_precheck_fail", 1, 0],
                             ["A", "local_precheck_fail", 9, 0]]}
     assert "did not converge" in _why(legacy), "no pass recorded: the plain comparison stands"
+
+
+def test_a_deferred_page_with_files_older_than_the_ingest_is_produced_not_shipped(tmp_path):
+    """Verus (2026-10-15): techstack and heatmap deferred A->B still carried
+    their version-A files; the workflow path shipped them against B before any
+    producer had run for B, spending a ship and downgrading the handoff to an
+    assembler-only repair."""
+    import os
+    sections = tmp_path / "08_sections"
+    sections.mkdir()
+    f = sections / "techstack.techstack.json"
+    f.write_text("{}")
+    old = 1_700_000_000.0
+    os.utime(f, (old, old))
+    d = SimpleNamespace(state={"connector": {"ingest_b": {"at": "2023-11-15T00:00:00Z"}},
+                               "pages": {}})
+    d._page_mtime = lambda page: max((x.stat().st_mtime for x in sections.glob(f"{page}.*.json")),
+                                     default=0.0)
+    d._version_ingested_at = lambda version: P.Pipeline._version_ingested_at(d, version)
+    ingested = P.Pipeline._version_ingested_at(d, "B")
+    assert ingested is not None and ingested > old, "the fixture's file predates the ingest"
+    assert not P.Pipeline._produced_for(d, "techstack", "B")
+    # produced after the ingest: this version's content
+    os.utime(f, (ingested + 60, ingested + 60))
+    assert P.Pipeline._produced_for(d, "techstack", "B")
+    # no ingest record: the files are taken as this version's
+    none = SimpleNamespace(state={"connector": {}, "pages": {}}, _page_mtime=d._page_mtime)
+    none._version_ingested_at = lambda version: P.Pipeline._version_ingested_at(none, version)
+    assert P.Pipeline._produced_for(none, "techstack", "B")
+    assert P.Pipeline._version_ingested_at(none, "B") is None

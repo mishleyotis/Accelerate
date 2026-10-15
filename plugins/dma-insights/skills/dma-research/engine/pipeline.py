@@ -4602,6 +4602,42 @@ class Pipeline:
                             for p in todo))
         return shipped
 
+    def _version_ingested_at(self, version: str) -> float | None:
+        """Epoch seconds at which this version's connector run was recorded
+        (`state.connector.ingest_a|ingest_b.at`), or None when unknown."""
+        rec = ((self.state.get("connector") or {})
+               .get(f"ingest_{str(version).lower()}") or {})
+        at = str(rec.get("at") or "").strip()
+        if not at:
+            return None
+        try:
+            from datetime import datetime, timezone
+            dt = datetime.fromisoformat(at.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt.timestamp()
+        except ValueError:
+            return None
+
+    def _produced_for(self, page: str, version: str) -> bool:
+        """Whether the page's section files on disk were produced FOR this
+        version: newer than the moment its connector run was ingested.
+
+        A page deferred from A to B (`--defer-to-b`) still carries its
+        version-A files on disk. The workflow path shipped them against B
+        before any producer had run for B (Verus Financial Partners,
+        2026-10-15: techstack and heatmap, nine refusals each, one of three
+        ships spent apiece, and the handoff downgraded to an assembler-only
+        REPAIR with the per-surface producers never dispatched). Files older
+        than the version's ingest are a previous version's content: they are
+        not shipped, and the page is handed as a fresh production. With no
+        ingest record the files are taken as this version's."""
+        at = self._version_ingested_at(version)
+        if at is None:
+            return True
+        m = self._page_mtime(page)
+        return bool(m) and m > at
+
     def _ship_pages_workflow(self, pages: tuple, version: str, connector_run: str,
                              verdicts: dict, verdicts_file: Path) -> list[str]:
         """Ship what the last page workflow left on disk; hand the rest back.
@@ -4618,7 +4654,7 @@ class Pipeline:
             rec = (self.state.get("pages") or {}).get(p) or {}
             m = self._page_mtime(p)
             last = (rec.get("shipped_mtime") or {}).get(version)
-            if m and (last is None or m > float(last)):
+            if m and (last is None or m > float(last)) and self._produced_for(p, version):
                 if self._ship_one(p, version, connector_run, verdicts):
                     shipped.append(p)
         self._save_state()
@@ -4664,7 +4700,8 @@ class Pipeline:
                                + f". Repair at source, then resume: {self.plan()['command']}")
         for p in todo:
             self._contract_file(p)
-        repair = [p for p in todo if tries.get(p, 0) > 0 and self._page_mtime(p)]
+        repair = [p for p in todo if tries.get(p, 0) > 0 and self._page_mtime(p)
+                  and self._produced_for(p, version)]
         fresh = [p for p in todo if p not in repair]
         n = len(list((self.run.root / BRIEFS_DIR).glob(f"pages_wf_{version}_*_assemble"))) + 1
         rows: dict[str, dict] = {}
