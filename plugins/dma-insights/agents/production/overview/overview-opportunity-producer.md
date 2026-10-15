@@ -28,6 +28,21 @@ fewer tiles than `tiles_wanted` before it is submitted (CG-COMPLETE). AAA WCNY
 (2026-10-15) served 2 tiles from the report's 8 candidates while the catalogue
 held 22 READY platforms.
 
+**Optimize what the client owns before proposing anything new** (owner,
+2026-10-15: "be more thorough in optimization ... mention clearly to verify FSC
+rollout"). The shortlist carries the engine's estate fields, and the driver
+and the connector (CG-COMPLETE) refuse what breaks them:
+- `in_estate` — the client already runs it (MuleSoft at AAA WCNY, per its
+  partner's case study). Never a tile: list it in `discarded[]` with the
+  reason "already run at this layer — an optimization conversation".
+- `replaces_in_estate` — it would replace a product the client runs (Tableau
+  beside Power BI, AWS beside Azure). Never a tile: discard it, naming what it
+  would replace.
+- `vendor_in_estate` — it extends an org the client owns (FSC on a Salesforce
+  org). It may be a tile, and `their_stack_context` says, in words, to
+  **verify** its rollout and entitlement first ("Verify whether FSC is already
+  licensed or activated on the club's Salesforce org before scoping it").
+
 **The shortlist picks WHICH platforms; the card supplies EVERY figure.** Fit is
 relative to the candidate set (rank fusion, readiness), so the shortlist's
 scores are not the served ones. Each tile reads its platform's card in

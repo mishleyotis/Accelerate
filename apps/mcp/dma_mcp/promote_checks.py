@@ -321,6 +321,12 @@ def _peered_categories(cur, run_id) -> set:
 
 def _catalogue_ready(conn, cur, run_id) -> list:
     """The full catalogue through the fit engine: READY rows, engine order."""
+    return [p for p in _catalogue_scored(conn, cur, run_id)
+            if p.get("state") == "READY"]
+
+
+def _catalogue_scored(conn, cur, run_id) -> list:
+    """Every catalogue platform through the fit engine, engine order."""
     from . import fit as fit_mod
     cur.execute("""
         SELECT p.l3_id, p.platform_name FROM ccg_l3_platforms p
@@ -333,10 +339,28 @@ def _catalogue_ready(conn, cur, run_id) -> list:
     if not cands:
         return []
     got = fit_mod.platform_fit(conn, run_id, cands) or {}
-    ready = [p for p in (got.get("platforms") or [])
-             if isinstance(p, dict) and p.get("state") == "READY"]
-    return sorted(ready, key=lambda p: (p.get("rank") is None, p.get("rank") or 999,
-                                        -(p.get("fit_score") or 0)))
+    rows = [p for p in (got.get("platforms") or []) if isinstance(p, dict)]
+    return sorted(rows, key=lambda p: (p.get("rank") is None, p.get("rank") or 999,
+                                       -(p.get("fit_score") or 0)))
+
+
+def _estate_vendors(pay, cur, run_id) -> list:
+    """Catalogue vendors the promoted register places in the estate."""
+    items = ((pay.get("techstack") or {}).get("techstack") or {}).get("items") or []
+    held = {str(i.get("vendor") or "").strip().lower(): str(i.get("vendor")).strip()
+            for i in items if isinstance(i, dict)
+            and str(i.get("status") or "").upper() in ("CONFIRMED", "INFERRED", "CLAIMED")}
+    try:
+        cur.execute("""
+            SELECT DISTINCT p.vendor FROM ccg_l3_platforms p
+             WHERE p.version = COALESCE(
+                      (SELECT r.ccg_catalog_version FROM runs r WHERE r.id = %s),
+                      (SELECT version FROM ccg_versions WHERE is_current))""", (run_id,))
+        cat = {v.strip().lower() for (raw,) in cur.fetchall() if raw
+               for v in re.split(r"\s*/\s*", str(raw))}
+    except Exception:                                 # noqa: BLE001
+        return []
+    return sorted(v for k, v in held.items() if k and k in cat)
 
 
 def completeness(conn, run_id, live: dict) -> dict:
@@ -370,14 +394,64 @@ def completeness(conn, run_id, live: dict) -> dict:
                         f"scores it with three or more peers."))
 
     try:
-        ready = _catalogue_ready(conn, cur, run_id)
+        scored = _catalogue_scored(conn, cur, run_id)
     except Exception as exc:                          # noqa: BLE001
         msg = (f"the fit engine could not score the catalogue at promote "
                f"({type(exc).__name__}); an opportunity set nobody checked is "
                f"unchecked, not complete")
         out.setdefault("overview", []).append(_block("opportunity", "overview.opportunity", msg))
         return out
+    # THE ESTATE (the fit engine's in_estate / vendor_in_estate /
+    # replaces_in_estate): what the client already runs is discarded and
+    # optimized, never tiled; a replacement is discarded; an extension of an
+    # org the client owns says to verify its rollout first.
+    owned = [p for p in scored if p.get("in_estate")]
+    ready_all = [p for p in scored if p.get("state") == "READY" and not p.get("in_estate")]
+    ready = [p for p in ready_all if not p.get("replaces_in_estate")]
     want = min(TILES_WANTED, len(ready))
+    cut = ready[want - 1] if want else None
+    replaces = [p for p in ready_all if p.get("replaces_in_estate")
+                and (cut is None or ready_all.index(p) < ready_all.index(cut))]
+    op = (pay.get("overview") or {}).get("opportunity") or {}
+    disc = {_norm(d.get("platform")) for d in (op.get("discarded") or []) if isinstance(d, dict)}
+    tiles_all = [t for t in (op.get("tiles") or []) if isinstance(t, dict)]
+    by_name = {_norm(p.get("platform")): p for p in scored}
+    for i, t in enumerate(tiles_all):
+        p = by_name.get(_norm(t.get("platform"))) or {}
+        ctx = _norm(f"{t.get('their_stack_context') or ''} {t.get('rank_rationale') or ''}")
+        if p.get("in_estate"):
+            out.setdefault("overview", []).append(_block(
+                "opportunity", f"overview.opportunity.tiles[{i}]",
+                f"'{t.get('platform')}' is already in the client's estate ({p['in_estate']}): "
+                f"the contract discards a platform the client already runs; carry it as an "
+                f"optimization recommendation."))
+        elif p.get("replaces_in_estate"):
+            out.setdefault("overview", []).append(_block(
+                "opportunity", f"overview.opportunity.tiles[{i}]",
+                f"'{t.get('platform')}' would replace {', '.join(p['replaces_in_estate'])}, "
+                f"which the client runs: a replacement is a discard, never a tile."))
+        elif p.get("vendor_in_estate") and not any(w in ctx for w in ("verify", "confirm")):
+            out.setdefault("overview", []).append(_block(
+                "opportunity", f"overview.opportunity.tiles[{i}].their_stack_context",
+                f"'{t.get('platform')}' extends a vendor org the client already runs: say to "
+                f"verify its rollout and entitlement on that org before it is proposed."))
+    for p in owned + replaces:
+        if _norm(p.get("platform")) not in disc:
+            out.setdefault("overview", []).append(_block(
+                "opportunity", "overview.opportunity.discarded",
+                f"'{p.get('platform')}' "
+                + (f"is in the client's estate ({p['in_estate']})" if p.get("in_estate")
+                   else f"would replace {', '.join(p.get('replaces_in_estate') or [])}")
+                + " and is not listed as discarded with that reason."))
+    recs = json.dumps(((pay.get("platform") or {}).get("recommendations") or {})
+                      .get("recommendations") or []).lower()
+    recs = " ".join(re.sub(r"[^a-z0-9]+", " ", recs).split())
+    for v in _estate_vendors(pay, cur, run_id):
+        if " ".join(re.sub(r"[^a-z0-9]+", " ", v.lower()).split()) not in recs:
+            out.setdefault("platform", []).append(_block(
+                "recommendations", "platform.recommendations",
+                f"the client already runs {v} (technology register) and no recommendation "
+                f"addresses optimizing what it owns there."))
     if not want:
         return out
     story = (pay.get("platform") or {}).get("platform_story") or {}
@@ -396,7 +470,9 @@ def completeness(conn, run_id, live: dict) -> dict:
             "opportunity", "overview.opportunity.tiles",
             f"{len(tiles)} tile(s); the fit engine scores {len(ready)} READY platform(s) "
             f"across the full catalogue, so the overview serves {want}."))
-    ranked = sorted([c for c in cards if isinstance(c.get("rank"), (int, float))],
+    skip = {_norm(p.get("platform")) for p in owned + replaces}
+    ranked = sorted([c for c in cards if isinstance(c.get("rank"), (int, float))
+                     and _norm(c.get("platform")) not in skip],
                     key=lambda c: c["rank"])[:want]
     if [_norm(t.get("platform")) for t in tiles[:want]] != [_norm(c.get("platform")) for c in ranked]:
         out.setdefault("overview", []).append(_block(

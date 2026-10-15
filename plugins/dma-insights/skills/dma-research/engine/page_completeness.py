@@ -16,6 +16,8 @@ refusal, never a skipped check.
 """
 from __future__ import annotations
 
+import json
+import re
 from typing import Callable
 
 TILES_WANTED = 5            # the contract's "Five tiles"; gold runs carry 4-5
@@ -122,6 +124,8 @@ def check(page: str, sec: Callable[[str], dict | None], *, shortlist,
                     out.append((sect, "CG-COMPLETE overview.opportunity: no platform cards to "
                                       "pin the tiles to (platform.platform_story missing)."))
                 return out
+            owned = {_norm(p.get("platform")) for p in (shortlist.get("in_estate") or [])}
+            cards = [c for c in cards if _norm(c.get("platform")) not in owned]
             top_cards = [_norm(c.get("platform")) for c in cards[:want]]
             got = [_norm(t.get("platform")) for t in tiles]
             if want and got[:want] != top_cards:
@@ -146,4 +150,93 @@ def check(page: str, sec: Callable[[str], dict | None], *, shortlist,
                                       f"'{t.get('platform')}': " + "; ".join(bad)
                                       + ". Every figure, the order and the rank prose come "
                                         "from the card in platform.platform_story."))
+        if page == "overview":
+            out.extend(estate_rules(sec, shortlist))
+    if page == "platform" and not sl_bad:
+        out.extend(optimization_rules(sec, shortlist))
+    return out
+
+
+_VERIFY = ("verify", "confirm")
+
+
+def estate_rules(sec, shortlist) -> list[tuple[str, str]]:
+    """What the client already owns, read deterministically off the engine's
+    estate fields (`in_estate`, `vendor_in_estate`, `replaces_in_estate`).
+    AAA WCNY (2026-10-15, owner: "be more thorough in optimization ... mention
+    clearly to verify FSC rollout")."""
+    out = []
+    op = sec("overview.opportunity") or {}
+    tiles = [t for t in (op.get("tiles") or []) if isinstance(t, dict)]
+    owned = {_norm(p.get("platform")): p for p in (shortlist.get("in_estate") or [])}
+    by = {_norm(p.get("platform")): p for p in (shortlist.get("shortlist") or [])}
+    for i, t in enumerate(tiles):
+        name = _norm(t.get("platform"))
+        if name in owned:
+            out.append(("overview.opportunity", f"CG-COMPLETE overview.opportunity.tiles[{i}] "
+                        f"'{t.get('platform')}' is already in the client's estate "
+                        f"({owned[name].get('in_estate')}): the contract discards a platform "
+                        f"'the client already runs at the layer in question'. Move it to "
+                        f"discarded[] and carry it as an optimization recommendation."))
+            continue
+        row = by.get(name) or {}
+        ctx = f"{t.get('their_stack_context') or ''} {t.get('rank_rationale') or ''}"
+        low = _norm(ctx)
+        if row.get("vendor_in_estate") and not any(w in low for w in _VERIFY):
+            out.append(("overview.opportunity", f"CG-COMPLETE overview.opportunity.tiles[{i}] "
+                        f"'{t.get('platform')}' extends a vendor org the client already runs "
+                        f"({row.get('vendor_in_estate')}): their_stack_context must say to "
+                        f"verify (or confirm) its rollout and entitlement on that org before "
+                        f"it is proposed."))
+    replacing = {_norm(p.get("platform")): p for p in (shortlist.get("replaces") or [])}
+    for i, t in enumerate(tiles):
+        p = replacing.get(_norm(t.get("platform")))
+        if p:
+            out.append(("overview.opportunity", f"CG-COMPLETE overview.opportunity.tiles[{i}] "
+                        f"'{t.get('platform')}' would replace "
+                        f"{', '.join(p.get('replaces_in_estate') or [])}, which the client runs: "
+                        f"a replacement is a discard with that reason, never a tile."))
+    disc = {_norm(d.get("platform")) for d in (op.get("discarded") or []) if isinstance(d, dict)}
+    for name, p in owned.items():
+        if name not in disc:
+            out.append(("overview.opportunity", f"CG-COMPLETE overview.opportunity.discarded: "
+                        f"'{p.get('platform')}' is in the client's estate ({p.get('in_estate')}) "
+                        f"and is not listed as discarded with that reason."))
+    for name, p in replacing.items():
+        if name not in disc:
+            out.append(("overview.opportunity", f"CG-COMPLETE overview.opportunity.discarded: "
+                        f"'{p.get('platform')}' would replace "
+                        f"{', '.join(p.get('replaces_in_estate') or [])} and is not listed as "
+                        f"discarded with that reason."))
+    return out
+
+
+def optimization_rules(sec, shortlist) -> list[tuple[str, str]]:
+    """Every catalogue platform the client already runs is covered by an
+    optimization recommendation on the platform page."""
+    recs = (sec("platform.recommendations") or {}).get("recommendations") or []
+    text = _norm(" ".join(json.dumps(r) for r in recs if isinstance(r, dict)))
+    out = []
+    for v in shortlist.get("estate_vendors") or []:
+        if _norm(v) not in text:
+            out.append(("platform.recommendations", f"CG-COMPLETE platform.recommendations: "
+                        f"the client already runs {v} (technology register) and no "
+                        f"recommendation addresses optimizing what it owns there."))
+    owned = [p for p in shortlist.get("in_estate") or [] if isinstance(p, dict)]
+    per_vendor: dict = {}
+    for p in owned:
+        per_vendor[_norm(p.get("vendor"))] = per_vendor.get(_norm(p.get("vendor")), 0) + 1
+    for p in owned:
+        name = _norm(p.get("platform"))
+        vend = _norm(p.get("vendor"))
+        bare = _norm(name.replace(vend, "", 1)) if vend else name
+        alias = " ".join(re.findall(r"\(([^)]*)\)", str(p.get("platform") or "")))
+        forms = {name, bare, _norm(re.sub(r"\([^)]*\)", " ", name)), _norm(alias)} - {""}
+        covered = any(f in text for f in forms) or (
+            vend and per_vendor.get(vend) == 1 and vend in text)
+        if not covered:
+            out.append(("platform.recommendations", f"CG-COMPLETE platform.recommendations: "
+                        f"'{p.get('platform')}' is in the client's estate "
+                        f"({p.get('in_estate')}) and no recommendation addresses optimizing "
+                        f"it. The client's own estate is the first opportunity."))
     return out

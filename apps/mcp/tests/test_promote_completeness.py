@@ -15,13 +15,16 @@ from dma_mcp import gates, promote_checks as PC  # noqa: E402
 
 
 class _Cur:
-    def __init__(self, peered=(), catalogue=()):
+    def __init__(self, peered=(), catalogue=(), vendors=()):
         self.peered, self.catalogue, self._rows = list(peered), list(catalogue), []
+        self.vendors = list(vendors)
 
     def execute(self, sql, args=None):
         s = " ".join(sql.split())
         if "FROM peer_scores" in s:
             self._rows = [(c,) for c in self.peered]
+        elif "SELECT DISTINCT p.vendor" in s:
+            self._rows = [(v,) for v in self.vendors]
         elif "FROM ccg_l3_platforms" in s:
             self._rows = list(self.catalogue)
         else:
@@ -45,13 +48,14 @@ CAT = [(f"L3-{i}", f"P{i}") for i in range(10)]
 @pytest.fixture
 def engine(monkeypatch):
     from dma_mcp import fit as fit_mod
-    state = {"raise": None}
+    state = {"raise": None, "estate": {}}
 
     def platform_fit(conn, run_id, cands):
         if state["raise"]:
             raise state["raise"]
         return {"platforms": [{"platform": c["platform"], "rank": i + 1, "fit_score": 70 - i,
-                               "state": "READY" if i < 7 else "INSUFFICIENT_EVIDENCE"}
+                               "state": "READY" if i < 7 else "INSUFFICIENT_EVIDENCE",
+                               **state["estate"].get(c["platform"], {})}
                               for i, c in enumerate(cands)]}
     monkeypatch.setattr(fit_mod, "platform_fit", platform_fit)
     return state
@@ -118,3 +122,61 @@ def test_it_runs_inside_every_promote_recheck(engine, monkeypatch):
     merged, _ = PC.extra_reasons(_Conn(_Cur(("P1C1",), CAT)), RUN,
                                  _live(tiles=2, cards=3))
     assert any(r["gate_id"] == "CG-COMPLETE" for rs in merged.values() for r in rs)
+
+
+# ── the estate: optimize what the client owns, never sell it back ──────────
+
+def _estate_live(tiles, discarded=(), recs="", ctx="Verify the rollout first."):
+    cs = [{"platform": f"P{i}", "rank": i + 1, "fit_score": 70 - i} for i in range(10)]
+    return {
+        "overview": {"payload": {"scores": {"pillars": []},
+                                 "opportunity": {"tiles": [
+                                     {"platform": f"P{i}", "rank": i + 1, "composite": 70 - i,
+                                      "their_stack_context": ctx} for i in tiles],
+                                     "discarded": [{"platform": d, "reason": "x"} for d in discarded]}}},
+        "heatmap": {"payload": {}},
+        "platform": {"payload": {"platform_story": {"platforms": cs},
+                                 "recommendations": {"recommendations": [{"title": recs}]}}},
+        "techstack": {"payload": {"techstack": {"items": [
+            {"vendor": "Salesforce", "product": "Salesforce Sales Cloud", "status": "INFERRED"}]}}},
+    }
+
+
+def _estate_run(live, vendors=("Salesforce",)):
+    return PC.completeness(_Conn(_Cur((), CAT, vendors)), RUN, live)
+
+
+def test_a_platform_the_client_runs_is_never_a_tile(engine):
+    engine["estate"] = {"P1": {"in_estate": "CLAIMED"}}
+    out = _estate_run(_estate_live([0, 1, 2, 3, 4], recs="Salesforce org health"))
+    msgs = [r["message"] for r in out.get("overview", [])]
+    assert any("already in the client's estate (CLAIMED)" in m for m in msgs)
+    assert any("'P1' is in the client's estate" in m and "discarded" in m for m in msgs)
+
+
+def test_a_replacement_is_discarded_not_tiled(engine):
+    engine["estate"] = {"P2": {"replaces_in_estate": ["Power BI"]}}
+    out = _estate_run(_estate_live([0, 1, 2, 3, 4], recs="Salesforce"))
+    assert any("would replace Power BI" in r["message"] for r in out["overview"])
+
+
+def test_an_extension_of_an_owned_org_must_say_verify(engine):
+    engine["estate"] = {"P0": {"vendor_in_estate": "INFERRED"}}
+    bad = _estate_run(_estate_live([0, 1, 2, 3, 4], recs="Salesforce", ctx="Extends the org."))
+    assert any("verify its rollout" in r["message"] for r in bad["overview"])
+    good = _estate_run(_estate_live([0, 1, 2, 3, 4], recs="Salesforce",
+                                    ctx="Verify the FSC rollout and edition on the org first."))
+    assert not [r for r in good.get("overview", []) if "verify" in r["message"]]
+
+
+def test_every_owned_vendor_gets_an_optimization_recommendation(engine):
+    out = _estate_run(_estate_live([0, 1, 2, 3, 4], recs="Tableau Pulse adoption"))
+    assert any("already runs Salesforce" in r["message"] for r in out["platform"])
+    ok = _estate_run(_estate_live([0, 1, 2, 3, 4], recs="Optimize the Salesforce org first"))
+    assert "platform" not in ok
+
+
+def test_the_tiles_skip_owned_cards_when_ranked(engine):
+    engine["estate"] = {"P0": {"in_estate": "INFERRED"}}
+    out = _estate_run(_estate_live([1, 2, 3, 4, 5], discarded=["P0"], recs="Salesforce"))
+    assert not [r for r in out.get("overview", []) if "card-rank order" in r["message"]]

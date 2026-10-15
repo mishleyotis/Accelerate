@@ -4448,6 +4448,11 @@ class Pipeline:
         overview served 2 tiles and the platform page 2 tabs."""
         reads = self.opts.reads
         if not self._fit_engine_reachable():
+            # A reads double with no fit engine (unit and stub walks): an
+            # explicit EMPTY catalogue, so the estate sweep runs over nothing
+            # rather than refusing. McpReads always has the engine, and a
+            # failed fetch there writes no catalogue — the sweep refuses.
+            (self.run.qa_dir / "l3_catalogue.json").write_text("[]")
             return None
         path = self.run.qa_dir / self.SHORTLIST
 
@@ -4473,22 +4478,63 @@ class Pipeline:
             fail(f"{e.__class__.__name__}: {str(e)[:160]}")
             return None
         ps = [p for p in (fit.get("platforms") or []) if isinstance(p, dict)]
+        # The estate fields come from the connector; an older connector lacks
+        # them, and then the engine's vendored copy computes them from the
+        # same register and catalogue (engine/estate.py, held equal by test).
+        from . import estate as _estate
+        _estate.annotate(ps, [r for r in self.wb.rows("Tech_Register") if r.get("TS_ID")],
+                         list(cat.get("l3_platforms") or []))
         if not ps:
             fail(f"get_platform_fit scored nothing ({str(fit.get('_error') or fit.get('error') or '')[:160]})")
             return None
-        ready = sorted([p for p in ps if p.get("state") == "READY"],
-                       key=lambda p: (p.get("rank") is None, p.get("rank") or 999,
-                                      -(p.get("fit_score") or 0)))
+        order = lambda p: (p.get("rank") is None, p.get("rank") or 999,   # noqa: E731
+                           -(p.get("fit_score") or 0))
+        # The contract's discard rule, applied by the engine's estate fields:
+        # a platform the client already runs is an OPTIMIZE conversation and
+        # never a tile (AAA WCNY, 2026-10-15: MuleSoft, already integrated,
+        # ranked #2 as if new).
+        owned = sorted([p for p in ps if p.get("in_estate")], key=order)
+        # A READY candidate that would replace a product the client runs (AWS
+        # beside an inferred Azure, Tableau beside Power BI) is a rip-and-
+        # replace sale, not an opportunity in what they own: discarded, named.
+        all_ready = sorted([p for p in ps if p.get("state") == "READY"
+                            and not p.get("in_estate")], key=order)
+        ready = [p for p in all_ready if not p.get("replaces_in_estate")]
+        cut = ready[min(self.TILES_WANTED, len(ready)) - 1] if ready else None
+        replaces = [p for p in all_ready if p.get("replaces_in_estate")
+                    and (cut is None or order(p) < order(cut))]
+        keys = ("platform", "l3_area", "rank", "fit_score", "state", "relevance",
+                "in_estate", "vendor_in_estate", "replaces_in_estate")
+        # The vendors the client already runs that the catalogue knows: each
+        # owes an OPTIMIZATION recommendation before anything is sold.
+        cat_vendors = {v.strip().lower(): v.strip()
+                       for p in (cat.get("l3_platforms") or [])
+                       for v in re.split(r"\s*/\s*", str(p.get("vendor") or "")) if v.strip()}
+        vend_of = {str(p.get("platform_name")): str(p.get("vendor") or "")
+                   for p in (cat.get("l3_platforms") or [])}
+        estate_vendors = sorted({cat_vendors[str(r.get("Vendor")).strip().lower()]
+                                 for r in self.wb.rows("Tech_Register")
+                                 if str(r.get("Vendor") or "").strip().lower() in cat_vendors
+                                 and str(r.get("Status") or "").upper() != "ABSENT"})
         doc = {"connector_run": connector_run, "scored": len(ps),
                "ready": len(ready),
                "tiles_wanted": min(self.TILES_WANTED, len(ready)),
-               "shortlist": [{k: p.get(k) for k in ("platform", "l3_area", "rank",
-                                                   "fit_score", "state", "relevance")}
-                             for p in ready[:8]],
-               "rule": ("start the platform cards and the overview tiles from this list "
-                        "in the engine's spelling; tile the top `tiles_wanted`; every "
-                        "other READY candidate is a card or a discard with its reason")}
+               "shortlist": [{k: p.get(k) for k in keys} for p in ready[:8]],
+               "in_estate": [{**{k: p.get(k) for k in keys},
+                              "vendor": vend_of.get(str(p.get("platform")), "")} for p in owned],
+               "estate_vendors": estate_vendors,
+               "replaces": [{k: p.get(k) for k in keys} for p in replaces],
+               "rule": ("tiles are the top `tiles_wanted` NOT already in the estate; a "
+                        "platform in `in_estate` is discarded ('already run at this "
+                        "layer') and carried as an OPTIMIZATION recommendation; a tile "
+                        "whose vendor_in_estate is set says to VERIFY the rollout and "
+                        "entitlement on the org the client owns; a tile with "
+                        "replaces_in_estate names what it would replace")}
         path.write_text(json.dumps(doc, indent=1))
+        # The catalogue the estate sweep reads (page_preflight.estate_sweep).
+        (self.run.qa_dir / "l3_catalogue.json").write_text(json.dumps(
+            [{k: p.get(k) for k in ("l3_id", "vendor", "platform_name", "category")}
+             for p in (cat.get("l3_platforms") or [])], indent=0))
         self.opts.log(f"  [PLATFORM] {len(ps)} catalogue platform(s) scored, {len(ready)} READY; "
                       f"shortlist: {', '.join(str(p.get('platform')) for p in ready[:5])}")
         return doc
@@ -5008,6 +5054,7 @@ class Pipeline:
         # platform the fit engine scores READY, never from the report's list
         # (AAA WCNY, 2026-10-15: 8 of 136 seeded, two tiles served).
         if self._shortlist_doc() is None or (self._shortlist_doc() or {}).get("error") \
+                or not (self.run.qa_dir / "l3_catalogue.json").is_file() \
                 or any(p in pages for p in ("overview", "platform")):
             self._platform_shortlist(str(self._md().get("connector_run_id") or ""))
         # Focus-area evidence names its focus area's cells (ET-07), linked

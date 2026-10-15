@@ -306,10 +306,107 @@ def sentiment_ladder(wb) -> list:
     return out
 
 
+CATALOGUE_FILE = "l3_catalogue.json"
+
+
+def _catalogue_vendors(wb) -> list[str] | None:
+    """Every vendor the run's L3 catalogue names ("Salesforce / Tableau" is two),
+    from the copy the driver caches beside the platform shortlist."""
+    path = Path(wb.path).parent / "07_qa" / CATALOGUE_FILE
+    try:
+        rows = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+    out = set()
+    for r in rows if isinstance(rows, list) else []:
+        for v in re.split(r"\s*/\s*", str((r or {}).get("vendor") or "")):
+            if len(v.strip()) >= 3:
+                out.add(v.strip())
+    return sorted(out)
+
+
+def _domain(url) -> str:
+    m = re.match(r"https?://([^/]+)", str(url or "").lower())
+    return (m.group(1) if m else "").removeprefix("www.")
+
+
+def estate_dismissals(wb) -> dict:
+    """{vendor: why} from the Gate_Log's ESTATE_DISMISSED rows (the run's
+    record of decisions; no workbook schema change)."""
+    return {_clean(r.get("Scope")): _clean(r.get("Detail"))
+            for r in wb.rows("Gate_Log")
+            if _clean(r.get("Gate")) == "ESTATE_DISMISSED" and _clean(r.get("Scope"))}
+
+
+def estate_sweep(wb) -> list:
+    """A catalogue vendor the run's OWN evidence places in the estate, with no
+    register row — the gap that let MuleSoft rank as a net-new tile (AAA WCNY,
+    2026-10-15: E-235 'Integrate Salesforce with Mulesoft' and no MuleSoft row,
+    so the fit engine could not know the client already ran it).
+
+    Deterministic: a vendor name (word-bounded, case-insensitive) in an
+    excerpt whose source is not that vendor's own site, against the
+    register's Vendor and Product columns (any status — an ABSENT row is a
+    decision too) and the recorded dismissals. Returns [] when it ran clean;
+    a NOT_RUN finding when the catalogue copy is missing."""
+    vendors = _catalogue_vendors(wb)
+    if vendors is None:
+        return [{"gate": "ESTATE", "page": "overview", "needs_connector": True,
+                 "severity": "block",
+                 "detail": ("the estate sweep did NOT RUN: no catalogue copy at "
+                            f"07_qa/{CATALOGUE_FILE} (the driver writes it with the "
+                            "platform shortlist), so nothing can say which platforms "
+                            "the client already runs"),
+                 "fix": "re-run the driver's PAGES preparation with the connector reachable"}]
+    reg = " ".join(f"{_clean(r.get('Vendor'))} {_clean(r.get('Product'))}"
+                   for r in wb.rows("Tech_Register") if _clean(r.get("TS_ID"))).lower()
+    dismissed = {k.lower() for k in estate_dismissals(wb)}
+    found: dict = {}
+    for r in wb.rows("Evidence_Detail"):
+        e = _clean(r.get("E_ID"))
+        text = _clean(r.get("Excerpt"))
+        if not e or not text:
+            continue
+        dom = _domain(r.get("Source_URL"))
+        for v in vendors:
+            key = v.lower()
+            if key in dismissed or re.search(rf"\b{re.escape(key)}\b", reg):
+                continue
+            if key.replace(" ", "") in dom.replace("-", ""):
+                continue                    # the vendor's own collateral page
+            if re.search(rf"\b{re.escape(key)}\b", text, re.I):
+                found.setdefault(v, []).append(e)
+    return [{"gate": "ESTATE", "page": "techstack", "needs_connector": False,
+             "severity": "block",
+             "detail": (f"{v} is named in the client's evidence ({', '.join(sorted(set(es))[:5])}) "
+                        f"and the technology register holds no {v} row: the fit engine "
+                        f"cannot tell an incumbent from a net-new platform"),
+             "fix": (f"`engine.cli techscan record --product '<the {v} product>' --vendor '{v}' "
+                     f"--status CONFIRMED|INFERRED|CLAIMED|ABSENT --evidence-id "
+                     f"{sorted(set(es))[0]} ...` (a partner's case study is CLAIMED), or, when "
+                     f"the mention is not about this client's estate, `engine.page_preflight "
+                     f"dismiss-vendor --vendor '{v}' --why '<at least 40 characters>'`")}
+            for v, es in sorted(found.items())]
+
+
+def dismiss_vendor(wb, *, vendor: str, why: str) -> dict:
+    why = _clean(why)
+    if len(why) < 40:
+        raise ValueError("a dismissal states why the mention is not this client's "
+                         "estate, in at least 40 characters")
+    from . import ledger as L
+    L.append_gate(wb, gate="ESTATE_DISMISSED", scope=_clean(vendor), verdict="PASS",
+                  blocking=False, detail=why[:900])
+    wb.save()
+    return estate_dismissals(wb)
+
+
 def preflight(wb, pages=("techstack",)) -> list:
     """The blockers, as {gate, page, detail, fix, needs_connector}."""
     out = []
     pages = tuple(pages or ())
+    if any(p in pages for p in ("techstack", "overview", "platform")):
+        out += estate_sweep(wb)
     for e, u in sorted(unlinked_citations(wb, pages).items()):
         advisory = all(c.split(":")[0] in _ET07_ADVISORY_SHEETS for c in u["cited_from"])
         out.append({
@@ -381,18 +478,24 @@ def main(argv=None) -> int:
     from . import runstate
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("check", "not-run"):
+    for name in ("check", "not-run", "dismiss-vendor"):
         p = sub.add_parser(name)
         p.add_argument("--run", required=True)
         p.add_argument("--root")
         if name == "check":
             p.add_argument("--page", action="append")
+        elif name == "dismiss-vendor":
+            p.add_argument("--vendor", required=True)
+            p.add_argument("--why", required=True)
         else:
             p.add_argument("--tool", required=True)
             p.add_argument("--reason", required=True)
     a = ap.parse_args(argv)
     run = runstate.locate(a.run, a.root)
     wb = run.open()
+    if a.cmd == "dismiss-vendor":
+        print(json.dumps(dismiss_vendor(wb, vendor=a.vendor, why=a.why)))
+        return 0
     if a.cmd == "not-run":
         print(json.dumps({"seq": declare_not_run(wb, tool=a.tool, reason=a.reason)}))
         return 0

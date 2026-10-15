@@ -121,6 +121,18 @@ Exa and Tavily you do not hold: emit those corroboration queries as
 `search_requests` and the conductor services them. That is their job here;
 they are not the spine.
 
+**A platform the client's own evidence names is a register row.** When any
+registered excerpt about this client names a catalogue vendor — a partner's
+case study ("integrate Salesforce with MuleSoft"), a posting, a newsroom
+item — the register carries a row for it: CONFIRMED / INFERRED by the
+evidence, CLAIMED for a partner's or vendor's case study, ABSENT when you
+searched and it is not there. `engine.page_preflight` runs the estate sweep
+before any page lane and blocks a vendor the evidence names with no row (AAA
+WCNY, 2026-10-15: MuleSoft was named in E-235, never registered, and ranked as
+a net-new tile). A mention that is not about this client's estate is
+dismissed with its reason (`engine.page_preflight dismiss-vendor`), never
+silently.
+
 ## Every row says WHO saw it
 
 `--provider` is required and repeatable, from

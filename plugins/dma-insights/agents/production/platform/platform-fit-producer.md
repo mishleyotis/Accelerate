@@ -229,6 +229,17 @@ by writing a quote.
     for every `subcap_id`, capability name and `catalogue_path`.
     `get_evidence` for every id you cite.
 
+**The client's own estate is the first opportunity.** Every catalogue vendor
+the technology register places in the estate (`estate_vendors` in the
+shortlist) and every owned platform (`in_estate`) is covered by a
+recommendation that OPTIMIZES what the client owns: an org health check, API
+reuse on the integration layer it already licenses, data products on the
+lakehouse it already runs (governed tables, a semantic layer its BI tool
+reads, a Salesforce↔lakehouse zero-copy link), before any new licence. The
+driver and the connector (CG-COMPLETE) refuse a platform page that leaves an
+owned vendor without one. A platform that only replaces something owned
+is a discard, not a card the page argues for.
+
 ## The contract — field by field
 
 ### P1 · `platform.platform_story`

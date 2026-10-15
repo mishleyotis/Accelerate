@@ -350,6 +350,107 @@ def _register_staged(cur, run_id) -> tuple:
             if sids - held_sids], held_sids
 
 
+_ESTATE_STATUSES = ("CONFIRMED", "INFERRED", "CLAIMED")
+
+
+def _l3_vendors(cur, run_id) -> dict:
+    """L3 code -> (catalogue vendor, catalogue category)."""
+    try:
+        cur.execute("""
+            SELECT p.l3_id, p.vendor, p.category FROM ccg_l3_platforms p
+             WHERE p.version = COALESCE(
+                      (SELECT r.ccg_catalog_version FROM runs r WHERE r.id = %s),
+                      (SELECT version FROM ccg_versions WHERE is_current))""",
+                    (run_id,))
+        return {str(r[0]).upper(): (str(r[1] or ""), str(r[2] or "") if len(r) > 2 else "")
+                for r in cur.fetchall() or [] if isinstance(r, (list, tuple)) and r[0]}
+    except Exception:                              # noqa: BLE001
+        return {}
+
+
+def _register_products(cur, run_id) -> list:
+    """[(vendor, product, status)] for every register row that places a
+    product IN the estate (CONFIRMED, INFERRED or CLAIMED) — from the promoted
+    techstack page, else the ingest tier. The client already runs these; the
+    contract's own discard rule ("discard ... when the client already runs it
+    at the layer in question") reads them (AAA WCNY, 2026-10-15: MuleSoft was
+    integrated per the partner's case study and still ranked a net-new tile)."""
+    out = []
+    try:
+        cur.execute(
+            """SELECT payload FROM submissions
+                WHERE run_id = %s AND page = 'techstack'
+                  AND superseded_at IS NULL
+                ORDER BY submitted_at DESC LIMIT 1""", (run_id,))
+        row = cur.fetchone()
+    except Exception:                              # noqa: BLE001
+        row = None
+    payload = row[0] if row else None
+    if isinstance(payload, str):
+        try:
+            payload = json.loads(payload)
+        except ValueError:
+            payload = None
+    items = (((payload or {}).get("techstack") or {}).get("items")) \
+        if isinstance(payload, dict) else None
+    for it in items or []:
+        if isinstance(it, dict):
+            st = str(it.get("status") or "").upper()
+            if st in _ESTATE_STATUSES and it.get("product"):
+                out.append((str(it.get("vendor") or ""), str(it["product"]), st))
+    try:
+        cur.execute("SELECT payload FROM techstack_raw WHERE run_id = %s", (run_id,))
+        raw = cur.fetchall() or []
+    except Exception:                              # noqa: BLE001
+        raw = []
+    for (p,) in raw:
+        p = p if isinstance(p, dict) else json.loads(p or "{}")
+        st = str(p.get("status") or p.get("presence") or "").upper()
+        prod = p.get("product") or p.get("l3_area")
+        if st in _ESTATE_STATUSES and prod:
+            out.append((str(p.get("vendor") or ""), str(prod), st))
+    return out
+
+
+def _vendor_key(v) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", str(v or "").lower()).strip()
+
+
+def _name_variants(name, vendor="") -> set:
+    """Token sets a product name can be read as: whole, without its
+    parenthetical, and the parenthetical alone — each with the vendor's words
+    dropped (kept when dropping them leaves nothing: "Microsoft Azure")."""
+    vt = set(_vendor_key(vendor).split()) | {"salesforce"}
+    raw = str(name or "")
+    paren = " ".join(re.findall(r"\(([^)]*)\)", raw))
+    bare = re.sub(r"\([^)]*\)", " ", raw)
+    out = set()
+    for form in (raw, bare, paren):
+        toks = set(re.sub(r"[^a-z0-9]+", " ", form.lower()).split())
+        if not toks:
+            continue
+        out.add(frozenset(toks - vt) or frozenset(toks))
+        out.add(frozenset(toks))
+    return out
+
+
+#: One generic word cannot carry an identity ("Salesforce CRM" ~ "Tableau CRM").
+_GENERIC_TOKENS = frozenset({"crm", "cloud", "platform", "data", "analytics", "ai",
+                             "service", "sales", "marketing", "bi", "server", "core"})
+#: Catalogue categories too broad to make one product a replacement for another.
+_GENERIC_CATEGORIES = frozenset({"platform", "industry cloud", "industry tooling", ""})
+
+
+def _estate_same(product, p_vendor, platform, c_vendor) -> bool:
+    """Exact token-set identity, never containment: "Salesforce CRM" is not
+    "Salesforce CRM Analytics" (the loose match marked an unowned product as
+    owned); "Power BI" is "Microsoft Power BI"; "Databricks Lakehouse (Azure
+    Databricks)" is "Databricks Data Intelligence Platform (Lakehouse)"."""
+    a = _name_variants(product, p_vendor)
+    b = _name_variants(platform, c_vendor)
+    return any(len(v) > 1 or not (v <= _GENERIC_TOKENS) for v in a & b)
+
+
 def _product_key(name) -> str:
     """A product or platform name reduced for matching: case, punctuation and
     the vendor prefix dropped ("Salesforce Data Cloud" == "Data Cloud")."""
@@ -483,6 +584,42 @@ def platform_fit(conn, run_id, candidates) -> dict:
             relevance=relevance))
 
     ranked = engine.rank(built, all_gap_cells=all_gaps)
+    # THE ESTATE, ON EVERY ROW. `in_estate` names the register status of the
+    # candidate's own product (the client already runs it: an OPTIMIZE
+    # conversation, never a net-new tile); `vendor_in_estate` the status of
+    # the strongest row from the same vendor (an extension of an org the
+    # client owns — its entitlement and rollout must be verified first).
+    # Computed from the register and the catalogue; nothing here is judged.
+    # `replaces_in_estate` names held products of ANOTHER vendor in the same
+    # catalogue category (Tableau beside an inferred Power BI): a replacement
+    # decision, not greenfield.
+    estate = _register_products(cur, run_id)
+    area_of = {str(c.platform): _resolve_area(c.l3_area, l3_names) for c in built}
+    cat = _l3_vendors(cur, run_id)
+    rank_st = {s: i for i, s in enumerate(_ESTATE_STATUSES)}
+    for p in ranked:
+        name = str(p.get("platform") or "")
+        area = area_of.get(name, "")
+        vendor, category = cat.get(area, ("", ""))
+        own, fam, repl = None, None, []
+        for e_vendor, product, st in estate:
+            e_areas = {_resolve_area(product, l3_names),
+                       _resolve_area(f"{e_vendor} {product}", l3_names)}
+            same = (_estate_same(product, e_vendor, name, vendor)
+                    or (area.startswith("L3-") and area in e_areas))
+            if same and (own is None or rank_st[st] < rank_st[own]):
+                own = st
+            if not same and _vendor_key(e_vendor) and _vendor_key(e_vendor) == _vendor_key(vendor) \
+                    and (fam is None or rank_st[st] < rank_st[fam]):
+                fam = st
+            e_cat = {cat.get(a, ("", ""))[1] for a in e_areas if a.startswith("L3-")}
+            if not same and category.strip().lower() not in _GENERIC_CATEGORIES \
+                    and category in e_cat \
+                    and _vendor_key(e_vendor) != _vendor_key(vendor):
+                repl.append(product)
+        p["in_estate"] = own
+        p["vendor_in_estate"] = fam
+        p["replaces_in_estate"] = sorted(set(repl))
     # AN UNRESOLVED SUB-VERTICAL IS AN UNCHECKED GUARD, NOT A PERFECT SCORE.
     # The engine scores it neutrally (1.0 keeps every cell, by design), but
     # the row used to SAY 1.0 as well — and a producer copied "relevance 1.0"

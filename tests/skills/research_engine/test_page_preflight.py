@@ -21,6 +21,11 @@ ROOT = Path(__file__).resolve().parents[3]
 
 def _first_tech_shape(wb):
     """Five web rows, one citing an excerpt that never names its product."""
+    # the estate sweep reads a catalogue copy the driver writes at page prep;
+    # an explicit empty one keeps these tests on ET-12 / CG-40 (the refusal
+    # without one is pinned in test_deterministic_completeness_2026_10_15.py)
+    (Path(wb.path).parent / "07_qa").mkdir(parents=True, exist_ok=True)
+    (Path(wb.path).parent / "07_qa" / PP.CATALOGUE_FILE).write_text("[]")
     named = L.append_evidence(
         wb, source_name="American Banker, Credit Union Journal",
         source_url="https://example.test/ab", tier="T2",

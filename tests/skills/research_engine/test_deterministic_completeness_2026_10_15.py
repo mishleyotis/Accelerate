@@ -241,3 +241,106 @@ def test_promote_is_refused_on_an_incomplete_staged_payload(tmp_path, break_it):
     assert shipper.promotions == []
     gates = [g for g in pl.wb.rows("Gate_Log") if g.get("Gate") == "PROMOTE_AUDIT"]
     assert gates and gates[-1].get("Verdict") == "FAIL"
+
+
+# ── the estate (owner, 2026-10-15: "be more thorough in optimization ... mention
+#    clearly to verify FSC rollout"): what the client runs is optimized, never sold ──
+
+from engine import page_preflight as PP  # noqa: E402
+
+EST = {**SL,
+       "shortlist": [{"platform": "P0", "vendor_in_estate": "INFERRED"}] +
+                    [{"platform": f"P{i}"} for i in range(1, 7)],
+       "in_estate": [{"platform": "MuleSoft Anypoint Platform", "in_estate": "CLAIMED",
+                      "vendor": "MuleSoft"}],
+       "replaces": [{"platform": "Tableau (Cloud + Server)", "replaces_in_estate": ["Power BI"]}],
+       "estate_vendors": ["Salesforce", "MuleSoft"]}
+
+
+def _est_secs(tiles=None, discarded=("MuleSoft Anypoint Platform", "Tableau (Cloud + Server)"),
+              ctx="Verify the FSC rollout and edition on the org first.",
+              recs="Optimize the Salesforce org; reuse the MuleSoft APIs"):
+    t = tiles if tiles is not None else [
+        {"platform": c["platform"], "rank": c["rank"], "composite": c["fit_score"],
+         "their_stack_context": ctx} for c in CARDS[:5]]
+    return {**GOOD,
+            "overview.opportunity": {"tiles": t,
+                                     "discarded": [{"platform": d, "reason": "x"} for d in discarded]},
+            "platform.recommendations": {"recommendations": [{"title": recs}]}}
+
+
+def test_an_owned_platform_tile_is_refused_and_must_be_discarded():
+    tiles = [{"platform": "MuleSoft Anypoint Platform", "rank": 1, "composite": 70}]
+    out = _check("overview", _est_secs(tiles=tiles, discarded=()), shortlist=EST)
+    msgs = [m for _, m in out]
+    assert any("already in the client's estate (CLAIMED)" in m for m in msgs)
+    assert any("discarded" in m and "MuleSoft" in m for m in msgs)
+
+
+def test_a_replacement_tile_is_refused():
+    tiles = [{"platform": "Tableau (Cloud + Server)", "rank": 1, "composite": 70}]
+    out = _check("overview", _est_secs(tiles=tiles), shortlist=EST)
+    assert any("would replace Power BI" in m for _, m in out)
+
+
+def test_an_extension_of_an_owned_org_must_say_verify():
+    out = _check("overview", _est_secs(ctx="FSC would extend that org."), shortlist=EST)
+    assert any("verify (or confirm) its rollout" in m for _, m in out)
+    assert not [m for _, m in _check("overview", _est_secs(), shortlist=EST) if "verify" in m]
+
+
+def test_every_owned_vendor_needs_an_optimization_recommendation():
+    out = _check("platform", _est_secs(recs="Tableau Pulse adoption"), shortlist=EST)
+    msgs = [m for _, m in out]
+    assert any("already runs Salesforce" in m for m in msgs)
+    assert any("'MuleSoft Anypoint Platform' is in the client's estate" in m for m in msgs)
+    assert not [m for _, m in _check("platform", _est_secs(), shortlist=EST)
+                if "recommendation" in m]
+
+
+def _sweep_wb(tmp_path, excerpt, url, register=()):
+    run, wb, cells, ev = researched_run(tmp_path)
+    (run.qa_dir).mkdir(parents=True, exist_ok=True)
+    (run.qa_dir / PP.CATALOGUE_FILE).write_text(json.dumps([
+        {"l3_id": "L3-MS-ANYPOINT", "vendor": "MuleSoft", "platform_name": "MuleSoft Anypoint Platform"},
+        {"l3_id": "L3-SF-SALES", "vendor": "Salesforce", "platform_name": "Salesforce Sales Cloud"}]))
+    rows = [r for r in wb.rows("Evidence_Detail") if r.get("E_ID")]
+    e = rows[0]["E_ID"]
+    wb.update_row("Evidence_Detail", "E_ID", e, {"Excerpt": excerpt, "Source_URL": url})
+    for r in wb.rows("Tech_Register"):
+        if r.get("TS_ID") and str(r.get("Vendor") or "").lower() in ("mulesoft", "salesforce"):
+            wb.update_row("Tech_Register", "TS_ID", r["TS_ID"], {"Vendor": "Other"})
+    wb.save()
+    return run, run.open(), e
+
+
+def test_the_sweep_names_a_vendor_the_evidence_places_and_the_register_lacks(tmp_path):
+    run, wb, e = _sweep_wb(tmp_path,
+                           "Tokara worked with the club to integrate Salesforce with Mulesoft "
+                           "and key third-party platforms.", "https://www.tokarasolutions.com/x")
+    found = PP.estate_sweep(wb)
+    vendors = {f["detail"].split(" is named")[0] for f in found}
+    assert {"MuleSoft", "Salesforce"} <= vendors and all(f["severity"] == "block" for f in found)
+    assert e in found[0]["detail"]
+
+
+def test_a_vendors_own_collateral_page_is_not_the_clients_estate(tmp_path):
+    run, wb, e = _sweep_wb(tmp_path, "MuleSoft Anypoint Platform connects any system to any "
+                           "other system in the enterprise.", "https://www.mulesoft.com/platform")
+    assert not [f for f in PP.estate_sweep(wb) if f["detail"].startswith("MuleSoft")]
+
+
+def test_a_dismissal_needs_a_reason_and_clears_the_sweep(tmp_path):
+    run, wb, e = _sweep_wb(tmp_path, "Many clubs have invested in Mulesoft for integration "
+                           "across their platforms.", "https://www.tokarasolutions.com/blog")
+    with pytest.raises(ValueError):
+        PP.dismiss_vendor(wb, vendor="MuleSoft", why="generic")
+    PP.dismiss_vendor(wb, vendor="MuleSoft",
+                      why="industry-wide blog sentence about AAA clubs in general, not this club")
+    assert not [f for f in PP.estate_sweep(run.open()) if f["detail"].startswith("MuleSoft")]
+
+
+def test_a_missing_catalogue_copy_is_a_refusal_not_a_skip(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    found = PP.estate_sweep(wb)
+    assert found and "did NOT RUN" in found[0]["detail"]
