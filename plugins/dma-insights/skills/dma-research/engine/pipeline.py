@@ -4866,6 +4866,7 @@ class Pipeline:
         already = (self.state.get("reopen") or {}).get("why") == why \
             and not str(md.get("promoted_at") or "").strip()
         if already:
+            Pipeline._widen_reopen(self)
             return
         promoted = bool(str(md.get("promoted_at") or "").strip())
         # A re-open that wrote its metadata and died before its state was
@@ -5123,6 +5124,45 @@ class Pipeline:
         self._set_md("connector_run_id", row["run_id"])
         self._set_md("connector_ingest_after_seq", row.get("run_seq"))
         return f"version B ingested as {row['run_id']} (seq {row.get('run_seq')}; A was {prev})"
+
+    def _widen_reopen(self) -> None:
+        """A fix at source AFTER the re-open moves more pages from restage to
+        reproduce (Verus, 2026-10-15: the Calendly register row was restruck
+        ABSENT → CONFIRMED while the re-opened run was still in REPORTS, so
+        techstack and insights — restaged from disk by the first re-open —
+        carried a stale register). `--reproduce` on a later run of the same
+        re-open WIDENS the recorded list; it never narrows it, and a page
+        already shipped afresh is left alone."""
+        rec = self.state.get("reopen") or {}
+        all_pages = tuple(PAGES_A) + tuple(p for g in PAGES_B for p in g)
+        want = tuple(self.opts.reproduce or ())
+        unknown = [p for p in want if p not in all_pages]
+        if unknown:
+            raise StageRefused(f"--reproduce names no page of this run: {', '.join(unknown)}")
+        new = [p for p in want if p not in (rec.get("reproduce") or [])]
+        if not new:
+            return
+        rec["reproduce"] = list(rec.get("reproduce") or []) + new
+        rec["restage"] = [p for p in (rec.get("restage") or []) if p not in new]
+        version = rec.get("version") or "B"
+        for p in new:                     # a restaged ship record of this version is void
+            prec = (self.state.get("pages") or {}).get(p)
+            if isinstance(prec, dict):
+                for key in ("versions", "shipped_mtime", "attempts_by_version"):
+                    if isinstance(prec.get(key), dict):
+                        prec[key].pop(version, None)
+                prec["status"] = "reopened"
+        self._save_state()
+        try:
+            L.append_gate(self.wb, gate="OWNER_REOPEN", scope="run", verdict="PASS",
+                          blocking=False,
+                          detail=(f"OWNER_DECISION: re-open widened — produced afresh now: "
+                                  f"{', '.join(rec['reproduce'])}; restaged from disk: "
+                                  f"{', '.join(rec['restage']) or 'none'}")[:900])
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+        self.opts.log(f"[REOPEN] widened — reproduce {', '.join(rec['reproduce'])}; "
+                      f"restage {', '.join(rec['restage']) or 'none'}")
 
     def _stage_pages_b(self) -> str:
         self._reset_counters()

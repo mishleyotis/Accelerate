@@ -213,3 +213,44 @@ def test_a_half_applied_reopen_is_completed_and_a_second_run_is_idempotent():
             assert "not promoted" in str(e)
     finally:
         P.L.append_gate = orig
+
+
+def test_a_later_run_of_the_same_reopen_widens_reproduce_never_narrows_it():
+    """Verus, 2026-10-15: TS-004 was restruck while the re-opened run was in
+    REPORTS; techstack and insights, restaged by the first re-open, had to
+    be produced afresh too. The same `--reopen` reason with a wider
+    `--reproduce` widens the record; a narrower one changes nothing."""
+    md = {"connector_run_id": "run-B", "connector_run_id_prev": "run-B", "promoted_at": ""}
+    gates, logged = [], []
+    orig = P.L.append_gate
+    P.L.append_gate = lambda wb, **kw: gates.append(kw)
+    try:
+        pages = {"techstack": {"versions": {"B": {"status": "PASS"}}, "status": "PASS",
+                               "shipped_mtime": {"B": 1.0}}}
+        d = SimpleNamespace(state={"pages": pages}, wb=object(),
+                            opts=SimpleNamespace(reopen="peer figures recorded",
+                                                 reproduce=("overview",), log=logged.append),
+                            _md=lambda: md, _set_md=lambda k, v: None, _save_state=lambda: None)
+        P.Pipeline._apply_reopen(d)
+        assert d.state["reopen"]["reproduce"] == ["overview"]
+        assert "techstack" in d.state["reopen"]["restage"]
+        d.opts.reproduce = ("overview", "techstack", "insights")
+        P.Pipeline._apply_reopen(d)
+        rec = d.state["reopen"]
+        assert rec["reproduce"] == ["overview", "techstack", "insights"]
+        assert "techstack" not in rec["restage"] and "insights" not in rec["restage"]
+        assert "B" not in pages["techstack"]["versions"] and pages["techstack"]["status"] == "reopened"
+        assert len(d.state["reopens"]) == 1 and gates[-1]["gate"] == "OWNER_REOPEN"
+        assert "widened" in gates[-1]["detail"]
+        n = len(gates)
+        d.opts.reproduce = ("overview",)           # narrower: nothing changes
+        P.Pipeline._apply_reopen(d)
+        assert rec["reproduce"] == ["overview", "techstack", "insights"] and len(gates) == n
+        d.opts.reproduce = ("overview", "nope")
+        try:
+            P.Pipeline._apply_reopen(d)
+            assert False
+        except P.StageRefused as e:
+            assert "nope" in str(e)
+    finally:
+        P.L.append_gate = orig
