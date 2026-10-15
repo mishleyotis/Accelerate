@@ -2120,6 +2120,9 @@ def _heatmap_peer_scores(body):
             for n in [_num(row.get("peer_score"))] if n is not None]
 
 
+_OWNER_DECISION = re.compile(r"OWNER_DECISION", re.I)
+
+
 def _check_peer_scores_cascade(conn, run_id, page, payload) -> list:
     """CG-44 — a peer figure the assessment holds reaches the overview strip.
 
@@ -2164,6 +2167,29 @@ def _check_peer_scores_cascade(conn, run_id, page, payload) -> list:
     out = []
     with_peer = [r for r in rows if _num(r.get("peer_median")) is not None]
     if not with_peer:
+        # Owner, 2026-10-15 (Verus Financial Partners: "Peer data is
+        # empty"): a run that NAMES a peer set and SCORES none of it served
+        # a strip of four null peer figures, each with a reason, and
+        # promoted. Identified peers below the cohort floor are scored on
+        # abbreviated public evidence (the assessment skill's protocol); an
+        # empty strip beside a named set is admissible only on the owner's
+        # recorded decision, named on the section.
+        from .peer_set import run_peer_set
+        named = run_peer_set(conn, run_id, payload, page)
+        scored = _run_peer_names(conn, run_id)      # failure-tolerant: {} without a store
+        if named and not scored and not _OWNER_DECISION.search(
+                json.dumps(payload.get("scores"), default=str)):
+            out.append(_reason(
+                "CG-44", "scores", "overview.scores.pillars[].peer_median",
+                f"the run names {len(named)} peer(s) ({', '.join(list(named.values())[:4])}) "
+                f"and not one of them carries a recorded score, so no pillar row on the "
+                f"strip carries a peer figure. Peer data is never served empty: below "
+                f"the sub-vertical cohort floor the locked peers are scored on "
+                f"abbreviated public evidence (engine.prelim peer-median --basis "
+                f"inferred, one positional score per peer) and the median and quartiles "
+                f"follow; a strip without a figure beside a named set is admissible only "
+                f"on the owner's recorded decision, stated on this section as "
+                f"OWNER_DECISION with the reason."))
         sibling = _live_submission(conn, run_id, "heatmap")
         peers = _heatmap_peer_scores(
             (sibling or {}).get("focus_areas") if isinstance(sibling, dict)

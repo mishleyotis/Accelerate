@@ -536,6 +536,32 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   prompt names the run are priced into the ledger (the IMA PRELIM relay,
   $8.85, had never been: the run is at $27.26 of $25). MEM-0637..0640.
 
+- **Peer data is never served empty** (owner, 2026-10-15, after the promoted
+  Verus Financial Partners run served null peer figures on every page: four
+  Richmond RIAs locked, the RIA cohort below its floor of three, every
+  Peer_Benchmarks row `cannot_estimate`): the 2026-10-06 rule (the peer figure
+  IS the sub-vertical cohort mean) presumes a cohort; **below the floor the
+  locked peers are scored** on abbreviated public evidence per the assessment
+  skill's Peer Scoring Protocol — one positional `Peer_Scores` figure per peer
+  with a confidence, median/p25/p75 computed from them, basis `inferred`,
+  rationale in Gate_Log `PEER_SCORE` — and `peer_row_wants_cohort` replaces
+  those figures once the sub-vertical has three assessed entities.
+  `workflows/dma-peer-scoring.js` does it (one agent per pillar plus a
+  peer-estate agent that completes `Tech_Peer_Deployments` and
+  `Platform_Peer_Adoption` for every locked peer). Enforcement: the driver
+  stops `NEEDS_PEER_SCORING` before INGEST_A and before any page agent
+  (`engine.pipeline _require_peer_figures`, handoff
+  `07_qa/peer_scoring_workflow.json`; the owner's recorded reason to proceed
+  is `--allow-unscored-peers`, logged `OWNER_DECISION_UNSCORED_PEERS`), and
+  the connector refuses CG-44 on an overview strip with no peer figure beside
+  a named peer set and no recorded peer score unless the section states
+  `OWNER_DECISION`. A fixed run is re-opened by the driver, never by hand:
+  `--reopen "<why>" --reproduce overview,heatmap,platform` (logged
+  `OWNER_REOPEN`) re-packages, re-ingests a new version, restages every other
+  page from disk and re-promotes. Tests:
+  `tests/skills/research_engine/test_peer_figures_gate_2026_10_15.py`,
+  `apps/mcp/tests/test_peer_scores_cascade.py`.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

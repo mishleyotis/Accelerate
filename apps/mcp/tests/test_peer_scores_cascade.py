@@ -294,3 +294,39 @@ def test_a_null_score_beside_a_peer_but_no_delta_is_not_recoverable(monkeypatch)
     is not arithmetic, and this gate refuses to guess it."""
     assert run(monkeypatch, strip({"pillar_id": "P1", "score": None,
                                    "peer_median": 3.1, "delta": None})) == []
+
+
+# ── a named peer set that nobody scored (Verus, 2026-10-15) ──────────────
+
+def test_a_named_peer_set_with_no_score_cannot_serve_an_empty_strip(monkeypatch):
+    """Four peers named, the RIA cohort below its floor, every pillar row
+    peer_median null with a cannot_estimate reason — and the page promoted.
+    "Peer data is empty." (owner, 2026-10-15)."""
+    import dma_mcp.peer_set as PS
+    monkeypatch.setattr(PS, "run_peer_set",
+                        lambda conn, run_id, payload, page=None:
+                        {"campbell": "Campbell Deegan Financial", "godsey": "Godsey & Gibb"})
+    monkeypatch.setattr(V2, "_run_peer_names", lambda conn, run_id: set())
+    payload = strip({"pillar_id": "P1", "score": 1.03, "peer_median": None,
+                     "peer_n": 0, "peer_basis": "cannot_estimate"},
+                    {"pillar_id": "P2", "score": 1.14, "peer_median": None,
+                     "peer_n": 0, "peer_basis": "cannot_estimate"})
+    payload["scores"]["empty_state"] = {"reason": "no assessed RIA in the cohort"}
+    out = run(monkeypatch, payload, None)
+    assert ids(out) == ["CG-44"], out
+    assert "names 2 peer(s)" in out[0]["message"]
+    # the owner's recorded decision, named on the section, is the one escape
+    payload["scores"]["empty_state"]["reason"] = (
+        "OWNER_DECISION 2026-10-15: peers identified, not scored, by the engagement owner")
+    assert run(monkeypatch, payload, None) == []
+    # a scored peer set is the normal case: no finding from this rule
+    monkeypatch.setattr(V2, "_run_peer_names", lambda conn, run_id: {"campbell"})
+    payload["scores"]["empty_state"]["reason"] = "x"
+    assert ids(run(monkeypatch, payload, None)) == []
+
+
+def test_no_named_peer_set_is_not_this_finding(monkeypatch):
+    import dma_mcp.peer_set as PS
+    monkeypatch.setattr(PS, "run_peer_set", lambda conn, run_id, payload, page=None: {})
+    out = run(monkeypatch, strip({"pillar_id": "P1", "score": 1.0, "peer_median": None}), None)
+    assert ids(out) == []

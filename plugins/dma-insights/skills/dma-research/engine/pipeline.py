@@ -316,6 +316,29 @@ class ScopeComplete(StageRefused):
     run stops SCOPE_COMPLETE (exit 0) and a later run continues the stage."""
 
 
+class NeedsPeerScoring(StageRefused):
+    """A locked peer set with no peer figure on any category.
+
+    Owner, 2026-10-15 (Verus Financial Partners): "Peer data is empty." The
+    run named four peers, the RIA cohort held no other assessed entity
+    (floor 3), every Peer_Benchmarks row read cannot_estimate, and every
+    peer field on every page — the overview strip, all twenty H4 medians,
+    the focus areas, the opportunity cells, the platform gap rows — served
+    null, promoted, with a reason on each. The owner decision of 2026-10-06
+    (the peer figure IS the cohort mean) presumed a cohort; below the floor
+    the assessment skill's own fallback applies: the locked peers are scored
+    on abbreviated public evidence (basis `inferred`, positional
+    Peer_Scores, a confidence per peer), and `peer_row_wants_cohort`
+    replaces those figures once the sub-vertical has three assessed
+    entities. Until a figure exists — or the owner records why none can
+    (`--allow-unscored-peers`) — no version is ingested and no page agent
+    is dispatched. The handoff names the workflow that scores them."""
+
+    def __init__(self, message: str, handoff: str = ""):
+        super().__init__(message)
+        self.handoff = handoff
+
+
 class NeedsConnector(StageRefused):
     """A stage cannot complete WITHOUT a connector this process cannot bind.
 
@@ -703,6 +726,18 @@ class Options:
     # the whole run. A deferred page is not shipped on A; PAGES_B produces it
     # against version B. Recorded in Gate_Log, never silent.
     defer_to_b: tuple = ()
+    #: Owner, 2026-10-15: a locked peer set with no figure on any category
+    #: stops the run NEEDS_PEER_SCORING before INGEST_A and before any page
+    #: agent. This is the owner's recorded reason to proceed without one
+    #: (logged OWNER_DECISION_UNSCORED_PEERS); never a default.
+    allow_unscored_peers: str = ""
+    #: Re-open a COMPLETE run after a fix at source (the workbook, the
+    #: reports): the reason, logged OWNER_REOPEN. PACKAGE, the ingest, the
+    #: PAGES_B group and PROMOTE run again against a new connector version;
+    #: `reproduce` names the pages produced afresh, every other page is
+    #: restaged from disk.
+    reopen: str = ""
+    reproduce: tuple = ()
     ingest_poll_s: float = 60.0
     ingest_timeout_s: float = 3600.0
     folder_root: Path | None = None
@@ -810,6 +845,134 @@ def _round_floor_usd(inv: dict, tier: dict[str, float]) -> float:
         total += (max(1, nb) * tier["collector_batch"]
                   + tier["orchestrator"] + tier["challenge"])
     return round(total, 4)
+
+
+PEER_SCORING_WORKFLOW = Path("workflows") / "dma-peer-scoring.js"
+
+
+def _peer_names_from_lock(lock: dict) -> list[str]:
+    raw = str((lock or {}).get("locked_peer_set") or "")
+    return [p.strip() for p in raw.split("|") if p.strip()]
+
+
+def peer_figures_missing(lock: dict, rows: list) -> dict | None:
+    """None when the run holds no locked peer set or at least one category
+    carries a numeric peer median; otherwise what is missing. A row whose
+    basis is a hand-recorded `table` with a median counts as a figure; a
+    `cannot_estimate` or blank row does not."""
+    peers = _peer_names_from_lock(lock)
+    if not peers:
+        return None
+    cats = [str(r.get("Category_ID") or "").strip() for r in (rows or [])
+            if str(r.get("Category_ID") or "").strip()]
+    figured = []
+    for r in rows or []:
+        v = r.get("Peer_Median")
+        try:
+            if v not in (None, "") and float(v) == float(v):
+                figured.append(str(r.get("Category_ID") or "").strip())
+        except (TypeError, ValueError):
+            continue
+    if figured:
+        return None
+    bases = {str(r.get("Peer_Basis") or "").split(":")[0].strip().lower() or "blank"
+             for r in rows or []}
+    return {"n_peers": len(peers), "peers": peers, "n_categories": len(cats),
+            "reason": "every row is " + ", ".join(sorted(bases)) if bases
+            else "the Peer_Benchmarks grid is empty"}
+
+
+def peer_scoring_handoff(wb, run) -> dict:
+    """Write <qa>/peer_scoring_workflow.json: ONE invocation of the peer-
+    scoring workflow for this run — the locked peers in positional order,
+    the run's categories by pillar, and the evidence rows already registered
+    that name a peer (so a scorer reuses them before searching)."""
+    lock = wb.handoff_lock()
+    peers = _peer_names_from_lock(lock)
+    md = wb.metadata()
+    cats: dict[str, list] = {}
+    for r in wb.rows("Peer_Benchmarks"):
+        cid = str(r.get("Category_ID") or "").strip().upper()
+        if not cid:
+            continue
+        pillar = cid[:2]
+        cats.setdefault(pillar, []).append(
+            {"id": cid, "name": str(r.get("Category_Name") or "").strip()})
+    if not cats:
+        for cid in sorted({c.split(".")[0] for c in wb.selected_subcaps()}):
+            cats.setdefault(cid[:2], []).append({"id": cid, "name": ""})
+    keys = []
+    for p in peers:
+        m = re.match(r"\W*([A-Za-z0-9]+(?:\s+[A-Za-z0-9&]+)?)", p)
+        keys.append((p, (m.group(1) if m else p).lower()))
+    known: dict[str, list] = {p: [] for p in peers}
+    try:
+        for r in wb.rows("Evidence_Detail"):
+            text = (str(r.get("Source_Name") or "") + " " + str(r.get("Excerpt") or "")).lower()
+            for p, k in keys:
+                if k and k in text:
+                    known[p].append(str(r.get("E_ID") or ""))
+    except Exception:                                # noqa: BLE001
+        pass
+    refs_dir = PLUGIN / "skills" / "dma-assessment" / "references"
+    inv = {"run": run.run_id, "root": str(run.root),
+           "eng": str(PLUGIN / "skills" / "dma-research"),
+           "entity": str(md.get("entity_name") or ""),
+           "sub_vertical": str(md.get("sub_vertical") or ""),
+           "today": _utcnow()[:10], "peers": peers,
+           "known_evidence": "; ".join(f"{p.split('(')[0].strip()}: "
+                                       + (", ".join(v[:12]) or "none")
+                                       for p, v in known.items()),
+           "refs": {"peer_benchmarking": str(refs_dir / "peer_benchmarking.md"),
+                    "scoring_methodology": str(refs_dir / "scoring_methodology.md"),
+                    "capability_criteria": str(refs_dir / "capability_criteria.md")},
+           "pillars": [{"pillar": pl, "categories": cs} for pl, cs in sorted(cats.items())]}
+    doc = {"workflow": str(PLUGIN / PEER_SCORING_WORKFLOW), "invocations": [inv],
+           "then": f"python3 -m engine.pipeline run --run {run.run_id} --root {run.root}",
+           "how": "start the invocation — Workflow({scriptPath: <workflow>, args: "
+                  "<invocation>}) — wait for it, then run `then`: the driver refills "
+                  "the rollups and continues. No Workflow tool? Run the five lanes as "
+                  "in-session agents with the same prompts (workflows/render-prompts)."}
+    f = run.qa_dir / "peer_scoring_workflow.json"
+    f.write_text(json.dumps(doc, indent=1, default=str))
+    return {"file": str(f), "workflow": doc["workflow"], "invocations": [inv]}
+
+
+def apply_reopen(state: dict, md: dict, *, reproduce: tuple, why: str, now: str) -> dict:
+    """Pure: the state changes a `--reopen` makes. Every page of the serving
+    version loses its ship record (so it ships again), the package record is
+    cleared (so PACKAGE runs again), the handoff guard for the pages stage is
+    cleared, and `reopen` records which pages are produced afresh and which
+    are restaged from disk. The connector-run metadata change (prev := cur,
+    promoted_at := blank) is the caller's: it lives in the workbook."""
+    version = "B"
+    all_pages = tuple(PAGES_A) + tuple(p for g in PAGES_B for p in g)
+    repro = tuple(p for p in reproduce if p in all_pages)   # the caller's order
+    restage = tuple(p for p in all_pages if p not in repro)
+    for p, rec in (state.get("pages") or {}).items():
+        if not isinstance(rec, dict):
+            continue
+        for key in ("versions", "shipped_mtime", "attempts_by_version"):
+            if isinstance(rec.get(key), dict):
+                rec[key].pop(version, None)
+        rec["n_history"] = [h for h in (rec.get("n_history") or [])
+                            if not (h and h[0] == version)]
+        rec["status"] = "reopened"
+        rec["reasons"] = []
+        rec["n_reasons"] = None
+    state["package"] = {}
+    guard = state.get("handoff_guard")
+    if isinstance(guard, dict):
+        for k in [k for k in guard if str(k).startswith(f"PAGES_{version}")]:
+            guard.pop(k, None)
+    for key in ("needs_peer_scoring", "needs_connector"):
+        state.pop(key, None)
+    rec = {"at": now, "why": why, "version": version, "reproduce": list(repro),
+           "restage": list(restage), "previous_connector_run": str(md.get("connector_run_id") or ""),
+           "previous_promoted_at": str(md.get("promoted_at") or "")}
+    state.setdefault("reopens", []).append(rec)
+    state["reopen"] = rec
+    return rec
 
 
 class Pipeline:
@@ -1734,6 +1897,7 @@ class Pipeline:
             self.opts.log(f"[PREFLIGHT] BLOCKED — {blocked['reason'][:160]}")
             return blocked
         self._set_md("pipeline_version", PIPELINE_VERSION)
+        self._apply_reopen()
         self.state["invocations"].append({"at": _utcnow(), "until": self.opts.until})
         self._save_state()
         outcome = {"outcome": "COMPLETE", "stage": None, "stages_run": [],
@@ -1947,6 +2111,18 @@ class Pipeline:
                     self.opts.log(f"[{st}] SCOPE COMPLETE — {msg[:300]}")
                     outcome.update(outcome="SCOPE_COMPLETE", stage=st, reason=msg[:800],
                                    resume=self.plan()["command"])
+                    return outcome
+                if isinstance(e, NeedsPeerScoring):
+                    self._record(st, "FAIL", msg[:600], t0)
+                    self.state["needs_peer_scoring"] = {
+                        "stage": st, "handoff": e.handoff, "reason": msg[:800],
+                        "at": _utcnow()}
+                    self._save_state()
+                    self.opts.log(f"[{st}] NEEDS_PEER_SCORING — {msg[:300]}")
+                    outcome.update(outcome="NEEDS_PEER_SCORING", stage=st, reason=msg[:800],
+                                   handoff=e.handoff,
+                                   resume=("start the peer-scoring workflow the handoff "
+                                           "names, then: " + self.plan()["command"]))
                     return outcome
                 if isinstance(e, NeedsConnector):
                     self._record(st, "FAIL", msg[:600], t0)
@@ -3834,6 +4010,8 @@ class Pipeline:
     def _stage_ingest_a(self) -> str:
         from . import assemble
         self._reset_counters()
+        self._cohort_peers()
+        self._require_peer_figures("INGEST_A")
         ck = assemble.checkpoint(self.run, self.opts.folder_root, push=self.opts.push,
                                  stage_reached="SCORING_PASS")
         self.state["connector"]["checkpoint_a"] = {"folder": ck.get("folder"),
@@ -4619,6 +4797,101 @@ class Pipeline:
                             for p in todo))
         return shipped
 
+    def _require_peer_figures(self, stage: str) -> None:
+        """A locked peer set must carry a figure on at least one category
+        before a version is ingested or a page agent runs (NeedsPeerScoring).
+        The owner's recorded reason (`--allow-unscored-peers`) is the one
+        escape, logged once as OWNER_DECISION_UNSCORED_PEERS."""
+        from . import prelim
+        try:
+            lock = self.wb.handoff_lock()
+            rows = self.wb.rows("Peer_Benchmarks")
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (peer figures not checked: {str(e)[:120]})")
+            return
+        missing = peer_figures_missing(lock, rows)
+        if not missing:
+            return
+        why = str(self.opts.allow_unscored_peers or "").strip()
+        if why:
+            already = any((w.get("unscored_peers") or "") == why
+                          for w in (self.state.get("waivers") or []))
+            if not already:
+                self.state.setdefault("waivers", []).append(
+                    {"at": _utcnow(), "stage": stage, "unscored_peers": why})
+                self._save_state()
+                try:
+                    L.append_gate(self.wb, gate="OWNER_DECISION_UNSCORED_PEERS", scope=stage,
+                                  verdict="FAIL", blocking=False,
+                                  detail=(f"OWNER_DECISION: {missing['n_peers']} locked "
+                                          f"peer(s) carry no peer figure on any of "
+                                          f"{missing['n_categories']} categories and the run "
+                                          f"proceeds on the owner's word: {why}")[:900])
+                except Exception as e:               # noqa: BLE001
+                    self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+            return
+        handoff = peer_scoring_handoff(self.wb, self.run)
+        try:
+            L.append_gate(self.wb, gate="PEER_FIGURES", scope=stage, verdict="FAIL",
+                          blocking=True,
+                          detail=(f"{missing['n_peers']} locked peer(s) and no peer figure on "
+                                  f"any of {missing['n_categories']} categories "
+                                  f"({missing['reason']}); the locked peers are scored on "
+                                  f"abbreviated public evidence before any page is produced "
+                                  f"— handoff {handoff['file']}")[:900])
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+        raise NeedsPeerScoring(
+            f"{stage}: the run locks {missing['n_peers']} peer(s) and carries no peer "
+            f"figure on any of {missing['n_categories']} categories "
+            f"({missing['reason']}). Peer data is never served empty: start the "
+            f"peer-scoring workflow {handoff['workflow']} with the invocation in "
+            f"{handoff['file']} (one agent per pillar scores every locked peer on "
+            f"abbreviated public evidence, basis inferred; one agent completes "
+            f"Tech_Peer_Deployments and Platform_Peer_Adoption), then run again. The "
+            f"owner's recorded reason to proceed without a figure is "
+            f"--allow-unscored-peers '<why>'.",
+            handoff=handoff["file"])
+
+    def _apply_reopen(self) -> None:
+        """`--reopen WHY` on a run whose PROMOTE is done: the fix at source is
+        already in the workbook or the reports; PACKAGE, the ingest, PAGES_B
+        and PROMOTE run again against a new connector version. Idempotent:
+        a run already re-opened for this reason, and not yet promoted again,
+        is left as it is."""
+        why = str(self.opts.reopen or "").strip()
+        if not why:
+            return
+        md = self._md()
+        already = (self.state.get("reopen") or {}).get("why") == why \
+            and not str(md.get("promoted_at") or "").strip()
+        if already:
+            return
+        if not str(md.get("promoted_at") or "").strip():
+            raise StageRefused("--reopen names a run that is not promoted: there is "
+                               "nothing to re-open; run the driver without the flag")
+        reproduce = tuple(self.opts.reproduce or ())
+        unknown = [p for p in reproduce if p not in PAGES_A + tuple(q for g in PAGES_B for q in g)]
+        if unknown:
+            raise StageRefused(f"--reproduce names no page of this run: {', '.join(unknown)}")
+        rec = apply_reopen(self.state, dict(md), reproduce=reproduce, why=why, now=_utcnow())
+        self._set_md("promoted_at", "")
+        self._set_md("connector_run_id_prev", str(md.get("connector_run_id") or ""))
+        self._set_md("reopened_at", rec["at"])
+        self._save_state()
+        try:
+            L.append_gate(self.wb, gate="OWNER_REOPEN", scope="run", verdict="PASS",
+                          blocking=False,
+                          detail=(f"OWNER_DECISION: run re-opened after a fix at source — "
+                                  f"{why}; version {rec['version']} is re-packaged, "
+                                  f"re-ingested and re-promoted; produced afresh: "
+                                  f"{', '.join(rec['reproduce']) or 'none'}; restaged from "
+                                  f"disk: {', '.join(rec['restage'])}")[:900])
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (gate log not written: {str(e)[:120]})")
+        self.opts.log(f"[REOPEN] {why[:160]} — reproduce {', '.join(rec['reproduce']) or 'none'}; "
+                      f"restage {', '.join(rec['restage'])}")
+
     def _version_ingested_at(self, version: str) -> float | None:
         """Epoch seconds at which this version's connector run was recorded
         (`state.connector.ingest_a|ingest_b.at`), or None when unknown."""
@@ -4649,6 +4922,9 @@ class Pipeline:
         than the version's ingest are a previous version's content: they are
         not shipped, and the page is handed as a fresh production. With no
         ingest record the files are taken as this version's."""
+        restage = ((self.state.get("reopen") or {}).get("restage") or ())
+        if page in restage:
+            return True              # re-opened run: restaged from disk by design
         at = self._version_ingested_at(version)
         if at is None:
             return True
@@ -4780,6 +5056,7 @@ class Pipeline:
         `_ship_pages` before any lane, which stops the driver with
         NEEDS_CONNECTOR rather than failing the stage."""
         self._cohort_peers()
+        self._require_peer_figures("PAGES")
 
     def _deferred(self) -> tuple:
         """PAGES_A pages moved to version B — by this invocation's flag or a
@@ -4843,6 +5120,11 @@ class Pipeline:
     def _stage_pages_b(self) -> str:
         self._reset_counters()
         deferred = self._deferred()
+        # A re-opened run's `reproduce` pages of version A go through the
+        # produce path (with the deferred pages, last) instead of the restage.
+        reproduce = tuple((self.state.get("reopen") or {}).get("reproduce") or ())
+        deferred = tuple(deferred) + tuple(p for p in PAGES_A
+                                           if p in reproduce and p not in deferred)
         self._pages_prepare(tuple(p for g in PAGES_B for p in g) + deferred)
         restaged = self._ship_pages(tuple(p for p in PAGES_A if p not in deferred),
                                     "B", produce=False)   # from disk, no lanes
@@ -5116,7 +5398,12 @@ def _build_opts(a) -> Options:
                    sg_v4_budget=int(getattr(a, "sg_v4_budget", None)
                                     if getattr(a, "sg_v4_budget", None) is not None
                                     else Options.sg_v4_budget),
-                   defer_to_b=tuple(getattr(a, "defer_to_b", None) or ()))
+                   defer_to_b=tuple(getattr(a, "defer_to_b", None) or ()),
+                   allow_unscored_peers=str(getattr(a, "allow_unscored_peers", "") or ""),
+                   reopen=str(getattr(a, "reopen", "") or ""),
+                   reproduce=tuple(p.strip() for p in
+                                   str(getattr(a, "reproduce", "") or "").split(",")
+                                   if p.strip()))
 
 
 def _research_mode(a) -> str:
@@ -5167,6 +5454,17 @@ def main(argv=None) -> int:
                         "promotes (invariant 12); this is the driver's own revision "
                         "policy, raised by a person for a page whose misses are "
                         "ungroundable by construction (stated absences)")
+    r.add_argument("--allow-unscored-peers", default=None, metavar="WHY",
+                   help="the owner's recorded reason to serve a locked peer set with "
+                        "no peer figure (otherwise the run stops NEEDS_PEER_SCORING "
+                        "before INGEST_A and before any page agent)")
+    r.add_argument("--reopen", default=None, metavar="WHY",
+                   help="re-open a COMPLETE run after a fix at source (logged "
+                        "OWNER_REOPEN): PACKAGE, the ingest, PAGES_B and PROMOTE run "
+                        "again against a new connector version")
+    r.add_argument("--reproduce", default=None, metavar="PAGES",
+                   help="with --reopen: comma-separated pages produced afresh by their "
+                        "per-surface producers; every other page is restaged from disk")
     r.add_argument("--defer-to-b", action="append", choices=PAGES_A, default=[],
                    help="move a version-A page to version B (an owner decision, "
                         "logged): for a page whose A verdict rests on evidence "
