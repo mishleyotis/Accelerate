@@ -331,7 +331,15 @@ def _rule8_absence_declared(wb, expect_scores: bool) -> list[Failure]:
             flag = str(ws.cell(row=r, column=ai).value or "").strip().upper() \
                 if ws.max_column >= ai else ""
             eids = str(ws.cell(row=r, column=fi).value or "").strip()
-            if flag in ("YES", "TRUE", "1") and sub not in declared:
+            # On an evidenced row the flag labels a claim that documents an
+            # absence (ledger.synthesise requires it there, and
+            # declare_absence refuses an evidenced cell), so only an EMPTY
+            # flagged row can be a forged declaration: the same reading as
+            # ledger.is_declared_absent.
+            evidenced = any(e.strip() and e.strip() != C.NO_EVIDENCE
+                            for e in re.split(r"[;,\s]+", eids))
+            if (flag in ("YES", "TRUE", "1") and not evidenced
+                    and sub not in declared):
                 forged.append(sub)
             if expect_scores and eids == C.NO_EVIDENCE and sub not in declared:
                 undeclared.append(sub)

@@ -54,6 +54,20 @@ def test_the_absence_flag_has_one_writer(tmp_path):
     assert cell not in wl["closed"] and cell not in wl["declared_absent"]
 
 
+def test_rule8_reads_the_flag_on_an_evidenced_row_as_a_claim_label(tmp_path):
+    """Verus 2026-10-15: a synthesis whose claim documents an absence must
+    carry Absence_Claimed (ledger.synthesise refuses it otherwise), and
+    declare_absence refuses an evidenced cell, so rule 8 refused HANDOFF on
+    cells no command could repair. Only an empty flagged row is forged."""
+    run = new_run(tmp_path, n=4)
+    wb = run.open()
+    cell = wb.selected_subcaps()[0]
+    wb.set_scoring(cell, {"Evidence_IDs": "E-001", "Absence_Claimed": "YES",
+                          "Proxy_Log": "searched the regulator and trade press"})
+    fails = validator.validate(wb.path, run_id="R-TEST-1")
+    assert not any(f["rule"] == 8 and cell in f["detail"] for f in fails), fails
+
+
 def test_a_notebook_absence_stages_the_ladder_and_leaves_the_declaration_to_the_cli(tmp_path):
     run = new_run(tmp_path, n=4)
     wb = run.open()
