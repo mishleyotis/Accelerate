@@ -963,7 +963,10 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
         "Peer_P75": hi if hi is not None else "",
         "Peer_Basis": f"{basis}: {_clean(source)}",
         "Peer_Scores": _clean(peer_scores),
-        **({"Peer_N": int(n)} if n is not None else {}),
+        # the benchmark's n: the cohort size the caller states, or a
+        # published table's own row count
+        **({"Peer_N": int(n)} if n is not None
+           else {"Peer_N": len(given)} if given else {}),
         "As_Of": _utcnow()[:10]})
     return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
 

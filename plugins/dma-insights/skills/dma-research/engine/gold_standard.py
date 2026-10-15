@@ -283,6 +283,13 @@ def workbook_findings(path) -> list[Finding]:
                 if (v is None or not _norm(v)):
                     if hdr[j] in optional or row_absent:
                         continue
+                    # Peer_N is the BENCHMARK's n: blank exactly while the
+                    # row carries no benchmark figure (owner, 2026-10-15 —
+                    # the selected set's size is Handoff_Lock.peer_n).
+                    if (sh == "Peer_Benchmarks" and hdr[j] == "Peer_N"
+                            and "Peer_Median" in hdr
+                            and not _norm(r[list(hdr).index("Peer_Median")])):
+                        continue
                     empt += 1
                 elif _is_hedge(v):
                     hedged += 1
