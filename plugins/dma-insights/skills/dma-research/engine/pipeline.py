@@ -4847,12 +4847,60 @@ class Pipeline:
                                f"{', '.join(restaged + shipped) or 'none'}")
         return f"restaged {', '.join(restaged)}; shipped {', '.join(shipped)} to version B"
 
+    def _route_retained_refusal(self, res: dict, version: str) -> list[str]:
+        """A promote refused because a RETAINED page fails a gate that is
+        current now (`retained_pages_fail_current_gates`) is a page verdict,
+        not a dead end: the page passed earlier on this version and the
+        engine's inputs moved under it (Verus Financial Partners, 2026-10-15:
+        platform passed, then the register and heatmap shipped, and promote
+        refused CG-30 on a fit score the engine now computes differently).
+        The refusal's reasons are recorded as that page's current verdict —
+        state and `verdicts_<version>.json`, the full list, not the 400 bytes
+        the log keeps — so the next run finds the page not passing and the
+        page workflow hands its repair with the reasons. Returns the pages
+        routed."""
+        if str(res.get("error") or "") != "retained_pages_fail_current_gates":
+            return []
+        reasons = res.get("reasons") if isinstance(res.get("reasons"), dict) else {}
+        pages = [p for p in (res.get("pages") or []) if isinstance(p, str)]
+        routed = []
+        vf = self.run.qa_dir / f"verdicts_{version}.json"
+        try:
+            verdicts = json.loads(vf.read_text()) if vf.is_file() else {}
+        except ValueError:
+            verdicts = {}
+        for p in pages:
+            rs = list(reasons.get(p) or [])
+            rec = self.state.setdefault("pages", {}).setdefault(p, {})
+            rec.update({"version": version, "status": "fail",
+                        "reasons": rs[:12], "n_reasons": len(rs),
+                        "n_history": ((rec.get("n_history") or [])
+                                      + [[version, "fail", len(rs), 0, "promote"]])[-8:],
+                        "at": _utcnow()})
+            rec.setdefault("versions", {})[version] = "fail"
+            verdicts[p] = rs
+            routed.append(p)
+        if routed:
+            try:
+                vf.write_text(json.dumps(verdicts, indent=2, default=str))
+            except OSError as e:
+                self.opts.log(f"  (verdicts not written: {str(e)[:120]})")
+            self._save_state()
+            self.opts.log(f"  [PROMOTE] retained page(s) failing current gates routed back "
+                          f"to PAGES_{version} as repairs: {', '.join(routed)}")
+        return routed
+
     def _stage_promote(self) -> str:
         self._reset_counters()
         connector_run = str(self._md().get("connector_run_id") or "")
         res = self.opts.shipper.promote(connector_run)
         if not res.get("promoted"):
-            raise StageRefused(f"promote_run refused: {json.dumps(res)[:400]}")
+            routed = self._route_retained_refusal(res, "B")
+            raise StageRefused(
+                f"promote_run refused: {json.dumps(res)[:400]}"
+                + (f" — {', '.join(routed)} recorded as failing on version B with the "
+                   f"full reasons in verdicts_B.json; run again and the page workflow "
+                   f"hands the repair" if routed else ""))
         when = res.get("promoted_at") or _utcnow()
         self._set_md("promoted_at", when)
         self.state["connector"]["promoted"] = {"run_id": connector_run, "at": when,

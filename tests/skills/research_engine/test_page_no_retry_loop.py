@@ -118,3 +118,34 @@ def test_a_deferred_page_with_files_older_than_the_ingest_is_produced_not_shippe
     none._version_ingested_at = lambda version: P.Pipeline._version_ingested_at(none, version)
     assert P.Pipeline._produced_for(none, "techstack", "B")
     assert P.Pipeline._version_ingested_at(none, "B") is None
+
+
+def test_a_promote_refused_on_a_retained_page_routes_that_page_back_as_a_repair(tmp_path):
+    """Verus (2026-10-15): platform passed on B, the register and heatmap then
+    shipped, and promote_run refused CG-30 on a fit score the engine now
+    computes differently. The stage just failed, with the reasons cut at 400
+    bytes and nothing routing the page back into the page workflow."""
+    import json
+    qa = tmp_path / "07_qa"
+    qa.mkdir()
+    (qa / "verdicts_B.json").write_text(json.dumps({"overview": []}))
+    logged = []
+    d = SimpleNamespace(state={"pages": {"platform": {"version": "B", "status": "pass",
+                                                       "versions": {"B": "pass"}}}},
+                        run=SimpleNamespace(qa_dir=qa),
+                        opts=SimpleNamespace(log=logged.append), _save_state=lambda: None)
+    reason = {"gate_id": "CG-30", "section": "platform_story",
+              "path": "platform.platform_story.platforms[1].fit_score",
+              "message": "the card says 43.8 and the engine computes 44.1", "severity": "block"}
+    res = {"promoted": False, "error": "retained_pages_fail_current_gates",
+           "pages": ["platform"], "reasons": {"platform": [reason]}}
+    assert P.Pipeline._route_retained_refusal(d, res, "B") == ["platform"]
+    rec = d.state["pages"]["platform"]
+    assert rec["versions"]["B"] == "fail" and rec["status"] == "fail" and rec["n_reasons"] == 1
+    assert rec["n_history"][-1][:2] == ["B", "fail"]
+    saved = json.loads((qa / "verdicts_B.json").read_text())
+    assert saved["platform"] == [reason], "the full reasons reach the verdict file"
+    assert saved["overview"] == [], "other pages' verdicts are kept"
+    # any other refusal is not a page verdict
+    other = {"promoted": False, "error": "lease_held", "pages": [], "reasons": {}}
+    assert P.Pipeline._route_retained_refusal(d, other, "B") == []
