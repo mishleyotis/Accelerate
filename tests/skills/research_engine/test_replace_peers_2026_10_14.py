@@ -139,3 +139,22 @@ def test_adoption_rows_of_a_ruled_out_peer_are_retired(tmp_path):
     detail = next(r["Detail"] for r in run.open().rows("Gate_Log")
                   if r.get("Gate") == "PEER_SET_REPLACED")
     assert "1 Platform_Peer_Adoption row(s) retired" in detail
+
+
+def test_a_recorded_cohort_answer_survives_a_replacement(tmp_path):
+    """Verus (2026-10-15): every category recorded `cannot_estimate` from
+    get_cohort_benchmarks; replace-peers wrote the set's rule over it, and
+    the report validators read that as a cohort fill that never ran."""
+    run = _locked(tmp_path)
+    wb = run.open()
+    cid = next(r["Category_ID"] for r in wb.rows("Peer_Benchmarks") if r.get("Category_ID"))
+    PR.peer_median(wb, category=cid, median=None, basis="cannot_estimate",
+                   source="get_cohort_benchmarks: 0 assessed entities, floor 3")
+    _replace(run.open())
+    rows = {r["Category_ID"]: r for r in run.open().rows("Peer_Benchmarks")
+            if r.get("Category_ID")}
+    assert rows[cid]["Peer_Basis"].startswith("cannot_estimate: get_cohort_benchmarks")
+    assert "Club" not in rows[cid]["Peer_Names"]
+    # any category without a recorded answer still takes the new rule
+    assert all(r["Peer_Basis"] == f"inferred: {NEW_RULE}"
+               for c, r in rows.items() if c != cid)

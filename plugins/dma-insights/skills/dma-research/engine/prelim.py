@@ -867,9 +867,16 @@ def replace_peers(wb: RunWorkbook, peers_: list[str], *, rule: str, owner: str,
         for r in rows:
             cid = _clean(r.get("Category_ID"))
             if cid:
+                # A recorded cohort answer (`cannot_estimate: get_cohort_
+                # benchmarks …`) is the peer FIGURE's basis, not the set's
+                # rule: overwriting it read as "the cohort fill never ran"
+                # to every report validator (Verus, 2026-10-15).
+                kept_answer = _clean(r.get("Peer_Basis")).lower().startswith("cannot_estimate")
                 wb.update_row("Peer_Benchmarks", "Category_ID", cid,
                               {"Peer_Names": names, "Peer_N": len(wanted),
-                               "Peer_Basis": f"{basis}: {_clean(rule)}"}, save=False)
+                               **({} if kept_answer else
+                                  {"Peer_Basis": f"{basis}: {_clean(rule)}"})},
+                              save=False)
         retired = sum(wb.delete_rows_where("Tech_Peer_Deployments", {"Peer": p}, save=False)
                       for p in stale)
         adoption_retired = sum(wb.delete_rows_where("Platform_Peer_Adoption", {"Peer": p},
