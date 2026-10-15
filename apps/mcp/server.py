@@ -166,8 +166,10 @@ def get_cohort_benchmarks(sub_vertical: str, exclude_display_id: str = "",
                           exclude_entity_name: str = "",
                           subcap_ids: list | None = None) -> dict:
     """The sub-vertical cohort's peer score per category: the MEAN of every
-    other assessed entity's category score (its active, promoted run), with
-    n, median and quartiles. Below three entities a category comes back with
+    other assessed entity's category score (its active promoted run, else its
+    latest scored run — an assessed package is assessed whether or not its
+    pages were produced), with n, median and quartiles. The sub-vertical is
+    resolved through the alias table ("Insurance Brokers" is IB). Below three entities a category comes back with
     mean null and the reason — record it as cannot_estimate, never impute.
     Aggregates only; no entity is named. Pass the asking client's display id
     or legal name so it is not counted as its own peer.

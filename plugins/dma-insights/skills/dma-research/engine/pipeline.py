@@ -4725,19 +4725,28 @@ class Pipeline:
         self._pages_prepare(tuple(p for g in PAGES_B for p in g) + deferred)
         restaged = self._ship_pages(tuple(p for p in PAGES_A if p not in deferred),
                                     "B", produce=False)   # from disk, no lanes
-        # A DEFERRED page ships LAST, and its refusal is held until every
+        # A DEFERRED page ships FIRST, and its refusal is held until every
         # other page has had its turn (R-INTERAC-20261010: techstack, deferred
         # for a server-side fix, halted PAGES_B before overview, insights,
         # platform or context were attempted).
+        #
+        # First, not last: techstack is the register insights.landscape, the
+        # overview's opportunity tiles and the platform page all read (the
+        # fit engine reads the latest staged techstack submission). Shipped
+        # after them, it reached AAA Western and Central New York's first
+        # promotion (2026-10-15) with the landscape saying "techstack page not
+        # yet shipped" and the opportunity card "the technology register is
+        # not promoted" — on a rerun the previous promotion hides that; on a
+        # first run nothing does. promote_checks CG-ORDER refuses it now.
         shipped = []
         held = None
-        for group in PAGES_B:
-            shipped += self._ship_pages(group, "B", produce=True)
         if deferred:
             try:
                 shipped += self._ship_pages(deferred, "B", produce=True)
             except StageRefused as e:
                 held = e
+        for group in PAGES_B:
+            shipped += self._ship_pages(group, "B", produce=True)
         if held:
             raise StageRefused(f"{held} — every other page shipped to version B: "
                                f"{', '.join(restaged + shipped) or 'none'}")

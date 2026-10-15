@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- **First promotions read incomplete: no peers, two platforms, stale pages**
+  (`docs/AAA-WCNY-FIRST-PROMOTION-2026-10-15.md`). AAA Western and Central
+  New York promoted with every peer median null, 2 opportunity tiles and 4
+  of 6 recommended platforms unranked. Three causes, each hidden on a rerun
+  by the previous promotion:
+  - **The cohort could not see assessed peers** (`apps/mcp/dma_mcp/cohort.py`):
+    it read promoted runs only and matched `sub_vertical = 'IB'` literally,
+    so six scored brokerages ("Insurance Brokers", "Insurance Brokerages
+    (IB)", NULL; all unpromoted) were invisible and IB read 2 against a
+    floor of 3. One run per entity now — promoted first, else the latest
+    scored — sub-vertical resolved through the alias table (NULL inferred
+    from one sub-vertical's variant cells), withdrawn runs excluded.
+  - **The evidence floor was judged on arbitrary cells**
+    (`packages/shared/platform_fit.py`): with every gap tied, the five
+    "driving" cells were the alphabetically-first unevidenced ones (the
+    neutral prior outranks a T3/T4 citation), so six of eight candidates
+    read strength 0.0. `judged_cells` orders by claim, then evidence; the fit
+    score does not move.
+  - **Pages staged before what they read**: a deferred techstack now ships
+    FIRST on version B (`pipeline._stage_pages_b`), and promote refuses
+    **CG-ORDER** — "register not promoted / page not yet shipped / rows not
+    yet registered" text, and a heatmap evidence index missing ids other
+    pages cite.
 - **A locked peer set the owner ruled out had no path but withdrawal**
   (`engine/prelim.py`): at AAA Western and Central New York (2026-10-14) the
   PRELIM conductor locked five other AAA clubs and the owner ruled "No AAA
