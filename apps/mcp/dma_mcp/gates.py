@@ -747,6 +747,27 @@ GATES = {
                "Values and counts are assessment results; a missing section "
                "or key is a production gap.",
                "block"),
+    # AAA WCNY, 2026-10-15 (owner: "deterministic, not probabilistic
+    # controls"; the narrow exception to decision B's warn-only list length).
+    "CG-COMPLETE": ("Peers and platform opportunities the run holds are served",
+                    None,
+                    "At promote, over the staged pages: (1) where the package's "
+                    "peer table has three or more peer scores for a category, "
+                    "no peer_median for that category, or for its pillar, is "
+                    "null on overview.scores or heatmap.workbook_scores; (2) "
+                    "the fit engine scores EVERY L3 platform in the run's "
+                    "catalogue, and overview.opportunity carries min(5, READY) "
+                    "tiles; (3) the tiles are the top platform cards by card "
+                    "rank, in that order; (4) platform.platform_story carries a "
+                    "card for each of the catalogue's top min(5, READY) READY "
+                    "platforms.",
+                    "AAA Western and Central New York's first promotion served "
+                    "'no peer benchmark' on every page while its workbook held "
+                    "a peer table, and two opportunity tiles while the "
+                    "catalogue held 22 READY platforms: candidates were seeded "
+                    "from the report's eight, and CG-PAR only warns on list "
+                    "length. Every earlier control was a producer instruction.",
+                    "block"),
     "CG-STALE": ("A promoted page does not say its own run is withdrawn",
                  None,
                  "At promote, no section's empty_state or narrative_thread "

@@ -543,6 +543,28 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   rubric level is not a fifth band; never ask to rewrite the rubric into bands
   (`agents/reports/report-validator.md` says the same).
 
+- **First-promotion completeness is deterministic, and blocks** (user,
+  2026-10-15, after AAA WCNY promoted "no peer benchmark" and two opportunity
+  tiles: "deterministic, not probabilistic controls"; a narrow exception to
+  the 2026-10-04 decision that list length only warns). One pure check,
+  `engine/page_completeness.py`, runs on the section files before a page
+  ships and on the STAGED payload before `promote_run` (`PROMOTE_AUDIT`);
+  the connector enforces the same rules at promote as **CG-COMPLETE**
+  (`promote_checks.completeness`), so a hand-driven promote is held too.
+  Rules: a category the peer table scores with ≥3 peers never serves a null
+  `peer_median` (overview pillars, heatmap pillars and categories); the fit
+  engine scores the WHOLE L3 catalogue and the overview serves
+  min(5, READY) tiles that are the top platform cards by card rank, in
+  order, with the card's figures (CG-31); the platform page carries a card
+  for each of the catalogue's top min(5, READY). Peers fail closed at
+  SCORING (`PEER_GATE`, also in SCORING's done predicate): a thin cohort is
+  answered by ≥3 locked peers scored by the protocol, each score file
+  checked (every category, 1–5) or rejected. A missing, failed or stale
+  shortlist, an unreadable staged section or a fit-engine error is a
+  refusal, never a skipped check. Tests:
+  `test_deterministic_completeness_2026_10_15.py`,
+  `apps/mcp/tests/test_promote_completeness.py`.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

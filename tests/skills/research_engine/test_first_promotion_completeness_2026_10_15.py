@@ -99,8 +99,15 @@ def test_an_overview_with_too_few_tiles_is_failed_before_submission(tmp_path):
     (sd / "overview.opportunity.json").write_text(json.dumps({"tiles": [{"platform": "Platform 0"}] * 2}))
     reasons = pl._completeness("overview")
     assert any("CG-COMPLETE overview.opportunity.tiles: 2 tile(s)" in r for r in reasons)
+    # five tiles are not enough: they must be the top five platform cards,
+    # in card-rank order, with the card's figures (deterministic)
     (sd / "overview.opportunity.json").write_text(json.dumps({"tiles": [{"platform": "x"}] * 5}))
-    assert not [r for r in pl._completeness("overview") if "tiles" in r]
+    assert [r for r in pl._completeness("overview") if "tiles" in r]
+    cards = [{"platform": f"Platform {i}", "rank": i + 1, "fit_score": 70 - i} for i in range(5)]
+    (sd / "platform.platform_story.json").write_text(json.dumps({"platforms": cards}))
+    (sd / "overview.opportunity.json").write_text(json.dumps({"tiles": [
+        {"platform": c["platform"], "rank": c["rank"], "composite": c["fit_score"]} for c in cards]}))
+    assert not [r for r in pl._completeness("overview") if "tiles" in r or "CG-31" in r]
 
 
 # ── the owed section goes to its OWNER, never to the assembler alone ──────
@@ -143,7 +150,7 @@ def test_fragments_dispatch_only_the_owners_of_owed_sections(tmp_path):
 
 def test_platform_with_fewer_cards_than_tiles_is_not_shipped(tmp_path):
     run, wb, cells, ev = researched_run(tmp_path)
-    pl = _pipe(run, tmp_path)
+    pl = _pipe(run, tmp_path, reads=_FitReads())
     (run.qa_dir / P.Pipeline.SHORTLIST).write_text(json.dumps(
         {"tiles_wanted": 5, "ready": 22, "shortlist": []}))
     sd = pl._sections_dir(); sd.mkdir(parents=True, exist_ok=True)

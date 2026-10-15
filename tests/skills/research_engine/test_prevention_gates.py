@@ -21,6 +21,7 @@ def test_the_pages_prepare_refills_peers_before_any_lane(tmp_path):
     d = SimpleNamespace(wb=wb, run=run, opts=SimpleNamespace(log=lambda *a: None, reads=None),
                         state={}, _cohort_peers=lambda: calls.append("peers"),
                         _md=lambda: {"connector_run_id": "r-1"},
+                        _shortlist_doc=lambda: {"tiles_wanted": 5},
                         _platform_shortlist=lambda rid: calls.append("shortlist:" + rid))
     P.Pipeline._pages_prepare(d, P.PAGES_A)
     P.Pipeline._pages_prepare(d, ("overview",))

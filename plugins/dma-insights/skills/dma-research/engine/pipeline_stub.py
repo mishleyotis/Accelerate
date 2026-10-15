@@ -359,6 +359,23 @@ def lane_page(agent, prompt_file, ctx):
     d.mkdir(parents=True, exist_ok=True)
     (d / f"{page}.stub.json").write_text(json.dumps(
         {"page": page, "written_by": agent, "at": _utcnow(), "brief": str(prompt_file)}))
+    # The sections the deterministic completeness checks read
+    # (engine.page_completeness): peer figures carried from the workbook's
+    # Peer_Benchmarks, as a real producer must serve them.
+    wb = ctx.run.open()
+    peers = [r for r in wb.rows("Peer_Benchmarks") if str(r.get("Peer_Median") or "").strip()]
+    med = float(peers[0]["Peer_Median"]) if peers else None
+    if page == "heatmap":
+        (d / "heatmap.workbook_scores.json").write_text(json.dumps(
+            {"categories": [{"category_id": str(r.get("Category_ID")),
+                             "peer_median": float(r["Peer_Median"])} for r in peers]}))
+    if page == "overview":
+        (d / "overview.scores.json").write_text(json.dumps(
+            {"pillars": [{"pillar_id": "P1", "peer_median": med}]}))
+        (d / "overview.opportunity.json").write_text(json.dumps({"tiles": []}))
+    if page == "platform":
+        # The stub reads have no fit engine, so the shortlist wants 0 tiles.
+        (d / "platform.platform_story.json").write_text(json.dumps({"platforms": []}))
 
 
 def lane_scanner(agent, prompt_file, ctx):

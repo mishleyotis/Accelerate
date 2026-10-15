@@ -993,9 +993,45 @@ def peers_owed_scores(wb: RunWorkbook) -> list[str]:
     # Owed exactly when NO category carries a figure — whatever the basis
     # text says (a frozen grid reads `inferred: <rule>` with no median until
     # the cohort refill, and stays so when the connector cannot answer).
-    if any(_clean(r.get("Peer_Median")) for r in rows):
+    # Owed when ANY category lacks a figure: a cohort that answers some
+    # categories and not others would otherwise leave the rest null on the
+    # page (the table fills only the rows without one).
+    if all(_clean(r.get("Peer_Median")) for r in rows):
         return []
     return _grid_names(rows[0])
+
+
+PEER_SCORE_MIN, PEER_SCORE_MAX = 1.0, 5.0
+
+
+def peer_score_file_problems(d, categories: list[str]) -> list[str]:
+    """Why a peer score file cannot enter the table — deterministic: every
+    in-scope category scored, every score a number on the 1–5 rubric."""
+    if not isinstance(d, dict) or not _clean(d.get("peer")) or not isinstance(d.get("categories"), dict):
+        return ["not a {peer, categories} object"]
+    cats = {str(k).upper(): v for k, v in d["categories"].items()}
+    out = []
+    for cid in categories:
+        v = cats.get(cid)
+        x = v.get("score") if isinstance(v, dict) else v
+        try:
+            x = float(x)
+        except (TypeError, ValueError):
+            out.append(f"{cid}: no numeric score")
+            continue
+        if not (PEER_SCORE_MIN <= x <= PEER_SCORE_MAX):
+            out.append(f"{cid}: {x} outside {PEER_SCORE_MIN}-{PEER_SCORE_MAX}")
+    return out
+
+
+def peer_gate(wb: RunWorkbook) -> list[str]:
+    """Categories in the Peer_Benchmarks grid with no median — the SCORING
+    peer gate refuses the stage while this is non-empty."""
+    rows = [r for r in wb.rows("Peer_Benchmarks") if _clean(r.get("Category_ID"))]
+    if not rows:
+        return ["(no Peer_Benchmarks grid — freeze the peer set in PRELIM)"]
+    return [_clean(r.get("Category_ID")).upper() for r in rows
+            if not _clean(r.get("Peer_Median"))]
 
 
 def peer_table_from_scores(wb: RunWorkbook, scores_dir) -> dict:
@@ -1022,16 +1058,32 @@ def peer_table_from_scores(wb: RunWorkbook, scores_dir) -> dict:
     rows = [r for r in wb.rows("Peer_Benchmarks") if _clean(r.get("Category_ID"))]
     if not rows:
         raise PrelimRefusal("no Peer_Benchmarks grid: freeze the peer set first")
+    cats = [_clean(r.get("Category_ID")).upper() for r in rows]
+    rejected = {}
+    for k in list(files):
+        why = peer_score_file_problems(files[k], cats)
+        if why:
+            rejected[files[k]["peer"]] = why
+            files.pop(k)
+    if rejected:
+        wb.append("Gate_Log", {"Timestamp": _utcnow(), "Gate": "PEER_SCORE_FILE_REJECTED",
+                               "Scope": "Peer_Benchmarks", "Verdict": "FAIL", "Blocking": False,
+                               "Detail": "; ".join(f"{p}: {', '.join(w[:4])}"
+                                                   for p, w in rejected.items())[:900]})
     names = _grid_names(rows[0])
     have = [n for n in names if _slug(n) in files]
     if len(have) < 3:
         raise PrelimRefusal(
             f"a peer table needs at least three scored peers; {len(have)} of "
             f"{len(names)} have a score file in {scores_dir} "
-            f"({', '.join(have) or 'none'})")
+            f"({', '.join(have) or 'none'})"
+            + (f"; rejected: " + "; ".join(f"{p}: {', '.join(w[:3])}" for p, w in rejected.items())
+               if rejected else ""))
     written = []
     for r in rows:
         cid = _clean(r.get("Category_ID")).upper()
+        if _clean(r.get("Peer_Median")):
+            continue                   # a cohort figure stands; the table fills the gaps
         per = []
         for n in names:
             v = ((files.get(_slug(n)) or {}).get("categories") or {}).get(cid) or {}

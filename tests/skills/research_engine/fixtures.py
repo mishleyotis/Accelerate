@@ -505,6 +505,15 @@ def make_shippable(wb):
                         query="fixture: the search the banked evidence came from",
                         tool="web_search", hits=4, kept=1, outcome="kept 1",
                         prelim=True)
+    # Every mandatory sentiment family a real PRELIM must work to a terminal
+    # outcome (page_preflight.sentiment_ladder, CG-40) — logged, not waived.
+    from engine import page_preflight as _pp
+    for f in _pp.sentiment_ladder(wb):
+        fam = f["detail"].split("'")[1]
+        L.append_search(wb, subcap=None, facet="fails",
+                        query=f"fixture: {fam} rating for the entity",
+                        tool="evidence_engine", hits=0, kept=0,
+                        outcome=f"VERIFIED_ABSENT: no {fam} listing", prelim=True)
     if not [r for r in wb.rows("DQ_Bank") if any(r.values())]:
         # A minimal bank. `kg build` seeds the real one from the pillar
         # toolkits; a fixture that has no toolkits still needs the sheet to

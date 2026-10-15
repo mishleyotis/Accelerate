@@ -21,7 +21,7 @@ by page, and promote refuses on them exactly as it refuses a pass-1 reason
 (SG excepted, per invariant 12). The refusal names the page; resubmitting
 that one page is the repair.
 
-Four checks:
+Five checks:
 
   refit          CG-30 and CG-31 re-run against `get_platform_fit` now, and a
                  tile or card built on an UNCHECKED engine context (the
@@ -35,6 +35,10 @@ Four checks:
                  gold record out and preferring gold of its sub-vertical. A
                  STRUCTURAL gap refuses (owner decision B, 2026-10-04);
                  counts and fill ratios are warnings in the verdict.
+  completeness   CG-COMPLETE: peer figures the package's peer table holds are
+                 served, and the opportunity tiles / platform cards cover the
+                 full catalogue's top min(5, READY) platforms through the fit
+                 engine (AAA WCNY, 2026-10-15).
   revision       the deployed connector's contract / gold / gate-set
                  fingerprint against what the caller's repo assumes, when the
                  caller says (`expected_revision`); otherwise RECORDED on the
@@ -295,9 +299,119 @@ def local_revision(repo_root: Path) -> dict:
     }
 
 
+# ── completeness (CG-COMPLETE) ───────────────────────────────────────────
+TILES_WANTED = 5          # the contract's "Five tiles"
+
+
+def _norm(name) -> str:
+    return " ".join(str(name or "").casefold().split())
+
+
+def _block(section, path, message):
+    return {"gate_id": "CG-COMPLETE", "section": section, "path": path,
+            "severity": "block", "message": message}
+
+
+def _peered_categories(cur, run_id) -> set:
+    cur.execute("""SELECT category_id FROM peer_scores
+                    WHERE run_id = %s AND score IS NOT NULL
+                    GROUP BY category_id HAVING count(*) >= 3""", (run_id,))
+    return {str(r[0]).upper() for r in cur.fetchall() if r and r[0]}
+
+
+def _catalogue_ready(conn, cur, run_id) -> list:
+    """The full catalogue through the fit engine: READY rows, engine order."""
+    from . import fit as fit_mod
+    cur.execute("""
+        SELECT p.l3_id, p.platform_name FROM ccg_l3_platforms p
+         WHERE p.version = COALESCE(
+                  (SELECT r.ccg_catalog_version FROM runs r WHERE r.id = %s),
+                  (SELECT version FROM ccg_versions WHERE is_current))
+         ORDER BY p.l3_id""", (run_id,))
+    cands = [{"platform": name, "l3_area": f"[{code}] {name}"}
+             for code, name in cur.fetchall() if code and name]
+    if not cands:
+        return []
+    got = fit_mod.platform_fit(conn, run_id, cands) or {}
+    ready = [p for p in (got.get("platforms") or [])
+             if isinstance(p, dict) and p.get("state") == "READY"]
+    return sorted(ready, key=lambda p: (p.get("rank") is None, p.get("rank") or 999,
+                                        -(p.get("fit_score") or 0)))
+
+
+def completeness(conn, run_id, live: dict) -> dict:
+    """{page: reasons} — CG-COMPLETE. Arithmetic over the staged payloads, the
+    package's peer_scores and the fit engine; nothing here is a judgement."""
+    out: dict = {}
+    cur = conn.cursor()
+    pay = {p: payload_json((live.get(p) or {}).get("payload")) or {} for p in live}
+
+    peered = _peered_categories(cur, run_id)
+    pillars = {c[:2] for c in peered}
+    if peered:
+        for row in ((pay.get("overview") or {}).get("scores") or {}).get("pillars") or []:
+            if isinstance(row, dict) and str(row.get("pillar_id") or "").upper() in pillars \
+                    and row.get("peer_median") is None:
+                out.setdefault("overview", []).append(_block(
+                    "scores", f"overview.scores.pillars[{row.get('pillar_id')}].peer_median",
+                    f"peer_median is null for {row.get('pillar_id')} while the package's "
+                    f"peer table scores {len(peered)} categor(ies) with three or more "
+                    f"peers. Serve the workbook's peer figure with its basis."))
+        ws = (pay.get("heatmap") or {}).get("workbook_scores") or {}
+        for grain, keys in (("pillars", pillars), ("categories", peered)):
+            rows = ws.get(grain) if isinstance(ws, dict) else None
+            if not isinstance(rows, dict):
+                continue
+            for k, v in rows.items():
+                if str(k).upper() in keys and isinstance(v, dict) and v.get("peer_median") is None:
+                    out.setdefault("heatmap", []).append(_block(
+                        "workbook_scores", f"heatmap.workbook_scores.{grain}.{k}.peer_median",
+                        f"peer_median is null for {k} while the package's peer table "
+                        f"scores it with three or more peers."))
+
+    try:
+        ready = _catalogue_ready(conn, cur, run_id)
+    except Exception as exc:                          # noqa: BLE001
+        msg = (f"the fit engine could not score the catalogue at promote "
+               f"({type(exc).__name__}); an opportunity set nobody checked is "
+               f"unchecked, not complete")
+        out.setdefault("overview", []).append(_block("opportunity", "overview.opportunity", msg))
+        return out
+    want = min(TILES_WANTED, len(ready))
+    if not want:
+        return out
+    story = (pay.get("platform") or {}).get("platform_story") or {}
+    cards = [c for c in (story.get("platforms") or []) if isinstance(c, dict)]
+    have = {_norm(c.get("platform")) for c in cards}
+    miss = [str(p.get("platform")) for p in ready[:want] if _norm(p.get("platform")) not in have]
+    if miss:
+        out.setdefault("platform", []).append(_block(
+            "platform_story", "platform.platform_story.platforms",
+            f"the catalogue's top {want} READY platform(s) need a card each; missing "
+            f"{', '.join(miss)} ({len(ready)} READY of the full catalogue)."))
+    tiles = [t for t in ((pay.get("overview") or {}).get("opportunity") or {}).get("tiles") or []
+             if isinstance(t, dict)]
+    if len(tiles) < want:
+        out.setdefault("overview", []).append(_block(
+            "opportunity", "overview.opportunity.tiles",
+            f"{len(tiles)} tile(s); the fit engine scores {len(ready)} READY platform(s) "
+            f"across the full catalogue, so the overview serves {want}."))
+    ranked = sorted([c for c in cards if isinstance(c.get("rank"), (int, float))],
+                    key=lambda c: c["rank"])[:want]
+    if [_norm(t.get("platform")) for t in tiles[:want]] != [_norm(c.get("platform")) for c in ranked]:
+        out.setdefault("overview", []).append(_block(
+            "opportunity", "overview.opportunity.tiles",
+            f"the tiles must be the top {want} platform cards in card-rank order "
+            f"({', '.join(str(c.get('platform')) for c in ranked)}); served "
+            f"{', '.join(str(t.get('platform')) for t in tiles)}."))
+    return out
+
+
 def extra_reasons(conn, run_id, live: dict) -> tuple[dict, dict]:
     """Every promote-time re-check, merged by page, plus a report."""
     merged: dict = {}
+    for page, rs in completeness(conn, run_id, live).items():
+        merged.setdefault(page, []).extend(rs)
     for page, rs in refit(conn, run_id, live).items():
         merged.setdefault(page, []).extend(rs)
     for page, sub in live.items():
