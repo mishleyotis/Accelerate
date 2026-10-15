@@ -1586,6 +1586,75 @@ def _engine(run) -> str:
     return f"--run {run.run_id} --root {run.root}" if run is not None else "--run <R> --root <ROOT>"
 
 
+def peer_scoring_batch(wb: RunWorkbook, *, run, out_dir: Path, peers: list[str]) -> dict:
+    """One lane per locked peer still owed a score file: the assessment
+    protocol's peer scoring (dma-assessment/references/peer_benchmarking.md)
+    under the client's own rules, written to 07_qa/peer_scores/<slug>.json.
+
+    AAA WCNY (2026-10-15): a first promotion in a thin sub-vertical had no
+    cohort figure and nothing scored the locked peers, so the workbook, both
+    reports and every page said "no peer benchmark". The frame is the run's
+    own taxonomy at capability grain; the evidence stays in the peer's file
+    (a foreign entity never enters this run's register)."""
+    from . import contract as C, prelim
+    tax = C.taxonomy()
+    cats = {}
+    sel = set(wb.selected_subcaps())
+    for cell in sorted(sel):
+        parts = cell.split(".")
+        cat, cap = parts[0], ".".join(parts[:2])
+        cats.setdefault(cat, {}).setdefault(cap, [])
+        if len(cats[cat][cap]) < 4:
+            cats[cat][cap].append(tax.name_of(cell))
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    frame = out_dir / "peer_scoring_frame.json"
+    frame.write_text(json.dumps({"categories": {c: {"capabilities": v}
+                                                for c, v in sorted(cats.items())}},
+                                indent=1), encoding="utf-8")
+    sdir = prelim.peer_scores_dir(run)
+    sdir.mkdir(parents=True, exist_ok=True)
+    md = wb.metadata()
+    protocol = (Path(__file__).resolve().parents[2] / "dma-assessment" / "references"
+                / "peer_benchmarking.md")
+    lanes = []
+    for peer in peers:
+        slug = prelim._slug(peer)
+        out = sdir / f"{slug}.json"
+        if out.is_file():
+            continue
+        packet = _bound({
+            "agent": "enrichment-web-specialist",
+            "task": (f"PEER SCORING for run {run.run_id} (client {md.get('entity_name')}, "
+                     f"sub-vertical {md.get('sub_vertical')}). Score ONE locked peer: "
+                     f"{peer}. Confirm its identity first (registry, domain, HQ) and "
+                     f"exclude namesakes."),
+            "protocol": str(protocol),
+            "frame": str(frame),
+            "write": str(out),
+            "rules": [
+                "score every CAPABILITY on 1.0-5.0: 1.0-1.4 M1 absent/ad hoc · 1.5-2.4 M2 "
+                "basic · 2.5-3.4 M3 standardised · 3.5-4.4 M4 optimised · 4.5-5.0 M5 leading",
+                "a capability with NO public evidence scores exactly 1.0 — the client's "
+                "own unevidenced cells were scored that way; the comparison is only fair "
+                "if the peer is held to the same rule",
+                "caps as the client: T5-only max 2.0; T4/T5-only max 2.5; single source max "
+                "3.0 (T1 regulator/SEC, T2 entity disclosure, T3 trade press/news/job boards)",
+                "category score = mean of its capability scores, 2 decimals",
+                "batch a category's questions into find_evidence_all_sources, then the "
+                "per-class tools; 2-4 searches a category",
+                "NEVER register evidence in this run (no engine.cli evidence): the peer is "
+                "a foreign entity",
+                "write {peer, identity:{domain,hq,basis}, scored_at, method, searches_run, "
+                "categories:{Cat:{score, capabilities_evidenced, of, evidence:[{capability, "
+                "score, tier, url, excerpt (verbatim 50-300 chars), date}]}}} to `write`",
+            ],
+        })
+        lanes.append((f"peer-{slug}", packet, f"Peer scoring — {peer}"))
+    return _write_lanes(out_dir, lanes, run=run, stage="SCORING",
+                        batch_name="batch_peers.json")
+
+
 def prelim_brief(wb: RunWorkbook, *, run, out_dir: Path) -> dict:
     """The PRELIM lanes: the institution before its capabilities. Three
     agents, one prompt each — the conductor in PRELIM-ONLY mode for the
@@ -2774,6 +2843,12 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
             # trimmed LAST, cut at 1,500, and the verdict file is named.
             "last_verdict_reasons": [str(r)[:1500] for r in (reasons or [])][:12],
             "last_verdict_file": str(verdicts_file) if verdicts_file else None,
+            # The full-catalogue fit (AAA WCNY, 2026-10-15): platform cards and
+            # overview tiles start here, never from the report's recommendations.
+            "platform_shortlist": (str(run.qa_dir / "platform_shortlist.json")
+                                   if run is not None and page in ("platform", "overview")
+                                   and (run.qa_dir / "platform_shortlist.json").is_file()
+                                   else None),
             "rules": [
                 "read `get_memory_digest` and the contract FILE before authoring; "
                 "the payload shape is law — never invent a field",

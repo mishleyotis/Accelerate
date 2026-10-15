@@ -476,6 +476,12 @@ class McpReads:
     def client_state(self, display_id: str) -> dict:
         return self._call("get_client_state", {"display_id": display_id})
 
+    def capability_catalogue(self, run_id: str) -> dict:
+        return self._call("get_capability_catalogue", {"run_id": run_id})
+
+    def platform_fit(self, run_id: str, candidates: list) -> dict:
+        return self._call("get_platform_fit", {"run_id": run_id, "candidates": candidates})
+
 
 class ShipPageShipper:
     """Connector WRITES only through ship_page.py (claim, submit) and, for
@@ -3578,6 +3584,30 @@ class Pipeline:
                       f"{got.get('entities')} assessed entit(ies); "
                       f"{len(got['cannot_estimate'])} below the floor")
 
+    def _peer_table(self) -> None:
+        """Score the locked peers when the sub-vertical cohort cannot figure
+        them, then write the peer TABLE every later artifact reads — before
+        the rollup computes a gap and before any report is written, so the
+        workbook, both reports and every page carry one set of figures."""
+        from . import brief, prelim
+        owed = prelim.peers_owed_scores(self.wb)
+        if not owed:
+            return
+        b = brief.peer_scoring_batch(self.wb, run=self.run, out_dir=self._briefs("peer_scoring"),
+                                     peers=owed)
+        if b.get("lanes"):
+            self.opts.log(f"  [PEERS] cohort under its floor: scoring {b['lanes']} locked "
+                          f"peer(s) by the assessment protocol")
+            self._count(self._dispatch(b, stage="SCORING"))
+        try:
+            got = prelim.peer_table_from_scores(self.wb, prelim.peer_scores_dir(self.run))
+            self.wb.save()
+            self.reopen()
+            self.opts.log(f"  [PEERS] peer table: {len(got['categories'])} categor(ies) "
+                          f"from {', '.join(got['peers'])}")
+        except prelim.PrelimRefusal as e:
+            self.opts.log(f"  [PEERS] no peer table — {e}")
+
     def _scoring_handoff(self) -> dict:
         """Write one scoring-workflow invocation per pillar still owed.
 
@@ -3591,6 +3621,7 @@ class Pipeline:
             A.open_stage(self.wb, self.run.qa_dir)
             self.reopen()
         self._cohort_peers()
+        self._peer_table()
         try:
             A.rollup(self.wb)
         except A.ScoringRefusal:
@@ -3779,6 +3810,7 @@ class Pipeline:
             A.open_stage(self.wb, self.run.qa_dir)
             self.reopen()
         self._cohort_peers()
+        self._peer_table()
         self._stalled("SCORING")
         for r in range(self.opts.max_rounds):
             self._rounds = r + 1
@@ -4335,10 +4367,109 @@ class Pipeline:
         return max((f.stat().st_mtime for f in self._sections_dir().glob(f"{page}.*.json")),
                    default=0.0)
 
+    SHORTLIST = "platform_shortlist.json"
+    TILES_WANTED = 5          # the contract's "Five tiles"; gold runs carry 4-5
+
+    def _platform_shortlist(self, connector_run: str) -> dict | None:
+        """Score EVERY L3 platform in the run's catalogue, not only the ones
+        the report happened to recommend, and write the ranked list the
+        platform and overview producers start from.
+
+        AAA WCNY (2026-10-15): the producers scored the 8 platforms the report
+        named; the catalogue holds 136, and 22 were READY — Financial Services
+        Cloud, Industries Insurance Cloud, Tableau and AWS among them — so the
+        overview served 2 tiles and the platform page 2 tabs."""
+        reads = self.opts.reads
+        if not connector_run or not hasattr(reads, "platform_fit") \
+                or not hasattr(reads, "capability_catalogue"):
+            return None
+        try:
+            cat = reads.capability_catalogue(connector_run) or {}
+            cands = [{"platform": p["platform_name"],
+                      "l3_area": f"[{p['l3_id']}] {p['platform_name']}"}
+                     for p in (cat.get("l3_platforms") or [])
+                     if p.get("l3_id") and p.get("platform_name")]
+            if not cands:
+                return None
+            fit = reads.platform_fit(connector_run, cands) or {}
+        except Exception as e:                       # noqa: BLE001
+            self.opts.log(f"  (platform shortlist not built: {e.__class__.__name__}: {str(e)[:120]})")
+            return None
+        ps = [p for p in (fit.get("platforms") or []) if isinstance(p, dict)]
+        ready = sorted([p for p in ps if p.get("state") == "READY"],
+                       key=lambda p: (p.get("rank") is None, p.get("rank") or 999,
+                                      -(p.get("fit_score") or 0)))
+        doc = {"connector_run": connector_run, "scored": len(ps),
+               "ready": len(ready),
+               "tiles_wanted": min(self.TILES_WANTED, len(ready)),
+               "shortlist": [{k: p.get(k) for k in ("platform", "l3_area", "rank",
+                                                   "fit_score", "state", "relevance")}
+                             for p in ready[:8]],
+               "rule": ("start the platform cards and the overview tiles from this list "
+                        "in the engine's spelling; tile the top `tiles_wanted`; every "
+                        "other READY candidate is a card or a discard with its reason")}
+        (self.run.qa_dir / self.SHORTLIST).write_text(json.dumps(doc, indent=1))
+        self.opts.log(f"  [PLATFORM] {len(ps)} catalogue platform(s) scored, {len(ready)} READY; "
+                      f"shortlist: {', '.join(str(p.get('platform')) for p in ready[:5])}")
+        return doc
+
+    def _completeness(self, page: str) -> list[str]:
+        """Contract shortfalls a page must not ship with, read from its own
+        section files before it is submitted (the connector's parity gate only
+        WARNS on list length — owner decision 2026-10-04 — so these passed)."""
+        out = []
+        sd = self._sections_dir()
+
+        def sec(name):
+            try:
+                return json.loads((sd / f"{name}.json").read_text())
+            except (OSError, ValueError):
+                return None
+        if page == "overview":
+            sl = None
+            try:
+                sl = json.loads((self.run.qa_dir / self.SHORTLIST).read_text())
+            except (OSError, ValueError):
+                pass
+            op = sec("overview.opportunity") or {}
+            tiles = op.get("tiles") if isinstance(op.get("tiles"), list) else []
+            want = int((sl or {}).get("tiles_wanted") or 0)
+            if sl and len(tiles) < want:
+                out.append(
+                    f"CG-COMPLETE overview.opportunity.tiles: {len(tiles)} tile(s); the "
+                    f"full-catalogue fit engine has {sl.get('ready')} READY platform(s) "
+                    f"({self.run.qa_dir / self.SHORTLIST}). Serve the top {want} as tiles "
+                    f"and give each a platform card, in the engine's spelling.")
+        if page in ("overview", "heatmap"):
+            have = [r for r in self.wb.rows("Peer_Benchmarks")
+                    if str(r.get("Peer_Median") or "").strip()]
+            if have:
+                body = sec("overview.scores" if page == "overview" else "heatmap.workbook_scores") or {}
+                txt = json.dumps(body)
+                if '"peer_median": null' in txt or '"peer_median":null' in txt:
+                    out.append(
+                        f"CG-COMPLETE {page} peer figures: Peer_Benchmarks carries "
+                        f"{len(have)} categor(ies) with a peer median ({str(have[0].get('Peer_Basis'))[:60]}) "
+                        f"and this page serves peer_median null. Serve the workbook's figures "
+                        f"with their basis, as the reports state them.")
+        return out
+
     def _ship_one(self, p: str, version: str, connector_run: str, verdicts: dict) -> bool:
         """Ship one page's section files and record the verdict. True on pass."""
-        res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
-                                     self.run.qa_dir / f"verdict_{p}_{version}.json")
+        pre = self._completeness(p)
+        if pre:
+            res = {"status": "local_precheck_fail", "n_reasons": len(pre),
+                   "reasons": pre, "sg_v4_fails": []}
+            try:
+                (self.run.qa_dir / f"verdict_{p}_{version}.json").write_text(json.dumps(
+                    {p: {"status": "local_precheck_fail", "n_reasons": len(pre),
+                         "reasons": [{"gate_id": "CG-COMPLETE", "message": m} for m in pre]}},
+                    indent=1))
+            except OSError:
+                pass
+        else:
+            res = self.opts.shipper.ship(connector_run, p, self._sections_dir(),
+                                         self.run.qa_dir / f"verdict_{p}_{version}.json")
         # AFTER the ship: the deterministic pre-ship fixer rewrites section
         # files inside it, and those rewritten files are what was submitted.
         mtime = self._page_mtime(p)
@@ -4751,6 +4882,12 @@ class Pipeline:
         `_ship_pages` before any lane, which stops the driver with
         NEEDS_CONNECTOR rather than failing the stage."""
         self._cohort_peers()
+        # The opportunity tiles and platform cards start from EVERY catalogue
+        # platform the fit engine scores READY, never from the report's list
+        # (AAA WCNY, 2026-10-15: 8 of 136 seeded, two tiles served).
+        if not (self.run.qa_dir / Pipeline.SHORTLIST).is_file() or any(
+                p in pages for p in ("overview", "platform")):
+            self._platform_shortlist(str(self._md().get("connector_run_id") or ""))
         # Focus-area evidence names its focus area's cells (ET-07), linked
         # here — after scoring, before any page lane (AAA WCNY, 2026-10-14).
         from . import profile as _profile

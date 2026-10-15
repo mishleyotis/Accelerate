@@ -19,6 +19,15 @@ platform page and must be the same numbers. You hand the section JSON back to
 whoever invoked you. You do not submit, you do not promote, and you do not write
 `platform.platform_story` — you reconcile against it.
 
+
+**Tiles come from the full-catalogue shortlist.** Read the packet's
+`platform_shortlist` (`07_qa/platform_shortlist.json`): serve its top
+`tiles_wanted` READY platforms as tiles (the contract asks for five), each with
+a platform card, in the engine's spelling. The driver refuses an overview with
+fewer tiles than `tiles_wanted` before it is submitted (CG-COMPLETE). AAA WCNY
+(2026-10-15) served 2 tiles from the report's 8 candidates while the catalogue
+held 22 READY platforms.
+
 ## Purpose, and the failure it prevents
 
 A fit score is a claim about **what the client should buy**. It is the most

@@ -969,6 +969,99 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
     return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
 
 
+def _slug(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", _clean(name).lower()).strip("-")
+
+
+def peer_scores_dir(run) -> Path:
+    return Path(run.qa_dir) / "peer_scores"
+
+
+def peers_owed_scores(wb: RunWorkbook) -> list[str]:
+    """The locked peers a TABLE must still be scored for: every named peer
+    when no category has a cohort figure (the sub-vertical cohort is under
+    its floor), else none.
+
+    AAA WCNY (2026-10-15): a first promotion in a thin sub-vertical — the IB
+    cohort held two assessed entities against a floor of three — served
+    "no peer benchmark" on every page and in both reports, because nothing
+    scored the locked peers. The assessment protocol does exactly that
+    (dma-assessment/references/peer_benchmarking.md)."""
+    rows = [r for r in wb.rows("Peer_Benchmarks") if _clean(r.get("Category_ID"))]
+    if not rows:
+        return []
+    # Owed exactly when NO category carries a figure — whatever the basis
+    # text says (a frozen grid reads `inferred: <rule>` with no median until
+    # the cohort refill, and stays so when the connector cannot answer).
+    if any(_clean(r.get("Peer_Median")) for r in rows):
+        return []
+    return _grid_names(rows[0])
+
+
+def peer_table_from_scores(wb: RunWorkbook, scores_dir) -> dict:
+    """Write every category's peer figure from the scored locked peers, as a
+    `table` row: the median of the peers' category scores, the quartiles, and
+    Peer_Scores positional against Peer_Names (NA for a peer with no file).
+
+    The peers are scored by the protocol — same rubric, same evidence caps,
+    an unevidenced capability at 1.0, as the client — one JSON file per peer
+    in `scores_dir` ({"peer", "categories": {Cat: {"score": x}}}). Their
+    evidence stays in those files: a peer is a foreign entity, and its
+    sources never enter this run's register."""
+    import json as _json
+    import statistics
+    scores_dir = Path(scores_dir)
+    files = {}
+    for f in sorted(scores_dir.glob("*.json")):
+        try:
+            d = _json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(d, dict) and d.get("peer") and isinstance(d.get("categories"), dict):
+            files[_slug(d["peer"])] = d
+    rows = [r for r in wb.rows("Peer_Benchmarks") if _clean(r.get("Category_ID"))]
+    if not rows:
+        raise PrelimRefusal("no Peer_Benchmarks grid: freeze the peer set first")
+    names = _grid_names(rows[0])
+    have = [n for n in names if _slug(n) in files]
+    if len(have) < 3:
+        raise PrelimRefusal(
+            f"a peer table needs at least three scored peers; {len(have)} of "
+            f"{len(names)} have a score file in {scores_dir} "
+            f"({', '.join(have) or 'none'})")
+    written = []
+    for r in rows:
+        cid = _clean(r.get("Category_ID")).upper()
+        per = []
+        for n in names:
+            v = ((files.get(_slug(n)) or {}).get("categories") or {}).get(cid) or {}
+            x = v.get("score") if isinstance(v, dict) else v
+            try:
+                per.append(round(float(x), 2) if x is not None else None)
+            except (TypeError, ValueError):
+                per.append(None)
+        xs = sorted(x for x in per if x is not None)
+        if len(xs) < 3:
+            continue
+        q = statistics.quantiles(xs, n=4, method="inclusive")
+        peer_median(wb, category=cid, median=round(statistics.median(xs), 2),
+                    p25=round(q[0], 2), p75=round(q[2], 2), basis="table",
+                    source=(f"locked peers scored by the assessment protocol "
+                            f"(same rubric and caps as the client, unevidenced "
+                            f"capability = 1.0), {len(xs)} peers, score files "
+                            f"{scores_dir.name}/"),
+                    peer_scores=", ".join("NA" if x is None else f"{x:.2f}" for x in per),
+                    n=len(xs))
+        written.append(cid)
+    wb.append("Gate_Log", {"Timestamp": _utcnow(), "Gate": "PEER_TABLE_SCORED",
+                           "Scope": "Peer_Benchmarks", "Verdict": "PASS", "Blocking": False,
+                           "Detail": (f"{len(written)} categor(ies) from {len(have)} scored "
+                                      f"peers ({', '.join(have)}); the sub-vertical cohort "
+                                      f"was under its floor")[:900]})
+    wb._dirty = True
+    return {"categories": written, "peers": have}
+
+
 def peer_row_is_cohort_sourced(row: dict) -> bool:
     """True when the row's figure (or its stated absence) came from the
     connector's cohort — `fill_cohort_peers` wrote it."""
@@ -1293,6 +1386,9 @@ def main(argv=None) -> int:
     rp.add_argument("--owner", required=True)
     rp.add_argument("--why", required=True)
 
+    pt = common(sub.add_parser("peer-table", help="peer figures from the scored locked "
+                                                  "peers (07_qa/peer_scores/*.json), basis table"))
+    pt.add_argument("--dir")
     m = common(sub.add_parser("peer-median"))
     m.add_argument("--category", required=True)
     m.add_argument("--median"); m.add_argument("--p25"); m.add_argument("--p75")
@@ -1370,6 +1466,9 @@ def main(argv=None) -> int:
         elif a.cmd == "replace-peers":
             print(json.dumps(replace_peers(wb, a.peer, rule=a.rule, owner=a.owner,
                                            why=a.why), indent=2, default=str))
+        elif a.cmd == "peer-table":
+            print(json.dumps(peer_table_from_scores(
+                wb, a.dir or peer_scores_dir(run)), indent=2))
         elif a.cmd == "peer-median":
             print(json.dumps(peer_median(wb, category=a.category, median=a.median,
                                          p25=a.p25, p75=a.p75, basis=a.basis,

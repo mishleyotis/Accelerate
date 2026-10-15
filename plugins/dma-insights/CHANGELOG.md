@@ -163,6 +163,27 @@
     refused to call the client done, though Clay and the web passes had run.
     PROMOTE now records both facets first, from the workbook's own provenance
     (source, rows, run), skipping a facet the connector already holds current.
+  - **First promotions in a thin sub-vertical served no peers and two
+    platforms** (`engine/prelim.py`, `engine/brief.py`, `engine/pipeline.py`,
+    platform and opportunity producer manifests; owner, 2026-10-15: "For 1st
+    time promotions, I seem to have this recurring problem"). Both shortfalls
+    passed every gate (the parity gate only warns on list length):
+    - *Peers.* The IB cohort held two assessed entities against a floor of
+      three, and nothing scored the locked peers, so the workbook, both reports
+      and every page said "no peer benchmark". When no category has a figure,
+      SCORING now scores each locked peer by the assessment protocol
+      (`dma-assessment/references/peer_benchmarking.md`: same rubric and caps as
+      the client, unevidenced capability = 1.0) into `07_qa/peer_scores/`, and
+      `engine.prelim peer-table` writes the `table` median, quartiles and
+      per-peer scores before the rollup and before any report is written.
+      Peer evidence never enters the run's register (a foreign entity).
+    - *Platforms.* Producers scored only the platforms the report named (8 of
+      the catalogue's 136; 22 were READY). Page prep now scores the whole L3
+      catalogue through `get_platform_fit` into `07_qa/platform_shortlist.json`,
+      which the platform and overview briefs carry, and an overview with fewer
+      tiles than the shortlist allows (up to the contract's five) — or a page
+      serving a null peer median the workbook has — is failed before
+      submission (`CG-COMPLETE`) into the repair loop.
   - **The package gate refused a declared financial absence**
     (`engine/gold_standard.py`): `completeness declare --sheet
     Financial_Trends` is the engine's documented route for an institution

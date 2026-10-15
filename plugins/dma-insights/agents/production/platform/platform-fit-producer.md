@@ -183,6 +183,12 @@ by writing a quote.
    alignment, and an `INSUFFICIENT_EVIDENCE` candidate ranks **after** every READY
    one whatever its arithmetic (owner, 2026-10-07: "I keep on seeing MuleSoft ranking
    first every run").
+   **Start from the full catalogue, never the report's list.** The packet's
+   `platform_shortlist` (`07_qa/platform_shortlist.json`) is every L3 platform in
+   the run's catalogue scored by the fit engine, READY ones ranked. Card the
+   shortlist; the report's recommendations are context, not the candidate set
+   (AAA WCNY, 2026-10-15: 8 report-named candidates scored, 2 tiles served, while
+   the catalogue held 22 READY platforms including Financial Services Cloud).
    **Card every candidate the overview tiles carry, spelled as the engine spells
    it.** The overview opportunity tiles are the engine's READY candidates; a tile
    with no platform card fails CG-31 on the OVERVIEW page, after this page has

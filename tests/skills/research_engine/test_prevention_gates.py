@@ -19,10 +19,14 @@ def test_the_pages_prepare_refills_peers_before_any_lane(tmp_path):
     run, wb, cells, ev = researched_run(tmp_path)
     calls = []
     d = SimpleNamespace(wb=wb, run=run, opts=SimpleNamespace(log=lambda *a: None, reads=None),
-                        state={}, _cohort_peers=lambda: calls.append("peers"))
+                        state={}, _cohort_peers=lambda: calls.append("peers"),
+                        _md=lambda: {"connector_run_id": "r-1"},
+                        _platform_shortlist=lambda rid: calls.append("shortlist:" + rid))
     P.Pipeline._pages_prepare(d, P.PAGES_A)
     P.Pipeline._pages_prepare(d, ("overview",))
-    assert calls == ["peers", "peers"]
+    # peers first, then the full-catalogue shortlist the overview tiles need
+    assert calls[0] == "peers" and calls.count("peers") == 2
+    assert calls[-2:] == ["peers", "shortlist:r-1"]
 
 
 # ── PRELIM gates the sub-vertical set while the run can still act ─────────
