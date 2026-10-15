@@ -54,3 +54,31 @@ def test_a_metadata_write_waits_for_a_writer_holding_the_lock(tmp_path):
     assert not L.is_frozen(fresh), "the thaw was lost to the other writer's save"
     assert any(r.get("Detail") == "a row written while the lock was held"
                for r in fresh.rows("Gate_Log"))
+
+
+def test_a_bare_save_of_a_stale_copy_is_refused_not_clobbered(tmp_path):
+    """Verus, 2026-10-15 (second loss the same evening): a report-validator
+    verdict on client_research §7 vanished from Report_Narrative when a
+    peer-scoring process saved a copy read before the verdict. A save
+    outside a transaction now takes the lock and refuses a stale copy."""
+    from engine.workbook import WorkbookError
+    run = new_run(tmp_path, n=2)
+    a = run.open()
+    b = RunWorkbook(a.path)                   # read now, saved later
+    a.append("Gate_Log", {"Timestamp": "2026-10-15T00:00:00Z", "Gate": "T", "Scope": "run",
+                          "Verdict": "PASS", "Blocking": "no",
+                          "Detail": "a verdict written after b was read"})
+    ws = b._sheet("Run_Metadata")
+    ws.append(["last_written_at", "stale"])
+    try:
+        b.save()
+        assert False, "a stale copy was saved over the other writer's work"
+    except WorkbookError as e:
+        assert "changed on disk" in str(e)
+    fresh = RunWorkbook(a.path)
+    assert any(r.get("Detail") == "a verdict written after b was read"
+               for r in fresh.rows("Gate_Log"))
+    # a copy that is current saves normally outside a transaction
+    c = RunWorkbook(a.path)
+    c._sheet("Run_Metadata").append(["last_written_at", "fresh"])
+    c.save()

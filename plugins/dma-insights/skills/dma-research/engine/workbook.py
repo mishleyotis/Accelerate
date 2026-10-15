@@ -167,6 +167,7 @@ class RunWorkbook:
             raise WorkbookError(
                 f"{self.path} does not exist — use RunWorkbook.create()")
         self._wb = openpyxl.load_workbook(self.path)
+        self._seen = self._stamp()           # what this copy was read from
         notes = self._upgrade_shape()
         missing = [s for s in C.REQUIRED_SHEETS if s not in self._wb.sheetnames]
         if missing:
@@ -180,6 +181,7 @@ class RunWorkbook:
             # upgrade away and wrote the note into the OLD shape (measured
             # 2026-09-03: a v6 workbook opened under v7 kept 40 sheets).
             _atomic_save(self._wb, self.path)
+            self._seen = self._stamp()
             self._record_upgrade(notes)
 
     # ── shape upgrade: expand, migrate, contract ─────────────────────────
@@ -400,6 +402,27 @@ class RunWorkbook:
             self._depth = 0
 
     def save(self) -> None:
+        """Write the workbook. Inside a transaction the lock is already held.
+        OUTSIDE one (Verus, 2026-10-15: `assessment.rollup` and
+        `prelim.amend` ended with a bare save after their transactions, and
+        a report-validator verdict written in that window was lost) the
+        save takes the lock and REFUSES when the file moved since this copy
+        was read — a stale copy saved over another writer's work is the
+        same data loss the transaction exists to prevent."""
+        if getattr(self, "_depth", 0):
+            self._save_locked()
+            return
+        with file_lock(self._lock_path(), timeout=self.LOCK_TIMEOUT_S, why="save"):
+            now = self._stamp()
+            seen = getattr(self, "_seen", None)
+            if seen is not None and now != seen:
+                raise WorkbookError(
+                    f"{self.path.name} changed on disk since this copy was read; "
+                    f"saving it would discard the other writer's work. Do the "
+                    f"read-modify-write inside one `transaction()`.")
+            self._save_locked()
+
+    def _save_locked(self) -> None:
         for ws in self._wb.worksheets:
             _refresh_filter(ws)
         _atomic_save(self._wb, self.path)
