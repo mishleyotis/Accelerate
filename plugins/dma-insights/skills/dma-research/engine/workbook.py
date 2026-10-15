@@ -637,17 +637,25 @@ class RunWorkbook:
         return {str(r["Key"]): r["Value"] for r in self.rows("Run_Metadata")}
 
     def set_metadata(self, key: str, value, *, save: bool = True) -> None:
+        """Set one Run_Metadata value — INSIDE the transaction, like every
+        other write (Verus, 2026-10-15: `engine.narrative thaw` cleared the
+        freeze key with no lock held while a report writer, mid-transaction
+        on a copy loaded before, saved over it; the register read frozen
+        again with the old reason and the next registration was refused).
+        Reentrant: a caller already inside a transaction keeps its own."""
         if key not in C.RUN_METADATA_KEYS:
             raise WorkbookError(f"Run_Metadata has no key {key!r}")
-        ws = self._sheet("Run_Metadata")
-        for r in range(2, ws.max_row + 1):
-            if str(ws.cell(row=r, column=1).value or "") == key:
-                ws.cell(row=r, column=2, value=_cell(value))
-                break
-        else:
-            ws.append([key, _cell(value)])
-        if save:
-            self.save()
+        with self.transaction(f"set metadata {key}"):
+            ws = self._sheet("Run_Metadata")
+            for r in range(2, ws.max_row + 1):
+                if str(ws.cell(row=r, column=1).value or "") == key:
+                    ws.cell(row=r, column=2, value=_cell(value))
+                    break
+            else:
+                ws.append([key, _cell(value)])
+            self._dirty = True
+            if save:
+                self.save()
 
     def _write_handoff_lock(self) -> None:
         """The lock the Client Profile asserts and nothing built (AUD-0060).
