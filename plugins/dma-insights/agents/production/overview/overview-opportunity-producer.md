@@ -28,6 +28,17 @@ fewer tiles than `tiles_wanted` before it is submitted (CG-COMPLETE). AAA WCNY
 (2026-10-15) served 2 tiles from the report's 8 candidates while the catalogue
 held 22 READY platforms.
 
+**The shortlist picks WHICH platforms; the card supplies EVERY figure.** Fit is
+relative to the candidate set (rank fusion, readiness), so the shortlist's
+scores are not the served ones. Each tile reads its platform's card in
+`platform.platform_story.json` (in the sections directory; the driver produces
+the platform page first): `composite` = the card's `fit_score`, and `subtotal`,
+`readiness_multiplier`, `factors` and `rank` are the card's, with tiles ordered
+by card rank. Write every rank and gap in `rank_rationale` from those card
+figures. The driver checks this before submit (CG-31 locally); AAA WCNY
+(2026-10-15) wrote 74.0 and rank 1 from the shortlist against a card at 62.9,
+rank 2.
+
 ## Purpose, and the failure it prevents
 
 A fit score is a claim about **what the client should buy**. It is the most

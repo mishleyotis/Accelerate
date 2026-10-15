@@ -125,7 +125,7 @@ def test_a_page_on_disk_that_owes_a_section_is_produced_not_restaged(tmp_path):
     src = inspect.getsource(P.Pipeline._ship_pages)
     assert "only_sections" in src and "_owed_sections" in src
     # a retry of an owing page runs the producer phases, not assemble alone
-    assert "brief.PAGE_PHASES, [p for p in todo if p in owed]" in src
+    assert "_platform_first([p for p in todo if p in owed])" in src
 
 
 def test_fragments_dispatch_only_the_owners_of_owed_sections(tmp_path):
@@ -150,3 +150,26 @@ def test_platform_with_fewer_cards_than_tiles_is_not_shipped(tmp_path):
     (sd / "platform.platform_story.json").write_text(json.dumps({"platforms": [{}, {}]}))
     det = pl._completeness_detail("platform")
     assert det and det[0][0] == "platform.platform_story" and "CG-COMPLETE" in det[0][1]
+
+
+def test_platform_is_produced_before_the_overview():
+    g = P.Pipeline._platform_first(["overview", "platform", "insights"])
+    assert [x[1] for x in g] == [["platform"], ["overview", "insights"]]
+    assert P.Pipeline._platform_first(["overview"])[0][1] == ["overview"]
+
+
+def test_a_tile_off_its_card_is_held_locally_cg31(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    pl = _pipe(run, tmp_path)
+    (run.qa_dir / P.Pipeline.SHORTLIST).write_text(json.dumps(
+        {"tiles_wanted": 1, "ready": 22, "shortlist": []}))
+    sd = pl._sections_dir(); sd.mkdir(parents=True, exist_ok=True)
+    (sd / "overview.opportunity.json").write_text(json.dumps(
+        {"tiles": [{"platform": "MuleSoft Anypoint Platform", "rank": 1, "composite": 74.0}]}))
+    (sd / "platform.platform_story.json").write_text(json.dumps(
+        {"platforms": [{"platform": "MuleSoft Anypoint Platform", "rank": 2, "fit_score": 62.9}]}))
+    det = [m for s_, m in pl._completeness_detail("overview") if s_ == "overview.opportunity"]
+    assert det and "CG-31" in det[0] and "rank 1 vs card 2" in det[0] and "62.9" in det[0]
+    (sd / "overview.opportunity.json").write_text(json.dumps(
+        {"tiles": [{"platform": "MuleSoft Anypoint Platform", "rank": 2, "composite": 62.9}]}))
+    assert not [m for s_, m in pl._completeness_detail("overview") if "CG-31" in m]

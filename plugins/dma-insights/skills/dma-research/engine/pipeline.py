@@ -4440,6 +4440,17 @@ class Pipeline:
         WARNS on list length — owner decision 2026-10-04 — so these passed)."""
         return [m for _, m in self._completeness_detail(page)]
 
+    @staticmethod
+    def _platform_first(pages: list) -> list:
+        """The overview's tiles read the platform cards (CG-31), so when both
+        pages are produced the platform page goes first."""
+        from . import brief
+        pages = list(pages)
+        if "platform" in pages and "overview" in pages:
+            return [(brief.PAGE_PHASES, ["platform"]),
+                    (brief.PAGE_PHASES, [p for p in pages if p != "platform"])]
+        return [(brief.PAGE_PHASES, pages)]
+
     def _owed_sections(self, page: str) -> list[str]:
         """Sections a page cannot ship without that only their per-surface
         producer can write: a producer-owned section with no file, or one a
@@ -4476,6 +4487,28 @@ class Pipeline:
                     f"full-catalogue fit engine has {sl.get('ready')} READY platform(s) "
                     f"({self.run.qa_dir / self.SHORTLIST}). Serve the top {want} as tiles "
                     f"and give each a platform card, in the engine's spelling."))
+            # CG-31, locally: a tile reads its card's engine row (the server
+            # refuses the same thing a submit later).
+            story = sec("platform.platform_story") or {}
+            cards = {str(c.get("platform")): c for c in (story.get("platforms") or [])
+                     if isinstance(c, dict)}
+            for i, t in enumerate(tiles):
+                c = cards.get(str(t.get("platform")))
+                if not c:
+                    continue
+                bad = []
+                if c.get("rank") is not None and t.get("rank") != c.get("rank"):
+                    bad.append(f"rank {t.get('rank')} vs card {c.get('rank')}")
+                fs, comp = c.get("fit_score"), t.get("composite")
+                if isinstance(fs, (int, float)) and isinstance(comp, (int, float)) \
+                        and abs(float(fs) - float(comp)) > 0.05:
+                    bad.append(f"composite {comp} vs card fit_score {fs}")
+                if bad:
+                    out.append(("overview.opportunity",
+                        f"CG-31 overview.opportunity.tiles[{i}] '{t.get('platform')}': "
+                        + "; ".join(bad) + ". The shortlist picks the platforms; every "
+                        f"figure, the order and the rank prose come from the card in "
+                        f"platform.platform_story."))
         if page == "platform":
             try:
                 sl = json.loads((self.run.qa_dir / Pipeline.SHORTLIST).read_text())
@@ -4755,14 +4788,14 @@ class Pipeline:
                 owed = {p: v for p, v in owed.items() if v}
                 if attempt == 0:
                     fresh = [p for p in todo if p not in on_disk or p in owed]
-                    groups = [(brief.PAGE_PHASES, fresh)]
+                    groups = self._platform_first(fresh)
                     ship_first = sorted(on_disk - set(owed))
                     if ship_first:
                         self.opts.log(f"  [PAGES_{version}] on disk, shipping first: "
                                       f"{', '.join(ship_first)}")
                 else:
-                    groups = [(brief.PAGE_PHASES, [p for p in todo if p in owed]),
-                              (("assemble",), [p for p in todo if p not in owed])]
+                    groups = (self._platform_first([p for p in todo if p in owed])
+                              + [(("assemble",), [p for p in todo if p not in owed])])
                 for p, v in owed.items():
                     self.opts.log(f"  [PAGES_{version}] {p} owes {', '.join(v)} — "
                                   f"dispatching its producer(s)")
