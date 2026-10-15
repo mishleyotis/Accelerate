@@ -964,6 +964,15 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
     for s in given:
         if s.upper() != "NA":
             _num(s, "peer score")
+    # Peer_N is the number of peers the figure rests on. Verus (2026-10-15):
+    # sixteen rows were recorded from positional peer scores with Peer_N left
+    # at the cohort's 0, and the overview strip served a median beside
+    # peer_n 0. Given scores, the count of non-NA figures is the default;
+    # cannot_estimate rests on none.
+    if n is None and given:
+        n = sum(1 for s in given if s.upper() != "NA")
+    if n is None and basis == "cannot_estimate":
+        n = 0
     wb.update_row("Peer_Benchmarks", "Category_ID", rows[0]["Category_ID"], {
         "Peer_Median": med if med is not None else "",
         "Peer_P25": lo if lo is not None else "",
@@ -973,6 +982,34 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
         **({"Peer_N": int(n)} if n is not None else {}),
         "As_Of": _utcnow()[:10]})
     return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
+
+
+def recount_peer_n(wb: RunWorkbook) -> dict:
+    """Peer_N := the number of non-NA figures in Peer_Scores on every row
+    that carries them; 0 on a cannot_estimate row with no figure; a row with
+    no positional scores (a hand-recorded table, a cohort row) is left as
+    it is. Returns {category: n} for the rows changed."""
+    changed = {}
+    for r in wb.rows("Peer_Benchmarks"):
+        cid = _clean(r.get("Category_ID"))
+        if not cid:
+            continue
+        basis = _clean(r.get("Peer_Basis")).lower()
+        given = [x.strip() for x in _clean(r.get("Peer_Scores")).split(",") if x.strip()]
+        if given:
+            n = sum(1 for x in given if x.upper() != "NA")
+        elif basis.startswith("cannot_estimate") and not _clean(r.get("Peer_Median")):
+            n = 0
+        else:
+            continue
+        try:
+            cur = int(float(_clean(r.get("Peer_N")) or -1))
+        except ValueError:
+            cur = -1
+        if cur != n:
+            wb.update_row("Peer_Benchmarks", "Category_ID", cid, {"Peer_N": n})
+            changed[cid] = n
+    return changed
 
 
 def peer_row_is_cohort_sourced(row: dict) -> bool:
@@ -1276,6 +1313,12 @@ def main(argv=None) -> int:
                    help="where the figure came from — the table, the "
                         "recomputation, the inference")
     m.add_argument("--peer-scores", default="")
+    m.add_argument("--n", type=int, default=None,
+                   help="peers the figure rests on; default: the non-NA count of "
+                        "--peer-scores, 0 for cannot_estimate")
+    common(sub.add_parser("peer-recount",
+                          help="Peer_N := the non-NA count of Peer_Scores on every row "
+                               "that carries them (0 on a bare cannot_estimate row)"))
 
     se = common(sub.add_parser(
         "seed-enrichment",
@@ -1348,8 +1391,11 @@ def main(argv=None) -> int:
         elif a.cmd == "peer-median":
             print(json.dumps(peer_median(wb, category=a.category, median=a.median,
                                          p25=a.p25, p75=a.p75, basis=a.basis,
-                                         source=a.source, peer_scores=a.peer_scores),
+                                         source=a.source, peer_scores=a.peer_scores,
+                                         n=a.n),
                              indent=2, default=str))
+        elif a.cmd == "peer-recount":
+            print(json.dumps({"recounted": recount_peer_n(wb)}, indent=2))
         else:
             print(json.dumps(complete(wb), indent=2))
     except PrelimRefusal as e:

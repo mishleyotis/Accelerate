@@ -145,3 +145,27 @@ def test_a_restaged_page_of_a_reopened_run_ships_from_disk_and_a_reproduced_one_
     d._version_ingested_at = lambda v: P.Pipeline._version_ingested_at(d, v)
     assert P.Pipeline._produced_for(d, "insights", "B"), "restaged: ships from disk by design"
     assert not P.Pipeline._produced_for(d, "overview", "B"), "reproduced: handed as a fresh production"
+
+
+def test_peer_n_is_the_count_of_scored_peers():
+    """Verus (2026-10-15): sixteen rows recorded from positional peer scores
+    kept the cohort's Peer_N 0, and the strip served a median beside n 0."""
+    from engine import prelim
+    writes = []
+    wb = SimpleNamespace(
+        rows=lambda tab: [
+            {"Category_ID": "P1C2", "Peer_Basis": "inferred: x", "Peer_Scores": "2.0,2.0,2.0,2.0",
+             "Peer_Median": 2.0, "Peer_N": 0},
+            {"Category_ID": "P1C3", "Peer_Basis": "inferred: x", "Peer_Scores": "2.0,NA,NA,NA",
+             "Peer_Median": 2.0, "Peer_N": 0},
+            {"Category_ID": "P1C1", "Peer_Basis": "cannot_estimate: x", "Peer_Scores": "NA,NA,NA,NA",
+             "Peer_Median": "", "Peer_N": 4},
+            {"Category_ID": "P2C1", "Peer_Basis": "table: published", "Peer_Scores": "",
+             "Peer_Median": 3.0, "Peer_N": 5},
+            {"Category_ID": "P2C2", "Peer_Basis": "recomputed: cohort", "Peer_Scores": "",
+             "Peer_Median": 2.5, "Peer_N": 3}],
+        update_row=lambda tab, key, cid, fields, **kw: writes.append((cid, fields)))
+    out = prelim.recount_peer_n(wb)
+    assert out == {"P1C2": 4, "P1C3": 1, "P1C1": 0}
+    assert ("P2C1", {"Peer_N": 5}) not in writes and all(c != "P2C2" for c, _ in writes), \
+        "a table or cohort row keeps its own count"
