@@ -1,0 +1,29 @@
+{
+ "_source": "packages/shared/contracts_data.json overview.sentiment.mandatory_families (vendored; test_sentiment_ladder_preflight_2026_10_15.py asserts equality)",
+ "mandatory_families": [
+  {
+   "family": "app stores",
+   "match": "App Store|Google Play|app stores?|Play Store"
+  },
+  {
+   "family": "Glassdoor",
+   "match": "Glassdoor"
+  },
+  {
+   "family": "Indeed",
+   "match": "\\bIndeed\\b"
+  },
+  {
+   "family": "CFPB",
+   "match": "\\bCFPB\\b|Consumer Financial Protection Bureau|complaint database"
+  },
+  {
+   "family": "BBB",
+   "match": "\\bBBB\\b|Better Business Bureau"
+  },
+  {
+   "family": "Trustpilot or Google reviews",
+   "match": "Trustpilot|Google (?:reviews|business|rating|listing)"
+  }
+ ]
+}

@@ -44,6 +44,7 @@ if __package__ in (None, ""):  # noqa: E402
 import argparse
 import json
 import re
+from pathlib import Path
 import sys
 
 #: The connector's techstack depth floor (apps/mcp DEPTH_FLOORS, CG-40).
@@ -270,6 +271,41 @@ def page_floors(wb, pages) -> list:
 
 # ── the preflight ─────────────────────────────────────────────────────────
 
+_SENTIMENT_FAMILIES = Path(__file__).resolve().parent / "schemas" / "sentiment_mandatory_families.json"
+
+
+def sentiment_ladder(wb) -> list:
+    """A mandatory sentiment family nobody searched, named before any lane.
+
+    AAA WCNY (2026-10-15): CG-40 refused overview.sentiment on version B for
+    'app stores' and 'Trustpilot or Google reviews' — families no search in
+    the run had touched, so no producer could state a terminal outcome for
+    them, and the gap surfaced only at the connector, after the page lanes
+    were paid for. Every family in the connector's list
+    (`overview.sentiment.mandatory_families`) must appear in at least one
+    Search_Log row (query or outcome); the fix is a search, not a rewrite."""
+    import json as _json
+    try:
+        fams = _json.loads(_SENTIMENT_FAMILIES.read_text(encoding="utf-8"))["mandatory_families"]
+    except (OSError, ValueError, KeyError):
+        return []
+    logged = [f"{_clean(r.get('Query'))} {_clean(r.get('Outcome'))} {_clean(r.get('Tool'))}"
+              for r in wb.rows("Search_Log")]
+    out = []
+    for f in fams:
+        rx = re.compile(str(f.get("match") or re.escape(str(f.get("family")))), re.I)
+        if any(rx.search(t) for t in logged):
+            continue
+        out.append({
+            "gate": "CG-40", "page": "overview", "needs_connector": False, "severity": "block",
+            "detail": (f"sentiment family {f.get('family')!r} has no Search_Log row, so "
+                       f"overview.sentiment cannot state a terminal outcome for it (CG-40)"),
+            "fix": (f"search it and log the outcome — find_customer_review_evidence, or "
+                    f"`engine.cli search --prelim --query '<{f.get('family')} …>' "
+                    f"--outcome '<RESOLVED | VERIFIED_ABSENT | REFUSED + alternate>'`")})
+    return out
+
+
 def preflight(wb, pages=("techstack",)) -> list:
     """The blockers, as {gate, page, detail, fix, needs_connector}."""
     out = []
@@ -285,6 +321,8 @@ def preflight(wb, pages=("techstack",)) -> list:
                     f"(or retire the citation); link every PRELIM and profile row "
                     f"before PAGES, not one page at a time")})
     out += page_floors(wb, pages)
+    if "overview" in pages:
+        out += sentiment_ladder(wb)
     if "techstack" not in pages:
         return out
     rows = [r for r in wb.rows("Tech_Register") if _clean(r.get("TS_ID"))]

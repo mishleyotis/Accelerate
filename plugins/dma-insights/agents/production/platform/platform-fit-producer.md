@@ -183,6 +183,13 @@ by writing a quote.
    alignment, and an `INSUFFICIENT_EVIDENCE` candidate ranks **after** every READY
    one whatever its arithmetic (owner, 2026-10-07: "I keep on seeing MuleSoft ranking
    first every run").
+   **Card every candidate the overview tiles carry, spelled as the engine spells
+   it.** The overview opportunity tiles are the engine's READY candidates; a tile
+   with no platform card fails CG-31 on the OVERVIEW page, after this page has
+   passed (AAA WCNY, 2026-10-14: tiles "CRM Analytics" and "MuleSoft Anypoint"
+   against cards built from the report's recommendations — no CRM Analytics card,
+   and "MuleSoft Anypoint Platform" for the engine's "MuleSoft Anypoint"). Start
+   the card list from `get_platform_fit`, then add the report's recommendations.
 6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/04-craft/2-platform-story.md`
    — the shared platform reasoning: the fit score is not yours, the L3 unit, the
    stack register changing the answer, discarding with reasons, the effort

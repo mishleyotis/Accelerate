@@ -682,6 +682,8 @@ class Options:
     # the whole run. A deferred page is not shipped on A; PAGES_B produces it
     # against version B. Recorded in Gate_Log, never silent.
     defer_to_b: tuple = ()
+    # Supersede version B with a fresh ingest (owner decision; the reason).
+    reingest_b: str = ""
     ingest_poll_s: float = 60.0
     ingest_timeout_s: float = 3600.0
     folder_root: Path | None = None
@@ -1448,7 +1450,8 @@ class Pipeline:
             return ok, (f"package verified at {pk.get('folder')}" if ok else "no verified package")
         if stage == "INGEST_B":
             prev, cur = md.get("connector_run_id_prev"), md.get("connector_run_id")
-            ok = bool(str(prev or "").strip()) and str(cur) != str(prev)
+            ok = (bool(str(prev or "").strip()) and str(cur) != str(prev)
+                  and str(cur) not in (self.state.get("superseded_runs") or []))
             return ok, (f"version B ingested as {cur} (A was {prev})" if ok
                         else "package not yet ingested as a new version")
         if stage == "PAGES_B":
@@ -1629,6 +1632,45 @@ class Pipeline:
                     f"records that too, and the run continues at reduced "
                     f"rigour. Override with --allow-unverified-connectors.")}
 
+    def reingest_b(self, why: str) -> dict:
+        """Supersede version B so a repair made after INGEST_B reaches the
+        connector: re-package and push, wait for a NEW version, and reship all
+        six pages against it (on-disk pages restage without lanes).
+
+        The connector reads evidence and its cell links at ingest only (AAA
+        WCNY, 2026-10-14: ET-07 on links the workbook held, and a held
+        firmographic field whose evidence had to be registered after B). An
+        owner decision, recorded — never a silent third ingest — and refused
+        once the run is promoted."""
+        why = " ".join(str(why or "").split())
+        if len(why) < 20:
+            raise StageRefused("--reingest-b needs a reason (>= 20 chars)")
+        md = self._md()
+        if str(md.get("promoted_at") or "").strip():
+            raise StageRefused("the run is promoted; a re-ingest would supersede a served version")
+        cur = str(md.get("connector_run_id") or "")
+        ok, _ = self.done("INGEST_B")
+        if not ok:
+            return {"reingest": False, "why": "version B is not ingested yet; nothing to supersede"}
+        sup = list(self.state.get("superseded_runs") or [])
+        if cur and cur not in sup:
+            sup.append(cur)
+        self.state["superseded_runs"] = sup
+        self.state.pop("package", None)
+        for p, rec in (self.state.get("pages") or {}).items():
+            for k in ("versions", "shipped_mtime", "attempts_by_version"):
+                if isinstance(rec.get(k), dict):
+                    rec[k].pop("B", None)
+            rec["n_history"] = [h for h in (rec.get("n_history") or []) if not (h and h[0] == "B")]
+            if rec.get("version") == "B":
+                rec["status"] = ""
+        self._save_state()
+        L.append_gate(self.wb, gate="REINGEST_B", scope="run", verdict="PASS", blocking=False,
+                      detail=f"version B ({cur}) superseded by the owner: {why}"[:900])
+        self.opts.log(f"[REINGEST_B] version B {cur} superseded — re-package, re-ingest, "
+                      f"reship all pages: {why}")
+        return {"reingest": True, "superseded": cur}
+
     def run_all(self) -> dict:
         """Drive the run, and RECORD HOW IT ENDED.
 
@@ -1658,6 +1700,20 @@ class Pipeline:
             self.opts.log(f"  (driver lock not taken: {e.__class__.__name__}: "
                           f"{str(e)[:120]})")
             locked = False
+        # A re-ingest is applied ONCE per reason: a resume that repeats the
+        # flag must not supersede the version it created.
+        why = " ".join(str(getattr(self.opts, "reingest_b", "") or "").split())
+        if why and why not in (self.state.get("reingest_reasons") or []):
+            try:
+                r = self.reingest_b(why)
+            except StageRefused as e:
+                if locked:
+                    runstate.release_driver_lock(self.run)
+                self.opts.log(f"[REINGEST_B] REFUSED — {e}")
+                return {"outcome": "REFUSED", "reason": str(e), "stage": "INGEST_B"}
+            if r.get("reingest"):
+                self.state.setdefault("reingest_reasons", []).append(why)
+                self._save_state()
         try:
             out = self._run_all()
         finally:
@@ -4779,6 +4835,21 @@ class Pipeline:
             grains.recommendations(self.wb)
         if not list(self.run.deliverables.glob("Technographic_Scan_*.docx")):
             techscan.render(self.wb, self.run.deliverables)
+        # THE PACKAGE IS THE LAST PLACE A CELL LINK REACHES THE CONNECTOR
+        # (AAA WCNY, 2026-10-14): the server reads evidence_subcap_links at
+        # ingest, so a focus-area or timeline row linked after INGEST_B is
+        # invisible to ET-07 — three version-B pages halted on rows the
+        # workbook had already linked. Link them before the package is built.
+        from . import profile as _profile
+        try:
+            linked = _profile.link_focus_evidence(self.wb)
+        except Exception as e:                       # noqa: BLE001
+            linked = []
+            self.opts.log(f"  (focus/timeline evidence not linked: {e.__class__.__name__})")
+        if linked:
+            self.wb.save()
+            self.opts.log(f"  [PACKAGE] {len(linked)} focus/timeline citation(s) linked "
+                          f"to their cells before packaging")
         pkg = assemble.package(self.run, self.opts.folder_root, push=self.opts.push)
         self.state["package"] = {"folder": pkg["folder"], "verified": pkg["verified"],
                                  "gold_findings": pkg["verification"].get("gold_findings"),
@@ -4810,19 +4881,22 @@ class Pipeline:
         self._pages_prepare(tuple(p for g in PAGES_B for p in g) + deferred)
         restaged = self._ship_pages(tuple(p for p in PAGES_A if p not in deferred),
                                     "B", produce=False)   # from disk, no lanes
-        # A DEFERRED page ships LAST, and its refusal is held until every
+        # A DEFERRED page ships FIRST, and its refusal is held until every
         # other page has had its turn (R-INTERAC-20261010: techstack, deferred
         # for a server-side fix, halted PAGES_B before overview, insights,
-        # platform or context were attempted).
+        # platform or context were attempted). First, not last (AAA WCNY,
+        # 2026-10-15): techstack feeds the platform-fit engine, so shipped
+        # after platform and overview it moved the engine's inputs under two
+        # pages that had passed, and promote_run refused them on CG-30.
         shipped = []
         held = None
-        for group in PAGES_B:
-            shipped += self._ship_pages(group, "B", produce=True)
         if deferred:
             try:
                 shipped += self._ship_pages(deferred, "B", produce=True)
             except StageRefused as e:
                 held = e
+        for group in PAGES_B:
+            shipped += self._ship_pages(group, "B", produce=True)
         if held:
             raise StageRefused(f"{held} — every other page shipped to version B: "
                                f"{', '.join(restaged + shipped) or 'none'}")
@@ -5032,7 +5106,8 @@ def _build_opts(a) -> Options:
                    sg_v4_budget=int(getattr(a, "sg_v4_budget", None)
                                     if getattr(a, "sg_v4_budget", None) is not None
                                     else Options.sg_v4_budget),
-                   defer_to_b=tuple(getattr(a, "defer_to_b", None) or ()))
+                   defer_to_b=tuple(getattr(a, "defer_to_b", None) or ()),
+                   reingest_b=str(getattr(a, "reingest_b", None) or ""))
 
 
 def _research_mode(a) -> str:
@@ -5083,6 +5158,10 @@ def main(argv=None) -> int:
                         "promotes (invariant 12); this is the driver's own revision "
                         "policy, raised by a person for a page whose misses are "
                         "ungroundable by construction (stated absences)")
+    r.add_argument("--reingest-b", metavar="WHY", default="",
+                   help="supersede version B: re-package, re-ingest and reship every "
+                        "page, so a repair made after INGEST_B reaches the connector "
+                        "(an owner decision; recorded as REINGEST_B)")
     r.add_argument("--defer-to-b", action="append", choices=PAGES_A, default=[],
                    help="move a version-A page to version B (an owner decision, "
                         "logged): for a page whose A verdict rests on evidence "

@@ -314,3 +314,22 @@ def test_issue9_the_schedule_can_be_read_from_the_runs_own_selection(tmp_path):
     sch = json.loads(out.stdout)
     assert sch["subcaps"] == len(cells) and sch["lanes"] == cost.PARALLEL_LANES
     assert sch["within_target"]
+
+
+def test_a_repair_brief_carries_every_verdict_reason_whole(tmp_path):
+    """AAA WCNY (2026-10-15): reasons were cut at 300 chars and trimmed first,
+    so CG-40's own instruction — past char 300 — never reached the repair lane
+    and four page repairs did not converge."""
+    run, wb, cells, ev = scored_run(tmp_path)
+    tail = "record the ladder in empty_state.sources_searched, one rung per route, each with its outcome"
+    long_reason = ("CG-40 techstack.techstack: serves 9 products against a floor of 15, " + "x" * 400
+                   + " — " + tail)
+    vf = tmp_path / "verdicts.json"
+    vf.write_text(json.dumps({"heatmap": [long_reason] * 6}))
+    contract = tmp_path / "contract.json"
+    contract.write_text(json.dumps({"page": "heatmap", "sections": {}}))
+    out = brief.page_batch(wb, run=run, out_dir=tmp_path / "pg", connector_run="RUN-9",
+                           contract_file=contract, verdicts_file=vf, pages=["heatmap"])
+    text = Path(out["briefs"][0]["prompt_file"]).read_text()
+    assert tail in text
+    assert str(vf) in text

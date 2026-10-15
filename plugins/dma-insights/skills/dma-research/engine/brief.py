@@ -2766,7 +2766,14 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "read": f"join://drilldowns — {len(page_drawers)} panel(s) on this "
                         f"page; an authored one carries its synthesis prompt there",
             },
-            "last_verdict_reasons": [str(r)[:300] for r in (reasons or [])][:12],
+            # THE REPAIR'S WHOLE INPUT, KEPT WHOLE (AAA WCNY, 2026-10-15): a
+            # 300-char cut and first-in-line trimming sent every repair lane the
+            # symptom without the fix — CG-40's own instruction ("record the
+            # ladder … one rung per route, each with its outcome") sits past
+            # char 300 — and four page repairs "did not converge". Reasons are
+            # trimmed LAST, cut at 1,500, and the verdict file is named.
+            "last_verdict_reasons": [str(r)[:1500] for r in (reasons or [])][:12],
+            "last_verdict_file": str(verdicts_file) if verdicts_file else None,
             "rules": [
                 "read `get_memory_digest` and the contract FILE before authoring; "
                 "the payload shape is law — never invent a field",
@@ -2801,7 +2808,7 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 "author it. `engine.surface_export.scaffold_card` refuses an "
                 "item key the contract card does not declare",
             ],
-        }, "last_verdict_reasons", "waiting_on")
+        }, "waiting_on", "last_verdict_reasons")
         produce = list(sp["produce"])
         if phase == "fragments":
             for agent in page_producers(page):

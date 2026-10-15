@@ -126,6 +126,36 @@
     that resolve in the run's own register (registered after INGEST_A) now
     moves the page to version B by itself, with a `PAGES_DEFERRED_TO_B`
     Gate_Log row.
+  - **A repair made after INGEST_B could never reach the connector**
+    (`engine/pipeline.py`): the server reads evidence and its cell links at
+    ingest only, so ET-07 kept refusing rows the workbook had linked after
+    version B, and a held firmographic whose evidence was registered after B
+    could not resolve. PACKAGE now links focus-area and timeline evidence
+    BEFORE it builds (the last moment a link reaches the server), and
+    `--reingest-b WHY` (an owner decision, applied once per reason, refused
+    after promotion, recorded as `REINGEST_B`) supersedes version B:
+    re-package, re-ingest, and every page reships against the new version.
+  - **Overview tiles with no platform card** (`agents/production/platform/
+    platform-fit-producer.md`): the platform page carded the report's
+    recommendations, the overview tiled the fit engine's READY candidates, and
+    CG-31 refused the overview after the platform page had passed. The producer
+    now starts its card list from `get_platform_fit`, in the engine's spelling.
+  - **A sentiment family nobody searched surfaced only at the connector**
+    (`engine/page_preflight.py`): CG-40 refused overview.sentiment on version
+    B for 'app stores' and 'Trustpilot or Google reviews', which no search in
+    the run had touched. Page preflight now blocks the overview, before any
+    lane, for every mandatory family (`schemas/sentiment_mandatory_families.json`,
+    vendored from the connector and test-pinned equal) with no Search_Log row.
+  - **Repair lanes were sent the symptom without the fix** (`engine/brief.py`):
+    the page packet cut each verdict reason at 300 characters and trimmed the
+    reasons list first; CG-40's own instruction sits past character 300, and
+    four page repairs "did not converge". Reasons are now cut at 1,500,
+    trimmed last (after `waiting_on`), and the verdict file is named.
+  - **A deferred techstack page staled the fit figures it feeds**
+    (`engine/pipeline.py`): shipped last on version B, techstack moved the
+    platform-fit engine's inputs under platform and overview pages that had
+    passed, and `promote_run` refused them on CG-30. A deferred page now ships
+    FIRST (its refusal still held until every other page has had its turn).
   - **The package gate refused a declared financial absence**
     (`engine/gold_standard.py`): `completeness declare --sheet
     Financial_Trends` is the engine's documented route for an institution
@@ -140,7 +170,7 @@
     bands are both correct (owner, 2026-10-14: GSY-11 stands — recorded in
     the charter) — an assessment §2 REVISE had demanded the rubric be
     rewritten into bands.
-  Tests: `test_fetch_tech_markers_2026_10_14.py`, `test_auto_defer_to_b_2026_10_14.py`,
+  Tests: `test_sentiment_ladder_preflight_2026_10_15.py`, `test_reingest_b_2026_10_14.py`, `test_fetch_tech_markers_2026_10_14.py`, `test_auto_defer_to_b_2026_10_14.py`,
   `test_tech_rows_cited_2026_10_14.py`, `test_gold_standard.py`,
   `test_differentiation_routing_2026_10_14.py`,
   `test_nonproduction_evidence_2026_10_14.py`,

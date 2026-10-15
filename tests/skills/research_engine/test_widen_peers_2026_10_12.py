@@ -150,7 +150,7 @@ def test_the_gate_table_renders_the_latest_verdict_per_gate_and_scope(tmp_path):
     assert "PASS — 0 findings" in text
 
 
-def test_a_deferred_page_ships_last_and_its_halt_does_not_block_the_others(tmp_path):
+def test_a_deferred_page_ships_first_and_its_halt_does_not_block_the_others(tmp_path):
     run, wb, cells, ev = researched_run(tmp_path)
     opts = P.Options(dispatcher=S.StubDispatcher(S.default_handlers()), reads=S.StubReads(),
                      shipper=S.StubShipper(), push=False, folder_root=tmp_path / "o",
@@ -169,7 +169,9 @@ def test_a_deferred_page_ships_last_and_its_halt_does_not_block_the_others(tmp_p
     import pytest
     with pytest.raises(P.StageRefused, match="every other page shipped to version B") as e:
         pl._stage_pages_b()
-    assert order[-1] == ("techstack",)
+    # FIRST since 2026-10-15 (AAA WCNY): techstack feeds the fit engine, so it
+    # ships before the pages that quote fit figures; its halt is still held.
+    assert order.index(("techstack",)) < order.index(("overview", "insights", "platform"))
     assert "overview" in str(e.value) and "context" in str(e.value)
 
 
