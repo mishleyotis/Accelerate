@@ -536,6 +536,23 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   prompt names the run are priced into the ledger (the IMA PRELIM relay,
   $8.85, had never been: the run is at $27.26 of $25). MEM-0637..0640.
 
+- **Peer benchmark vs peer comparison** (user, 2026-10-15, after AAA WCNY's
+  first promotion served every peer median null: "they can include them as
+  part of benchmark scores. But for peer analysis, then they are only
+  researched with regard to that entity's focus area"). Two concepts, never
+  one field — map: `plugins/dma-insights/docs/PEER-BENCHMARK-VS-COMPARISON.md`.
+  **Peer benchmark** = a number: the mean of every already-assessed entity in
+  the sub-vertical (promoted or not; one run per entity, promoted first;
+  sub-vertical resolved through the alias table; withdrawn/superseded/
+  non-ACTIVE out; floor 3, else `cannot_estimate`), computed by
+  `get_cohort_benchmarks`, never researched, names no one. **Peer comparison**
+  = the SELECTED peers locked in `Handoff_Lock`, researched ONLY on the
+  client's focus areas (`Focus_Areas` FA-NN; `techscan peer-record --focus`,
+  `Tech_Peer_Deployments.Focus_ID`, relay peer probes scoped), never scored by
+  category (`--peer-scores` only from a published `table`).
+  `Peer_Benchmarks.Peer_N` is the benchmark's n; the selected set's size is
+  `Handoff_Lock.peer_n`.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).
@@ -545,3 +562,8 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
 - Techstack layer denominator (T-03/DNR-6): producer product slots vs the
   server's cell count.
 - Partitioning: **not yet** (triggers/strategies documented in TRD §17; do not pre-build).
+- Peer split follow-ups (PEER-BENCHMARK-VS-COMPARISON.md items 7–9): may the
+  selected set be widened/replaced after the cohort figure is written; should
+  CG-44's null-benchmark disclosure state the cohort instead of naming the
+  selected peers (RC-10(c)/D-17); should Assessment Report §6.1 "Peer scores"
+  become benchmark position with the named deep dive on focus areas only.

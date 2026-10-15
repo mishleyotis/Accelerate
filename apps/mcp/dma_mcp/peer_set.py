@@ -248,7 +248,9 @@ def named_peer_findings(page: str, payload: dict, peers: dict) -> list:
                 "set — so every tile carries exactly one row per named peer: "
                 "deployed true or false where established, deployed null where "
                 "not, and every row states its basis (for null, the ladder that "
-                "could not establish it). A tile silent about the peers reads as "
+                "could not establish it, or 'not compared: outside the client's "
+                "focus areas' — selected peers are researched only on the "
+                "focus areas, owner 2026-10-15). A tile silent about the peers reads as "
                 "one nobody compared (SWBC: 6 of 8 tiles bare, 37 of 40 verdicts "
                 "absent; RC-10, D-08)"))
     return out

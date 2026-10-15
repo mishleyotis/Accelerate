@@ -379,10 +379,95 @@ def set_impact(wb: RunWorkbook, ts_id: str, text: str) -> dict:
 PEER_DEPLOYED = {"yes": True, "no": False, "unknown": None}
 
 
+def _peer_norm(name) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", str(name or "").lower()).strip()
+
+
+def locked_peer(wb: RunWorkbook, peer: str) -> str:
+    """The locked-set name `peer` refers to, or a refusal.
+
+    PEER COMPARISON is about the SELECTED peers (owner, 2026-10-15): the set
+    PRELIM froze in Handoff_Lock. A row about any other institution is not a
+    comparison this run made — it is the cohort leaking in by name, or a
+    researcher's stray. Matched on the whole normalised name, or one name
+    extending the other by whole words ("Lawley" ~ "Lawley Insurance"),
+    never on a shared first token ("First Tech" is not "First Horizon")."""
+    have = [p for p in str(wb.handoff_lock().get("locked_peer_set") or "").split("|")
+            if p.strip()]
+    if not have:
+        raise ScanRefused(
+            "no peer set is locked. Peer comparison covers the SELECTED peers "
+            "only — freeze them first (`engine.prelim peers --peer … --rule …`).")
+    want = _peer_norm(peer)
+    for name in have:
+        n = _peer_norm(name)
+        if want and (want == n or n.startswith(want + " ") or want.startswith(n + " ")):
+            return name.strip()
+    raise ScanRefused(
+        f"{peer!r} is not in the locked peer set ({', '.join(have)}). Peer "
+        f"comparison covers the selected peers only; the sub-vertical average "
+        f"is the peer BENCHMARK and names no one. Widen or replace the set "
+        f"with the owner (`engine.prelim widen-peers` / `replace-peers`) if "
+        f"this institution belongs in it.")
+
+
+def _categories(cells) -> set:
+    return {str(c).split(".")[0].strip().upper()
+            for c in _split_ids(cells or "") if str(c).strip()}
+
+
+def comparison_focus(wb: RunWorkbook, ts_row: dict, focus_id: str | None) -> str:
+    """The client focus area (FA-NN) a peer comparison row answers.
+
+    Owner, 2026-10-15: the selected peers are researched ONLY with regard to
+    the assessed entity's focus areas — the comparison answers "what do our
+    peers do about the thing we said we are trying to do", not "score these
+    institutions". So a row names its focus area, and where the register row
+    names cells, they share a category with that focus area's cells; with no
+    `focus_id` the area is inferred from that overlap and refused when there
+    is none."""
+    areas = [r for r in wb.rows("Focus_Areas") if str(r.get("ID") or "").strip()]
+    if not areas:
+        raise ScanRefused(
+            "no client focus area is recorded. Peer comparison is researched "
+            "only against the entity's focus areas — record them first "
+            "(`engine.profile focus --id FA-01 …`, PRELIM-FOCUS).")
+    ts_cats = _categories(ts_row.get("SubCap_IDs"))
+    if focus_id:
+        fa = next((r for r in areas
+                   if str(r.get("ID")).strip().upper() == str(focus_id).strip().upper()),
+                  None)
+        if fa is None:
+            raise ScanRefused(
+                f"{focus_id} is not a recorded focus area "
+                f"({', '.join(str(r['ID']) for r in areas)})")
+        fa_cats = _categories(fa.get("Cells"))
+        if ts_cats and fa_cats and not ts_cats & fa_cats:
+            raise ScanRefused(
+                f"{ts_row.get('TS_ID')} ({ts_row.get('Product')}) touches "
+                f"{', '.join(sorted(ts_cats))}; {fa['ID']} is about "
+                f"{', '.join(sorted(fa_cats))}. A peer comparison outside the "
+                f"client's focus areas is out of scope.")
+        return str(fa["ID"]).strip().upper()
+    if not ts_cats:
+        raise ScanRefused(
+            f"{ts_row.get('TS_ID')} names no cells, so the focus area it "
+            f"answers cannot be inferred — pass --focus FA-NN.")
+    hits = [r for r in areas if _categories(r.get("Cells")) & ts_cats]
+    if not hits:
+        raise ScanRefused(
+            f"{ts_row.get('TS_ID')} ({ts_row.get('Product')}) touches "
+            f"{', '.join(sorted(ts_cats))}, and no client focus area does "
+            f"({', '.join(str(r['ID']) for r in areas)}). Peers are compared on "
+            f"the client's focus areas only; this product is out of scope.")
+    return str(hits[0]["ID"]).strip().upper()
+
+
 def peer_record(wb: RunWorkbook, *, ts_id: str, peer: str,
                 deployed: bool | None, basis: str,
                 source_url: str | None = None,
-                as_of: str | None = None) -> dict:
+                as_of: str | None = None,
+                focus_id: str | None = None) -> dict:
     """One peer, one product, one of THREE answers — with what settles it.
 
     `deployed=None` is "looked and could not establish", and it is a real
@@ -397,8 +482,11 @@ def peer_record(wb: RunWorkbook, *, ts_id: str, peer: str,
     HERE, where the run is already looking at peers.
     """
     rows = wb.rows("Tech_Register")
-    if not any(str(r["TS_ID"]) == ts_id for r in rows):
+    ts_row = next((r for r in rows if str(r["TS_ID"]) == ts_id), None)
+    if ts_row is None:
         raise ScanRefused(f"{ts_id} is not in this run's Tech_Register")
+    peer = locked_peer(wb, peer)
+    fa = comparison_focus(wb, ts_row, focus_id)
     if len(str(basis or "").strip()) < 15:
         raise ScanRefused(
             "a peer row states the BASIS in a clause — what was seen and "
@@ -412,7 +500,7 @@ def peer_record(wb: RunWorkbook, *, ts_id: str, peer: str,
             "deployed, or find the source.")
     word = {True: "yes", False: "no", None: "unknown"}[deployed]
     wb.append("Tech_Peer_Deployments", {
-        "TS_ID": ts_id, "Peer": str(peer).strip(),
+        "TS_ID": ts_id, "Peer": str(peer).strip(), "Focus_ID": fa,
         "Deployed": word,
         "Basis": str(basis).strip(),
         "Source_URL": source_url or None,
@@ -912,6 +1000,9 @@ def main(argv=None) -> int:
             s.add_argument("--basis", required=True)
             s.add_argument("--url")
             s.add_argument("--as-of")
+            s.add_argument("--focus", help="the client focus area (FA-NN) this "
+                                           "comparison answers; inferred from "
+                                           "the register row's cells when omitted")
         if name == "record":
             s.add_argument("--product", required=True)
             s.add_argument("--vendor")
@@ -992,7 +1083,8 @@ def main(argv=None) -> int:
         print(json.dumps(peer_record(
             wb, ts_id=a.ts, peer=a.peer,
             deployed=(True if a.deployed else None if a.unknown else False),
-            basis=a.basis, source_url=a.url, as_of=a.as_of), indent=2))
+            basis=a.basis, source_url=a.url, as_of=a.as_of,
+            focus_id=a.focus), indent=2))
         return 0
     if a.cmd == "peers":
         out = peer_state(wb, a.ts)

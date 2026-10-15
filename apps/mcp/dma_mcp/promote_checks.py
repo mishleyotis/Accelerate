@@ -21,7 +21,7 @@ by page, and promote refuses on them exactly as it refuses a pass-1 reason
 (SG excepted, per invariant 12). The refusal names the page; resubmitting
 that one page is the repair.
 
-Four checks:
+Five checks:
 
   refit          CG-30 and CG-31 re-run against `get_platform_fit` now, and a
                  tile or card built on an UNCHECKED engine context (the
@@ -39,6 +39,13 @@ Four checks:
                  fingerprint against what the caller's repo assumes, when the
                  caller says (`expected_revision`); otherwise RECORDED on the
                  result as unchecked — never reported as matched.
+  order          CG-ORDER: a page staged before the pages it reads — text
+                 saying the run's own register, page or rows are "not
+                 promoted / not yet shipped / not yet registered", and a
+                 heatmap evidence index that omits ids other pages cite.
+                 Both are FIRST-PROMOTION defects: on a rerun the previous
+                 promotion hides them; on a first run nothing does (AAA
+                 Western and Central New York, 2026-10-15).
 """
 from __future__ import annotations
 
@@ -97,6 +104,106 @@ def stale_run_state(page: str, payload: dict) -> list:
                             "Restate it for a promoted run (count what it "
                             "counts now) and resubmit this page.")})
     return out
+
+
+# ── order: a page staged before what it reads ───────────────────────────
+#
+# AAA Western and Central New York, first promotion 2026-10-15: heatmap and
+# insights were staged at 03:47, techstack at 04:43, overview and platform
+# at 05:00 — and the overview's opportunity card said "the technology
+# register is not promoted", the landscape strip "techstack page not yet
+# shipped", the evidence-age panel "24 later workbook rows are not yet
+# registered", and the heatmap's evidence index stopped at E-228 while the
+# other pages cited E-229 … E-253. Every one of those sentences is about THIS
+# RUN's own artefacts, and promotion makes each false or stale the moment it
+# succeeds — the same class as CG-STALE. Narrow on purpose: the run's own
+# artefact nouns only, negative assertions only.
+_ORDER_TEXT = re.compile(
+    r"\b(register|techstack|page|evidence|rows?)\b[^.;]{0,60}?"
+    r"\b(?:not|never)\s+(?:yet\s+)?(?:been\s+)?(promoted|shipped|registered)\b",
+    re.I)
+_E_FORMS = (re.compile(r"^E-\d+$"), re.compile(r"^E-[A-Z0-9]+-\d+$"))
+
+
+def order_text(page: str, payload: dict) -> list:
+    """CG-ORDER over one page's empty_state, narrative_thread and r_layer."""
+    out = []
+    for section, body in sorted((payload or {}).items()):
+        if not isinstance(body, dict):
+            continue
+        for key in ("empty_state", "narrative_thread", "r_layer"):
+            for path, text in _strings(body.get(key), key):
+                m = _ORDER_TEXT.search(text)
+                if m:
+                    out.append({
+                        "gate_id": "CG-ORDER", "section": section,
+                        "path": f"{page}.{section}.{path}",
+                        "severity": "block",
+                        "message": (
+                            f"this text says the run's own {m.group(1).lower()} "
+                            f"is not yet {m.group(2).lower()} ({m.group(0)!r}): "
+                            "the section was produced before the page it reads "
+                            "had shipped. Every page is staged now, so re-produce "
+                            "this section from what is staged (the techstack "
+                            "register, the full evidence index) and resubmit "
+                            "this page.")})
+    return out
+
+
+def _cited_ids(node, out: set) -> None:
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if k in ("e_ids", "evidence_ids") and isinstance(v, list):
+                out.update(str(x) for x in v if isinstance(x, str))
+            elif k == "e_id" and isinstance(v, str):
+                out.add(v)
+            else:
+                _cited_ids(v, out)
+    elif isinstance(node, list):
+        for v in node:
+            _cited_ids(v, out)
+
+
+def evidence_index_gaps(live: dict) -> list:
+    """CG-ORDER on heatmap.evidence: an id another page cites that the run's
+    evidence index (H6, "the run's full evidence index") does not carry.
+
+    Compared within one id FORM (package-local `E-123` or server
+    `E-ENT-123`) and only for a form the index itself uses, so an index
+    keyed one way is never failed for citations written the other way."""
+    hm = (live.get("heatmap") or {}).get("payload") or {}
+    rows = ((hm.get("evidence") or {}).get("evidence")) or []
+    index = {str(r.get("e_id")) for r in rows if isinstance(r, dict) and r.get("e_id")}
+    if not index:
+        return []
+    forms = [f for f in _E_FORMS if any(f.match(i) for i in index)]
+    missing: dict = {}
+    for page, sub in live.items():
+        payload = sub.get("payload") or {}
+        for section, body in payload.items():
+            if page == "heatmap" and section == "evidence":
+                continue
+            cited: set = set()
+            _cited_ids(body, cited)
+            for eid in cited:
+                if eid not in index and any(f.match(eid) for f in forms):
+                    missing.setdefault(eid, set()).add(f"{page}.{section}")
+    if not missing:
+        return []
+    def _n(e):
+        return int(re.sub(r"\D", "", e.rsplit("-", 1)[-1]) or 0)
+    ids = sorted(missing, key=_n)
+    where = sorted({w for e in ids for w in missing[e]})
+    return [{"gate_id": "CG-ORDER", "section": "evidence",
+             "path": "heatmap.evidence.evidence", "severity": "block",
+             "message": (
+                 f"the evidence index carries {len(index)} ids and omits "
+                 f"{len(ids)} that other pages cite ({', '.join(ids[:8])}"
+                 f"{' …' if len(ids) > 8 else ''}; cited by {', '.join(where[:6])}). "
+                 "The heatmap was staged before that evidence was registered; "
+                 "a chip on those pages opens onto nothing. Rebuild "
+                 "heatmap.evidence from the full register and resubmit the "
+                 "heatmap page.")}]
 
 
 # ── refit ────────────────────────────────────────────────────────────────
@@ -301,9 +408,13 @@ def extra_reasons(conn, run_id, live: dict) -> tuple[dict, dict]:
     for page, rs in refit(conn, run_id, live).items():
         merged.setdefault(page, []).extend(rs)
     for page, sub in live.items():
-        rs = stale_run_state(page, sub.get("payload") or {})
+        rs = (stale_run_state(page, sub.get("payload") or {})
+              + order_text(page, sub.get("payload") or {}))
         if rs:
             merged.setdefault(page, []).extend(rs)
+    gaps = evidence_index_gaps(live)
+    if gaps:
+        merged.setdefault("heatmap", []).extend(gaps)
     par, report = gold_parity(live, run_id=run_id,
                               sub_vertical=_sub_vertical(conn, run_id))
     for page, rs in par.items():

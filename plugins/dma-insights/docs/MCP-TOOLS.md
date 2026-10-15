@@ -1,6 +1,6 @@
 # DMA Insights MCP connector — tool reference
 
-Generated from `apps/mcp/server.py` at commit `c8f50b0307` (2026-10-07) by `gen_tools_md.py`. Signatures and defaults are read from the source with `ast`; the description of each tool is that tool's own docstring, verbatim. Regenerate rather than hand-edit.
+Generated from `apps/mcp/server.py` at commit `37b543f124` (2026-10-14) by `gen_tools_md.py`. Signatures and defaults are read from the source with `ast`; the description of each tool is that tool's own docstring, verbatim. Regenerate rather than hand-edit.
 
 **36 tools.** Python MCP SDK over streamable HTTP, deployed as the `mcp` Cloud Run service on session-mode pooling (promotion holds locks).
 
@@ -189,8 +189,10 @@ get_cohort_benchmarks(sub_vertical: str, exclude_display_id: str = '',
 | `subcap_ids` | `list | None` | `None` |
 
 The sub-vertical cohort's peer score per category: the MEAN of every
-other assessed entity's category score (its active, promoted run), with
-n, median and quartiles. Below three entities a category comes back with
+other assessed entity's category score (its active promoted run, else its
+latest scored run — an assessed package is assessed whether or not its
+pages were produced), with n, median and quartiles. The sub-vertical is
+resolved through the alias table ("Insurance Brokers" is IB). Below three entities a category comes back with
 mean null and the reason — record it as cannot_estimate, never impute.
 Aggregates only; no entity is named. Pass the asking client's display id
 or legal name so it is not counted as its own peer.
@@ -1044,4 +1046,4 @@ unreadable verdict is left un-ingested and named, not counted as nothing.
 
 ---
 
-_36 tools · generated from `apps/mcp/server.py` @ `c8f50b0307`._
+_36 tools · generated from `apps/mcp/server.py` @ `37b543f124`._

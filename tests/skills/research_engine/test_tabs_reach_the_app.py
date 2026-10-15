@@ -37,7 +37,7 @@ from engine import contract as C
 from engine import prelim
 from engine import techscan
 
-from .fixtures import bank_evidence, new_run
+from .fixtures import bank_evidence, new_run, ready_for_comparison
 
 
 
@@ -84,7 +84,7 @@ def test_a_peer_name_with_a_comma_lands_as_one_peer_with_its_score(tmp_path):
                        basis="inferred", rule=_RULE)
     cat = out["categories"][0]
     prelim.peer_median(wb, category=cat, median="1.50", p25="1.25", p75="1.75",
-                       basis="inferred", source="peer research 2026-10-06",
+                       basis="table", source="published peer table 2026-10-06",
                        peer_scores="1.25, 1.75, 1.50")
     rows = parse_peer_benchmarks(str(run.workbook_path),
                                  subject_names=["Acme Bank"], obs=[])
@@ -104,7 +104,7 @@ def test_peer_scores_that_do_not_line_up_with_the_names_are_refused(tmp_path):
                        basis="inferred", rule=_RULE)
     with pytest.raises(prelim.PrelimRefusal, match="positional"):
         prelim.peer_median(wb, category=out["categories"][0], median="1.5",
-                           basis="inferred", source="peer research 2026-10-06",
+                           basis="table", source="published peer table 2026-10-06",
                            peer_scores="1.25, 1.75")
 
 
@@ -168,6 +168,7 @@ def test_the_scan_carries_the_fields_the_drilldown_renders(tmp_path):
     synthesis session, which is the work a turn budget drops first."""
     run = new_run(tmp_path, prelim=False)
     wb = run.open()
+    fa = ready_for_comparison(wb)
     eids = bank_evidence(wb, wb.selected_subcaps()[0])
     ts = techscan.record(
         wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
@@ -181,10 +182,12 @@ def test_the_scan_carries_the_fields_the_drilldown_renders(tmp_path):
                 "the core. Confirming a documented adoption figure would "
                 "move P2C1 further; nothing here would move P3 without a "
                 "core decision alongside it."))
-    techscan.peer_record(wb, ts_id=ts, peer="Peer Alpha CU", deployed=True,
+    techscan.peer_record(
+        wb, ts_id=ts, focus_id=fa, peer="Peer Alpha CU", deployed=True,
                          basis="the peer's newsroom names the platform live",
                          source_url="https://peer-alpha.example/news")
-    techscan.peer_record(wb, ts_id=ts, peer="Peer Beta CU", deployed=False,
+    techscan.peer_record(
+        wb, ts_id=ts, focus_id=fa, peer="Peer Beta CU", deployed=False,
                          basis="four searches of the peer's own site and "
                                "newsroom returned 0 hits for the platform")
     techscan.render(wb, run.deliverables)
@@ -207,15 +210,17 @@ def test_a_peer_the_run_could_not_settle_is_null_not_a_negative(tmp_path):
     like data, which invariant 9 forbids."""
     run = new_run(tmp_path, prelim=False)
     wb = run.open()
+    fa = ready_for_comparison(wb)
     ts = techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                          status="CLAIMED", method="technographic_scan",
                          providers=["explorium"],
                          basis="the Explorium export carries this row")
-    techscan.peer_record(wb, ts_id=ts, peer="Peer Alpha CU", deployed=True,
+    techscan.peer_record(
+        wb, ts_id=ts, focus_id=fa, peer="Peer Alpha CU", deployed=True,
                          basis="the peer's newsroom names the platform live",
                          source_url="https://peer-alpha.example/news")
     techscan.peer_record(
-        wb, ts_id=ts, peer="Peer Beta CU", deployed=None,
+        wb, ts_id=ts, focus_id=fa, peer="Peer Beta CU", deployed=None,
         basis="the peer publishes no vendor list and four searches of its "
               "site returned nothing either way")
     st = techscan.peer_state(wb, ts)
@@ -231,12 +236,13 @@ def test_a_peer_the_run_could_not_settle_is_null_not_a_negative(tmp_path):
 def test_peer_coverage_is_null_when_nothing_was_established(tmp_path):
     run = new_run(tmp_path, prelim=False)
     wb = run.open()
+    fa = ready_for_comparison(wb)
     ts = techscan.record(wb, product="Alkami Digital Banking", vendor="Alkami", layer="CUST",
                          status="CLAIMED", method="technographic_scan",
                          providers=["explorium"],
                          basis="the Explorium export carries this row")
     techscan.peer_record(
-        wb, ts_id=ts, peer="Peer Alpha CU", deployed=None,
+        wb, ts_id=ts, focus_id=fa, peer="Peer Alpha CU", deployed=None,
         basis="the peer publishes no vendor list and the searches returned "
               "nothing either way")
     assert techscan.peer_state(wb, ts)["peer_coverage"] is None
@@ -259,12 +265,14 @@ def test_a_deployed_peer_with_no_source_is_refused(tmp_path):
     silence upstream."""
     run = new_run(tmp_path, prelim=False)
     wb = run.open()
+    fa = ready_for_comparison(wb)
     ts = techscan.record(wb, product="X", vendor="Y", layer="OPS",
                          status="CLAIMED", method="technographic_scan",
                          providers=["explorium"],
                          basis="the Explorium export carries this row")
     with pytest.raises(techscan.ScanRefused, match="carries the source"):
-        techscan.peer_record(wb, ts_id=ts, peer="Peer Alpha CU",
+        techscan.peer_record(
+        wb, ts_id=ts, focus_id=fa, peer="Peer Alpha CU",
                              deployed=True,
                              basis="somebody said they run it too")
 

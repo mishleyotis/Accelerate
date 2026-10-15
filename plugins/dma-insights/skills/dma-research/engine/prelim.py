@@ -130,8 +130,11 @@ SECTIONS = {
         section_id="PRELIM-PEERDEP", kind="sheet", sheet="Tech_Peer_Deployments",
         min_rows=1, facet="peer_deployments",
         heading="Peer deployments",
-        why="whether the peer set runs the client's platforms — the AG-04 "
-            "evidence behind every platform recommendation's peer argument"),
+        why="PEER COMPARISON: whether the SELECTED peers run the client's "
+            "platforms, researched only on the client's focus areas (owner, "
+            "2026-10-15) — the AG-04 evidence behind every platform "
+            "recommendation's peer argument. Not the peer benchmark, which "
+            "is the sub-vertical average (`fill-cohort`)"),
 }
 
 #: An empty connector-owned tab is a FINDING only when a connector looked.
@@ -721,8 +724,12 @@ def peers(wb: RunWorkbook, names: list[str], *, rule: str,
             # a category acquires a rendered label; the parser stores None
             # for a blank and never invents one.
             "Category_ID": cid, "Category_Name": "",
+            # Peer_N is the BENCHMARK's n (the cohort behind Peer_Median),
+            # written when the figure is; the selected set's size lives in
+            # Handoff_Lock.peer_n. One column meaning two counts was how a
+            # row read "3 peers" over a mean of 2 (owner, 2026-10-15).
             "Entity_Score": "", "Peer_Median": "", "Peer_P25": "",
-            "Peer_P75": "", "Peer_N": len(clean),
+            "Peer_P75": "", "Peer_N": "",
             "Peer_Basis": f"{basis}: {_clean(rule)}",
             "Source_Cell": "", "Peer_Names": names, "Peer_Scores": "",
             "As_Of": _utcnow()[:10]})
@@ -780,7 +787,7 @@ def widen_peers(wb: RunWorkbook, add: list[str], *, rule: str, owner: str,
             cid = _clean(r.get("Category_ID"))
             if cid:
                 wb.update_row("Peer_Benchmarks", "Category_ID", cid,
-                              {"Peer_Names": names, "Peer_N": len(wanted)}, save=False)
+                              {"Peer_Names": names}, save=False)
         detail = (f"peer set widened by {_clean(owner)}: {', '.join(have)} -> "
                   f"{', '.join(wanted)}. Rule: {_clean(rule)}. Why: {_clean(why)}")[:900]
         wb.append("Provenance", {"SubCap_ID": "", "Step": "widen_peers",
@@ -854,7 +861,7 @@ def replace_peers(wb: RunWorkbook, peers_: list[str], *, rule: str, owner: str,
             cid = _clean(r.get("Category_ID"))
             if cid:
                 wb.update_row("Peer_Benchmarks", "Category_ID", cid,
-                              {"Peer_Names": names, "Peer_N": len(wanted),
+                              {"Peer_Names": names,
                                "Peer_Basis": f"{basis}: {_clean(rule)}"}, save=False)
         retired = sum(wb.delete_rows_where("Tech_Peer_Deployments", {"Peer": p}, save=False)
                       for p in stale)
@@ -929,6 +936,18 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
     # which peer got which figure. Refuse that here, where it can be fixed.
     named = _grid_names(rows[0])
     given = [s.strip() for s in _clean(peer_scores).split(",") if s.strip()]
+    # Selected peers are COMPARED on the client's focus areas, never scored
+    # category by category by this engine (owner, 2026-10-15). A per-peer
+    # score is admissible only when a published table someone else scored
+    # supplies it.
+    if given and basis != "table":
+        raise PrelimRefusal(
+            f"--peer-scores scores the selected peers by category under basis "
+            f"{basis!r}. The peer BENCHMARK is the sub-vertical average "
+            f"(`fill-cohort`); the selected peers are compared on the client's "
+            f"focus areas (`engine.cli techscan peer-record --focus FA-NN`), not "
+            f"scored. Per-peer figures are admissible only from a published "
+            f"table (basis `table`).")
     if given and len(given) != len(named):
         raise PrelimRefusal(
             f"--peer-scores carries {len(given)} figure(s) and Peer_Names "
@@ -944,7 +963,10 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
         "Peer_P75": hi if hi is not None else "",
         "Peer_Basis": f"{basis}: {_clean(source)}",
         "Peer_Scores": _clean(peer_scores),
-        **({"Peer_N": int(n)} if n is not None else {}),
+        # the benchmark's n: the cohort size the caller states, or a
+        # published table's own row count
+        **({"Peer_N": int(n)} if n is not None
+           else {"Peer_N": len(given)} if given else {}),
         "As_Of": _utcnow()[:10]})
     return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
 
@@ -1019,7 +1041,7 @@ def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False)
             lo = hi = None
         peer_median(wb, category=cid, median=mean, p25=lo, p75=hi, basis="recomputed",
                     source=(f"sub-vertical cohort ({sv}): mean of {n} assessed entities' "
-                            f"{cid} scores on their active promoted runs, "
+                            f"{cid} scores (promoted run, else latest scored run), "
                             f"get_cohort_benchmarks {today}"),
                     n=n)
         filled.append(cid)
