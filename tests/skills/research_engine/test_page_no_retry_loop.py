@@ -69,3 +69,22 @@ def test_a_page_edited_after_it_passed_is_shipped_again(tmp_path):
     import os
     os.utime(f, (shipped + 60, shipped + 60))
     assert not P.Pipeline._page_ok(d, "overview", "B"), "a repaired page is not the passed one"
+
+
+def test_a_repair_that_cleared_pass_1_and_first_met_pass_2_is_not_a_stall():
+    """ship_page.py runs pass 2 only once pass 1 is clean, so the first pass-2
+    verdict counts gates pass 1 had hidden. Verus Financial Partners,
+    2026-10-15: techstack went 1 (pass1) -> 9 (pass2) and was halted."""
+    advanced = {"version": "A", "status": "local_precheck_fail", "n_reasons": 9,
+                "n_history": [["A", "local_precheck_fail", 1, 0, "pass1"],
+                              ["A", "local_precheck_fail", 9, 0, "pass2"]]}
+    assert _why(advanced) is None
+    stuck_in_pass2 = {"version": "A", "status": "local_precheck_fail", "n_reasons": 9,
+                      "n_history": [["A", "local_precheck_fail", 9, 0, "pass2"],
+                                    ["A", "local_precheck_fail", 9, 0, "pass2"]]}
+    assert "did not converge" in _why(stuck_in_pass2)
+    assert "pass2" in _why(stuck_in_pass2)
+    legacy = {"version": "A", "status": "local_precheck_fail", "n_reasons": 9,
+              "n_history": [["A", "local_precheck_fail", 1, 0],
+                            ["A", "local_precheck_fail", 9, 0]]}
+    assert "did not converge" in _why(legacy), "no pass recorded: the plain comparison stands"

@@ -522,6 +522,10 @@ class ShipPageShipper:
                 "reasons": verdict.get("reasons") or
                 ([(r.stderr or r.stdout)[-400:]] if r.returncode else []),
                 "sg_v4_fails": verdict.get("sg_v4_fails") or [],
+                # which local validation pass refused it (pass1 | pass2):
+                # pass 1 hides pass 2's reasons, so a count is comparable
+                # only with a count from the same pass (`_no_retry`)
+                "stage": verdict.get("stage"),
                 "rc": r.returncode}
 
     def promote(self, connector_run):
@@ -4292,7 +4296,7 @@ class Pipeline:
                     "n_reasons": res.get("n_reasons"),
                     "n_history": ((rec.get("n_history") or [])
                                   + [[version, res.get("status"), res.get("n_reasons"),
-                                      len(sgv4)]])[-8:],
+                                      len(sgv4), res.get("stage")]])[-8:],
                     "attempts": int(rec.get("attempts") or 0) + 1,
                     "connector_run": connector_run, "at": _utcnow()})
         rec.setdefault("versions", {})[version] = res.get("status")
@@ -4398,9 +4402,23 @@ class Pipeline:
                 if h and h[0] == rec.get("version") and h[1] == "local_precheck_fail"]
         if status == "local_precheck_fail" and isinstance(n, int) and len(hist) >= 2:
             prev = hist[-2][2]
+            # The local check is two passes and pass 1 HIDES pass 2's reasons
+            # (ship_page.py runs pass 2 only once pass 1 is clean). A repair
+            # that cleared pass 1 and was then refused by pass 2 for the
+            # first time has converged on everything it was told; the new
+            # count measures a different gate set. Verus Financial Partners
+            # (2026-10-15): techstack 1 -> 9, heatmap 6 -> 10, both halted as
+            # "did not converge" on the first pass-2 verdict ever read.
+            # Counts compare only within one pass; a history entry with no
+            # pass recorded (an older driver) keeps the plain comparison.
+            prev_pass = hist[-2][4] if len(hist[-2]) > 4 else None
+            cur_pass = hist[-1][4] if len(hist[-1]) > 4 else None
+            if prev_pass and cur_pass and prev_pass != cur_pass:
+                return None
             if isinstance(prev, int) and n >= prev:
                 return (f"the repair did not converge: {n} blocking reason(s) after "
-                        f"repair, {prev} before")
+                        f"repair, {prev} before"
+                        + (f" (both {cur_pass})" if cur_pass else ""))
         return None
 
     def _pages_preflight(self, pages: tuple, version: str) -> None:
