@@ -2714,9 +2714,16 @@ def page_producers(page: str) -> list[str]:
 
 
 def section_owners(page: str) -> dict[str, str]:
-    """`<page>.<section>` -> the per-surface producer whose definition names
-    it in backticks (its frontmatter description is the roster's contract)."""
-    out: dict[str, str] = {}
+    """`<page>.<section>` -> the first per-surface producer whose definition
+    names it in backticks. A section two producers share (techstack.techstack:
+    rows and rollup) is `section_owner_sets`."""
+    return {k: v[0] for k, v in section_owner_sets(page).items()}
+
+
+def section_owner_sets(page: str) -> dict[str, list[str]]:
+    """`<page>.<section>` -> EVERY per-surface producer whose definition names
+    it in backticks, in roster order."""
+    out: dict[str, list[str]] = {}
     d = PLUGIN_ROOT / "agents" / "production" / page
     for agent in page_producers(page):
         try:
@@ -2724,8 +2731,26 @@ def section_owners(page: str) -> dict[str, str]:
         except OSError:
             continue
         for m in re.finditer(rf"`({re.escape(page)}\.[a-z_]+)`", head):
-            out.setdefault(m.group(1), agent)
+            if agent not in out.setdefault(m.group(1), []):
+                out[m.group(1)].append(agent)
     return out
+
+
+def _estate_plan(run, page: str, sdir) -> dict | None:
+    if run is None or page not in ("platform", "overview"):
+        return None
+    from . import page_completeness as PC
+    try:
+        sl = json.loads((Path(run.qa_dir) / "platform_shortlist.json").read_text())
+    except (OSError, ValueError):
+        return None
+
+    def sec(name):
+        try:
+            return json.loads((Path(sdir) / f"{name}.json").read_text())
+        except (OSError, ValueError):
+            return None
+    return PC.estate_plan(page, sec, sl)
 
 
 def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
@@ -2865,6 +2890,12 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                                    if run is not None and page in ("platform", "overview")
                                    and (run.qa_dir / "platform_shortlist.json").is_file()
                                    else None),
+            # The deterministic estate plan (page_completeness.estate_plan): the
+            # exact cards, tiles, discards, verify wording and optimizations the
+            # driver's precheck and the connector will hold the page to. In
+            # the PACKET because a lane loads the INSTALLED plugin's agent
+            # definitions, which may predate the guidance (AAA WCNY, 2026-10-15).
+            "estate_plan": _estate_plan(run, page, sdir),
             "rules": [
                 "read `get_memory_digest` and the contract FILE before authoring; "
                 "the payload shape is law — never invent a field",
@@ -2909,8 +2940,8 @@ def page_batch(wb: RunWorkbook, *, run, out_dir: Path, connector_run: str,
                 # other sections are sound is not re-paid in full (AAA WCNY,
                 # 2026-10-15: the assembler alone was sent to fill tiles it
                 # cannot produce, and restored the stale ones).
-                own = section_owners(page)
-                agents = sorted({own[x] for x in owed if x in own}) or agents
+                own = section_owner_sets(page)
+                agents = sorted({a for x in owed for a in own.get(x, [])}) or agents
             for agent in agents:
                 lanes.append((f"page-{page}-{agent}", {
                     **packet, "agent": agent,

@@ -148,7 +148,7 @@ def _estate_run(live, vendors=("Salesforce",)):
 
 def test_a_platform_the_client_runs_is_never_a_tile(engine):
     engine["estate"] = {"P1": {"in_estate": "CLAIMED"}}
-    out = _estate_run(_estate_live([0, 1, 2, 3, 4], recs="Salesforce org health"))
+    out = _estate_run(_estate_live([0, 1, 2, 3, 4], recs="Salesforce org health check"))
     msgs = [r["message"] for r in out.get("overview", [])]
     assert any("already in the client's estate (CLAIMED)" in m for m in msgs)
     assert any("'P1' is in the client's estate" in m and "discarded" in m for m in msgs)
@@ -180,3 +180,8 @@ def test_the_tiles_skip_owned_cards_when_ranked(engine):
     engine["estate"] = {"P0": {"in_estate": "INFERRED"}}
     out = _estate_run(_estate_live([1, 2, 3, 4, 5], discarded=["P0"], recs="Salesforce"))
     assert not [r for r in out.get("overview", []) if "card-rank order" in r["message"]]
+
+
+def test_selling_beside_an_owned_vendor_is_not_optimizing_it(engine):
+    out = _estate_run(_estate_live([0, 1, 2, 3, 4], recs="Extend Salesforce with Service Cloud"))
+    assert any("already runs Salesforce" in r["message"] for r in out["platform"])

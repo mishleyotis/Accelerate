@@ -109,6 +109,17 @@ def check(page: str, sec: Callable[[str], dict | None], *, shortlist,
                 out.append((sect, f"CG-COMPLETE platform.platform_story: the full-catalogue "
                                   f"top {want} READY platform(s) need a card each; missing "
                                   f"{', '.join(map(str, miss))} (engine spelling)."))
+            barred = {_norm(x.get("platform")): x for x in
+                      (shortlist.get("in_estate") or []) + (shortlist.get("replaces") or [])}
+            for c in cards:
+                b = barred.get(_norm(c.get("platform")))
+                if b:
+                    out.append((sect, f"CG-COMPLETE platform.platform_story: '{c.get('platform')}' "
+                                      + (f"is already in the client's estate ({b.get('in_estate')})"
+                                         if b.get("in_estate") else
+                                         f"would replace {', '.join(b.get('replaces_in_estate') or [])}")
+                                      + " and is a ranked card: it is an optimization "
+                                        "recommendation (or a discard), never a card the page ranks."))
             if story is not None and len(cards) < want:
                 out.append((sect, f"CG-COMPLETE platform.platform_story: {len(cards)} ranked "
                                   f"card(s); the overview tiles the top {want}."))
@@ -158,6 +169,17 @@ def check(page: str, sec: Callable[[str], dict | None], *, shortlist,
 
 
 _VERIFY = ("verify", "confirm")
+#: Words that make a recommendation title OPTIMIZE what is owned rather than
+#: sell something next to it (owner, 2026-10-15: "be more thorough in
+#: optimization ... I feel you are banking on selling").
+_OPTIMIZE = re.compile(r"\b(optimi[sz]\w*|health[ -]?check|reuse|re-use|adoption|"
+                       r"rationali[sz]\w*|consolidat\w*|tune|tuning|verify|"
+                       r"get more from|maximi[sz]\w*)\b", re.I)
+
+
+def _optimizing_titles(recs) -> list[str]:
+    return [_norm(r.get("title")) for r in recs
+            if isinstance(r, dict) and _OPTIMIZE.search(str(r.get("title") or ""))]
 
 
 def estate_rules(sec, shortlist) -> list[tuple[str, str]]:
@@ -215,13 +237,18 @@ def optimization_rules(sec, shortlist) -> list[tuple[str, str]]:
     """Every catalogue platform the client already runs is covered by an
     optimization recommendation on the platform page."""
     recs = (sec("platform.recommendations") or {}).get("recommendations") or []
-    text = _norm(" ".join(json.dumps(r) for r in recs if isinstance(r, dict)))
+    # An optimization recommendation is one whose TITLE names the owned
+    # vendor or product AND optimizes it; naming a vendor while selling the
+    # next licence beside it is not optimizing (AAA WCNY: "Extend Salesforce
+    # with Service Cloud" named Salesforce and optimized nothing).
+    text = " ".join(_optimizing_titles(recs))
     out = []
     for v in shortlist.get("estate_vendors") or []:
         if _norm(v) not in text:
             out.append(("platform.recommendations", f"CG-COMPLETE platform.recommendations: "
                         f"the client already runs {v} (technology register) and no "
-                        f"recommendation addresses optimizing what it owns there."))
+                        f"recommendation TITLE optimizes it (optimize, health check, reuse, "
+                        f"adoption, rationalize, consolidate, verify)."))
     owned = [p for p in shortlist.get("in_estate") or [] if isinstance(p, dict)]
     per_vendor: dict = {}
     for p in owned:
@@ -240,3 +267,59 @@ def optimization_rules(sec, shortlist) -> list[tuple[str, str]]:
                         f"({p.get('in_estate')}) and no recommendation addresses optimizing "
                         f"it. The client's own estate is the first opportunity."))
     return out
+
+
+def estate_plan(page: str, sec, shortlist) -> dict | None:
+    """The deterministic plan a page lane is handed (the brief carries it, so
+    it reaches a lane whatever plugin version the lane loaded): which
+    platforms are cards and tiles, which are discards and why, which tiles
+    must say 'verify', which owned vendors need an optimization
+    recommendation. Computed from the shortlist and the platform cards; the
+    checks above refuse anything else."""
+    if not isinstance(shortlist, dict) or shortlist.get("error"):
+        return None
+    want = int(shortlist.get("tiles_wanted") or 0)
+    owned = shortlist.get("in_estate") or []
+    repl = shortlist.get("replaces") or []
+    discards = ([{"platform": p.get("platform"),
+                  "reason": f"Already in the client's estate ({p.get('in_estate')}): an "
+                            f"optimization conversation, not a new platform."} for p in owned]
+                + [{"platform": p.get("platform"),
+                    "reason": f"Would replace {', '.join(p.get('replaces_in_estate') or [])}, "
+                              f"which the client runs: a replacement, not an opportunity in "
+                              f"what it owns."} for p in repl])
+    verify = [p.get("platform") for p in shortlist.get("shortlist") or []
+              if p.get("vendor_in_estate")]
+    if page == "platform":
+        return {"cards_required": [p.get("platform") for p in
+                                   (shortlist.get("shortlist") or [])[:want]],
+                "cards_forbidden": discards,
+                "optimization_required": {
+                    "vendors": shortlist.get("estate_vendors") or [],
+                    "platforms": [p.get("platform") for p in owned]},
+                "verify_on_owned_org": verify,
+                "rule": ("rank cards only for cards_required (and other non-forbidden READY "
+                         "platforms); a cards_forbidden platform is never a card — the owned "
+                         "ones each get an OPTIMIZATION recommendation, and every vendor in "
+                         "optimization_required.vendors has a recommendation whose TITLE names "
+                         "it with an optimization verb (optimize, health check, reuse, "
+                         "adoption, rationalize, consolidate, verify) — e.g. 'Salesforce org "
+                         "health check and FSC entitlement verification', 'Reuse the MuleSoft "
+                         "integration the club already licenses'")}
+    if page == "overview":
+        story = sec("platform.platform_story") if sec else None
+        bar = {_norm(d["platform"]) for d in discards}
+        cards = [c for c in ranked_cards(story) if _norm(c.get("platform")) not in bar][:want]
+        return {"tiles": [{"platform": c.get("platform"), "rank": c.get("rank"),
+                           "composite": c.get("fit_score"), "subtotal": c.get("subtotal"),
+                           "readiness_multiplier": c.get("readiness_multiplier"),
+                           "factors": c.get("factors"),
+                           "must_say_verify": c.get("platform") in verify}
+                          for c in cards] if story else None,
+                "discarded_required": discards,
+                "rule": ("serve exactly `tiles`, in this order, with these figures (they are "
+                         "the platform cards'); write rank prose from them; a tile with "
+                         "must_say_verify says in their_stack_context to VERIFY its rollout and "
+                         "entitlement on the org the client already owns; list every "
+                         "discarded_required platform in discarded[] with its reason")}
+    return None

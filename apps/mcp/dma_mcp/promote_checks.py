@@ -344,6 +344,11 @@ def _catalogue_scored(conn, cur, run_id) -> list:
                                        -(p.get("fit_score") or 0)))
 
 
+_OPTIMIZE = re.compile(r"\b(optimi[sz]\w*|health[ -]?check|reuse|re-use|adoption|"
+                       r"rationali[sz]\w*|consolidat\w*|tune|tuning|verify|"
+                       r"get more from|maximi[sz]\w*)\b", re.I)
+
+
 def _estate_vendors(pay, cur, run_id) -> list:
     """Catalogue vendors the promoted register places in the estate."""
     items = ((pay.get("techstack") or {}).get("techstack") or {}).get("items") or []
@@ -443,15 +448,19 @@ def completeness(conn, run_id, live: dict) -> dict:
                 + (f"is in the client's estate ({p['in_estate']})" if p.get("in_estate")
                    else f"would replace {', '.join(p.get('replaces_in_estate') or [])}")
                 + " and is not listed as discarded with that reason."))
-    recs = json.dumps(((pay.get("platform") or {}).get("recommendations") or {})
-                      .get("recommendations") or []).lower()
-    recs = " ".join(re.sub(r"[^a-z0-9]+", " ", recs).split())
+    # An owned vendor is OPTIMIZED by a recommendation whose title names it
+    # with an optimization verb; naming it while selling beside it is not.
+    rec_rows = (((pay.get("platform") or {}).get("recommendations") or {})
+                .get("recommendations") or [])
+    recs = " ".join(" ".join(re.sub(r"[^a-z0-9]+", " ", str(r.get("title") or "").lower()).split())
+                    for r in rec_rows if isinstance(r, dict) and _OPTIMIZE.search(str(r.get("title") or "")))
     for v in _estate_vendors(pay, cur, run_id):
         if " ".join(re.sub(r"[^a-z0-9]+", " ", v.lower()).split()) not in recs:
             out.setdefault("platform", []).append(_block(
                 "recommendations", "platform.recommendations",
                 f"the client already runs {v} (technology register) and no recommendation "
-                f"addresses optimizing what it owns there."))
+                f"title optimizes it (optimize, health check, reuse, adoption, rationalize, "
+                f"consolidate, verify)."))
     if not want:
         return out
     story = (pay.get("platform") or {}).get("platform_story") or {}

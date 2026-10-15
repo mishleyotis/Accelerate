@@ -729,6 +729,9 @@ class Options:
     # Let --reingest-b supersede a PROMOTED version (owner decision): the
     # corrected run is promoted in its place; the old one is retained.
     supersede_promoted: bool = False
+    # Re-open named pages on the current version (owner decision, REPAGE).
+    repage: tuple = ()
+    repage_why: str = ""
     ingest_poll_s: float = 60.0
     ingest_timeout_s: float = 3600.0
     folder_root: Path | None = None
@@ -1509,8 +1512,62 @@ class Pipeline:
                         f"pending: {', '.join(p for p in allp if not self._page_ok(p, 'B'))}")
         if stage == "PROMOTE":
             ok = bool(str(md.get("promoted_at") or "").strip())
-            return ok, (f"promoted at {md.get('promoted_at')}" if ok else "not promoted")
+            if not ok:
+                return False, "not promoted"
+            later = self._shipped_after_promotion(str(md.get("promoted_at")))
+            if later:
+                # A page shipped after the promotion is content the client is
+                # not served: the promotion is no longer current (AAA WCNY,
+                # 2026-10-15 — a repaired page must never sit unpromoted).
+                return False, (f"promoted at {md.get('promoted_at')}, but "
+                               f"{', '.join(later)} shipped after it: re-promote")
+            return True, f"promoted at {md.get('promoted_at')}"
         raise KeyError(stage)
+
+    def _shipped_after_promotion(self, promoted_at: str) -> list[str]:
+        from datetime import datetime
+
+        def ts(v):
+            try:
+                return datetime.fromisoformat(str(v).replace("Z", "+00:00"))
+            except ValueError:
+                return None
+        when = ts(promoted_at)
+        if when is None:
+            return []
+        out = []
+        for p, rec in sorted((self.state.get("pages") or {}).items()):
+            at = ts(rec.get("at")) if isinstance(rec, dict) else None
+            if at is not None and at.tzinfo is not None and when.tzinfo is not None \
+                    and at > when and rec.get("status") == "pass":
+                out.append(p)
+        return out
+
+    def repage(self, pages: tuple, why: str) -> dict:
+        """Re-open named pages on the CURRENT version (owner decision, logged
+        as REPAGE): their pass is cleared so PAGES_B re-produces them — the
+        sections a producer owns that are missing or refused go to that
+        producer — and PROMOTE re-runs because a page then ships after the
+        promotion. No re-ingest: invariant 3's 'fix one page, re-promote'."""
+        why = " ".join(str(why or "").split())
+        if len(why) < 20:
+            raise StageRefused("--repage needs --repage-why (>= 20 chars)")
+        bad = [p for p in pages if p not in PAGES_A + tuple(x for g in PAGES_B for x in g)]
+        if bad:
+            raise StageRefused(f"--repage names unknown page(s): {', '.join(bad)}")
+        for p in pages:
+            rec = (self.state.setdefault("pages", {})).setdefault(p, {})
+            for v in ("A", "B"):
+                if (rec.get("versions") or {}).get(v) == "pass":
+                    rec["versions"][v] = "repage"
+            rec["status"] = "repage"
+            rec.pop("attempts_by_version", None)
+        self._save_state()
+        L.append_gate(self.wb, gate="REPAGE", scope=",".join(pages), verdict="PASS",
+                      blocking=False, detail=f"re-opened by the owner: {why}"[:900])
+        self.wb.save()
+        self.opts.log(f"[REPAGE] {', '.join(pages)} re-opened: {why}")
+        return {"repage": list(pages)}
 
     def _page_ok(self, page: str, version: str) -> bool:
         """Passed on this version AND not edited since. A pass is a verdict on
@@ -1737,6 +1794,19 @@ class Pipeline:
                       f"reship all pages: {why}")
         return {"reingest": True, "superseded": cur}
 
+    def _apply_repage(self) -> dict | None:
+        pages = tuple(getattr(self.opts, "repage", ()) or ())
+        why = " ".join(str(getattr(self.opts, "repage_why", "") or "").split())
+        if not pages:
+            return None
+        key = f"{','.join(pages)}|{why}"
+        if key in (self.state.get("repage_reasons") or []):
+            return None
+        out = self.repage(pages, why)
+        self.state.setdefault("repage_reasons", []).append(key)
+        self._save_state()
+        return out
+
     def run_all(self) -> dict:
         """Drive the run, and RECORD HOW IT ENDED.
 
@@ -1780,6 +1850,13 @@ class Pipeline:
             if r.get("reingest"):
                 self.state.setdefault("reingest_reasons", []).append(why)
                 self._save_state()
+        try:
+            self._apply_repage()
+        except StageRefused as e:
+            if locked:
+                runstate.release_driver_lock(self.run)
+            self.opts.log(f"[REPAGE] REFUSED — {e}")
+            return {"outcome": "REFUSED", "reason": str(e), "stage": "PAGES_B"}
         try:
             out = self._run_all()
         finally:
@@ -5550,7 +5627,9 @@ def _build_opts(a) -> Options:
                                     else Options.sg_v4_budget),
                    defer_to_b=tuple(getattr(a, "defer_to_b", None) or ()),
                    reingest_b=str(getattr(a, "reingest_b", None) or ""),
-                   supersede_promoted=bool(getattr(a, "supersede_promoted", False)))
+                   supersede_promoted=bool(getattr(a, "supersede_promoted", False)),
+                   repage=tuple(getattr(a, "repage", None) or ()),
+                   repage_why=str(getattr(a, "repage_why", None) or ""))
 
 
 def _research_mode(a) -> str:
@@ -5605,6 +5684,11 @@ def main(argv=None) -> int:
                    help="supersede version B: re-package, re-ingest and reship every "
                         "page, so a repair made after INGEST_B reaches the connector "
                         "(an owner decision; recorded as REINGEST_B)")
+    r.add_argument("--repage", action="append", default=[],
+                   help="re-open a page on the current version so PAGES_B re-produces it "
+                        "and PROMOTE re-runs (repeatable; an owner decision, logged REPAGE)")
+    r.add_argument("--repage-why", metavar="WHY", default="",
+                   help="the reason for --repage (>= 20 chars)")
     r.add_argument("--supersede-promoted", action="store_true",
                    help="with --reingest-b: allowed on a PROMOTED run, whose served "
                         "version is replaced at PROMOTE by the corrected one (an owner "

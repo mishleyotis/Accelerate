@@ -344,3 +344,61 @@ def test_a_missing_catalogue_copy_is_a_refusal_not_a_skip(tmp_path):
     run, wb, cells, ev = researched_run(tmp_path)
     found = PP.estate_sweep(wb)
     assert found and "did NOT RUN" in found[0]["detail"]
+
+
+# ── a page shipped after the promotion is never left unpromoted ───────────
+
+def test_a_page_shipped_after_promotion_reopens_promote(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    pl = _pipe(run, tmp_path)
+    pl._set_md("promoted_at", "2026-10-15T10:17:05.976908+00:00")
+    pl.state["pages"] = {"overview": {"status": "pass", "at": "2026-10-15T10:16:00Z"}}
+    assert pl.done("PROMOTE")[0] is True
+    pl.state["pages"]["platform"] = {"status": "pass", "at": "2026-10-15T11:00:00Z"}
+    ok, why = pl.done("PROMOTE")
+    assert ok is False and "platform shipped after it" in why
+
+
+def test_repage_reopens_named_pages_once_per_reason_and_logs_it(tmp_path):
+    run, wb, cells, ev = researched_run(tmp_path)
+    pl = _pipe(run, tmp_path)
+    pl.state["pages"] = {"overview": {"status": "pass", "versions": {"B": "pass"}}}
+    with pytest.raises(P.StageRefused):
+        pl.repage(("overview",), "short")
+    with pytest.raises(P.StageRefused, match="unknown"):
+        pl.repage(("nonsense",), "a reason long enough to pass the floor")
+    pl.repage(("overview",), "estate rules: MuleSoft is owned, FSC must say verify")
+    assert pl.state["pages"]["overview"]["versions"]["B"] == "repage"
+    assert pl._page_ok("overview", "B") is False
+    assert any(g.get("Gate") == "REPAGE" for g in run.open().rows("Gate_Log"))
+    pl.opts.repage, pl.opts.repage_why = ("overview",), "estate rules: once per reason"
+    assert pl._apply_repage() is not None and pl._apply_repage() is None
+
+
+def test_an_owned_platform_is_never_a_ranked_card():
+    secs = _est_secs()
+    secs["platform.platform_story"] = {"platforms": CARDS + [
+        {"platform": "MuleSoft Anypoint Platform", "rank": 7, "fit_score": 60}]}
+    out = _check("platform", secs, shortlist=EST)
+    assert any("is a ranked card" in m and "MuleSoft" in m for _, m in out)
+
+
+def test_the_estate_plan_is_the_deterministic_brief():
+    plan = PC.estate_plan("platform", lambda n: None, EST)
+    assert plan["cards_required"][0] == "P0"
+    assert {d["platform"] for d in plan["cards_forbidden"]} == {
+        "MuleSoft Anypoint Platform", "Tableau (Cloud + Server)"}
+    assert plan["optimization_required"]["vendors"] == ["Salesforce", "MuleSoft"]
+    ov = PC.estate_plan("overview", lambda n: GOOD.get(n), EST)
+    assert [t["platform"] for t in ov["tiles"]] == [f"P{i}" for i in range(5)]
+    assert ov["tiles"][0]["must_say_verify"] is True
+    assert ov["tiles"][0]["composite"] == CARDS[0]["fit_score"]
+
+
+def test_naming_an_owned_vendor_while_selling_beside_it_is_not_optimizing():
+    sell = _est_secs(recs="Extend Salesforce with Service Cloud; MuleSoft integration layer")
+    out = [m for _, m in _check("platform", sell, shortlist=EST)]
+    assert any("already runs Salesforce" in m and "TITLE" in m for m in out)
+    assert any("already runs MuleSoft" in m for m in out)
+    ok = _est_secs(recs="Salesforce org health check and FSC entitlement verify; reuse MuleSoft APIs")
+    assert not [m for _, m in _check("platform", ok, shortlist=EST) if "TITLE" in m]

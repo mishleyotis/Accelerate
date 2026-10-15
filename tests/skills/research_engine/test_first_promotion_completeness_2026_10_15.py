@@ -180,3 +180,9 @@ def test_a_tile_off_its_card_is_held_locally_cg31(tmp_path):
     (sd / "overview.opportunity.json").write_text(json.dumps(
         {"tiles": [{"platform": "MuleSoft Anypoint Platform", "rank": 2, "composite": 62.9}]}))
     assert not [m for s_, m in pl._completeness_detail("overview") if "CG-31" in m]
+
+
+def test_a_shared_section_dispatches_every_owner():
+    from engine import brief
+    owners = brief.section_owner_sets("techstack")["techstack.techstack"]
+    assert set(owners) == {"techstack-layers-producer", "techstack-register-producer"}
