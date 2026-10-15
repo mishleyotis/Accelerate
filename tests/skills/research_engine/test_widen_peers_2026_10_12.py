@@ -39,7 +39,9 @@ def test_the_owner_widens_a_set_no_figure_rests_on(tmp_path):
     lock = wb.handoff_lock()
     assert lock["locked_peer_set"] == "Peer A|Peer B|Peer C"
     assert int(lock["peer_n"]) == 3
-    assert all(int(r["Peer_N"]) == 3 and "Peer C" in r["Peer_Names"]
+    # The selected set's size is the lock's; the grid's Peer_N is the
+    # BENCHMARK's n and stays blank until the cohort figure is written.
+    assert all(not r.get("Peer_N") and "Peer C" in r["Peer_Names"]
                for r in wb.rows("Peer_Benchmarks") if r.get("Category_ID"))
     assert any(r.get("Gate") == "PEER_SET_WIDENED" for r in wb.rows("Gate_Log"))
     assert not [b for b in brief.report_preflight(wb) if b["kind"] == "owner"]

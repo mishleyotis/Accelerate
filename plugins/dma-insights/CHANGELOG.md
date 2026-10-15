@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- **Peer benchmark and peer comparison are two things now, in code and in
+  the docs** (`docs/PEER-BENCHMARK-VS-COMPARISON.md`; owner, 2026-10-15).
+  The benchmark is the sub-vertical average of already-assessed entities
+  (promoted or not) and names no one; the comparison is the selected,
+  locked peers, researched only on the client's focus areas.
+  `techscan peer-record` refuses a peer outside the locked set, a run with
+  no focus area, and a product no focus area reaches, and records
+  `Focus_ID`; relay's peer platform/layer probes are scoped to the focus
+  areas; `--peer-scores` is refused unless from a published `table`;
+  `Peer_Benchmarks.Peer_N` is the cohort's n, not the selected set's size.
+  Three conflations wait on the owner (doc items 7–9).
+
 - **First promotions read incomplete: no peers, two platforms, stale pages**
   (`docs/AAA-WCNY-FIRST-PROMOTION-2026-10-15.md`). AAA Western and Central
   New York promoted with every peer median null, 2 opportunity tiles and 4

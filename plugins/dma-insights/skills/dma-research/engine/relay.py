@@ -967,7 +967,7 @@ def batch_prompt(run: runstate.Run, wb, key: str, tool: str,
         "says what the product does (T3). For a request whose purpose starts "
         "`peer layer:`, record one reading per register row it lists, for that "
         f"peer: `python3 -m engine.techscan peer-record {rr} --ts <TS-nnn> "
-        "--peer '<peer>' --deployed|--not-deployed|--unknown --basis '<what was "
+        "--peer '<peer>' --focus <FA-NN> --deployed|--not-deployed|--unknown --basis '<what was "
         "searched and what it showed>' [--url <url>]`; name the vendor you found "
         "in the basis even when it is not on the register (a peer on Jack Henry "
         "when Susser's core is unknown is the finding).",
@@ -1164,8 +1164,20 @@ def report_probes(run: runstate.Run, wb) -> dict:
     lock = wb.handoff_lock() or {}
     peers = [re.sub(r"\s*\(.*?\)", "", p).strip()
              for p in str(lock.get("locked_peer_set") or "").split("|") if p.strip()]
+    # PEER COMPARISON is scoped to the client's FOCUS AREAS (owner,
+    # 2026-10-15): the selected peers are researched only with regard to what
+    # the client said it is trying to do. A platform or layer no focus area
+    # reaches is not compared; the peer BENCHMARK (the sub-vertical average,
+    # `get_cohort_benchmarks`) covers every category without naming anyone.
+    focus_cats = {c.strip().split(".")[0].upper()
+                  for fa in wb.rows("Focus_Areas")
+                  for c in str(fa.get("Cells") or "").split(",") if c.strip()}
     plats = []
     for r in sols:
+        scats = {c.strip().upper() for c in str(r.get("categories") or "").split(",")
+                 if c.strip()}
+        if not scats & focus_cats:
+            continue
         for part in re.split(r"\+|/", str(r.get("platform") or "")):
             part = part.strip()
             if part and part not in plats:
@@ -1174,7 +1186,7 @@ def report_probes(run: runstate.Run, wb) -> dict:
     # search window cannot hold the whole peer set (Susser Bank, 2026-10-05:
     # twelve probes on one P2C3 cell hit the 60-search ceiling unlogged).
     sol_cells = [c for c in (first_cell(str(r.get("categories") or "").split(",")[0].strip())
-                             for r in sols) if c]
+                             for r in sols) if c and c.split(".")[0].upper() in focus_cats]
     if peers and plats and sol_cells:
         terms = " OR ".join(f'"{p}"' for p in plats[:6])
         for i, peer in enumerate(peers):
@@ -1186,6 +1198,15 @@ def report_probes(run: runstate.Run, wb) -> dict:
     reg = wb.rows("Tech_Register")
     for layer, cat in _LAYER_CATEGORY.items():
         rows = [r for r in reg if str(r.get("Layer") or "") == layer]
+        if not rows:
+            continue
+        def _row_cats(r):
+            return {c.strip().split(".")[0].upper()
+                    for c in str(r.get("SubCap_IDs") or "").split(",") if c.strip()}
+        # Only the rows a focus area reaches: a row's own cells, or — for a
+        # row with none — the layer's category. `peer-record` refuses the rest.
+        rows = [r for r in rows
+                if (_row_cats(r) & focus_cats) or (not _row_cats(r) and cat in focus_cats)]
         if not rows:
             continue
         # Name systems, not consumer features: a row the bank's own feature
