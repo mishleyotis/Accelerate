@@ -236,6 +236,23 @@ STAGES = ("PREFLIGHT", "START", "PRELIM", "KG", "RESEARCH", "HANDOFF", "SCORING"
 #: from a scored checkpoint, and the rest wait for the package.
 PAGES_A = ("techstack", "heatmap")
 PAGES_B = (("overview", "insights", "platform"), ("context",))
+#: The order due pages SHIP within one call: a page ships after the pages its
+#: cross-page gates reconcile against, because the local pass-2 replay reads
+#: the connector's STAGED copy of those pages. insights' landscape counts the
+#: techstack register (T2 vs T1); overview reconciles its opportunity tiles to
+#: the platform cards (CG-31) and its coverage to the heatmap (O10/H2);
+#: context projects from overview (C4, C6). Verus Financial Partners
+#: (2026-10-15): platform was repaired after a promote refusal and overview
+#: re-quoted its figures; shipped overview-first, overview's pass 2 would have
+#: failed CG-31 against the stale staged platform and spent its last attempt.
+SHIP_ORDER = ("techstack", "heatmap", "platform", "insights", "overview", "context")
+
+
+def ship_order(pages) -> list:
+    """`pages` sorted by SHIP_ORDER; a page the order does not name keeps its
+    place after the named ones."""
+    rank = {p: i for i, p in enumerate(SHIP_ORDER)}
+    return sorted(pages, key=lambda p: (rank.get(p, len(SHIP_ORDER)), list(pages).index(p)))
 
 PLUGIN = Path(__file__).resolve().parents[3]
 AGENT_RUN = PLUGIN / "scripts" / "agent_run.py"
@@ -4650,7 +4667,7 @@ class Pipeline:
         guard stops a group whose workflows leave nothing new on disk."""
         shipped = []
         todo = [p for p in pages if not self._page_ok(p, version)]
-        for p in todo:
+        for p in ship_order(todo):
             rec = (self.state.get("pages") or {}).get(p) or {}
             m = self._page_mtime(p)
             last = (rec.get("shipped_mtime") or {}).get(version)

@@ -149,3 +149,14 @@ def test_a_promote_refused_on_a_retained_page_routes_that_page_back_as_a_repair(
     # any other refusal is not a page verdict
     other = {"promoted": False, "error": "lease_held", "pages": [], "reasons": {}}
     assert P.Pipeline._route_retained_refusal(d, other, "B") == []
+
+
+def test_due_pages_ship_after_the_pages_they_reconcile_against():
+    """Verus (2026-10-15): platform was repaired after a promote refusal and
+    overview re-quoted its figures; shipped overview-first, overview's local
+    pass 2 would read the STAGED (stale) platform and fail CG-31."""
+    assert P.ship_order(["overview", "insights", "platform"]) == ["platform", "insights", "overview"]
+    assert P.ship_order(["context", "overview"]) == ["overview", "context"]
+    assert P.ship_order(["techstack", "heatmap"]) == ["techstack", "heatmap"]
+    assert P.ship_order(["overview", "mystery"]) == ["overview", "mystery"], "unknown pages keep their place after the named ones"
+    assert P.ship_order([]) == []
