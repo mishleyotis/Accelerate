@@ -46,7 +46,9 @@ def _emitted_ids() -> set:
     out = set()
     base = ROOT / "apps" / "mcp" / "dma_mcp"
     for p in list(base.glob("*.py")) + list(base.glob("*.json")):
-        out |= set(re.findall(r"\b(?:CG|AG|SG|ET)-[0-9]+\b", p.read_text(
+        # [a-z]? — letter-suffixed ids (CG-18b, RC-04/06 2026-10-04) are gates
+        # too; without it the census marks them registry-only.
+        out |= set(re.findall(r"\b(?:CG|AG|SG|ET)-[0-9]+[a-z]?\b", p.read_text(
             errors="ignore")))
     return out
 
@@ -77,7 +79,7 @@ def render() -> str:
         if not ids:
             continue
         lines += [f"### {fam} · {FAMILY[fam]} ({len(ids)})", "",
-                  "| Gate | What it asserts | On failure |", "|---|---|---|"]
+                  "| Gate | What it asserts | On failure | Deep dive |", "|---|---|---|---|"]
         for gid in ids:
             name, plain, what, _why, on_fail = gates[gid]
             what = " ".join(str(what).split())
@@ -85,7 +87,10 @@ def render() -> str:
                 what = what[:237].rsplit(" ", 1)[0] + "…"
             note = "" if gid in emitted else " *(registry-only: no module "\
                                              "emits this id today)*"
-            lines.append(f"| `{gid}` | **{name}.** {what}{note} | {on_fail} |")
+            # one file per gate under 05-lifecycle/gates/ (W3-4, F-E01-026):
+            # the census links it so a verdict's id routes to its own page
+            dive = f"`gates/{gid}.md`" if (TARGET.parent / "gates" / f"{gid}.md").is_file() else "—"
+            lines.append(f"| `{gid}` | **{name}.** {what}{note} | {on_fail} | {dive} |")
         lines.append("")
     missing = sorted(emitted - set(gates))
     if missing:

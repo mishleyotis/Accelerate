@@ -227,3 +227,142 @@ def test_it_runs_inside_pass_two():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── the empty bar ─────────────────────────────────────────────────────
+#
+# Golden 1, run 40971653, promoted 2026-09-02T14:35:12Z. The overview hero
+# rendered P1-P4 as four blank tracks with only a peer-median tick, because
+# `score` was null on all four. This gate had the row in its hands and let
+# it through: `if score is None or peer is None: continue` skipped every
+# check below, so a strip could serve four empty bars and pass.
+#
+# It was never a missing input. The workbook stated the figures twice
+# (Pillar_Summary.Weighted_Score and Pillar_Rollup.score), the heatmap
+# already served exactly those figures with their source cells, and the
+# composite on this very section was their mean. The delta beside each null
+# was computed FROM the number the row declined to state.
+#
+# The rule is the mirror of the delta branch: a derived value with its
+# operands in hand is computed, never left null. score = peer + delta.
+
+# verbatim from that promoted payload, before the repair
+GOLDEN1_P1_EMPTY = {"pillar_id": "P1", "score": None, "peer_median": 3.1,
+                    "delta": -0.7, "direction": "below", "peer_n": 4}
+GOLDEN1_P1_FIXED = {**GOLDEN1_P1_EMPTY, "score": 2.4}
+
+
+def test_the_promoted_empty_bar_is_refused(monkeypatch):
+    out = run(monkeypatch, strip(GOLDEN1_P1_EMPTY))
+    assert ids(out) == ["CG-44"]
+    r = out[0]
+    assert r["path"] == "overview.scores.pillars[0].score"
+    # the verdict hands back the recoverable figure, 3.1 + (-0.7)
+    assert "2.4" in r["message"]
+    assert "EMPTY BAR" in r["message"]
+
+
+def test_serving_the_figure_clears_it(monkeypatch):
+    assert run(monkeypatch, strip(GOLDEN1_P1_FIXED)) == []
+
+
+def test_all_four_golden1_pillars_are_reported_not_just_the_first(monkeypatch):
+    """The promoted defect was four bars, not one."""
+    rows = [
+        {"pillar_id": "P1", "score": None, "peer_median": 3.1, "delta": -0.7},
+        {"pillar_id": "P2", "score": None, "peer_median": 3.0, "delta": -0.89},
+        {"pillar_id": "P3", "score": None, "peer_median": 3.0, "delta": -0.75},
+        {"pillar_id": "P4", "score": None, "peer_median": 3.1, "delta": -0.85},
+    ]
+    out = run(monkeypatch, strip(*rows))
+    assert ids(out) == ["CG-44"] * 4
+    # each names its own recoverable score: 2.4, 2.11, 2.25, 2.25
+    for want, r in zip(("2.4", "2.11", "2.25", "2.25"), out):
+        assert want in r["message"]
+
+
+def test_a_row_with_no_peer_median_is_still_not_this_gates_business(monkeypatch):
+    """Only a row whose operands are BOTH present can have its score
+    recovered. A genuinely peerless row is another gate's concern, and this
+    one must not invent a figure for it."""
+    assert run(monkeypatch, strip({"pillar_id": "P1", "score": None,
+                                   "peer_median": None, "delta": None})) == []
+
+
+def test_a_null_score_beside_a_peer_but_no_delta_is_not_recoverable(monkeypatch):
+    """Two operands or nothing. With only the peer median in hand the score
+    is not arithmetic, and this gate refuses to guess it."""
+    assert run(monkeypatch, strip({"pillar_id": "P1", "score": None,
+                                   "peer_median": 3.1, "delta": None})) == []
+
+
+# ── a named peer set that nobody scored (Verus, 2026-10-15) ──────────────
+
+def test_a_named_peer_set_with_no_score_cannot_serve_an_empty_strip(monkeypatch):
+    """Four peers named, the RIA cohort below its floor, every pillar row
+    peer_median null with a cannot_estimate reason — and the page promoted.
+    "Peer data is empty." (owner, 2026-10-15)."""
+    import dma_mcp.peer_set as PS
+    monkeypatch.setattr(PS, "run_peer_set",
+                        lambda conn, run_id, payload, page=None:
+                        {"campbell": "Campbell Deegan Financial", "godsey": "Godsey & Gibb"})
+    monkeypatch.setattr(V2, "_run_peer_names", lambda conn, run_id: set())
+    payload = strip({"pillar_id": "P1", "score": 1.03, "peer_median": None,
+                     "peer_n": 0, "peer_basis": "cannot_estimate"},
+                    {"pillar_id": "P2", "score": 1.14, "peer_median": None,
+                     "peer_n": 0, "peer_basis": "cannot_estimate"})
+    payload["scores"]["empty_state"] = {"reason": "no assessed RIA in the cohort"}
+    out = run(monkeypatch, payload, None)
+    assert ids(out) == ["CG-44"], out
+    assert "names 2 peer(s)" in out[0]["message"]
+    # the owner's recorded decision, named on the section, is the one escape
+    payload["scores"]["empty_state"]["reason"] = (
+        "OWNER_DECISION 2026-10-15: peers identified, not scored, by the engagement owner")
+    assert run(monkeypatch, payload, None) == []
+    # a scored peer set is the normal case: no finding from this rule
+    monkeypatch.setattr(V2, "_run_peer_names", lambda conn, run_id: {"campbell"})
+    payload["scores"]["empty_state"]["reason"] = "x"
+    assert ids(run(monkeypatch, payload, None)) == []
+
+
+def test_no_named_peer_set_is_not_this_finding(monkeypatch):
+    import dma_mcp.peer_set as PS
+    monkeypatch.setattr(PS, "run_peer_set", lambda conn, run_id, payload, page=None: {})
+    out = run(monkeypatch, strip({"pillar_id": "P1", "score": 1.0, "peer_median": None}), None)
+    assert ids(out) == []
+
+
+def test_a_grid_silent_on_a_category_the_run_scored_peers_for_is_refused(monkeypatch):
+    """Verus, 2026-10-16: the overview strip served four pillar medians, the
+    heatmap grid served peer_median null on all 20 rows with an empty_state
+    saying the peers "were not scored", and the run promoted. The grid file
+    predated the peer scoring and shipped from disk afterwards."""
+    monkeypatch.setattr(V2, "_run_peer_categories",
+                        lambda conn, run_id: {"P1C2", "P2C3"})
+    grid = {"pillars": {"P1": {"score": 1.03, "peer_median": None},
+                        "P2": {"score": 1.14, "peer_median": None},
+                        "P3": {"score": 1.08, "peer_median": None}},
+            "categories": {"P1C1": {"score": 1.06, "peer_median": None},
+                           "P1C2": {"score": 1.04, "peer_median": None},
+                           "P2C3": {"score": 1.09, "peer_median": None},
+                           "P3C1": {"score": 1.15, "peer_median": None}},
+            "empty_state": {"reason": "the four identified peers were not scored"}}
+    out = V2._check_peer_grid_cascade(None, "run-1", "heatmap", {"workbook_scores": grid})
+    paths = sorted(r["path"] for r in out)
+    assert ids(out) == ["CG-44"] * 4, out
+    assert paths == ["heatmap.workbook_scores.categories.P1C2.peer_median",
+                     "heatmap.workbook_scores.categories.P2C3.peer_median",
+                     "heatmap.workbook_scores.pillars.P1.peer_median",
+                     "heatmap.workbook_scores.pillars.P2.peer_median"]
+    # P1C1 and P3C1 carry no recorded peer: their null stands, as does P3's
+    grid["categories"]["P1C2"]["peer_median"] = 2.0
+    grid["categories"]["P2C3"]["peer_median"] = 2.0
+    grid["pillars"]["P1"]["peer_median"] = 2.0
+    grid["pillars"]["P2"]["peer_median"] = 1.75
+    assert V2._check_peer_grid_cascade(None, "run-1", "heatmap", {"workbook_scores": grid}) == []
+    # no recorded peer score at all: the honest null is not this finding
+    monkeypatch.setattr(V2, "_run_peer_categories", lambda conn, run_id: set())
+    grid["categories"]["P1C2"]["peer_median"] = None
+    assert V2._check_peer_grid_cascade(None, "run-1", "heatmap", {"workbook_scores": grid}) == []
+    # the overview rule is untouched by the heatmap half
+    assert V2._check_peer_grid_cascade(None, "run-1", "overview", {"workbook_scores": grid}) == []

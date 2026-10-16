@@ -87,3 +87,37 @@ def test_other_tools_are_not_the_guards_business():
     assert _run({"tool_name": "Read",
                  "tool_input": {"command": f"https://{FAKE_PAT}@github.com"}}
                 ) is None
+
+
+# ── F-K04-039 · the service-account key is named, and named as forbidden ──
+
+KEY_FILE = "/root/.dma/" + "sa.json"          # constructed: a test is not a command
+TOKEN_FILE = "/root/.dma/" + "pathtok"
+KEY_VAR = "DMA_ROUTINE_" + "SA_KEY_B64"
+
+
+def test_the_key_file_and_the_key_variable_are_denied_by_name():
+    for cmd in (f"cat {KEY_FILE}",
+                f"python3 -c \"print(open('{KEY_FILE}').read())\"",
+                f"base64 -w0 ~/.dma/{KEY_FILE.rsplit('/', 1)[-1]} | pbcopy",
+                f"cp {TOKEN_FILE} /tmp/t",
+                f"echo ${KEY_VAR} > /tmp/k"):
+        out = _run(_bash(cmd))
+        assert _is_deny(out), cmd
+        why = out["hookSpecificOutput"]["permissionDecisionReason"]
+        assert "service-account key" in why or "credential environment variable" in why
+
+
+def test_the_plugins_own_bridge_and_bootstrap_are_not_named_and_pass():
+    for cmd in ("python3 scripts/mcp_raw.py call get_run_progress --args '{\"run_id\": \"x\"}'",
+                "bash plugins/dma-insights/scripts/bootstrap_session.sh",
+                "python3 plugins/dma-insights/scripts/doctor.py --heal"):
+        assert _run(_bash(cmd)) is None, cmd
+
+
+def test_decide_is_the_one_entry_bash_guard_calls():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("deny_credential_ops", HOOK)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    assert m.decide("ls") is None and "GitHub" in m.decide(f"curl -H 'token {FAKE_PAT}'")

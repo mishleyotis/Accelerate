@@ -1,0 +1,8 @@
+# BREAK-GLASS ONLY. Revoke links on Admin › Client links (effective within
+# seconds, no release). This file is for when the app itself cannot be used.
+#
+# Revoked client share links — one `jti` per line (shown in the share dialog
+# and in each `share_link_minted` log line). infra/deploy.sh passes this list
+# to dmai-share as SHARE_REVOKED_JTIS; a listed link stops opening on the
+# next release. To revoke EVERY link at once, rotate the key pair instead
+# (new versions of dmai-share-signing-key and dmai-share-verify-key).

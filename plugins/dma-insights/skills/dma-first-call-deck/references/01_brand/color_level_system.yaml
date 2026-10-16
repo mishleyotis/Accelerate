@@ -5,59 +5,63 @@
 # To change a color, edit color_level_system.py and re-run the sync script.
 
 level_4tier:
+  # Boundaries and accents are the app's (apps/web/lib/bands.js): strict
+  # less-than at 2 / 3 / 4 on the raw score; no fifth band.
   Activating:
-    score_range: [0.00, 1.49]
-    accent: "F97316"       # strip + progress-bar fill/border; heatmap
+    score_range: [0.00, 1.99]
+    accent: "FFCB99"       # strip + progress-bar fill/border; heatmap
     card_bg: "FFF3E8"      # heatmap bg_card fill/border; Slide 10 rec card bg
     label_text: "F97316"   # level-label text color (matches template)
   Building:
-    score_range: [1.50, 2.49]
-    accent: "8094C0"
+    score_range: [2.00, 2.99]
+    accent: "62D7B8"
     card_bg: "F2F4F9"
     label_text: "4E5E8A"
   Competing:
-    score_range: [2.50, 3.49]
+    score_range: [3.00, 3.99]
     accent: "27BBAF"
     card_bg: "E6F5F3"
     label_text: "198478"
   Differentiating:
-    score_range: [3.50, 5.00]
-    accent: "185F60"
+    score_range: [4.00, 5.00]
+    accent: "139F94"
     card_bg: "E8F7F6"
-    label_text: "185F60"
+    label_text: "139F94"
 
+# The 1-5 maturity SCORE scale (engine/rubric.py cuts 1.5/2.5/3.5/4.5), not
+# the display bands.
 level_5tier:
   1:
-    score_range: [0.00, 0.99]
+    score_range: [0.00, 1.49]
     label: "Foundational"
     bg_rect: "FFCB99"
     circle: "FE9732"
     num_text: "F2F4F9"
     label_text: "1C4A4D"
   2:
-    score_range: [1.00, 1.99]
+    score_range: [1.50, 2.49]
     label: "Developing"
     bg_rect: "C7D3EC"
     circle: "8094C0"
     num_text: "F2F4F9"
     label_text: "1C4A4D"
   3:
-    score_range: [2.00, 2.99]
+    score_range: [2.50, 3.49]
     label: "Established"
     bg_rect: "E6F3FA"
     circle: "3D81F6"
     num_text: "F2F4F9"
     label_text: "1C4A4D"
   4:
-    score_range: [3.00, 3.99]
+    score_range: [3.50, 4.49]
     label: "Advanced"
     bg_rect: "E8F7F6"
     circle: "62D7B8"
     num_text: "F2F4F9"
     label_text: "1C4A4D"
   5:
-    score_range: [4.00, 5.00]
-    label: "Transformational"
+    score_range: [4.50, 5.00]
+    label: "Leading"
     bg_rect: "B0EED3"       # brand standard (theme has B0EDD3; explicit srgbClr wins)
     circle: "27BBAF"
     num_text: "FFFFFF"
@@ -76,24 +80,24 @@ static_colors:
   zennify_muted_body: "3D5A5C"
   # Slide 10 peer benchmarks legend
   s10_legend_act_bg: "FFF3E8"
-  s10_legend_act_acc: "F97316"
+  s10_legend_act_acc: "FFCB99"
   s10_legend_bld_bg: "F2F4F9"
-  s10_legend_bld_acc: "8094C0"
+  s10_legend_bld_acc: "62D7B8"
   s10_legend_cmp_bg: "E6F5F3"
   s10_legend_cmp_acc: "27BBAF"
   # Slide 10 competitive strengths
   s10_strengths_bg: "E8F7F6"
-  s10_strengths_accent: "139F94"  # legacy teal; deliberately preserved
+  s10_strengths_accent: "139F94"  # the Differentiating fill; preserved on the panel
   # Slide 6 logo frame
   s6_logo_frame: "E0EEF0"
   # Slide 14 level legend
   s14_legend_act_bg: "FFF3E8"
-  s14_legend_act_acc: "F97316"
+  s14_legend_act_acc: "FFCB99"
   s14_legend_bld_bg: "F2F4F9"
-  s14_legend_bld_acc: "8094C0"
+  s14_legend_bld_acc: "62D7B8"
   s14_legend_cmp_bg: "E6F5F3"
   s14_legend_cmp_acc: "27BBAF"
-  s14_legend_dif_acc: "185F60"
+  s14_legend_dif_acc: "139F94"
 
 theme_refs:
   # Slide 13 decorative bars + pillar row backgrounds

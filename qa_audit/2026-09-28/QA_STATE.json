@@ -1,0 +1,101 @@
+{
+ "audit_date": "28-09-2026",
+ "plugin": "dma-insights",
+ "version": "1.20.0",
+ "plugin_root": "/home/user/Accelerate/plugins/dma-insights",
+ "ops_used": 101,
+ "session": 1,
+ "phase0": {
+  "status": "DONE",
+  "files": 543,
+  "skills": 6,
+  "agents": 74,
+  "hooks": 25,
+  "mcp_tools": 34,
+  "artifacts": [
+   "inventory.json",
+   "INVENTORY.md",
+   "engine_census.json",
+   "contracts_census.md"
+  ]
+ },
+ "axes": {
+  "A": "DONE",
+  "B": "DONE",
+  "C": "DONE",
+  "D": "DONE",
+  "E": "DONE",
+  "F": "DONE",
+  "G": "DONE",
+  "H": "DONE",
+  "I": "DONE",
+  "J": "DONE",
+  "K": "DONE",
+  "L": "DONE",
+  "M": "DONE",
+  "N": "DONE",
+  "O": "DONE"
+ },
+ "findings_so_far": [
+  {
+   "id": "F-A05-001",
+   "sev": "BLOCKER",
+   "note": "retired skills dma-p1/dma-orchestrator/dma-core installed at account level with live ALWAYS-use triggers (seed 10)"
+  },
+  {
+   "id": "F-A04-002",
+   "sev": "HIGH",
+   "note": "account copies of dma-assessment/research/governance/first-call-deck diverge from plugin copies (4/4 sha mismatch); account dma-assessment says 17 cats/836 subcaps/M1-M5"
+  },
+  {
+   "id": "F-K-003",
+   "sev": "BLOCKER",
+   "note": "autoapprove_connector.py allowlists tavily_research, tavily_crawl, enrich-business, enrich-prospects as read-only; these are credit-spending (reproduced via hook run)"
+  },
+  {
+   "id": "F-K-004",
+   "sev": "HIGH",
+   "note": "autoapprove_builtins.py auto-approves 'rm -rf /tmp/run/04_scoring' (reproduced)"
+  },
+  {
+   "id": "F-D02-005",
+   "sev": "HIGH",
+   "note": "31 synthesis/verification agents carry WebSearch+WebFetch (inventory.json has_search)"
+  },
+  {
+   "id": "F-B4-006",
+   "sev": "MEDIUM",
+   "note": "5 of 6 SKILL.md > 500 lines and > 5k tokens; 12 missing refs across 4 skills"
+  },
+  {
+   "id": "F-O04-007",
+   "sev": "HIGH",
+   "note": "live: swbc insights ET-04 rejection at attempts=5 open 11 days; 199 goeasy heatmap rejections at attempts=2 open 25 days"
+  },
+  {
+   "id": "F-H-008",
+   "sev": "MEDIUM",
+   "note": "4 hooks > 200ms (guard_dispatch 770, stage_advance 571, record_handback 504, harvest 459)"
+  },
+  {
+   "id": "F-H-009",
+   "sev": "MEDIUM",
+   "note": "precheck_promote allows promote on unknown run without get_run_progress (client-side by design)"
+  }
+ ],
+ "open_questions": [
+  "engine test coverage per module (sub-agent)",
+  "contracts version skew (sub-agent)",
+  "pytest suite result (background)"
+ ],
+ "resume": "all 16 deliverables written; pending: owner approval at the \u00a718 gate; pytest full run timed out at 60% (1 F)",
+ "verdict": "DO-NOT-SHIP",
+ "findings": {
+  "total": 43,
+  "BLOCKER": 5,
+  "HIGH": 16,
+  "MEDIUM": 18,
+  "LOW": 4
+ },
+ "deliverables_dir": "/tmp/claude-0/-home-user-Accelerate/2fcf16cc-6904-532f-86f1-06397548646a/scratchpad/qa/deliverables"
+}

@@ -389,7 +389,7 @@ the pin that keeps it from recurring: a test id pytest collects, a gate id in
 the connector's registry, or `OPEN` where no pin yet exists and the entry
 states what the missing test must assert. It is the user-flagged core of the
 regression corpus the admission loop re-runs (step 4 above), and
-`scripts/tests/test_permanent_regressions.py` enforces it on every CI run:
+`scripts/tests/test_permanent_regressions.py` (repo root) enforces it on every CI run:
 pins must resolve, and the OPEN count may only shrink.
 
 What this skill may do to the register, in the direction the rules bind:

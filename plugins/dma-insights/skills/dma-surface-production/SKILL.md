@@ -13,6 +13,17 @@ inference at request time — everything a client sees was written here, validat
 and persisted by promotion. That is why a mistake made here is not a runtime surprise but a
 build-time failure a verdict can name, and why the discipline below is worth the effort.
 
+## Reading manifest — by phase
+
+| Phase | Read | Why |
+|---|---|---|
+| Before anything | the list under *Before you write anything* below | the standing clauses, evidence, absence, memory-first |
+| A surface | `03-pages/<page>/<ID>.md`, `03-pages/rulebooks/<page>/<ID>.md`, the gate files your reading order names | the contract, the patterns, the gates |
+| A page | `03-pages/<n>-<page>.md` (the index) and every file it lists | assembling |
+| Submit and repair | `06-reference/shipping.md`, `06-reference/recording.md`, `05-lifecycle/1-gates.md` § Reading a verdict, `05-lifecycle/gates/<ID>.md` | the one command, the tabs, the verdict |
+| Template and memory | `06-reference/template-binding.md`, `05-lifecycle/client-memory.md` | binding, memory |
+| Any script | `06-reference/scripts.md` | what it is for |
+
 ## What you produce
 
 **34 sections across 6 pages**, which render as **38 client surfaces** on 7 dashboards plus
@@ -128,11 +139,19 @@ For what the package folder contains and which artefact is authoritative for wha
 Enrichment is async and the pages that consume it come last. Start it immediately after
 reading the bundle so results are waiting when you reach them.
 
+**Which session runs it.** Clay is session-bound (`02-inputs/enrichment_sources.json`:
+a scheduled run cannot hold the grant), so these calls run in a hand-driven session —
+yours, or the `enrichment-connector-specialist` you dispatch. A scheduled run does not
+pretend: `engine.prelim seed-enrichment` has already written the facets
+`get_client_state` reports into `Enrichment_Needed`, and a facet no session could reach
+is recorded `NOT_RUN` with that reason (`record_enrichment`), never left blank and never
+written as an absence.
+
 ```
-find-and-enrich-company(domain from 01_evidence/entity_profile/)   → taskId
+search-companies + add-company-data-points(domain from 01_evidence/entity_profile/)   → taskId
 add-company-data-points(taskId, [Tech Stack, Annual Revenue, Headcount Growth,
                                  Recent News, Open Jobs, Latest Funding])
-find-and-enrich-contacts-at-company(domain, contactFilters={C-suite titles})  → taskId2
+search-contacts + add-contact-data-points(domain, contactFilters={C-suite titles})  → taskId2
 add-contact-data-points(taskId2, [Find Thought Leadership, Summarize Work History])
 get-task-context(taskId) ; get-task-context(taskId2)     ← POLL. Do not conclude.
 ```
@@ -156,7 +175,7 @@ Three rules that matter more than the call sequence:
   two targeted custom points.** Enrichments cost credits and a DMA needs the leadership tier,
   not the org chart. Outside that, ask.
 
-Full playbook and tier map: `02-inputs/2-clay-enrichment.md`.
+Full playbook, tier map and the **mandatory** company call plus Vibe Prospecting scan (ET-12): `02-inputs/2-clay-enrichment.md`.
 
 ### 5 · Produce, page by page
 
@@ -169,6 +188,9 @@ Work in this order and read the page pack before starting each one:
 03-pages/4-platform.md
 03-pages/5-context.md
 03-pages/6-techstack.md
+
+(Each of those is the page's INDEX — its sections table and page-wide rules. The
+surface you produce is `03-pages/<page>/<ID>.md`; read that, not the whole page.)
 ```
 
 Each pack carries, per surface: the contract, what must be presented, the
@@ -203,7 +225,7 @@ achievement: a cell with its own evidence gets a cited synthesis, a cell whose p
 capability carries evidence gets an inherited one labelled as the inference it is, and a
 cell with nothing gets the ladder that established that. Work outward from the cells other
 surfaces cite — those must be cited grade, because a reader was sent there. Method and
-`linking_stats` shape: `03-pages/1-heatmap.md`.
+`linking_stats` shape: `03-pages/heatmap/H2.md`.
 
 **Write the run thesis after the heatmap, and each page's thread before you submit it.** One
 constraint, stated once, instantiated at five anchors — the hero framing, the top finding,
@@ -274,15 +296,15 @@ Probe sets per surface, the nine contradiction classes and the cross-check proce
 so a contradiction *between* pages survives every per-page gate:
 
 ```bash
-python scripts/check_consistency.py <rundir>/ --subvertical <CODE>   # all six together
+python scripts/check_consistency.py <rundir>/   # all six + bundle.json, catalogue.json, fit.json
 ```
 
-It reconciles the composite against the pillar means, the hero against the grid, gap rows
-against served scores, roadmap ids against the recommendation set, landscape counts against the
-register, O8 against C6, confidence against evidence count, and the framing sentence against
-the top finding. It also refuses a cited cell belonging to another sub-vertical, a served cell
-whose drawer says nothing, a coverage denominator that is not the served cell set, and a run
-whose five narrative anchors are about different constraints.
+It reconciles the composite against the pillar means, the hero against the grid, gap rows against
+served scores, roadmap ids against recommendations, landscape counts against the register, O8 against
+C6, confidence against evidence count, and the framing sentence against the top finding. It refuses a
+cell of another sub-vertical (binding read from `bundle.json`, MEM-0559), a silent drawer, a coverage
+denominator that is not the served set, five anchors about different constraints, and every RC-10/RC-12
+cross-section invariant listed in `scripts/README.md`.
 
 ### 7 · Submit and repair
 
@@ -412,48 +434,17 @@ These are the ones that produced measured defects when they were left to judgeme
 17. **Every served cell opens a drawer that says something.** Cited, inherited or declared —
     a scored cell with no synthesis asserts a number and answers nothing about it.
 
-## Colour: you never send one
+## The rest of the procedure — one file each
 
-Score → band → hex resolves in one module in the app. No payload field carries a hex value, a
-CSS class or an outline instruction. You send the raw score, the band **word** where a surface
-renders one, and semantic flags — `is_thin_evidence`, `below_threshold`, `is_primary_gap`.
+Moved out of this file on 28-09-2026 (QA audit F-B04-027) so it stays under 500 lines;
+the reading manifest above says which phase reads each.
 
-But your prose has to agree with what renders, so know the boundaries. They are strict
-less-than on the **raw** score, before display rounding:
-
-```
-< 2.0  Activating      2.0-2.99  Building
-< 4.0  Competing       >= 4.0    Differentiating
-null   no score
-```
-
-Three things worth knowing before you write a band word:
-
-- **"Transformational" does not render.** The resolver has four branches; anything at or above
-  4.0 returns Differentiating. Do not write M5 into prose.
-- **A score of 2.97 displays as 3.0 and bands as Building.** Resolve the band from the raw
-  value, not the rounded one.
-- **"Stale" means two different things** — over 12 months in the freshness dot, 36 to 48 months
-  on the evidence ladder. The evidence ladder governs anything you emit. Say the age; let the
-  band speak.
-
-Thin evidence adds a dashed outline and does not change the fill, because the fill means
-maturity and nothing else. Full detail, including two hex values that disagree between sources:
-`01-start-here/5-colour-and-bands.md`.
-
-## Representing absence
-
-An empty surface is a value, not an omission. A missing required field fails the contract;
-an explicit empty state passes and renders correctly.
-
-| Situation | Emit |
-|---|---|
-| No leadership found after a full search | empty roster, `verified_absent`, `sources_searched` |
-| Fewer than three dated financial points | the points, `verified_sparse`, no trend |
-| No stair-step derivable | null ladder, `empty_state` with the reason |
-| A figure failed the identity gate | null value, `quarantined`, `quarantine_reason` |
-| A cell's evidence is genuinely thin | `thin`, `sources_searched`, `closure_condition` |
-| No peer figure available | `peer_basis=cannot_estimate`, median stays null |
+- **Colour: you never send one** — `01-start-here/5-colour-and-bands.md` — no colour in any payload; the four bands, strict less-than on the raw score; the freshness dot versus the evidence ladder.
+- **Representing absence** — `01-start-here/4-absence-protocol.md` — an empty surface is a value; the empty state each situation emits.
+- **Where you record, and when your page can ship** — `06-reference/recording.md` — which tab each fact is recorded in and the readiness reader. Read at §7 (submit).
+- **Bind to the template, and to the copy the agent wrote last** — `06-reference/template-binding.md` — the template binding and the copy the agent wrote last. Read at §5 before the first page.
+- **Shipping a page: write files, run one command** — `06-reference/shipping.md` — write files, run one command — `ship_page.py`, the local pass-1 gates, the claim. Read at §7.
+- **Scripts** — `06-reference/scripts.md` — every script the skill ships and what it is for. Read when a step names one.
 
 ## When you are asked to fix one card
 
@@ -490,7 +481,8 @@ assets/          payload skeletons per section
 | `01-start-here/2-evidence.md` | Always — tiers, recency, rank score, peer ladder, citation, and why the excerpt and the `source_url` are one claim |
 | `02-inputs/1-package.md` | Orienting in the assessment folder; deciding which artefact wins |
 | `02-inputs/3-mcp-tools.md` | Any tool call whose exchange you are unsure of |
-| `05-lifecycle/1-gates.md` | Reading a verdict; understanding what will be asserted |
+| `05-lifecycle/1-gates.md` | Reading a verdict; the families and the census |
+| `05-lifecycle/gates/<ID>.md` | One gate's deep dive — read when a verdict or your reading order names it, never the whole set up front |
 | `05-lifecycle/2-versioning.md` | Reruns, catalogue bumps, fixing one page |
 | `04-craft/5-prompt-standard.md` | Producing a surface that has no prompt, or improving one |
 | `02-inputs/2-clay-enrichment.md` | Running enrichment; deciding what tier a Clay output is |
@@ -503,85 +495,6 @@ assets/          payload skeletons per section
 | `04-craft/7-storyline-challenge.md` | After the six pages pass, before you promote — five volleys against the run's whole story |
 | `04-craft/8-answered-questions.md` | Before you promote — the fifteen questions the intelligence panel asks of the run |
 | `01-start-here/5-colour-and-bands.md` | Writing a band word, or describing the heatmap |
-| `03-pages/<n>-<page>.md` | Before producing that page |
+| `03-pages/<n>-<page>.md` | Before producing that page — the index: sections table and page-wide rules |
+| `03-pages/<page>/<ID>.md` | Before producing that surface — its contract, must-present list and prompt; the only pack file a per-surface producer reads |
 | `03-pages/rulebooks/<page>.md` | With the page pack — the rulebook every page is produced against, applied by default |
-
-## Scripts
-
-Run these rather than eyeballing — they are faster and they do not get tired.
-
-```bash
-python scripts/preflight.py --run-id <uuid>        # where the run stands, what is blocking
-python scripts/check_payload.py <payload.json> --page <page> \
-       --subvertical <CODE> --cells <bundle.json>
-                                                    # local checks before you submit:
-                                                    # required fields, budgets, id patterns,
-                                                    # internal_only marking, empty states.
-                                                    # --subvertical turns ET-05 ON and
-                                                    # --cells turns CG-14 ON; without them
-                                                    # those two print "not run", which is
-                                                    # not a pass
-python scripts/check_repetition.py <drafts.json> --page <page> --at-scale 708
-                                                    # BEFORE you write the 21st item of a
-                                                    # large array, not before submit:
-                                                    # CG-15's template rule compares items
-                                                    # against each other, so no per-item
-                                                    # check can see it, and the shape that
-                                                    # refuses 708 cells is visible in 20
-python scripts/score_prompt.py <prompt.txt>        # score a prompt you have written
-                                                    # against the 14-attribute standard
-python scripts/check_language.py <payload.json>    # accusatory framing, fields that OPEN on
-                                                    # an absence, gap statements with no
-                                                    # adjacent asset, lost capitals
-python scripts/check_evidence.py <get_evidence.json> --review
-                                                    # the evidence register, not a page:
-                                                    # one excerpt under two hosts, a
-                                                    # source_url that is not a document,
-                                                    # a search page, a tool cited as a source
-python scripts/clay_plan.py --domain <domain>      # the enrichment call sequence and the
-                                                    # tier each data point registers at
-python scripts/check_consistency.py <rundir>/ --subvertical <CODE>
-                                                    # cross-page reconciliation before
-                                                    # promotion — the check no per-page
-                                                    # gate can make: foreign variant cells,
-                                                    # silent drawers, coverage denominators
-                                                    # and the run's one constraint
-python scripts/precheck_gates.py <payload.json> --page <page> \
-       --evidence <get_evidence.json> --bundle <get_report_bundle.json>
-                                                    # the connector's own blocking gates,
-                                                    # run locally: ET-01/ET-04 citations,
-                                                    # CG-10 dating, ET-05 sub-vertical
-                                                    # scope, CG-14 cell linkage
-```
-
-`check_payload.py` catches the cheap failures locally so your submissions spend their
-round trips on the expensive ones — grain, identity and grounding, which only the server
-can check.
-
-`check_repetition.py` runs at a different moment from all the others: **while you are
-still deciding how to write, not after you have written**. CG-15 refuses three or more
-items of one field that share both their phrasing and their content words, so it is a
-property of the ARRAY and invisible inside any single item — on 2026-08-08 two producers
-met it at submit, one of them having already built all 708 heatmap cells. Twenty drafts
-are enough to see it. The promoted Baxter run's 706 cell syntheses score 0.179 against a
-line of 0.40, so a 700-cell page is demonstrably writable; if yours is refused, the shape
-is the problem and not the scale. `03-pages/1-heatmap.md` says what to change.
-
-`precheck_gates.py` sits between the two, and it exists because a submission is not
-free. Submitting supersedes the staged row, so a FAIL on a page that was passing costs
-you the pass until you repair it — and inside a promotion window, that blocks the
-promote for every other page too. The gates it runs need the run's own facts (which
-evidence rows exist and what they carry, which cells the run serves) but not a database,
-so two tool calls you have already made are enough: `get_evidence` for every id the page
-cites — `--list-cited` prints them so one call covers the page — and `get_report_bundle`.
-
-It imports the connector's gate modules rather than restating them. A second copy of a
-gate is a second answer to the same question, and the answer that matters is the
-server's.
-
-Run it on a page you did not write, too. The heatmap promoted on the run this was
-written for returned **120 blocking reasons** when first checked this way: 79 foreign
-sub-vertical cells sitting inside focus-area cell lists, 11 alerts naming cells the run
-does not carry, 28 evidence rows whose stored excerpt cannot be cited, 2 lowercase
-openings. A page that passed under an older gate set is not a page that passes now, and
-finding that out from this costs nothing.

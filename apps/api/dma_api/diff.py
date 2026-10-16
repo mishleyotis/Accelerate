@@ -64,12 +64,14 @@ _COLS = ("subcap_id", "capability_id", "category_id", "pillar_id",
          "is_thin_evidence")
 
 
-def _cells(cur, run_id: str, sub_vertical: str | None) -> dict:
+def _cells(cur, run_id: str, sub_vertical: str | None,
+           supplementary=None) -> dict:
     cur.execute(
         f"SELECT {', '.join(_COLS)} FROM serving_subcaps "
         "WHERE run_id = %s ORDER BY subcap_id", (run_id,))
     rows = scope_to_entity(cur.fetchall(), sub_vertical,
-                           key=_COLS.index("subcap_id"))
+                           key=_COLS.index("subcap_id"),
+                           supplementary=supplementary)
     out = {}
     for r in rows:
         d = dict(zip(_COLS, r))
@@ -191,8 +193,9 @@ def build_diff(cur, display_id: str, audience: str = "internal",
         return head
 
     sub_vertical = entity.get("sub_vertical")
-    base_cells = _cells(cur, b_meta["run_id"], sub_vertical)
-    target_cells = _cells(cur, t_meta["run_id"], sub_vertical)
+    supplementary = entity.get("supplementary_sub_verticals")
+    base_cells = _cells(cur, b_meta["run_id"], sub_vertical, supplementary)
+    target_cells = _cells(cur, t_meta["run_id"], sub_vertical, supplementary)
 
     b_ver, t_ver = b_meta["ccg_catalog_version"], t_meta["ccg_catalog_version"]
     bridge = _bridge(cur, b_ver, t_ver)

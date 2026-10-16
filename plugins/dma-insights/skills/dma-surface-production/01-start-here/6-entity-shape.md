@@ -198,7 +198,7 @@ grid is clickable on every cell, so 90% of clicks opened a drawer that said noth
 the same run held hundreds of linked evidence rows, so this was a linking and coverage
 failure, not an evidence one.
 
-Broad cell coverage is the default, not an achievement. `03-pages/1-heatmap.md` carries the
+Broad cell coverage is the default, not an achievement. `03-pages/heatmap/H2.md` carries the
 method — three grades of synthesis, the order the work is done in, and what `linking_stats`
 must report — and it is worth reading before you plan the run rather than when you reach
 H2, because the ordering decision is made early and cannot be recovered late.

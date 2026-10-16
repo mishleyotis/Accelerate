@@ -1,0 +1,124 @@
+{
+ "ts": "1787950217.210239",
+ "bot_id": "B0ACUPDCMGF",
+ "username": "Assessment and Research Request",
+ "text": "*Account Full Name*\nREV Federal Credit Union\n*Website*\n<https://www.revfcu.com/>\n*Additional Context*\nClient has marketing cloud but no CRM. Opportunity to implement CRM and Data Cloud\n*Submitter*\n<@U061X1XFD5F>\n*Priority*\nHigh (need in 48 hours)\n\n<@U09TL2S4LLS> Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder",
+ "reply_count": 1,
+ "latest_reply": "1787950217.210239",
+ "blocks": [
+  {
+   "type": "rich_text",
+   "block_id": "jfHNx",
+   "elements": [
+    {
+     "type": "rich_text_section",
+     "elements": [
+      {
+       "type": "text",
+       "text": "Account Full Name",
+       "style": {
+        "bold": true
+       }
+      },
+      {
+       "type": "text",
+       "text": "\n"
+      },
+      {
+       "type": "text",
+       "text": "REV Federal Credit Union"
+      },
+      {
+       "type": "text",
+       "text": "\n"
+      },
+      {
+       "type": "text",
+       "text": "Website",
+       "style": {
+        "bold": true
+       }
+      },
+      {
+       "type": "text",
+       "text": "\n"
+      },
+      {
+       "type": "link",
+       "url": "https://www.revfcu.com/"
+      },
+      {
+       "type": "text",
+       "text": "\n"
+      },
+      {
+       "type": "text",
+       "text": "Additional Context",
+       "style": {
+        "bold": true
+       }
+      },
+      {
+       "type": "text",
+       "text": "\n"
+      },
+      {
+       "type": "text",
+       "text": "Client has marketing cloud but no CRM. Opportunity to implement CRM and Data Cloud"
+      },
+      {
+       "type": "text",
+       "text": "\n"
+      },
+      {
+       "type": "text",
+       "text": "Submitter",
+       "style": {
+        "bold": true
+       }
+      },
+      {
+       "type": "text",
+       "text": "\n"
+      },
+      {
+       "type": "user",
+       "user_id": "U061X1XFD5F"
+      },
+      {
+       "type": "text",
+       "text": "\n"
+      },
+      {
+       "type": "text",
+       "text": "Priority",
+       "style": {
+        "bold": true
+       }
+      },
+      {
+       "type": "text",
+       "text": "\n"
+      },
+      {
+       "type": "text",
+       "text": "High (need in 48 hours)"
+      },
+      {
+       "type": "text",
+       "text": "\n\n"
+      },
+      {
+       "type": "user",
+       "user_id": "U09TL2S4LLS"
+      },
+      {
+       "type": "text",
+       "text": " Please run the maturity assessment and account research, place in the account folder, and reply to this thread with a link to the folder"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

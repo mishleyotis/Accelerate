@@ -144,3 +144,18 @@ def test_duplicate_gate_ids_are_asked_once(db):
     _finding(conn, tag, gate)
     out = memory.recall_for_gates(conn, [gate, gate, gate, None, ""])
     assert out["checked"] == [gate]
+
+
+def test_a_non_uuid_run_id_is_refused_by_name_not_by_postgres():
+    """MEM-0610 (2026-10-09): an engine run id in run_id came back as a raw
+    22P02 and recorded nothing. It is refused before the insert, naming the
+    field and where the id belongs."""
+    out = memory.record_finding(None, {
+        "title": "x", "observed": "y", "measurement": "m" * 40, "component": "mcp",
+        "defect_class": "UNDIAGNOSABLE_REFUSAL", "severity": "MINOR",
+        "raised_by_kind": "TEST", "raised_by": "test",
+        "run_id": "R-IMA-20261009", "entity_id": "ima-financial-group"})
+    assert out["finding_id"] is None
+    assert any(e.startswith("run_id:") and "not a UUID" in e for e in out["errors"])
+    assert any(e.startswith("entity_id:") for e in out["errors"])
+    assert memory._uuid_field_errors({"run_id": str(uuid.uuid4())}) == []

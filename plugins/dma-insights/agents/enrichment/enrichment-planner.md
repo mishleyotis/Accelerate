@@ -6,9 +6,11 @@ effort: high
 maxTurns: 80
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__find-and-enrich-list-of-contacts, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__Clay__add-company-data-points, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Indeed__search_jobs, mcp__Indeed__get_job_details, mcp__Indeed__get_company_data, mcp__Quartr__search, mcp__Quartr__read_transcript, mcp__Quartr__list_conferences, mcp__Quartr__get_conference, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback, mcp__plugin_dma-insights_connector__record_enrichment
-disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
+tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_memory_digest
+disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_enrichment, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
+
+**Model:** `sonnet` — ranks listed gaps by a closure test; no claim about the world.
 
 You read the run's worklist and decide **what is worth doing, in what order, by
 which route** — and, just as importantly, **what is not worth doing at all and
@@ -186,7 +188,7 @@ general opinion about which fields matter.
     plan; `get_memory_digest` for what came back. A gap whose defect class is
     already open in memory is ranked differently from a fresh one.
 12. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/3-mcp-tools.md`
-    — the 33 tools. `list_enrichment_gaps` and `record_enrichment` are the two
+    — the 34 tools. `list_enrichment_gaps` and `record_enrichment` are the two
     your plan turns on; never name a tool that is not on that list.
 
 ## THE CONTRACT — the worklist's kinds, and the surface that renders the plan
@@ -481,7 +483,7 @@ decision auditable:
 | **Computed at read** | contract carries `not_producer_authored`; the doc says "COMPUTED AT READ — do not send" | Nothing. The row should not exist; if it does, report a recurrence |
 | **Server-derived** | H9's value chain from `ccg_value_chains` × `ccg_vc_mapping`; the workbook's stated pillar and category scores | *"An empty chain has two causes — a chain never authored, or a derivation fault — and both live upstream of evidence, so no query closes either"* |
 | **Unobservable enrichment** | the register declares `ran_observable: false` — firmographics, sentiment, thought leadership | `ran: null` with the register's own `ran_unobservable_reason`, reproduced rather than invented |
-| **Refused retrieval** | Glassdoor, Indeed, ZipRecruiter, Trustpilot answering 403; a client domain refusing the verifier | The route named as refused, dated. **A 403 is never an absence** — it records nothing about the institution |
+| **Refused retrieval** | Glassdoor, ZipRecruiter, Trustpilot pages answering 403; a client domain refusing the verifier. NOT Indeed: its page 403s but the Indeed connector (`get_company_data`, origin='connector', T3) answers, so planning it as refused plans a gap that need not exist (RC-07) | The route named as refused, dated. **A 403 is never an absence** — it records nothing about the institution |
 | **Route not wired** | `declared, not wired` in `enrichment_sources.json`. Read the entry before you conclude it: Explorium's key is absent from Secret Manager for the INGEST path only — the producer session reaches it through the Vibe Prospecting connector with no key, so a plan that writes it off unattempted is planning a gap that need not exist | `NOT_RUN` **with the reason, naming which path**, which is what the routine records and the register renders |
 | **No prior run** | `trend_vs_prior` on a first assessment | *"A movement needs a prior reading to move from… the column fills on the second run"* |
 | **Structurally empty peer set** | every comparable is private | *"no rung yields a median. A published ranking of those firms is rung 4 — a proxy that discloses itself"*, disclosed with the literal phrase **peer proxy**, never as a median |
@@ -559,3 +561,19 @@ the ladder named. Each per-surface producer needs its own rows from item 2 and
 **all** of item 3, because the absences are content it has to write.
 `surface-producer` needs items 1, 5 and 6 to decide whether the run is ready to
 promote at all.
+
+## Searching is not this role's
+
+You carry no `WebSearch` and no `WebFetch`, and `scripts/hooks/deny_whole_page_fetch.py` denies both to this role even in a headless child. Measured 28-09-2026 (QA audit F-D02-008): thirty-one synthesis and verification agents could search, so a claim could be written from a page nobody registered — unlogged, unbudgeted, uncitable. You work from what the run holds: the registered evidence the connector serves, the staged payload, the report bundle and the workbook.
+
+When a claim needs evidence the run does not hold, do not go and find it. Return a `search_requests` block and stop; the relay (`engine.relay`) queues it, the research tier runs the search inside the run's budget and ledger, and you are re-dispatched with registered evidence ids:
+
+```json
+{"search_requests": [
+  {"query": "<the search, as you would type it>", "subcap": "P1C1.1.1",
+   "why": "<what a hit would prove for this surface>",
+   "facet": "<a diagnostic-question facet, or omit>", "tool": "exa|tavily|clay|explorium"}
+]}
+```
+
+One object per search. `subcap` names the cell the claim sits on; `why` is what the research lane reads to choose the tool. Never paraphrase a page you found yourself into a citation: the ledger cannot verify an excerpt against a page the run did not keep.

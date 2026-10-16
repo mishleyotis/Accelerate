@@ -96,6 +96,33 @@ def test_the_reach_back_floor_now_answers_on_the_timeline():
 
 # ── the escape, tested hardest ────────────────────────────────────────────
 
+COMPLETE_LADDER = [
+    "Google Play — RESOLVED: 4.6 on 12,000 ratings",
+    "Apple App Store — VERIFIED ABSENT: no app",
+    "Glassdoor — REFUSED (HTTP 403) + ALTERNATE TRIED: Indeed connector — "
+    "RESOLVED",
+    "Indeed — RESOLVED via the connector",
+    "CFPB complaint database — VERIFIED ABSENT",
+    "BBB — VERIFIED ABSENT", "Trustpilot — VERIFIED ABSENT",
+]
+
+
+@pytest.mark.parametrize("disclosure", [
+    {"thin": True, "empty_state": {"sources_searched": COMPLETE_LADDER}},
+    {"empty_state": {"reason": "one rated source exists for this institution",
+                     "sources_searched": COMPLETE_LADDER}},
+    {"sources_searched": COMPLETE_LADDER},
+])
+def test_a_thin_section_that_says_what_it_searched_passes(disclosure):
+    """A CLIENT WITH EIGHT PRODUCTS HAS EIGHT. Refusing the run would be the
+    reject-rather-than-triage failure this system has already paid for. What
+    "says what it searched" means changed on 2026-10-04 (RC-05): a ladder of
+    rungs with outcomes covering the mandatory families."""
+    body = {"sentiment": {"bars": [{"source": "Google Play"}], **disclosure}}
+    assert check("overview", body) == [], (
+        f"a documented thin result must pass: {disclosure}")
+
+
 @pytest.mark.parametrize("disclosure", [
     {"thin": True, "empty_state": {"sources_searched": ["Google Play", "G2"]}},
     {"thin": True, "r_layer": {"probes_run": ["app-store sweep"]}},
@@ -104,12 +131,13 @@ def test_the_reach_back_floor_now_answers_on_the_timeline():
                     "Google Play publishes a rating for this institution."},
     {"r_layer": {"searches": ["trustpilot", "g2"]}},
 ])
-def test_a_thin_section_that_says_what_it_searched_passes(disclosure):
-    """A CLIENT WITH EIGHT PRODUCTS HAS EIGHT. Refusing the run would be the
-    reject-rather-than-triage failure this system has already paid for."""
+def test_the_old_escape_hatches_no_longer_pass(disclosure):
+    """RC-05 (SWBC gold audit, 2026-10-04): each of these passed until today
+    and none is a completed ladder — route names with no outcome, r_layer
+    probes (mandatory on every section, so the floor never bit), a bare
+    reason, prose."""
     body = {"sentiment": {"bars": [{"source": "Google Play"}], **disclosure}}
-    assert check("overview", body) == [], (
-        f"a documented thin result must pass: {disclosure}")
+    assert len(check("overview", body)) == 1, disclosure
 
 
 def test_a_bare_thin_flag_is_not_a_disclosure():
@@ -128,8 +156,10 @@ def test_a_two_word_empty_state_is_not_a_disclosure():
 def test_a_thin_techstack_that_documents_itself_passes():
     body = {"techstack": {"items": [{"ts_id": f"TS-{i}"} for i in range(8)],
                           "thin": True,
-                          "empty_state": {"sources_searched":
-                                          ["Explorium", "Clay", "job posts"]}}}
+                          "empty_state": {"sources_searched": [
+                              "Explorium — NOT_RUN: no API key; Clay Tech "
+                              "Stack ran in its place — RESOLVED, 5 products",
+                              "Job posts — RESOLVED, 3 products"]}}}
     assert check("techstack", body) == []
 
 

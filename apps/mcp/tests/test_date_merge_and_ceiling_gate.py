@@ -74,9 +74,17 @@ def test_the_contradiction_branch_keeps_the_stored_date():
     src = (ROOT / "apps" / "mcp" / "dma_mcp" / "register.py").read_text()
     fill = src.index('verdict == "fill"')
     contra = src.index('verdict == "contradiction"')
-    assert src.count("UPDATE evidence_index") == 1, (
+    # Counted over the UPDATEs that WRITE A DATE, so that another UPDATE of
+    # evidence_index elsewhere in the module would not hide a second date
+    # write. (A split span's `customer_attribution` is never UPDATEd — it is
+    # set only by the minting INSERT: test_split_span_attribution.)
+    import re
+    updates = [(m.start(), m.group(1)) for m in re.finditer(
+        r"UPDATE evidence_index(.*?)WHERE", src, re.S)]
+    date_writes = [pos for pos, body in updates if "published_date" in body]
+    assert len(date_writes) == 1, (
         "more than one update path — the contradiction branch may now write")
-    assert src.index("UPDATE evidence_index") < contra, (
+    assert date_writes[0] < contra, (
         "the only UPDATE must sit in the fill branch, above the "
         "contradiction branch which reports and writes nothing")
     assert fill < contra

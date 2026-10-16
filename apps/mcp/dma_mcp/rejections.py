@@ -105,6 +105,13 @@ def open_for_run(conn, run_id) -> list:
     return [dict(zip(cols, r)) for r in cur.fetchall()]
 
 
+#: Run states whose open rejections are not work: the run is off the board.
+#: A rejection on a SUPERSEDED run was opened against a page a later run
+#: re-produced and promoted; a WITHDRAWN run's repair is the withdrawal
+#: reason, not its old verdict.
+NOT_ACTIONABLE_RUN_STATES = ("SUPERSEDED", "WITHDRAWN")
+
+
 def open_corpus_wide(conn, display_id: str = "", page: str = "",
                      limit: int = 200) -> list:
     """The read that did not exist: what is outstanding ACROSS runs.
@@ -112,22 +119,67 @@ def open_corpus_wide(conn, display_id: str = "", page: str = "",
     This is the queue a scheduled producer session reads to know there is work,
     without having to already know which run to ask about — which is the whole
     reason refusals went unnoticed.
+
+    Measured 28-09-2026 (QA audit F-O04-007): 199 of the 200 rows this
+    returned sat on one run (seq 15) that a later run (seq 18) had
+    superseded by promotion, so the "read this first" list pointed every
+    producer session at a page nobody could usefully repair. Rows on a
+    SUPERSEDED or WITHDRAWN run are not listed here, whatever their
+    `closed_at` says — `close_superseded` closes them at promote, and this
+    filter is the belt to that brace for rows promoted before it existed.
+    Each row carries `run_status` and `run_seq` so a reader can see which
+    run of the client it is looking at.
     """
     cur = conn.cursor()
-    sql = ["SELECT rejection_id, run_id, display_id, legal_name, page, section,",
-           "       gate_id, path, message, attempts, opened_at, open_for",
-           "  FROM open_rejections WHERE TRUE"]
-    args = []
+    sql = ["SELECT r.rejection_id, r.run_id, e.display_id, e.legal_name, r.page,",
+           "       r.section, r.gate_id, r.path, r.message, r.attempts,",
+           "       r.opened_at, (now() - r.opened_at) AS open_for,",
+           "       enum_label(ru.status) AS run_status, ru.run_seq",
+           "  FROM rejection_ledger r",
+           "  JOIN runs ru ON ru.id = r.run_id",
+           "  JOIN entities e ON e.id = ru.entity_id",
+           " WHERE r.closed_at IS NULL",
+           "   AND enum_label(ru.status) <> ALL(%s)"]
+    args: list = [list(NOT_ACTIONABLE_RUN_STATES)]
     if display_id:
-        sql.append(" AND display_id = %s"); args.append(display_id)
+        sql.append(" AND e.display_id = %s"); args.append(display_id)
     if page:
-        sql.append(" AND page = %s"); args.append(page)
+        sql.append(" AND r.page = %s"); args.append(page)
+    sql.append(" ORDER BY r.attempts DESC, r.opened_at")
     sql.append(" LIMIT %s"); args.append(max(1, min(int(limit or 200), 1000)))
     cur.execute("\n".join(sql), tuple(args))
     cols = ("rejection_id", "run_id", "display_id", "legal_name", "page",
             "section", "gate_id", "path", "message", "attempts", "opened_at",
-            "open_for")
+            "open_for", "run_status", "run_seq")
     return [dict(zip(cols, r)) for r in cur.fetchall()]
+
+
+def close_superseded(cur, entity_id, promoted_run_id) -> list:
+    """Close every open rejection on the entity's OTHER runs once one run is
+    promoted — the promote proved every page passes on a newer run, so a
+    ticket on an older run names a repair nobody will make.
+
+    Called inside the promote transaction, after the older runs are marked
+    SUPERSEDED. `closed_by` stays NULL (no submission closed it; the ledger's
+    own constraint allows exactly this) and the message records why, so the
+    row reads as "closed: superseded" and not as a repair that landed."""
+    cur.execute(
+        """UPDATE rejection_ledger r
+              SET closed_at = now(),
+                  message = left(r.message, 3900)
+                            || ' [closed: run superseded by promoted run '
+                            || %s::text || ']'
+             FROM runs ru
+            WHERE ru.id = r.run_id
+              AND ru.entity_id = %s
+              AND r.run_id <> %s
+              AND r.closed_at IS NULL
+              AND enum_label(ru.status) = 'SUPERSEDED'
+        RETURNING r.rejection_id, r.run_id, r.page, r.gate_id, r.path""",
+        (str(promoted_run_id), entity_id, promoted_run_id))
+    cols = ("rejection_id", "run_id", "page", "gate_id", "path")
+    return [dict(zip(cols, (str(x) if i < 2 else x for i, x in enumerate(r))))
+            for r in cur.fetchall()]
 
 
 def summary(rows: list) -> dict:

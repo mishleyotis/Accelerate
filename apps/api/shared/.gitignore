@@ -1,2 +1,10 @@
 # Staged at deploy time from packages/shared — never committed here.
 *.json
+# *.py joined this list on 2026-09-01, matching apps/mcp/shared/.gitignore.
+# Four modules were tracked here — abbreviations.py, cloudsql.py,
+# evidence_merge.py, internal_ids.py — byte-identical to packages/shared on
+# the day they were committed and free to drift on any day after. That is the
+# "four copies" packages/shared/cloudsql.py was written to end, reproduced one
+# directory down, and dma_api/db.py now imports cloudsql from here at module
+# load, so a stale copy is a stale database connector.
+*.py

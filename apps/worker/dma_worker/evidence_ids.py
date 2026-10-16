@@ -171,10 +171,36 @@ class EvidenceLander:
     second set of rules would be a second thing to get wrong.
     """
 
-    #: Mirrors CONTENT_HASH_EXPR in 0005 with claim_type NULL (the package
-    #: path never asserts a claim type). Kept byte-identical to the generated
-    #: column so the kept row can be found after the dedup index rejects.
-    HASH_SQL = r"""encode(digest(coalesce(%s,'') || '|' || '' || '|' ||
+    #: Mirrors CONTENT_HASH_EXPR in 0005. Three parameters, IN THIS ORDER:
+    #: source_url, claim_type, excerpt.
+    #:
+    #: IT USED TO HARDCODE THE CLAIM-TYPE SEGMENT AS `''`, on the stated
+    #: premise that "the package path never asserts a claim type". The INSERT
+    #: eleven lines below passes `ev.get("claim_type")` — so the premise was
+    #: false in the same file that stated it, and every package evidence item
+    #: carrying a claim type hashed one way into the generated column and
+    #: another way in every lookup that tried to find it again.
+    #:
+    #: Measured against the live generated column on 2026-08-30, same url and
+    #: excerpt:
+    #:     claim_type NULL    generated af4458b1…  mirror af4458b1…   agree
+    #:     claim_type FACT    generated 74b8e86d…  mirror af4458b1…   DIVERGE
+    #:
+    #: The two consequences, both of which the ingest then recorded as though
+    #: they were facts about the package rather than about this expression:
+    #:   * `content_hash IS NOT DISTINCT FROM` (line ~299) reads false, so a
+    #:     row the entity already holds looks like "same id, different
+    #:     content" — a mint under a suffix, logged `evidence_id_collision`.
+    #:   * the dedup lookup below cannot find the row the unique index just
+    #:     rejected against, so the item is UNATTRIBUTABLE AND DROPPED,
+    #:     logged `evidence_conflict_unresolved`.
+    #: goeasy-ltd, one package: 316 collisions and 430 dropped items.
+    #:
+    #: `enum_label` rather than a bare cast because that is what the
+    #: generated column uses, and this has to stay byte-identical to it —
+    #: being nearly identical is what cost the corpus its evidence.
+    HASH_SQL = r"""encode(digest(coalesce(%s,'') || '|' ||
+                    coalesce(enum_label(%s::claim_t),'') || '|' ||
                     lower(left(regexp_replace(%s,'\s+',' ','g'),500)),
              'sha256'),'hex')"""
 
@@ -194,16 +220,36 @@ class EvidenceLander:
         self.superseded: dict[str, str] = {}  # minted -> the id it supersedes
 
     # ------------------------------------------------------------------
-    def _lookup(self, local, url, excerpt):
+    def _correct_origin(self, e_id, ev) -> None:
+        """A row this entity already holds as 'package' that the package now
+        states is a connector reading becomes one — the provenance the
+        ingest dropped before 2026-10-12, corrected on the next scan the way
+        `url_backfill` corrects a missing URL. Nothing else on the row moves,
+        and a row already carrying another origin is left alone."""
+        if ev.get("origin") != "connector":
+            return
+        self.cur.execute(
+            """UPDATE evidence_index
+                  SET origin = 'connector',
+                      connector_tool = COALESCE(connector_tool, %s),
+                      connector_retrieved_at = COALESCE(connector_retrieved_at, %s)
+                WHERE e_id = %s AND origin = 'package'""",
+            (ev.get("connector_tool"), ev.get("connector_retrieved_at"), e_id))
+
+    def _lookup(self, local, url, claim_type, excerpt):
         """(stored e_id, content matches) for this entity's row under
         `local`, or (None, False). The entity is in the WHERE clause and in
-        the mapping's primary key: this cannot see another institution."""
+        the mapping's primary key: this cannot see another institution.
+
+        `claim_type` is part of the content hash and therefore part of the
+        question. Omitting it made "content matches" read false for every
+        item that carried one — see HASH_SQL."""
         self.cur.execute(
             f"""SELECT m.e_id, e.content_hash IS NOT DISTINCT FROM {self.HASH_SQL}
                   FROM evidence_package_ids m
                   JOIN evidence_index e ON e.e_id = m.e_id
                  WHERE m.entity_id = %s AND m.package_local_id = %s""",
-            (url, excerpt, self.entity_id, local))
+            (url, claim_type, excerpt, self.entity_id, local))
         row = self.cur.fetchone()
         return (row[0], bool(row[1])) if row else (None, False)
 
@@ -235,6 +281,10 @@ class EvidenceLander:
         local = local_id(ev["e_id"])
         url = stored_url(ev.get("source_url"))
         excerpt, uncitable = citable_span(ev.get("excerpt"))
+        # Bound ONCE, here, and passed to the INSERT and to every hash
+        # lookup alike. The defect this repairs was exactly a value that the
+        # insert wrote and the lookups did not know about.
+        claim_type = ev.get("claim_type")
         if uncitable:
             # Recorded per row, so "this package landed evidence nobody can
             # cite" is a number on the scan rather than something a producer
@@ -249,13 +299,13 @@ class EvidenceLander:
                 # The same local number twice in one package. Reading order
                 # wins, as it does for a repeated subcap row; the repeat is
                 # recorded rather than silently overwriting the mapping.
-                prior, _ = self._lookup(local, url, excerpt)
+                prior, _ = self._lookup(local, url, claim_type, excerpt)
                 self._observe("duplicate_package_local_id",
                               {"package_local_id": local, "resolved_to": prior,
                                "reason": "the package states this local id more "
                                          "than once; the first row keeps it"})
                 return prior
-            prior, prior_same = self._lookup(local, url, excerpt)
+            prior, prior_same = self._lookup(local, url, claim_type, excerpt)
             if prior and prior_same and local_id_of_stored(prior) == local:
                 # Idempotent re-scan: this entity already holds this item
                 # under its OWN number. A mapping that points at some other
@@ -264,21 +314,33 @@ class EvidenceLander:
                 # duplicate recognised on a later scan is a duplicate.
                 self.landed.add(prior)
                 self.claimed.add(local)
+                self._correct_origin(prior, ev)
                 return prior
 
         candidate = qualify(ev["e_id"], self.token)
         tried: list[str] = []
         while candidate and candidate not in tried and len(tried) < self.MAX_MINT_ATTEMPTS:
             tried.append(candidate)
+            # A connector reading lands as one (0063): origin 'connector' with
+            # its tool and retrieval time, so ET-12 can see the technographic
+            # scan the register rests on. Every other row is 'package', as
+            # before (R-INTERAC-20261010: every Clay/Vibe row landed
+            # 'package' with no tool and ET-12 could never pass).
+            connector = ev.get("origin") == "connector"
             self.cur.execute(
                 """INSERT INTO evidence_index
                      (e_id, entity_id, origin, source_name, source_url, excerpt,
-                      tier, claim_type, ers, published_date, reference_date)
-                   VALUES (%s,%s,'package',%s,%s,%s,%s,%s,%s,%s,%s)
+                      tier, claim_type, ers, published_date, reference_date,
+                      connector_tool, connector_retrieved_at)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                    ON CONFLICT DO NOTHING RETURNING e_id""",
-                (candidate, self.entity_id, ev.get("source_name"), url, excerpt,
-                 ev.get("tier"), ev.get("claim_type"), ev.get("ers"),
-                 ev.get("published_date"), self.reference_date))
+                (candidate, self.entity_id,
+                 "connector" if connector else "package",
+                 ev.get("source_name"), url, excerpt,
+                 ev.get("tier"), claim_type, ev.get("ers"),
+                 ev.get("published_date"), self.reference_date,
+                 ev.get("connector_tool") if connector else None,
+                 ev.get("connector_retrieved_at") if connector else None))
             if self.cur.fetchone():
                 self.landed.add(candidate)
                 if local:
@@ -298,10 +360,11 @@ class EvidenceLander:
                 f"""SELECT entity_id = %s,
                            content_hash IS NOT DISTINCT FROM {self.HASH_SQL}
                       FROM evidence_index WHERE e_id = %s""",
-                (self.entity_id, url, excerpt, candidate))
+                (self.entity_id, url, claim_type, excerpt, candidate))
             row = self.cur.fetchone()
             if row is None:
-                return self._dedup_branch(ev, candidate, local, url, excerpt)
+                return self._dedup_branch(ev, candidate, local, url,
+                                          claim_type, excerpt)
             same_entity, same_content = row
             if same_entity and same_content:
                 # Idempotent re-scan of a package this entity already holds
@@ -311,6 +374,7 @@ class EvidenceLander:
                 if local:
                     self._map(local, candidate)
                     self.claimed.add(local)
+                self._correct_origin(candidate, ev)
                 return candidate
 
             # Same stored id, different content. Within this entity that is a
@@ -330,14 +394,19 @@ class EvidenceLander:
         return None
 
     # ------------------------------------------------------------------
-    def _dedup_branch(self, ev, candidate, local, url, excerpt):
+    def _dedup_branch(self, ev, candidate, local, url, claim_type,
+                      excerpt):
         """No PK hit -> the (entity_id, content_hash) dedup index fired: this
         content already lives under another of this entity's ids. Map to it
         and record — never silently."""
+        # `split_of IS NULL`: 0065's dedup key is (entity_id, content_hash,
+        # lineage), and a package row is never a split span — so the row it
+        # collided with is the unsplit one, never a span cut from it.
         self.cur.execute(
             f"""SELECT e_id FROM evidence_index
-                 WHERE entity_id = %s AND content_hash = {self.HASH_SQL}""",
-            (self.entity_id, url, excerpt))
+                 WHERE entity_id = %s AND content_hash = {self.HASH_SQL}
+                   AND split_of IS NULL""",
+            (self.entity_id, url, claim_type, excerpt))
         hit = self.cur.fetchone()
         if hit is None:
             # Neither lookup resolved: the insert conflicted on a constraint
@@ -357,7 +426,7 @@ class EvidenceLander:
             f"""INSERT INTO evidence_dedup_audit
                   (e_id, content_hash, branch, matched_e_id, occurred_at)
                 VALUES (NULL, {self.HASH_SQL}, %s, %s, now())""",
-            (url, excerpt, branch, kept))
+            (url, claim_type, excerpt, branch, kept))
         self._observe("evidence_dedup", {"package_local_id": ev["e_id"],
                                          "incoming_e_id": candidate,
                                          "kept_e_id": kept, "branch": branch})

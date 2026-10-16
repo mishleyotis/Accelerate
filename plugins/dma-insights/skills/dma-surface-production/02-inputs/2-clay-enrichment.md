@@ -8,7 +8,7 @@ evidence like any other source.
 
 | Surface | Clay call | Data point |
 |---|---|---|
-| **O7 Leadership** | `find-and-enrich-contacts-at-company` | base contact rows, filtered by title |
+| **O7 Leadership** | `search-contacts` (then `add-contact-data-points`) | base contact rows, filtered by title |
 | **O12 Thought leadership** | `add-contact-data-points` | `Find Thought Leadership` |
 | **O2 Firmographics** | `add-company-data-points` | `Annual Revenue`, `Headcount Growth` |
 | **T1 Tech stack** | `add-company-data-points` | `Tech Stack` — this is the machine technographic scan |
@@ -63,7 +63,7 @@ tool contract warns against, and a DMA needs the leadership tier, not the org ch
 
 ```
 STEP 1 — RESOLVE THE COMPANY
-  find-and-enrich-company(companyIdentifier=<domain from entity_profile>)
+  search-companies + add-company-data-points(companyIdentifier=<domain from entity_profile>)
   → taskId
   The domain comes from 01_evidence/entity_profile/, never from a guess. A wrong domain
   produces a real company's data attached to the wrong entity — the contamination class
@@ -87,7 +87,7 @@ STEP 2 — COMPANY DATA POINTS, ONE CALL
     {type:"Recent News"}, {type:"Open Jobs"}, {type:"Latest Funding"}])
 
 STEP 3 — LEADERSHIP
-  find-and-enrich-contacts-at-company(
+  search-contacts + add-contact-data-points(
     companyIdentifier=<domain>,
     contactFilters={ job_title_keywords:[
         "Chief Executive","Chief Information","Chief Technology","Chief Operating",
@@ -140,10 +140,12 @@ labelled one — it does not become a fact by arriving through an API.
 company, a subsidiary and a same-named institution in another market all have domains. Check
 the legal name, the regulator and the order of magnitude before you use a figure.
 
-A source that blocks automated retrieval cannot be registered at all, whatever Clay returned
-from it — Glassdoor, Indeed and ZipRecruiter all 403, so `register_evidence` gets
-`url_unreachable`. Such a value is an inference with its route named, or it is omitted. See
-`01-start-here/2-evidence.md`.
+A source that blocks automated retrieval cannot be registered by URL, whatever Clay returned
+from it — Glassdoor and ZipRecruiter pages 403, so `register_evidence` gets
+`url_unreachable`. Such a value is an inference with its route named, or it is omitted. An
+employer rating Clay echoes from Indeed is the exception with a door: read it from the Indeed
+connector (`get_company_data`) and register that reading `origin='connector'` (T3; RC-07,
+owner decision 3) rather than the Clay echo. See `01-start-here/2-evidence.md`.
 
 ## The contact route lands in real columns, and it lands NOW
 
@@ -234,3 +236,28 @@ page** — enrichment is slow and async, and the pages that consume it come late
 
 `scripts/clay_plan.py` prints the exact call sequence for a domain, including the title
 filters and the tier each returned data point should be registered at.
+
+## The company call and the Vibe Prospecting scan are mandatory (owner decision 2026-10-05)
+
+SWBC promoted a tech register that had never seen a machine scan: Clay was
+called for contacts only and Vibe Prospecting never, so an integration
+platform both scans would have surfaced was never weighed against the run's
+rank-1 integration argument. On every hand-driven run:
+
+1. Clay `search-companies` on the domain, then `add-company-data-points`
+   with **Tech Stack, Annual Revenue, Headcount Growth**; poll
+   `get-task-context` until each is `completed`.
+2. Vibe Prospecting `match-business` → `enrich-business` with
+   **firmographics, technographics, financial-metrics**; `show-sample` for
+   the unmasked row (exploration is free; export only with the owner's
+   approval of the quoted cost).
+3. Register each reading under origin `connector` with `connector.kind`:
+   `technographic` → T1 (a row resting on a scan alone stays INFERRED;
+   CONFIRMED still needs SWBC's own posting or release beside it), or
+   `firmographic` → T3 (revenue band, LinkedIn headcount and its growth).
+   The response is stored and the excerpt verified against it.
+4. Cite the scan on every register row it detects. ET-12 refuses a
+   non-empty register that cites none, unless `r_layer.probes_run` records
+   the scan NOT_RUN naming Clay and Vibe Prospecting and why.
+5. Headcount Growth and any revenue history are CAGR candidates under
+   CG-18f: rank them, serve only a corroborated one.

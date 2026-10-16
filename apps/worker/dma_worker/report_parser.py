@@ -59,6 +59,22 @@ DEEP_DIVE_PILLAR = re.compile(r"\(P([1-4])\)")
 # never silently assigned to whatever the count happened to reach.
 _TITLE_KINDS = (
     (r"executive\s+summary", "executive_summary"),
+    # ── the PINNED templates' own headings (2026-09-03) ──────────────────
+    # The two owner Docs (plugins/dma-insights/references/templates/) name
+    # sections this vocabulary had never met, so a report rendered to the
+    # template landed half its sections as `unmapped:*`. Named here BEFORE
+    # the looser patterns below so "Client Priorities" is not filed under
+    # `gap_prioritization` by the `priorit` stem, and "Issue Impact and Cap
+    # Analysis" reaches the issue kind rather than nothing.
+    (r"issue\s+impact|cap\s+analysis", "issue_register"),
+    (r"benchmark\s+and\s+technology\s+estate", "benchmark_comparison"),
+    (r"workbook\s+traceability|workbook\s+references", "evidence_sources"),
+    (r"^firmographics$", "firmographics"),
+    (r"entity\s+profile", "entity_profile"),
+    (r"market\s+position", "market_position"),
+    (r"strategic\s+intelligence", "strategic_intelligence"),
+    (r"client\s+priorities", "client_priorities"),
+    (r"risk\s+and\s+issues", "risk_and_issues"),
     (r"\bmethod(olog)?y|scope\s+and\s+limits|method,\s*scope", "methodology"),
     (r"trend|trajector", "trend_analysis"),
     (r"issue\s+register|open\s+matters", "issue_register"),

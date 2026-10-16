@@ -1,0 +1,31 @@
+{
+  "recorded_at_utc": "2026-08-28T18:51:22Z",
+  "repo": "mishleyotis/Accelerate",
+  "branch": "claude/dma-headless-readiness-82e4gl",
+  "commit_sha": "cdea0e1cb48d21b9e7f063e105d29a2393784034",
+  "prior_commits_head": [
+    "cdea0e1 Revert \"Seven things the owner asks of this pipeline that the QA prompt never asked\"",
+    "4dda9b5 Seven things the owner asks of this pipeline that the QA prompt never asked",
+    "9111446 The pipeline being planned is not the pipeline that exists, and nothing said so",
+    "df1688f The plugin drives 33 connector tools and documented none of them",
+    "3e2d5e3 A continued session called its lost binding unrecoverable; nothing was lost (#9)"
+  ],
+  "model": "claude-sonnet-5",
+  "effort_level": "xhigh",
+  "ultracode": true,
+  "gcloud_credentials": "ABSENT - gcloud CLI not installed in this environment; production verification (scripts/verify_deployed.py, scripts/verify_mcp_end_to_end.py) is BLOCKED for this session",
+  "prompt_sha256_file": ".qa/prompt.sha256",
+  "ledger_file": ".qa/ledger.jsonl",
+  "ledger_bootstrap_count": 149,
+  "ledger_bootstrap_note": "149 matches the prompt's own 'Expect 149' claim in the ledger-bootstrap section. The separate phase table in the same prompt says 'ledger at 168' as the P0 blocking output -- that is an internal inconsistency in the prompt text itself (149 vs 168), recorded as a finding, not a bootstrap error.",
+  "pinned_artefacts_resolved": {
+    "dma_workbook_18IoJD5jn9aIe3E_F2omxqIZrjnHQwfR2pD0-_nUe5zc": "RESOLVED - Google Sheet 'DMA Workbook', owner mishley.otiende@zennify.com, matches described contract-v3 content (4255 DQs, 851 subcaps, 16 categories, six required sheets)",
+    "client_profile_142FoFcgs2-zzMm2_y4ykQW_gSUVbIOWSMHV_sgITs0Y": "RESOLVED - Google Doc 'Client Profile Research Report', owner mishley.otiende@zennify.com, matches described Document Control / Surface Alignment content including the '57 of 138 clients... 53 shipped machine scoring text' measurement",
+    "assessment_report_1FPr7wNuo2-Fk7PPTvk1VkQxYBvjLbEWwU7kZQY8TuDA": "RESOLVED - Google Doc 'DMA Assessment Report Template', owner mishley.otiende@zennify.com, matches described Document Control / Surface Alignment content",
+    "supplied_v4.2_dma_research_archive": "RESOLVED - found via Google Drive search (title 'dma-research (4).skill', 964984 bytes, same parent folder 0AKSzTqKnBmrcUk9PVA as the three pinned templates), downloaded and unzipped to /tmp/dmar/dma-research: 94 files, CHANGELOG.md top entry 'v4.2 (2026-07-08)', SKILL.md banner reads 'DMA Research Skill v3.0' (confirms the internal version-inconsistency finding), kg/ present with catalog/graph/packs/runtime/sources/build subdirs"
+  },
+  "repo_recon": {
+    "installed_dma_research_skill_files": "plugins/dma-insights/skills/dma-research/ contains SKILL.md + references/ (13 files) + scripts/ (8 files) + templates/ (5 files) = ~27, consistent with the '26 files' claim; no kg/ directory present",
+    "gh_pr_2": "OPEN, draft, base=main, head=claude/dma-insights-onboarding-0ryrd0, 604 commits, 340867 additions, 941 changed files -- confirmed real and matches the thirteen-defect table quoted in the prompt's SS1.1"
+  }
+}

@@ -91,12 +91,17 @@ function EvidenceDrawer() {
     unresolved = evidenceDrawer.evidenceId;
   }
 
-  // Tier filter
+  // Tier filter. The customer body carries no `tier` (the server strips the
+  // tier class for that audience — TRD, "evidence rank scores, tier weights:
+  // stripped"), so a tier is counted only where an item states one: keying
+  // the distribution on `undefined` printed "undefined · 12" as a filter and
+  // "undefined · undefined" on every customer item.
   const filtered = tierFilter === "ALL" ? items : items.filter(it => it.tier === tierFilter);
 
   // Tier distribution for filter
   const dist = {};
-  items.forEach(it => { dist[it.tier] = (dist[it.tier] || 0) + 1; });
+  items.forEach(it => { if (it.tier) dist[it.tier] = (dist[it.tier] || 0) + 1; });
+  const tiered = Object.keys(dist).length > 0;
 
   return (
     <>
@@ -152,7 +157,7 @@ function EvidenceDrawer() {
           ) : null}
 
           {/* Tier filter */}
-          {items.length > 1 ? (
+          {items.length > 1 && tiered ? (
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 12 }}>
               <button className={`btn btn-tertiary btn-sm ${tierFilter === "ALL" ? "" : ""}`} style={{ background: tierFilter === "ALL" ? "var(--z-dark)" : "transparent", color: tierFilter === "ALL" ? "#fff" : "var(--z-body)" }} onClick={() => setTierFilter("ALL")}>All · {items.length}</button>
               {Object.entries(dist).sort().map(([t, n]) => (
@@ -198,7 +203,9 @@ function EvidenceDrawer() {
               <div key={it.id} style={{ borderBottom: "1px solid var(--z-sep)", padding: "12px 0" }}>
                 <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
                   <span className="chip">{it.id}</span>
-                  <span className={`tier-chip tier-${it.tier}`} title={tier?.desc}>{it.tier} · {tier?.label}</span>
+                  {it.tier ? (
+                    <span className={`tier-chip tier-${it.tier}`} title={tier?.desc}>{it.tier} · {tier?.label}</span>
+                  ) : null}
                   {it.claim ? <span className="b b-purple">{it.claim}</span> : null}
                   <span style={{ fontSize: 10, color: "var(--z-muted)" }}
                         title={it.recency_band === "UNVERIFIED"
@@ -263,7 +270,7 @@ function EvidenceDrawer() {
             // An item with no excerpt copies as the citation without a quote,
             // never as an empty pair of quote marks pasted into a deck.
             const lines = filtered.map(it => [
-              `${it.id} · ${it.tier} · ${it.title}`,
+              `${it.id}${it.tier ? ` · ${it.tier}` : ""} · ${it.title}`,
               dwText(it.excerpt) ? `— "${dwText(it.excerpt)}"` : "— no excerpt served",
               `(${it.source_pretty || it.source || "no source url"})`,
             ].join(" ")).join("\n");
@@ -891,7 +898,7 @@ function IpAnswer({ res, onEv }) {
 
 /* ── Intelligence Panel ─────────────────────────────────────────── */
 function IntelligencePanel() {
-  const { ipOpen, setIpOpen, ipSurface, ipContext, authed, pushToast, openEvidence, openSubcap } = useApp();
+  const { ipOpen, setIpOpen, ipSurface, ipContext, authed, audience, pushToast, openEvidence, openSubcap } = useApp();
   const [text, setText] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [chat, setChat] = useState([]);          // [{role: 'user'|'ai', text}]
@@ -938,6 +945,9 @@ function IntelligencePanel() {
 
   // Never show before sign-in (rule of hooks: gate AFTER all hook calls)
   if (!authed) return null;
+  // Meeting prep is Zennify's own preparation: the client dashboard carries
+  // neither the button nor the panel it opens (client-view review 2026-10-07).
+  if (audience === "customer") return null;
 
   const ask = (question) => {
     const q = String(question || chatInput || "").trim();

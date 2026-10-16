@@ -32,7 +32,7 @@ live?" is answered mechanically.
 
 | Surface | Package sources (primary → fallback) | Storyline inputs | Enrichment |
 |---|---|---|---|
-| O1 scores & peers | scoring wb `Pillar_Summary`/`Category_Detail` → `export_pillar_summary.csv`/`export_category_summary.csv` (54 corpus clients are export-ONLY — the exports are then the authority); peers: `06_peers/peer_comparison_table.csv` → `Peer_Benchmarks` tab | composite vs peer median AND vs full peer range (the sharper finding when below every individual peer); the package's own methodology caveats (e.g. peer-depth asymmetry) temper the claim | — (scores never enriched) |
+| O1 scores & peers | **mandatory read: scoring wb `Executive_Summary`** — it STATES the overall ("Overall Maturity") and its weighting basis (SWBC: 2.0073, pillar-weighted 20/20/30/30), so the hero's composite and `r_layer` name the tab it was taken from, at the stated precision (MEM-0561, MEM-0560); then `Pillar_Summary`/`Category_Detail` → `export_pillar_summary.csv`/`export_category_summary.csv` (54 corpus clients are export-ONLY — the exports are then the authority); peers: `06_peers/peer_comparison_table.csv` → `Peer_Benchmarks` tab | composite vs peer median AND vs full peer range (the sharper finding when below every individual peer); the package's own methodology caveats (e.g. peer-depth asymmetry) temper the claim | — (scores never enriched) |
 | O2 firmographics | `run_manifest*.json` → `00/01_evidence/entity_profile` → Client Profile report | identity anchor: charter, regulator, scale — every later claim hangs on it | P2 verification (Explorium/Tavily) |
 | O3 why-now | report strategic sections; `A7_time_maps.csv`; research wb `Entity_Timeline` | dated triggers + windows; consequence of waiting argued from the client's own events | **P1 currency re-check** — a package signal is as old as the assessment date |
 | O4 exec summary | the report's own executive summary is an INPUT TO CHALLENGE, never copy | written last, over settled claims; the run's single thesis | — |
@@ -68,7 +68,7 @@ live?" is answered mechanically.
 | P2b starters | H1 quotes + P1 stories | say-it-aloud, consultative, client-specific | — |
 | P3/P4 roadmap | recommendations sequencing + engine | one order argued twice | — |
 | C1 timeline | `A7_time_maps.csv`; `Entity_Timeline` tab; report history | arc from dated, cited events | P2 currency |
-| C2/C3 issues & regulatory | issue registers — **three header generations measured** (`03_issues/L*.csv`, `07_governance/*issue*`, `A5_Issue_Register.csv`); regulator identity from O2 | open matters and the ceilings they place; refused registries recorded, never dressed as absence | P1 regulator records (NCUA/SEC/FINRA) |
+| C2/C3 issues & regulatory | **mandatory read: scoring wb `Issue_Register`** (SWBC's C2 probes named only the bundle's sections and never opened it — MEM-0561), then the issue registers — **three header generations measured** (`03_issues/L*.csv`, `07_governance/*issue*`, `A5_Issue_Register.csv`); regulator identity from O2 | open matters and the ceilings they place; refused registries recorded, never dressed as absence | P1 regulator records (NCUA/SEC/FINRA) |
 | C4 context sentiment | projects O9 by `e_id` | three audiences at Context depth | rides O9 (P0 upstream) |
 | C5 acquisitions | report history; timeline stores | deal records with integration statements | P2 deal verification |
 | T1 register | `A4_Tech_Stack.csv`; Explorium/technographic xlsx (corroboration); evidence stores' tech rows | one row per named product; CONFIRMED needs a source row; ABSENT needs the ladder | **P0 for CONFIRMED status** — package rows alone rarely clear the bar |
@@ -192,5 +192,5 @@ and lands on a home page. Say so in the source name ("Vibe Prospecting
 enrich-business technographic scan"), never dress it as a document, and
 never go looking for a deeper URL that does not exist.
 
-`scripts/gate_m_evidence_url_and_span.py` measures all of this over the
+`scripts/gate_m_evidence_url_and_span.py` (repo root) measures all of this over the
 complete set and fails the run rather than sampling it.

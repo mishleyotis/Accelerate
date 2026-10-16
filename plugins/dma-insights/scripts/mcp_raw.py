@@ -90,7 +90,7 @@ def _pathtok() -> str:
     return gcp_token.path_token()
 
 
-def rpc(method: str, params: dict | None = None) -> dict:
+def rpc(method: str, params: dict | None = None, *, timeout: float = 180) -> dict:
     body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": method,
                        **({"params": params} if params is not None else {})
                        }).encode()
@@ -99,14 +99,23 @@ def rpc(method: str, params: dict | None = None) -> dict:
     req.add_header("X-DMA-Path-Token", _pathtok())
     req.add_header("Content-Type", "application/json")
     req.add_header("Accept", "application/json, text/event-stream")
-    with urllib.request.urlopen(req, timeout=180) as resp:
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
         raw = resp.read().decode()
     m = re.search(r"data: (\{.*\})", raw)
     return json.loads(m.group(1) if m else raw)
 
 
+#: Tools whose server side validates or writes a whole page. First Tech
+#: (2026-10-07): a 2.6 MB heatmap's submit ran past the 180 s default, the
+#: client died with a bare traceback, and the server recorded a verdict
+#: nobody read — three driver attempts spent on a timeout.
+SLOW_TOOLS = {"submit_page_payload": 1800, "promote_run": 1800,
+              "get_validation_verdict": 600}
+
+
 def call(tool: str, args: dict) -> int:
-    d = rpc("tools/call", {"name": tool, "arguments": args})
+    d = rpc("tools/call", {"name": tool, "arguments": args},
+            timeout=SLOW_TOOLS.get(tool, 180))
     if "error" in d:
         print(json.dumps(d["error"]), file=sys.stderr)
         return 1

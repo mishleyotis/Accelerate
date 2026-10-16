@@ -33,6 +33,17 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "apps" / "mcp"))
 
+# A SUITE RUN INSIDE A CLAUDE SESSION MUST SEE THE MACHINE CI SEES. Since
+# 2026-10-10 the connector baseline is measured from the session's own
+# transcript (`session_roster.py`) and SessionStart fast-forwards a stale
+# default-branch ref (`git_refs.py`). Both read the live session through
+# CLAUDE_CODE_SESSION_ID — which every Bash child inherits — so the tests of
+# "no baseline is refused" passed on CI and failed in-session. Off by
+# default here; the tests of those two features switch them on against
+# fixtures they build.
+os.environ.setdefault("DMA_SESSION_ROSTER", "0")
+os.environ.setdefault("DMA_FRESHEN_REFS", "0")
+
 _DSN = os.environ.get(
     "LOCAL_DATABASE_URL",
     "postgresql://postgres:local@localhost:5432/dma_insights")
@@ -117,6 +128,31 @@ def _seed_gate_registry(conn):
     import dma_mcp.gates as gates
     gates.ensure_gate_registry(conn)
     conn.commit()
+
+
+# ── nothing in a test run may write into the checkout ────────────────────
+#
+# The source-yield ledger is a CROSS-CLIENT record, so it lives with the
+# plugin rather than under a run root — correct in production, where the
+# plugin is installed outside any repository. In a test run the plugin path
+# resolves into this checkout, so the first suite that reconciled a relay
+# request appended real-looking measurements to a repository file (measured
+# 2026-09-14: 6 entries from three test modules, committed by nobody on
+# purpose). A ledger of what enrichment pathways yield, seeded with fixture
+# queries, is worse than an empty one.
+#
+# The redirect is here rather than in one suite's conftest because the
+# writer is the ENGINE, and any suite that drives the engine can reach it.
+
+@pytest.fixture(scope="session", autouse=True)
+def _source_yield_ledger_is_never_the_checkout(tmp_path_factory):
+    prior = os.environ.get("DMA_SOURCE_YIELD")
+    if not prior:
+        os.environ["DMA_SOURCE_YIELD"] = str(
+            tmp_path_factory.mktemp("source_yield") / "source_yield.json")
+    yield
+    if not prior:
+        os.environ.pop("DMA_SOURCE_YIELD", None)
 
 
 @pytest.fixture(scope="session", autouse=True)

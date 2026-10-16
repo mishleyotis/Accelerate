@@ -15,11 +15,11 @@ OUT = pathlib.Path(sys.argv[2]) if len(sys.argv) > 2 else pathlib.Path("MCP-TOOL
 
 GROUPS = [
  ("Read the assessment", "Pure reads of what the package and the catalogue already say. None of them write; all of them are safe to call again.",
-  ["get_report_bundle","get_capability_catalogue","get_page_contract","get_evidence","get_platform_fit"]),
+  ["get_report_bundle","get_capability_catalogue","get_page_contract","get_evidence","get_platform_fit","get_cohort_benchmarks"]),
  ("Run and session state", "Which runs exist, who holds them, and what is still outstanding. `list_open_rejections` is the one to read first in any producer session.",
-  ["list_pending_runs","claim_run","get_run_progress","get_client_state","list_open_rejections"]),
+  ["list_pending_runs","claim_run","get_run_progress","list_submissions","get_client_state","list_open_rejections"]),
  ("Author and submit", "The write path. Content enters the system only here, and only through `submit_page_payload`.",
-  ["register_evidence","open_payload","append_payload_part","submit_page_payload","get_staged_payload"]),
+  ["register_evidence","open_payload","append_payload_part","get_upload_status","submit_page_payload","get_staged_payload"]),
  ("Verdicts and promotion", "What the gates said, and moving a run on or off the client surface.",
   ["get_validation_verdict","explain_gate","promote_run","withdraw_run","list_withdrawn_runs"]),
  ("Enrichment ledger", "Holds together the two halves of \"the work was done but it is not showing\": what was enriched, and what is still empty.",

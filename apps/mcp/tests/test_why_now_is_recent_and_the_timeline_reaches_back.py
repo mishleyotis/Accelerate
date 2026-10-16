@@ -120,10 +120,23 @@ def test_a_section_that_says_what_it_searched_still_promotes():
     """The escape every CG-40 rule keeps: an entity with genuinely no recent
     event promotes by saying so. The floor is on EFFORT, never on the world."""
     said = dict(ALL_STALE)
+    # The ladder, with outcomes (RC-05, 2026-10-04): r_layer probes are not a
+    # ladder, and a rung must say what it found.
+    said["empty_state"] = {"reason": "no recent event", "sources_searched": [
+        "Filings after 2016 — VERIFIED ABSENT: no event bearing on digital "
+        "capability",
+        "Trade press — VERIFIED ABSENT", "Entity newsroom — VERIFIED ABSENT"]}
+    assert _check_depth_floors("overview", {"why_now": said}) == []
+
+
+def test_r_layer_probes_alone_no_longer_buy_the_escape():
+    """RC-05 (SWBC gold audit, 2026-10-04): r_layer is mandatory on every
+    section, so accepting its probes as a search meant the floor never bit."""
+    said = dict(ALL_STALE)
     said["r_layer"] = {"probes_run": [
         "Searched filings, trade press and the entity's own newsroom for any "
         "event after 2016 bearing on digital capability: none found."]}
-    assert _check_depth_floors("overview", {"why_now": said}) == []
+    assert len(_check_depth_floors("overview", {"why_now": said})) == 1
 
 
 # ── timeline: long, not recent ────────────────────────────────────────

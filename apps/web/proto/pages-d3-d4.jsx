@@ -979,10 +979,10 @@ function ClientPlatform({ entity, run }) {
         <div>
           <div className="eyebrow">Platform opportunity</div>
           <h1>Platform Fit Score</h1>
-          <div className="sub">Which platform conversation should lead with {entity.name}?</div>
+          <div className="sub">Which platform conversation should lead with {entityName(entity)}?</div>
         </div>
         <div className="actions">
-          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entity.name} roadmap as PDF…`, "success")}><Icon name="download" size={13} /> Roadmap export</button>
+          <button className="btn btn-tertiary" onClick={() => pushToast(`Exporting ${entityName(entity)} roadmap as PDF…`, "success")}><Icon name="download" size={13} /> Roadmap export</button>
           <button className="btn btn-secondary" onClick={() => { setIpSurface("platform_story"); setIpContext({ entity, platform: selKey }); setIpOpen(true); }}>✦ Platform story</button>
         </div>
       </div>
@@ -1479,10 +1479,21 @@ function ClientPlatform({ entity, run }) {
                   <button onClick={() => setOpenPrereq(o => o === idx ? null : idx)}
                     title={pfText(p.condition) || ""}
                     style={{ width: "100%", background: "none", border: 0, cursor: "pointer", textAlign: "left", padding: "10px 0" }}>
-                    <div className="row" style={{ gap: 6, marginBottom: 3 }}>
+                    {/* WRAPS, and the basis chip does not pin itself.
+                        Reported 2026-09-02 from the promoted platform page:
+                        chips read "Governed member domain owed in the cat…"
+                        and "Licence and user-seat audit decides a…", cut
+                        mid-word at the card edge. `basis` is a sentence-shaped
+                        status label with no contract length, and this column
+                        is ~300px, so a row that cannot wrap around a chip that
+                        cannot shrink has exactly one outcome. The chip keeps
+                        `.b`'s own wrapping (app.css) instead of an inline
+                        `flexShrink: 0` that overrides it; the row wraps so the
+                        chip takes its own line before it takes the card's. */}
+                    <div className="row" style={{ gap: 6, marginBottom: 3, flexWrap: "wrap" }}>
                       <span style={{ fontSize: 9, color: "var(--z-muted)", letterSpacing: ".06em", textTransform: "uppercase", flexShrink: 0 }}>Condition</span>
                       <span className="spacer" />
-                      {p.basis ? <span className="b b-above" style={{ flexShrink: 0 }}>{pfText(p.basis)}</span> : null}
+                      {p.basis ? <span className="b b-above">{pfText(p.basis)}</span> : null}
                       <Icon name={isOpen ? "chevron-u" : "chevron-d"} size={13} style={{ color: "var(--z-muted)", flexShrink: 0 }} />
                     </div>
                     <div style={{ fontSize: 12, lineHeight: 1.45 }} className="txt-fit-2">{pfText(p.condition)}</div>
@@ -2117,7 +2128,7 @@ function StairstepCurve({ entity, selKey, area }) {
             {selKey ? <span style={{ color: "var(--z-muted)", fontWeight: 400 }}> · {selKey}</span> : null}
           </div>
           <div style={{ fontSize: 11, color: "var(--z-muted)" }}>
-            {n} rung{n === 1 ? "" : "s"} · where {entity.name} stands today, and what each rung requires
+            {n} rung{n === 1 ? "" : "s"} · where {entityName(entity)} stands today, and what each rung requires
           </div>
           {/* What the selection did to THIS card, in the run's own counts. A
               platform that climbs none of these rungs says so rather than
@@ -2398,7 +2409,7 @@ function TransformationRoadmap({ entity, selKey, area }) {
           <button className={view === "chevrons" ? "on" : ""} onClick={() => setView("chevrons")}><Icon name="route" size={11} /> Phases</button>
           <button className={view === "impact" ? "on" : ""} onClick={() => setView("impact")}><Icon name="stairs" size={11} /> Cell impact</button>
         </div>
-        <button className="btn btn-tertiary btn-sm" onClick={() => pushToast(`Exporting ${entity.name} roadmap (${view} view)…`, "success")}><Icon name="download" size={11} /> Export</button>
+        <button className="btn btn-tertiary btn-sm" onClick={() => pushToast(`Exporting ${entityName(entity)} roadmap (${view} view)…`, "success")}><Icon name="download" size={11} /> Export</button>
       </div>
 
       {/* The third view ("Step curve") plotted entity.overall + 0.3 / +0.7 /
