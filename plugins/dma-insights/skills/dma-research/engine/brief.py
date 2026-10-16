@@ -353,6 +353,18 @@ def shared(wb: RunWorkbook, *, prelim: bool = False) -> dict:
         "peers": sorted({n.strip() for r in wb.rows("Peer_Benchmarks")
                          for n in str(r.get("Peer_Names") or "").split(",")
                          if n.strip()}),
+        # The category peer figures the run HOLDS (Verus, 2026-10-16: a grid
+        # producer wrote "the peers were not scored" beside a sheet that
+        # scored them). Below the cohort floor these are the locked peers'
+        # abbreviated scores (basis inferred); null is a category no peer
+        # cleared, and stays null. A category median is a CATEGORY figure:
+        # it is never written as a cell's peer (Arbor Bank, 2026-10-07).
+        "peer_category_medians": {
+            str(r.get("Category_ID")): {
+                "median": r.get("Peer_Median"), "p25": r.get("Peer_P25"),
+                "p75": r.get("Peer_P75"), "n": r.get("Peer_N"),
+                "basis": str(r.get("Peer_Basis") or "").split(":")[0].strip() or None}
+            for r in wb.rows("Peer_Benchmarks") if r.get("Category_ID")},
         "evidence_rows": len(register),
         "source_identities": sorted(hosts, key=lambda h: (-hosts[h], h))[:12],
         "searches_fired": len([s for s in wb.rows("Search_Log")

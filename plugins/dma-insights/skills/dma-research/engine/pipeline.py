@@ -4792,6 +4792,9 @@ class Pipeline:
                             self._save_page_reports(pg, phase)
             still = []
             for p in todo:
+                if self._refuse_stale_ship(p, version, verdicts):
+                    still.append(p)
+                    continue
                 if self._ship_one(p, version, connector_run, verdicts):
                     shipped.append(p)
                     continue
@@ -4957,8 +4960,9 @@ class Pipeline:
 
           heatmap.workbook_scores  a category/pillar peer_median null while
                                    Peer_Benchmarks carries a median there
-          platform.platform_story  a gap row's peer_score null, basis
-                                   cannot_estimate, while its category has one
+          (platform gap rows are NOT read here: a cell-grain peer below the
+           cohort floor is honestly cannot_estimate — a category mean is
+           never written as a cell's peer, Arbor Bank 2026-10-07)
           techstack.techstack      item count or status counts differ from
                                    the Tech_Register sheet
           insights.landscape       tile counts differ from the register
@@ -5004,61 +5008,73 @@ class Pipeline:
                 return (f"heatmap.workbook_scores leaves peer_median null on "
                         f"{', '.join(stale)} while Peer_Benchmarks carries a median there")
             return None
-        if page == "platform":
-            g = load("platform.platform_story.json")
-            if not isinstance(g, dict):
-                return None
-            have = {str(r.get("Category_ID")) for r in self.wb.rows("Peer_Benchmarks")
-                    if r.get("Category_ID") and num(r.get("Peer_Median")) is not None}
-            stale = []
-            for card in g.get("platforms") or []:
-                for gap in (card.get("gaps") or []) if isinstance(card, dict) else []:
-                    cell = str(gap.get("subcap_id") or "")
-                    cat = cell.split(".")[0]
-                    if cat in have and num(gap.get("peer_score")) is None \
-                            and str(gap.get("peer_basis") or "") == "cannot_estimate":
-                        stale.append(cell)
-            if stale:
-                return (f"platform.platform_story gap rows carry peer_score null with basis "
-                        f"cannot_estimate on {len(stale)} cell(s) ({', '.join(stale[:4])}) "
-                        f"whose category carries a Peer_Benchmarks median")
-            return None
         if page in ("techstack", "insights"):
-            reg = [r for r in self.wb.rows("Tech_Register") if r.get("TS_ID")]
+            reg = {str(r.get("TS_ID")): str(r.get("Status") or "").upper()
+                   for r in self.wb.rows("Tech_Register") if r.get("TS_ID")}
             if not reg:
                 return None
-            by_status: dict = {}
-            for r in reg:
-                k = str(r.get("Status") or "").upper()
-                by_status[k] = by_status.get(k, 0) + 1
+            t = load("techstack.techstack.json")
+            if not isinstance(t, dict):
+                return None
+            items = [it for it in (t.get("items") or []) if isinstance(it, dict)]
             if page == "techstack":
-                g = load("techstack.techstack.json")
-                if not isinstance(g, dict):
-                    return None
-                items = g.get("items") or []
-                got: dict = {}
-                for it in items:
-                    k = str((it or {}).get("status") or "").upper()
-                    got[k] = got.get(k, 0) + 1
-                if len(items) != len(reg) or any(got.get(k, 0) != v for k, v in by_status.items()):
-                    return (f"techstack.techstack carries {len(items)} row(s) "
-                            f"({', '.join(f'{k} {v}' for k, v in sorted(got.items()))}) against "
-                            f"the Tech_Register's {len(reg)} "
-                            f"({', '.join(f'{k} {v}' for k, v in sorted(by_status.items()))})")
+                # Per register row, by TS id. The producer may DROP a row with
+                # its reason (`dropped[]` names the workbook id: a category
+                # rather than a product, a service, a superseded row), so the
+                # count alone proves nothing; a row served under a status the
+                # sheet no longer carries, an id the sheet lacks, or a sheet
+                # row neither served nor dropped is the stale file.
+                dropped_text = " ".join(json.dumps(d, default=str) for d in (t.get("dropped") or []))
+                served = {str(it.get("ts_id")): str(it.get("status") or "").upper() for it in items}
+                off = [f"{ts} served {st} vs sheet {reg[ts]}" for ts, st in served.items()
+                       if ts in reg and st != reg[ts]]
+                off += [f"{ts} served but not on the sheet" for ts in served if ts not in reg]
+                off += [f"{ts} ({reg[ts]}) neither served nor named in dropped[]"
+                        for ts in reg if ts not in served and ts not in dropped_text]
+                if off:
+                    return "techstack.techstack disagrees with the Tech_Register: " + "; ".join(off[:6])
                 return None
+            # The landscape strip recounts the techstack SECTION (T2 from T1,
+            # invariant 8), so it is read against the register file on disk.
             g = load("insights.landscape.json")
-            if not isinstance(g, dict):
+            if not isinstance(g, dict) or not items:
                 return None
-            tiles = {str(t.get("kind") or "").upper(): int(t.get("count") or 0)
-                     for t in (g.get("tiles") or []) if isinstance(t, dict)}
-            # the GAPS tile is not a register status
-            off = {k: (tiles.get(k, 0), v) for k, v in by_status.items()
-                   if k in ("CONFIRMED", "INFERRED", "CLAIMED", "ABSENT") and tiles.get(k, 0) != v}
+            by_status: dict = {}
+            for it in items:
+                k = str(it.get("status") or "").upper()
+                by_status[k] = by_status.get(k, 0) + 1
+            tiles = {str(x.get("kind") or "").upper(): int(x.get("count") or 0)
+                     for x in (g.get("tiles") or []) if isinstance(x, dict)}
+            off = {k: (tiles.get(k, 0), by_status.get(k, 0))
+                   for k in ("CONFIRMED", "INFERRED", "CLAIMED", "ABSENT")
+                   if tiles.get(k, 0) != by_status.get(k, 0)}
             if off:
-                return ("insights.landscape tiles disagree with the Tech_Register: "
+                return ("insights.landscape tiles disagree with the techstack register rows: "
                         + ", ".join(f"{k} {a} vs {b}" for k, (a, b) in sorted(off.items())))
             return None
         return None
+
+    def _refuse_stale_ship(self, page: str, version: str, verdicts: dict) -> str | None:
+        """At SHIP time, after any production: a section that contradicts
+        the workbook is not submitted. The contradiction is recorded as the
+        page's verdict (state and the verdicts file), so the next attempt is
+        a repair carrying it. Verus, 2026-10-16: insights was produced in
+        the first group and techstack in the deferred group after it, so
+        the landscape strip recounted the previous register and shipped."""
+        why = self._section_contradicts_workbook(page)
+        if not why:
+            return None
+        rec = (self.state.setdefault("pages", {})).setdefault(page, {})
+        rec["version"] = version
+        rec["status"] = "local_precheck_fail"
+        rec["reasons"] = [why]
+        rec["n_reasons"] = 1
+        rec.setdefault("n_history", []).append([version, "local_precheck_fail", 1, 0, "pass1"])
+        att = rec.setdefault("attempts_by_version", {})
+        att[version] = int(att.get(version) or 0) + 1
+        verdicts[page] = [why]
+        self.opts.log(f"  [PAGES_{version}] {page}: not submitted — {why}")
+        return why
 
     def _stale_on_disk(self, page: str, version: str) -> str | None:
         """Why the page's files on disk must NOT ship as this version's
@@ -5114,6 +5130,8 @@ class Pipeline:
                 if why:
                     self.opts.log(f"  [PAGES_{version}] {p}: on disk but stale — {why}; "
                                   f"handed as a fresh production")
+                    continue
+                if self._refuse_stale_ship(p, version, verdicts):
                     continue
                 if self._ship_one(p, version, connector_run, verdicts):
                     shipped.append(p)
@@ -5340,13 +5358,19 @@ class Pipeline:
         # platform or context were attempted).
         shipped = []
         held = None
-        for group in PAGES_B:
-            shipped += self._ship_pages(group, "B", produce=True)
+        # The deferred pages go FIRST in production order and their refusal
+        # is still held to the end: techstack is the register the insights
+        # landscape recounts (T2 from T1), and produced after it the strip
+        # could only ever count the previous register (Verus, 2026-10-16:
+        # the served strip named two CONFIRMED products beside a register
+        # serving three). Every other group still gets its turn.
         if deferred:
             try:
                 shipped += self._ship_pages(deferred, "B", produce=True)
             except StageRefused as e:
                 held = e
+        for group in PAGES_B:
+            shipped += self._ship_pages(group, "B", produce=True)
         if held:
             raise StageRefused(f"{held} — every other page shipped to version B: "
                                f"{', '.join(restaged + shipped) or 'none'}")
