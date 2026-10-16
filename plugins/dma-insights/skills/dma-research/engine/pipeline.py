@@ -4728,6 +4728,18 @@ class Pipeline:
             return self._ship_pages_workflow(pages, version, connector_run,
                                              verdicts, verdicts_file)
         todo = [p for p in pages if not self._page_ok(p, version)]
+        if not produce:
+            # A restage from disk ships a previous version's files BY DESIGN
+            # (the re-open's `restage` list, the A→B carry); a file that
+            # contradicts the workbook is not that — it is stale, and this
+            # path has no lanes to repair it, so it is refused with the
+            # contradiction named (re-open it with --reproduce).
+            bad = {p: w for p in todo if (w := self._section_contradicts_workbook(p))}
+            if bad:
+                raise StageRefused(
+                    "restage refused — section files on disk contradict the workbook: "
+                    + "; ".join(f"{p}: {w}" for p, w in bad.items())
+                    + ". Re-open with --reproduce naming these pages.")
         shipped = []
         halted: dict = {}
         for attempt in range(self.opts.page_retries + 1):
@@ -4743,6 +4755,18 @@ class Pipeline:
                 # a repair: the assembler alone, carrying the verdict's reasons.
                 on_disk = {p for p in todo if list(self._sections_dir().glob(f"{p}.*.json"))}
                 if attempt == 0:
+                    # Verus, 2026-10-16: files on disk shipped first even when
+                    # they predated the version's ingest or contradicted the
+                    # workbook (a heatmap grid with every peer_median null,
+                    # seven hours after the peers were scored). Stale files
+                    # are a previous version's content: they are produced
+                    # afresh, every phase, not shipped.
+                    stale = {p: w for p in sorted(on_disk)
+                             if (w := self._stale_on_disk(p, version))}
+                    for p, w in stale.items():
+                        self.opts.log(f"  [PAGES_{version}] {p}: on disk but stale — {w}; "
+                                      f"produced afresh")
+                    on_disk -= set(stale)
                     groups = [(brief.PAGE_PHASES, [p for p in todo if p not in on_disk])]
                     if on_disk:
                         self.opts.log(f"  [PAGES_{version}] on disk, shipping first: "
@@ -4917,6 +4941,136 @@ class Pipeline:
         except ValueError:
             return None
 
+    def _section_contradicts_workbook(self, page: str) -> str | None:
+        """A section file on disk that CONTRADICTS the workbook it claims to
+        render, named — or None.
+
+        Verus, 2026-10-16: the lanes path shipped `heatmap.workbook_scores`
+        written at 17:11 the day before (every peer_median null, an
+        empty_state saying the peers "were not scored") seven hours after
+        the peers were scored, and `techstack.techstack` with 10 register
+        rows against the sheet's 13 — and the run promoted. Neither file
+        was wrong when written; both were stale, and "on disk, shipping
+        first" never asked. A file older than the version's ingest is one
+        signal (`_produced_for`); this is the other — the figures a reader
+        would see beside the workbook that now says otherwise:
+
+          heatmap.workbook_scores  a category/pillar peer_median null while
+                                   Peer_Benchmarks carries a median there
+          platform.platform_story  a gap row's peer_score null, basis
+                                   cannot_estimate, while its category has one
+          techstack.techstack      item count or status counts differ from
+                                   the Tech_Register sheet
+          insights.landscape       tile counts differ from the register
+        """
+        sd = self._sections_dir()
+
+        def load(name):
+            f = sd / name
+            if not f.is_file():
+                return None
+            try:
+                return json.loads(f.read_text())
+            except ValueError:
+                return None
+
+        def num(v):
+            try:
+                return None if v is None or v == "" else float(v)
+            except (TypeError, ValueError):
+                return None
+
+        if page == "heatmap":
+            g = load("heatmap.workbook_scores.json")
+            if not isinstance(g, dict):
+                return None
+            medians = {str(r.get("Category_ID")): num(r.get("Peer_Median"))
+                       for r in self.wb.rows("Peer_Benchmarks") if r.get("Category_ID")}
+            have = {c for c, m in medians.items() if m is not None}
+            if not have:
+                return None
+            cats = g.get("categories") or {}
+            rows = cats.items() if isinstance(cats, dict) else \
+                [(str(r.get("category_id") or r.get("id")), r) for r in cats if isinstance(r, dict)]
+            stale = sorted(c for c, r in rows if c in have and isinstance(r, dict)
+                           and num(r.get("peer_median")) is None)
+            pils = g.get("pillars") or {}
+            prow = pils.items() if isinstance(pils, dict) else \
+                [(str(r.get("pillar_id") or r.get("id")), r) for r in pils if isinstance(r, dict)]
+            stale += sorted(pid for pid, r in prow if isinstance(r, dict)
+                            and num(r.get("peer_median")) is None
+                            and any(c.startswith(str(pid)) for c in have))
+            if stale:
+                return (f"heatmap.workbook_scores leaves peer_median null on "
+                        f"{', '.join(stale)} while Peer_Benchmarks carries a median there")
+            return None
+        if page == "platform":
+            g = load("platform.platform_story.json")
+            if not isinstance(g, dict):
+                return None
+            have = {str(r.get("Category_ID")) for r in self.wb.rows("Peer_Benchmarks")
+                    if r.get("Category_ID") and num(r.get("Peer_Median")) is not None}
+            stale = []
+            for card in g.get("platforms") or []:
+                for gap in (card.get("gaps") or []) if isinstance(card, dict) else []:
+                    cell = str(gap.get("subcap_id") or "")
+                    cat = cell.split(".")[0]
+                    if cat in have and num(gap.get("peer_score")) is None \
+                            and str(gap.get("peer_basis") or "") == "cannot_estimate":
+                        stale.append(cell)
+            if stale:
+                return (f"platform.platform_story gap rows carry peer_score null with basis "
+                        f"cannot_estimate on {len(stale)} cell(s) ({', '.join(stale[:4])}) "
+                        f"whose category carries a Peer_Benchmarks median")
+            return None
+        if page in ("techstack", "insights"):
+            reg = [r for r in self.wb.rows("Tech_Register") if r.get("TS_ID")]
+            if not reg:
+                return None
+            by_status: dict = {}
+            for r in reg:
+                k = str(r.get("Status") or "").upper()
+                by_status[k] = by_status.get(k, 0) + 1
+            if page == "techstack":
+                g = load("techstack.techstack.json")
+                if not isinstance(g, dict):
+                    return None
+                items = g.get("items") or []
+                got: dict = {}
+                for it in items:
+                    k = str((it or {}).get("status") or "").upper()
+                    got[k] = got.get(k, 0) + 1
+                if len(items) != len(reg) or any(got.get(k, 0) != v for k, v in by_status.items()):
+                    return (f"techstack.techstack carries {len(items)} row(s) "
+                            f"({', '.join(f'{k} {v}' for k, v in sorted(got.items()))}) against "
+                            f"the Tech_Register's {len(reg)} "
+                            f"({', '.join(f'{k} {v}' for k, v in sorted(by_status.items()))})")
+                return None
+            g = load("insights.landscape.json")
+            if not isinstance(g, dict):
+                return None
+            tiles = {str(t.get("kind") or "").upper(): int(t.get("count") or 0)
+                     for t in (g.get("tiles") or []) if isinstance(t, dict)}
+            # the GAPS tile is not a register status
+            off = {k: (tiles.get(k, 0), v) for k, v in by_status.items()
+                   if k in ("CONFIRMED", "INFERRED", "CLAIMED", "ABSENT") and tiles.get(k, 0) != v}
+            if off:
+                return ("insights.landscape tiles disagree with the Tech_Register: "
+                        + ", ".join(f"{k} {a} vs {b}" for k, (a, b) in sorted(off.items())))
+            return None
+        return None
+
+    def _stale_on_disk(self, page: str, version: str) -> str | None:
+        """Why the page's files on disk must NOT ship as this version's
+        content: older than the version's ingest, or contradicting the
+        workbook. None when they may ship."""
+        if not self._produced_for(page, version):
+            return "section files predate this version's ingest"
+        restage = ((self.state.get("reopen") or {}).get("restage") or ())
+        if page in restage:
+            return None
+        return self._section_contradicts_workbook(page)
+
     def _produced_for(self, page: str, version: str) -> bool:
         """Whether the page's section files on disk were produced FOR this
         version: newer than the moment its connector run was ingested.
@@ -4955,7 +5109,12 @@ class Pipeline:
             rec = (self.state.get("pages") or {}).get(p) or {}
             m = self._page_mtime(p)
             last = (rec.get("shipped_mtime") or {}).get(version)
-            if m and (last is None or m > float(last)) and self._produced_for(p, version):
+            if m and (last is None or m > float(last)):
+                why = self._stale_on_disk(p, version)
+                if why:
+                    self.opts.log(f"  [PAGES_{version}] {p}: on disk but stale — {why}; "
+                                  f"handed as a fresh production")
+                    continue
                 if self._ship_one(p, version, connector_run, verdicts):
                     shipped.append(p)
         self._save_state()

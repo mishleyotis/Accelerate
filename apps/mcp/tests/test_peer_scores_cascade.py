@@ -330,3 +330,39 @@ def test_no_named_peer_set_is_not_this_finding(monkeypatch):
     monkeypatch.setattr(PS, "run_peer_set", lambda conn, run_id, payload, page=None: {})
     out = run(monkeypatch, strip({"pillar_id": "P1", "score": 1.0, "peer_median": None}), None)
     assert ids(out) == []
+
+
+def test_a_grid_silent_on_a_category_the_run_scored_peers_for_is_refused(monkeypatch):
+    """Verus, 2026-10-16: the overview strip served four pillar medians, the
+    heatmap grid served peer_median null on all 20 rows with an empty_state
+    saying the peers "were not scored", and the run promoted. The grid file
+    predated the peer scoring and shipped from disk afterwards."""
+    monkeypatch.setattr(V2, "_run_peer_categories",
+                        lambda conn, run_id: {"P1C2", "P2C3"})
+    grid = {"pillars": {"P1": {"score": 1.03, "peer_median": None},
+                        "P2": {"score": 1.14, "peer_median": None},
+                        "P3": {"score": 1.08, "peer_median": None}},
+            "categories": {"P1C1": {"score": 1.06, "peer_median": None},
+                           "P1C2": {"score": 1.04, "peer_median": None},
+                           "P2C3": {"score": 1.09, "peer_median": None},
+                           "P3C1": {"score": 1.15, "peer_median": None}},
+            "empty_state": {"reason": "the four identified peers were not scored"}}
+    out = V2._check_peer_grid_cascade(None, "run-1", "heatmap", {"workbook_scores": grid})
+    paths = sorted(r["path"] for r in out)
+    assert ids(out) == ["CG-44"] * 4, out
+    assert paths == ["heatmap.workbook_scores.categories.P1C2.peer_median",
+                     "heatmap.workbook_scores.categories.P2C3.peer_median",
+                     "heatmap.workbook_scores.pillars.P1.peer_median",
+                     "heatmap.workbook_scores.pillars.P2.peer_median"]
+    # P1C1 and P3C1 carry no recorded peer: their null stands, as does P3's
+    grid["categories"]["P1C2"]["peer_median"] = 2.0
+    grid["categories"]["P2C3"]["peer_median"] = 2.0
+    grid["pillars"]["P1"]["peer_median"] = 2.0
+    grid["pillars"]["P2"]["peer_median"] = 1.75
+    assert V2._check_peer_grid_cascade(None, "run-1", "heatmap", {"workbook_scores": grid}) == []
+    # no recorded peer score at all: the honest null is not this finding
+    monkeypatch.setattr(V2, "_run_peer_categories", lambda conn, run_id: set())
+    grid["categories"]["P1C2"]["peer_median"] = None
+    assert V2._check_peer_grid_cascade(None, "run-1", "heatmap", {"workbook_scores": grid}) == []
+    # the overview rule is untouched by the heatmap half
+    assert V2._check_peer_grid_cascade(None, "run-1", "overview", {"workbook_scores": grid}) == []

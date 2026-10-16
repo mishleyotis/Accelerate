@@ -2123,6 +2123,79 @@ def _heatmap_peer_scores(body):
 _OWNER_DECISION = re.compile(r"OWNER_DECISION", re.I)
 
 
+def _run_peer_categories(conn, run_id) -> set:
+    """The category ids this run has a recorded peer score on, from
+    `peer_scores` (category grain since 0011). Empty on any read failure,
+    for the reason `_run_peer_names` gives."""
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT DISTINCT category_id FROM peer_scores "
+            "WHERE run_id = %s AND score IS NOT NULL AND category_id IS NOT NULL",
+            (run_id,))
+        return {str(r[0]) for r in cur.fetchall() if r[0]}
+    except Exception:                                          # noqa: BLE001
+        return set()
+
+
+def _check_peer_grid_cascade(conn, run_id, page, payload) -> list:
+    """CG-44, the heatmap half — a peer figure the assessment holds reaches
+    the workbook grid.
+
+    Owner, 2026-10-16 (Verus Financial Partners, the morning after "Peer
+    data is empty" was fixed at source): the overview strip served four
+    pillar medians with their disclosures, and `heatmap.workbook_scores` —
+    the grid a reader opens to see the same comparison at category grain —
+    served peer_median null on all 20 rows with an empty_state saying the
+    peers "were not scored". The file had been written before the peers
+    were scored and shipped from disk afterwards. The run promoted: this
+    gate watched the overview strip only.
+
+    The rule is the overview's, moved one page over: where `peer_scores`
+    holds a score for a category, that category's row on the grid may not
+    be silent, and a pillar with any scored category may not be either.
+    """
+    if page != "heatmap" or not isinstance(payload, dict):
+        return []
+    grid = payload.get("workbook_scores")
+    if not isinstance(grid, dict):
+        return []
+    scored = _run_peer_categories(conn, run_id)
+    if not scored:
+        return []                        # nothing recorded: the honest null stands
+    out = []
+    cats = grid.get("categories")
+    rows = (list(cats.items()) if isinstance(cats, dict) else
+            [(str(r.get("category_id") or r.get("id") or ""), r)
+             for r in (cats or []) if isinstance(r, dict)])
+    for cid, r in rows:
+        if cid in scored and isinstance(r, dict) and _num(r.get("peer_median")) is None:
+            out.append(_reason(
+                "CG-44", "workbook_scores", f"heatmap.workbook_scores.categories.{cid}.peer_median",
+                f"{cid} leaves peer_median null while this run records a peer score "
+                f"on {cid} (peer_scores, category grain). The strip on the overview "
+                f"serves the pillar figure built from it; the grid is where a reader "
+                f"opens the same comparison at category grain and finds an empty "
+                f"column with an absence reason. A figure the assessment holds is "
+                f"served, or the section says why this category's median does not "
+                f"apply — a section file written before the peers were scored is "
+                f"stale, not an absence."))
+    pils = grid.get("pillars")
+    prow = (list(pils.items()) if isinstance(pils, dict) else
+            [(str(r.get("pillar_id") or r.get("id") or ""), r)
+             for r in (pils or []) if isinstance(r, dict)])
+    for pid, r in prow:
+        if isinstance(r, dict) and _num(r.get("peer_median")) is None \
+                and any(c.startswith(pid) for c in scored):
+            out.append(_reason(
+                "CG-44", "workbook_scores", f"heatmap.workbook_scores.pillars.{pid}.peer_median",
+                f"{pid} leaves peer_median null while this run records a peer score on "
+                f"{', '.join(sorted(c for c in scored if c.startswith(pid))[:4])}; the "
+                f"pillar figure is the mean of its scored category medians and the "
+                f"overview strip already serves it."))
+    return out
+
+
 def _check_peer_scores_cascade(conn, run_id, page, payload) -> list:
     """CG-44 — a peer figure the assessment holds reaches the overview strip.
 
@@ -4062,6 +4135,7 @@ def validate_pass2(conn, run_id, page: str, payload: dict,
     reasons.extend(_check_sentiment_projections_agree(
         conn, run_id, page, payload))
     reasons.extend(_check_peer_scores_cascade(conn, run_id, page, payload))
+    reasons.extend(_check_peer_grid_cascade(conn, run_id, page, payload))
     reasons.extend(_check_cards_state_their_reach(conn, run_id, page, payload))
     reasons.extend(_check_issue_register_is_the_entitys(page, payload))
     reasons.extend(_check_prose_counts_what_is_served(page, payload))
