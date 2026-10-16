@@ -571,6 +571,20 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   `--reopen` widens `--reproduce`** (TS-004 Calendly was restruck ABSENT →
   CONFIRMED mid-REPORTS, so techstack and insights moved from restage to
   reproduce; a narrower list changes nothing).
+  **A stale section file never ships** (2026-10-16, after the re-promoted
+  run served the heatmap grid with every `peer_median` null and a techstack
+  register of 10 rows against the sheet's 13 — files written the day
+  before, shipped "on disk first" by the lanes fallback): `_stale_on_disk`
+  (files older than the version's ingest, or a section contradicting the
+  workbook — grid peer medians vs `Peer_Benchmarks`, platform gap-row peers
+  vs category medians, techstack items and insights tiles vs the
+  `Tech_Register`) governs the lanes, workflow and restage paths alike; a
+  stale page is produced afresh, every phase, and a restage that
+  contradicts the workbook is refused naming it. The connector's CG-44
+  gains the heatmap half (a grid category or pillar silent where
+  `peer_scores` records a score). Tests:
+  `test_stale_section_never_ships_2026_10_16.py`,
+  `test_peer_scores_cascade.py`.
 
 ## Open decisions — leave open, do not resolve silently
 
