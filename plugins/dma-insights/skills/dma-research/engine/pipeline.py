@@ -5043,7 +5043,11 @@ class Pipeline:
             for it in items:
                 k = str(it.get("status") or "").upper()
                 by_status[k] = by_status.get(k, 0) + 1
-            tiles = {str(x.get("kind") or "").upper(): int(x.get("count") or 0)
+            # `count` is computed, never stored (invariant 8): a producer may
+            # leave it null and name the items; the names are then the count.
+            tiles = {str(x.get("kind") or "").upper():
+                     (int(x["count"]) if x.get("count") is not None
+                      else len(x.get("named_items") or []))
                      for x in (g.get("tiles") or []) if isinstance(x, dict)}
             off = {k: (tiles.get(k, 0), by_status.get(k, 0))
                    for k in ("CONFIRMED", "INFERRED", "CLAIMED", "ABSENT")
