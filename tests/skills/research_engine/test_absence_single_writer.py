@@ -54,6 +54,25 @@ def test_the_absence_flag_has_one_writer(tmp_path):
     assert cell not in wl["closed"] and cell not in wl["declared_absent"]
 
 
+def test_an_absence_label_on_an_evidenced_synthesis_is_not_forged(tmp_path):
+    """The ledger accepts Absence_Claimed on an EVIDENCED row as a label on the
+    claim, so rule 8 must not read it as a flag written around the command.
+    Measured 2026-10-17 (EPIC): 36 such rows refused the handoff with no
+    engine path able to satisfy both the ledger and the validator."""
+    run, wb, cells, ev = researched_run(tmp_path, n=6, absent=1)
+    cell = cells[0]
+    rec = good_synthesis(cell, ev[cell])
+    rec.update({"Absence_Claimed": "YES",
+                "Proxy_Log": "hunted the leadership_title proxy class across the "
+                             "site, LinkedIn and the annual report for the owner"})
+    L.append_synthesis(wb, cell, rec, actor="research-p1c1-producer")
+    wb = run.open()
+    assert str(wb.scoring_row(cell).get("Absence_Claimed")).upper() == "YES"
+    assert L.is_declared_absent(wb.scoring_row(cell), wb) is False
+    fails = validator.validate(wb.path, run_id="R-TEST-1")
+    assert not any(f["rule"] == 8 and cell in f["detail"] for f in fails), fails
+
+
 def test_a_notebook_absence_stages_the_ladder_and_leaves_the_declaration_to_the_cli(tmp_path):
     run = new_run(tmp_path, n=4)
     wb = run.open()
