@@ -411,6 +411,14 @@ def peer_record(wb: RunWorkbook, *, ts_id: str, peer: str,
             "no url never reaches the page anyway — record it as not "
             "deployed, or find the source.")
     word = {True: "yes", False: "no", None: "unknown"}[deployed]
+    # One peer, one product, ONE answer: a re-record supersedes the earlier
+    # row rather than sitting beside it. Appending only left the old "yes"
+    # counted in peer_state and served beside the new "unknown" (EPIC,
+    # 2026-10-17: five job-posting rows re-marked unknown after the report
+    # review found them undated still read Deployed=yes).
+    wb.delete_rows_where("Tech_Peer_Deployments",
+                         {"TS_ID": ts_id, "Peer": str(peer).strip()},
+                         save=False)
     wb.append("Tech_Peer_Deployments", {
         "TS_ID": ts_id, "Peer": str(peer).strip(),
         "Deployed": word,

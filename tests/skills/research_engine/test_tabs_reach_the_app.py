@@ -242,6 +242,32 @@ def test_peer_coverage_is_null_when_nothing_was_established(tmp_path):
     assert techscan.peer_state(wb, ts)["peer_coverage"] is None
 
 
+def test_a_re_recorded_peer_supersedes_its_earlier_answer(tmp_path):
+    """One peer, one product, ONE answer. EPIC (2026-10-17): five rows
+    re-marked unknown after review found their only source undated still
+    read Deployed=yes, because peer-record appended beside the old row and
+    peer_state counted both."""
+    run = new_run(tmp_path, prelim=False)
+    wb = run.open()
+    ts = techscan.record(wb, product="X", vendor="Y", layer="DATA",
+                         status="CLAIMED", method="technographic_scan",
+                         providers=["explorium"],
+                         basis="the Explorium export carries this row")
+    techscan.peer_record(wb, ts_id=ts, peer="Peer Alpha CU", deployed=True,
+                         basis="an undated job posting names the platform",
+                         source_url="https://jobs.example/1")
+    techscan.peer_record(wb, ts_id=ts, peer="Peer Beta CU", deployed=False,
+                         basis="four searches of the peer's site found none")
+    st = techscan.peer_record(
+        wb, ts_id=ts, peer="Peer Alpha CU", deployed=None,
+        basis="the only source is undated, so deployment is not established",
+        source_url="https://jobs.example/1")
+    assert st["peers_examined"] == 2
+    assert st["peers_deployed"] == 0 and st["peers_unknown"] == 1
+    rows = {r["peer"]: r["deployed"] for r in techscan.peer_rows(wb, ts)}
+    assert rows == {"Peer Alpha CU": None, "Peer Beta CU": False}
+
+
 def test_the_impact_band_is_the_served_contracts_own(tmp_path):
     run = new_run(tmp_path, prelim=False)
     wb = run.open()

@@ -772,6 +772,16 @@ def widen_peers(wb: RunWorkbook, add: list[str], *, rule: str, owner: str,
     if wanted == sorted(have):
         raise PrelimRefusal(f"every named peer is already in the locked set {have}")
     names = ", ".join(_grid_name(n) for n in wanted)
+    # Peer_Basis is what the reports cite for the rule, so it must state the
+    # ORDER as well: a basis written at lock time ("frozen before any score")
+    # next to a Peer_Names list widened later reads as one ordering when
+    # there were two (EPIC, 2026-10-17: four of five peers added after
+    # scoring; the report review refused CR §4 on it twice).
+    at = _utcnow()
+    after = (" after scoring" if str(C.stage_of(wb.metadata()) or "")
+             .lower() not in ("", "research") else "")
+    stamp = (f"; set widened at {at} by {_clean(owner)}{after} under the "
+             f"same rule ({len(have)} -> {len(wanted)} peers)")
     with wb.transaction("widen_peers"):
         wb.update_row("Handoff_Lock", "Key", "locked_peer_set",
                       {"Value": "|".join(wanted)}, save=False)
@@ -779,14 +789,16 @@ def widen_peers(wb: RunWorkbook, add: list[str], *, rule: str, owner: str,
         for r in rows:
             cid = _clean(r.get("Category_ID"))
             if cid:
+                basis = _clean(r.get("Peer_Basis")).split("; set widened at ")[0]
                 wb.update_row("Peer_Benchmarks", "Category_ID", cid,
-                              {"Peer_Names": names, "Peer_N": len(wanted)}, save=False)
-        detail = (f"peer set widened by {_clean(owner)}: {', '.join(have)} -> "
+                              {"Peer_Names": names, "Peer_N": len(wanted),
+                               "Peer_Basis": (basis + stamp)[:900]}, save=False)
+        detail = (f"peer set widened{after} by {_clean(owner)}: {', '.join(have)} -> "
                   f"{', '.join(wanted)}. Rule: {_clean(rule)}. Why: {_clean(why)}")[:900]
         wb.append("Provenance", {"SubCap_ID": "", "Step": "widen_peers",
                                  "Actor": _clean(owner), "At": _utcnow(),
                                  "Detail": detail}, save=False)
-        wb.append("Gate_Log", {"Timestamp": _utcnow(), "Gate": "PEER_SET_WIDENED",
+        wb.append("Gate_Log", {"Timestamp": at, "Gate": "PEER_SET_WIDENED",
                                "Scope": "Handoff_Lock", "Verdict": "PASS",
                                "Blocking": False, "Detail": detail}, save=False)
         wb.save()

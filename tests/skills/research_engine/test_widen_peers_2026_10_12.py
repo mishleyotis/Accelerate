@@ -184,3 +184,31 @@ def test_a_report_section_citation_with_no_cell_is_advisory_not_a_halt(tmp_path)
     wb.append("Report_Narrative", {"Section_ID": "3", "Evidence_IDs": eid})
     found = [b for b in PP.preflight(run.open(), ("overview",)) if eid in b["detail"]]
     assert found and all(b["severity"] == "warn" for b in found)
+
+
+def test_peer_basis_states_when_the_set_was_widened(tmp_path):
+    """EPIC (2026-10-17): Peer_Basis kept the lock-time wording beside a
+    Peer_Names list widened after scoring, so the report cited one ordering
+    when there were two. The widening is stamped on every row's basis, and
+    'after scoring' is said only when the run is past research."""
+    run = _locked(tmp_path)
+    _widen(run.open())
+    rows = [r for r in run.open().rows("Peer_Benchmarks") if r.get("Category_ID")]
+    assert rows and all("; set widened at " in r["Peer_Basis"]
+                        and "after scoring" not in r["Peer_Basis"]
+                        and r["Peer_Basis"].count("; set widened at ") == 1
+                        for r in rows)
+
+
+def test_a_widening_after_scoring_says_so(tmp_path):
+    run = _locked(tmp_path)
+    wb = run.open()
+    wb.set_metadata("stage", "assessment")
+    _widen(run.open())
+    _widen(run.open(), add=["Peer D"])
+    rows = [r for r in run.open().rows("Peer_Benchmarks") if r.get("Category_ID")]
+    assert all("after scoring" in r["Peer_Basis"]
+               and r["Peer_Basis"].count("; set widened at ") == 1
+               and "(3 -> 4 peers)" in r["Peer_Basis"] for r in rows)
+    gl = [r for r in run.open().rows("Gate_Log") if r.get("Gate") == "PEER_SET_WIDENED"]
+    assert gl and "widened after scoring" in gl[-1]["Detail"]
