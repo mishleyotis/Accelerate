@@ -558,10 +558,21 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
             # stayed empty (AUD-0052). Each block must carry substance AND a
             # citation. 55 words is the floor — well under the reference, well
             # over the one-line defect.
+            # A block STARTS where the phrase opens a line (the heading the
+            # renderer emits, or an "AI and data overlay:" lead-in) and runs
+            # to the next such line or the next deep dive. Until 2026-10-18 any
+            # mention started and ended a block, so EPIC's P4 prose "P4 is
+            # where the AI and data overlay concentrates" cut a ~247-word
+            # overlay to 8 words and failed a report that met the floor.
+            starts = [m.start() for m in
+                      re.finditer(r"(?im)^[ \t]*ai and data overlay", whole)]
+            if not starts:                 # no heading-form block: old reading
+                starts = [m.start() for m in re.finditer(r"ai and data overlay", low)]
             thin = []
-            for m in re.finditer(r"ai and data overlay", low):
-                seg = whole[m.start(): m.start() + 1400]
-                nxt = re.search(r"(?i)(ai and data overlay|pillar deep dive)", seg[20:])
+            for st in starts:
+                seg = whole[st: st + 1400]
+                nxt = re.search(r"(?im)(^[ \t]*ai and data overlay|pillar deep dive)",
+                                seg[20:])
                 if nxt:
                     seg = seg[: nxt.start() + 20]
                 w = len(re.findall(r"\w+", seg))
