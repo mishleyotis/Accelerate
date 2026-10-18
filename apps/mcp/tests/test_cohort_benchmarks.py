@@ -107,3 +107,57 @@ def test_cell_grain_names_no_entity_and_refuses_an_unbounded_list():
     too_many = [f"P1C1.1.{i}" for i in range(cohort.CELL_LIMIT + 1)]
     assert "error" in cohort.cell_benchmarks(_Conn([]), "CL", too_many)
     assert cohort.cell_benchmarks(_Conn([]), "CL", [])["error"] == "subcap_ids_required"
+
+
+# ── the fit engine reads a full-scope run's cells in slices (EPIC, 2026-10-18) ──
+
+class _FitCur:
+    """Answers the entity lookup _cell_peers makes, then the cohort reads."""
+    def __init__(self, cohort_rows):
+        self.cohort_rows, self.calls, self._last = cohort_rows, [], None
+
+    def execute(self, sql, args):
+        self._last = (sql, args)
+        if "subcap_scores" in sql:
+            self.calls.append(list(args[1]))
+
+    def fetchone(self):
+        return ("IB", "me", "me broker")
+
+    def fetchall(self):
+        sql, args = self._last
+        ids = set(args[1])
+        return [r for r in self.cohort_rows if r[2] in ids]
+
+
+class _FitConn:
+    def __init__(self, cur):
+        self.cur = cur
+
+    def cursor(self):
+        return self.cur
+
+
+def test_a_run_wider_than_the_cohort_limit_still_gets_its_gap_row_peers():
+    from dma_mcp import fit
+    n = cohort.CELL_LIMIT + 194                     # EPIC served 694 cells
+    ids = [f"P1C1.{i // 10}.{i % 10}" for i in range(n)]
+    last = ids[-1]                                  # beyond the first slice
+    rows = [(f"ib-{e}", f"broker {e}", sid, 2.0 + e) for e in range(3)
+            for sid in (ids[0], last)]
+    cur = _FitCur(rows)
+    cells = {sid: {"score": 1.0, "peer": None} for sid in ids}
+    fit._cell_peers(_FitConn(cur), cur, "run-1", cells)
+    assert len(cur.calls) == 2 and all(len(c) <= cohort.CELL_LIMIT for c in cur.calls)
+    assert cells[ids[0]]["peer"] == 3.0 and cells[last]["peer"] == 3.0
+    assert cells[ids[1]]["peer"] is None            # unscored by the cohort: stays null
+
+
+def test_a_refused_cohort_read_is_logged_never_read_as_no_peers(caplog, monkeypatch):
+    from dma_mcp import fit
+    monkeypatch.setattr(cohort, "cell_benchmarks",
+                        lambda *a, **k: {"error": "too_many_subcap_ids: 9 > 8"})
+    cur = _FitCur([])
+    with caplog.at_level("WARNING"):
+        fit._cell_peers(_FitConn(cur), cur, "run-1", {"P1C1.1.1": {"peer": None}})
+    assert "refused" in caplog.text and "too_many_subcap_ids" in caplog.text

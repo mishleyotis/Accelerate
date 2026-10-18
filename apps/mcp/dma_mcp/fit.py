@@ -19,6 +19,7 @@ pure function in `packages/shared/platform_fit.py`.
 from __future__ import annotations
 
 import json
+import logging
 import re
 
 from . import subverticals
@@ -26,6 +27,8 @@ from .shared_path import ensure as _ensure_shared
 
 _ensure_shared(__file__)
 import platform_fit as engine  # noqa: E402  packages/shared/platform_fit.py
+
+_log = logging.getLogger(__name__)
 
 # Tier and freshness weights for the per-cell evidence strength. Mirrors the
 # ladder the evidence tier already uses; a T1 regulator filing read this
@@ -202,14 +205,27 @@ def _cell_peers(conn, cur, run_id, cells: dict) -> None:
     display_id = str(row[1] or "") if len(row) > 1 else ""
     name = str(row[2] or "") if len(row) > 2 else ""
     from . import cohort
-    try:
-        got = cohort.cell_benchmarks(conn, sv, want, exclude_display_id=display_id,
-                                     exclude_entity_name=name)
-    except Exception:                              # noqa: BLE001
-        return
-    for sid, v in ((got or {}).get("cells") or {}).items():
-        if sid in cells and isinstance(v, dict) and v.get("mean") is not None:
-            cells[sid]["peer"] = float(v["mean"])
+    # A full-scope run asks for every cell it serves (686-851), and the cohort
+    # read refuses more than CELL_LIMIT ids with an error dict. Read in slices:
+    # before 2026-10-18 the one oversized call came back as an error that read
+    # here as "no peers", and every gap row of EPIC's promoted run (694 cells)
+    # served peer null although half of its cells cleared the floor.
+    step = max(1, int(getattr(cohort, "CELL_LIMIT", 500)))
+    for i in range(0, len(want), step):
+        try:
+            got = cohort.cell_benchmarks(conn, sv, want[i:i + step],
+                                         exclude_display_id=display_id,
+                                         exclude_entity_name=name)
+        except Exception as exc:                   # noqa: BLE001
+            _log.warning("fit: cell cohort read failed for run %s: %s", run_id, exc)
+            return
+        if isinstance(got, dict) and got.get("error"):
+            _log.warning("fit: cell cohort read refused for run %s: %s",
+                         run_id, got["error"])
+            continue
+        for sid, v in ((got or {}).get("cells") or {}).items():
+            if sid in cells and isinstance(v, dict) and v.get("mean") is not None:
+                cells[sid]["peer"] = float(v["mean"])
 
 
 def _entity_subvertical(cur, run_id):
