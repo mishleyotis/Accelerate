@@ -579,6 +579,16 @@ def report_findings(report_path, template_path=None, scores=None, kind="auto",
         if recs and rebut < recs:
             out.append(Finding("GS-RPT-REBUTTALS", f"{rebut} rebuttals for {recs} recs", "GSY-10"))
 
+    # GS-RPT-TABLES — a markdown table a writer authored must reach the Doc as
+    # a Word table. EPIC's 2026-10-17 assessment shipped 86 literal `| :-: |`
+    # separator lines (tables as raw pipe text) and this gate printed PASS.
+    raw = [ln for ln in whole.splitlines()
+           if re.match(r"^\s*\|\s*:?-{1,}:?\s*\|", ln)]
+    if raw:
+        out.append(Finding("GS-RPT-TABLES",
+            f"{len(raw)} markdown table separator line(s) rendered as text — "
+            f"tables reached the Doc as raw '| … |' paragraphs", "GSY-05"))
+
     # GS-RPT-FINANCIALS — the report renders a multi-year financial trajectory
     # ("depth and all 5-year trends including 5-year financials", GSY-18): >=5
     # distinct fiscal years, a financial metric, and an explicit trend word.

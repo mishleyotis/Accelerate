@@ -805,28 +805,34 @@ def review(wb: RunWorkbook, report: str, section_id: str, *, verdict: str,
         raise NarrativeRefusal(
             f"{actor} authored at least one row of §{sec.id}. A verdict from "
             f"an author of the section is not a review.")
-    ws = wb._sheet("Report_Narrative")
-    cols = list(C.REPORT_NARRATIVE_COLUMNS)
-    ci = {c: cols.index(c) + 1 for c in
-          ("Report", "Section_ID", "Review_Verdict", "Review_Actor",
-           "Review_At")}
-    now = _utcnow()
-    touched = 0
-    for r_ in range(2, ws.max_row + 1):
-        if (str(ws.cell(row=r_, column=ci["Report"]).value or "").strip()
-                == report
-                and str(ws.cell(row=r_, column=ci["Section_ID"]).value
-                        or "").strip() == str(sec.id)):
-            ws.cell(row=r_, column=ci["Review_Verdict"], value=v)
-            ws.cell(row=r_, column=ci["Review_Actor"], value=_clean(actor))
-            ws.cell(row=r_, column=ci["Review_At"], value=now)
-            touched += 1
-    wb.save()
-    wb.append("Provenance", {
-        "SubCap_ID": "", "Step": f"report_review:{report}:{sec.id}",
-        "Actor": _clean(actor), "At": _utcnow(),
-        "Detail": f"{v} — " + json.dumps(dimensions, sort_keys=True)
-                  + " — " + _clean(note)[:300]})
+    # UNDER THE WORKBOOK LOCK (2026-10-18, EPIC): this used to edit cells and
+    # call wb.save() outside wb.transaction(), so two validators reviewing
+    # different sections at once each saved their own stale copy and one
+    # verdict vanished. The transaction reloads the file on entry, so the
+    # sheet below is the current one and the save is serialised.
+    with wb.transaction(f"report_review {report} {sec.id}"):
+        ws = wb._sheet("Report_Narrative")
+        cols = list(C.REPORT_NARRATIVE_COLUMNS)
+        ci = {c: cols.index(c) + 1 for c in
+              ("Report", "Section_ID", "Review_Verdict", "Review_Actor",
+               "Review_At")}
+        now = _utcnow()
+        touched = 0
+        for r_ in range(2, ws.max_row + 1):
+            if (str(ws.cell(row=r_, column=ci["Report"]).value or "").strip()
+                    == report
+                    and str(ws.cell(row=r_, column=ci["Section_ID"]).value
+                            or "").strip() == str(sec.id)):
+                ws.cell(row=r_, column=ci["Review_Verdict"], value=v)
+                ws.cell(row=r_, column=ci["Review_Actor"], value=_clean(actor))
+                ws.cell(row=r_, column=ci["Review_At"], value=now)
+                touched += 1
+        wb.save()
+        wb.append("Provenance", {
+            "SubCap_ID": "", "Step": f"report_review:{report}:{sec.id}",
+            "Actor": _clean(actor), "At": _utcnow(),
+            "Detail": f"{v} — " + json.dumps(dimensions, sort_keys=True)
+                      + " — " + _clean(note)[:300]})
     # THE WHOLE NOTE, where the writer's next packet reads it. Provenance
     # keeps 300 characters, and until 2026-10-06 that was the only copy: the
     # validator's numbered fixes past the cut never reached the writer, who

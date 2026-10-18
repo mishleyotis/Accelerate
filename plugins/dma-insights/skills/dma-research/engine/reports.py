@@ -262,6 +262,53 @@ def _financial_table(rows: list[dict]) -> dict:
 _BLOCK_LINE = re.compile(r"^\s*##\s+(.+?)\s*$")
 
 
+#: A markdown table row (`| a | b |`) and its alignment separator (`| :-: | --- |`).
+_MD_ROW = re.compile(r"^\s*\|.*\|\s*$")
+_MD_SEP = re.compile(r"^\s*\|?\s*:?-{1,}:?\s*(\|\s*:?-{1,}:?\s*)*\|?\s*$")
+
+
+def _md_cells(line: str) -> list[str]:
+    inner = line.strip()
+    if inner.startswith("|"):
+        inner = inner[1:]
+    if inner.endswith("|"):
+        inner = inner[:-1]
+    return [c.strip() for c in inner.split("|")]
+
+
+def _emit_lines(doc, lines: list[str]) -> None:
+    """One paragraph per run of prose lines, one Word table per markdown
+    table. Section bodies carry their tables as markdown (the writers'
+    contract); before 2026-10-18 they reached the Doc as literal `| … |`
+    paragraphs — EPIC's assessment report shipped 86 `| :-: |` separator
+    lines and one real table, and the gold gate printed PASS on it."""
+    i, n = 0, len(lines)
+    prose: list[str] = []
+
+    def flush_prose():
+        if prose:
+            doc.add_paragraph("\n".join(prose).strip())
+            prose.clear()
+
+    while i < n:
+        if (i + 1 < n and _MD_ROW.match(lines[i]) and _MD_SEP.match(lines[i + 1])
+                and "-" in lines[i + 1]):
+            flush_prose()
+            cols = _md_cells(lines[i])
+            rows = []
+            i += 2
+            while i < n and _MD_ROW.match(lines[i]):
+                cells = _md_cells(lines[i])
+                cells = (cells + [""] * len(cols))[:len(cols)]
+                rows.append(cells)
+                i += 1
+            _write_table(doc, {"cols": cols, "rows": rows})
+            continue
+        prose.append(lines[i])
+        i += 1
+    flush_prose()
+
+
 def _emit_body(doc, body: str) -> None:
     """Write a section body, promoting its `## ` block lines to Heading2.
 
@@ -277,7 +324,7 @@ def _emit_body(doc, body: str) -> None:
 
     def flush():
         if buf:
-            doc.add_paragraph("\n".join(buf).strip())
+            _emit_lines(doc, buf)
             buf.clear()
 
     for line in (body or "").splitlines():
@@ -694,7 +741,7 @@ def _emit_cards(doc, wb, sec, rows) -> None:
 
         def flush():
             if buf:
-                doc.add_paragraph("\n".join(buf).strip())
+                _emit_lines(doc, buf)
                 buf.clear()
         for line in str(r.get("Body") or "").splitlines():
             m = _BLOCK_LINE.match(line)
