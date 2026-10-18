@@ -3458,40 +3458,66 @@ class Pipeline:
         self.reopen()
         return f"handoff written: {len(doc.get('subcap_records') or [])} records"
 
-    def _cohort_peers(self) -> None:
+    def _cohort_peers(self) -> dict:
         """Fill blank peer figures from the sub-vertical cohort (owner,
         2026-10-06) before any rollup computes a gap. A connector that
         cannot answer leaves the blanks and says so: the gap stays null
-        rather than the stage stopping on a comparison it can disclose."""
+        rather than the stage stopping on a comparison it can disclose.
+
+        EVERY outcome is logged and recorded as a COHORT_PEERS Gate_Log row,
+        including each early return: until 2026-10-18 three of them were
+        silent, and EPIC ran SCORING and both page stages without one line
+        saying the refill had skipped sixteen blank rows. The cohort read is
+        kept on `self._cohort` for the page-stage backstop."""
         from . import prelim
+        self._cohort = None
         rows = self.wb.rows("Peer_Benchmarks")
+
+        def said(verdict: str, detail: str, out: dict) -> dict:
+            self.opts.log(f"  [COHORT] {detail}")
+            try:
+                L.append_gate(self.wb, gate="COHORT_PEERS", scope="Peer_Benchmarks",
+                              verdict=verdict, blocking=False, detail=detail[:900])
+                self.reopen()
+            except Exception:                        # noqa: BLE001
+                pass
+            return out
+
+        if not rows:
+            return said("NOT_RUN", "skipped: Peer_Benchmarks has no rows (freeze the peer "
+                        "set with `engine.prelim peers`)", {"skipped": "no_rows"})
         # Runs whenever a row is not yet the cohort's (blank, a placeholder,
         # a non-cohort figure) — a blank-only trigger left sixteen `inferred`
         # placeholders standing on Arbor Bank (2026-10-07).
-        if not rows or not any(prelim.peer_row_wants_cohort(r, has_figure=True)
-                               for r in rows):
-            return
+        if not any(prelim.peer_row_wants_cohort(r, has_figure=True) for r in rows):
+            return said("PASS", f"nothing to fill: all {len(rows)} row(s) are cohort-sourced "
+                        f"or carry a recorded table figure", {"skipped": "nothing_wanted"})
         reads = getattr(self.opts.reads, "cohort_benchmarks", None)
         if reads is None:
-            return
+            return said("NOT_RUN", "skipped: this driver has no connector reader for "
+                        "get_cohort_benchmarks, so blank peer rows stay blank",
+                        {"skipped": "no_reader"})
         md = self._md()
         sv = str(md.get("sub_vertical") or "").strip()
         if not sv:
-            return
+            return said("NOT_RUN", "skipped: Run_Metadata names no sub_vertical, so no "
+                        "cohort can be read", {"skipped": "no_sub_vertical"})
         try:
             data = reads(sv, display_id=str(md.get("entity_id") or ""),
                          entity_name=str(md.get("entity_name") or ""))
         except Exception as e:                       # noqa: BLE001
             data = {"_error": f"{e.__class__.__name__}: {str(e)[:200]}"}
         if not isinstance(data, dict) or data.get("_error") or data.get("error"):
-            self.opts.log(f"  [COHORT] peer figures not filled — connector said: "
-                          f"{str((data or {}).get('_error') or (data or {}).get('error'))[:200]}")
-            return
+            return said("NOT_RUN", "peer figures not filled — connector said: "
+                        + str((data or {}).get('_error') or (data or {}).get('error'))[:200],
+                        {"skipped": "connector_error"})
+        self._cohort = data
         got = prelim.fill_cohort_peers(self.wb, data)
         self.reopen()
-        self.opts.log(f"  [COHORT] {sv}: {len(got['filled'])} categor(ies) from "
-                      f"{got.get('entities')} assessed entit(ies); "
-                      f"{len(got['cannot_estimate'])} below the floor")
+        return said("PASS", f"{sv}: {len(got['filled'])} categor(ies) filled from "
+                    f"{got.get('entities')} assessed entit(ies); "
+                    f"{len(got['cannot_estimate'])} below the floor; "
+                    f"{len(got['kept'])} kept", got)
 
     def _scoring_handoff(self) -> dict:
         """Write one scoring-workflow invocation per pillar still owed.
@@ -4657,8 +4683,25 @@ class Pipeline:
         sixteen `inferred` peers on the overview). ET-12 — the machine
         technographic scan — is `page_preflight.preflight`, run by
         `_ship_pages` before any lane, which stops the driver with
-        NEEDS_CONNECTOR rather than failing the stage."""
+        NEEDS_CONNECTOR rather than failing the stage.
+
+        The refill is followed by a BACKSTOP: a category the cohort figures
+        whose peer row is still blank refuses the stage before any lane runs,
+        so a skipped refill can never again publish blank peers the platform
+        could have stated (EPIC, 2026-10-18). A connector that could not
+        answer is disclosed, not blocked."""
+        from . import prelim
         self._cohort_peers()
+        cohort = getattr(self, "_cohort", None)
+        unused = prelim.cohort_unused(self.wb, cohort) if cohort else []
+        if unused:
+            msg = (f"PEER_COHORT_UNUSED: the {self._md().get('sub_vertical')} cohort figures "
+                   f"{len(unused)} categor(ies) whose Peer_Benchmarks row is blank "
+                   f"({', '.join(unused)}). Fix: save the get_cohort_benchmarks reply and run `engine.prelim fill-cohort --cohort <file>`; a page produced now would "
+                   f"publish blank peers the platform can state.")
+            L.append_gate(self.wb, gate="PEER_COHORT_UNUSED", scope="Peer_Benchmarks",
+                          verdict="FAIL", blocking=True, detail=msg[:900])
+            raise StageRefused(msg)
 
     def _deferred(self) -> tuple:
         """PAGES_A pages moved to version B — by this invocation's flag or a

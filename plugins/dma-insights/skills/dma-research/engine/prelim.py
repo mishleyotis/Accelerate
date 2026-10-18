@@ -961,6 +961,21 @@ def peer_median(wb: RunWorkbook, *, category: str, median, p25=None, p75=None,
     return {"category": cid, "median": med, "p25": lo, "p75": hi, "basis": basis}
 
 
+def cohort_unused(wb: RunWorkbook, cohort: dict) -> list[str]:
+    """Categories the cohort FIGURES whose Peer_Benchmarks row is still blank.
+
+    The backstop behind `fill_cohort_peers`: after a refill, any category
+    listed here would ship a blank peer the platform could have stated, so
+    the page stage refuses rather than publish it (EPIC, 2026-10-18)."""
+    cats = (cohort or {}).get("categories") or {}
+    out = []
+    for r in wb.rows("Peer_Benchmarks"):
+        cid = _clean(r.get("Category_ID")).upper()
+        if cid and not _clean(r.get("Peer_Median")) and (cats.get(cid) or {}).get("mean") is not None:
+            out.append(cid)
+    return out
+
+
 def peer_row_is_cohort_sourced(row: dict) -> bool:
     """True when the row's figure (or its stated absence) came from the
     connector's cohort — `fill_cohort_peers` wrote it."""
@@ -985,11 +1000,28 @@ def peer_row_wants_cohort(row: dict, *, has_figure: bool) -> bool:
     median = _clean(row.get("Peer_Median"))
     if peer_row_is_cohort_sourced(row):
         return False
-    if basis.startswith("table"):
+    # A TABLE wins only when it carries a figure. `peers` records the SET's
+    # provenance in the same column ("table: <ranking the set was chosen
+    # from>") with every median blank, and a bare `startswith("table")` read
+    # that as "a published peer table is already here": EPIC (2026-10-18)
+    # shipped sixteen blank peer rows while the IB cohort figured all sixteen
+    # categories, and the refill skipped every row without a word.
+    if basis.startswith("table") and median:
         return False
     if not median or basis.startswith("cannot_estimate"):
         return True
     return has_figure
+
+
+def _set_rule_of(row: dict) -> str:
+    """The peer-SET selection rule a row carried before any figure was
+    written ("table: <rule>", "inferred: <rule>"), as a suffix to keep."""
+    basis = _clean(row.get("Peer_Basis"))
+    if not basis or peer_row_is_cohort_sourced(row) or "peer set rule:" in basis:
+        return ""
+    head, _, rest = basis.partition(":")
+    text = _clean(rest) if head.strip().lower() in C.PEER_BASIS else basis
+    return f"; peer set rule: {text}"[:700] if text else ""
 
 
 def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False) -> dict:
@@ -1017,11 +1049,14 @@ def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False)
         if not overwrite and not peer_row_wants_cohort(r, has_figure=c.get("mean") is not None):
             kept.append(cid)
             continue
+        # The SET's selection rule rides in the same column; it is cited by
+        # the reports and the Gate_Log, so it is carried, never erased.
+        rule = _set_rule_of(r)
         if c.get("mean") is None:
             peer_median(wb, category=cid, median=None, basis="cannot_estimate",
                         source=(f"sub-vertical cohort ({sv}) via get_cohort_benchmarks "
                                 f"{today}: " + (c.get("reason") or "no assessed entity "
-                                                "in the cohort scores this category")),
+                                                "in the cohort scores this category")) + rule,
                         n=n)
             held.append(cid)
             continue
@@ -1032,7 +1067,7 @@ def fill_cohort_peers(wb: RunWorkbook, cohort: dict, *, overwrite: bool = False)
         peer_median(wb, category=cid, median=mean, p25=lo, p75=hi, basis="recomputed",
                     source=(f"sub-vertical cohort ({sv}): mean of {n} assessed entities' "
                             f"{cid} scores on their active promoted runs, "
-                            f"get_cohort_benchmarks {today}"),
+                            f"get_cohort_benchmarks {today}") + rule,
                     n=n)
         filled.append(cid)
     return {"filled": filled, "cannot_estimate": held, "kept": kept,
@@ -1263,6 +1298,13 @@ def main(argv=None) -> int:
                         "recomputation, the inference")
     m.add_argument("--peer-scores", default="")
 
+    fc = common(sub.add_parser(
+        "fill-cohort", help="record the sub-vertical cohort as the peer figures "
+                            "(the driver's refill, from a saved get_cohort_benchmarks reply)"))
+    fc.add_argument("--cohort", required=True,
+                    help="path to the JSON get_cohort_benchmarks returned for this "
+                         "run's sub-vertical (the asking entity excluded)")
+
     se = common(sub.add_parser(
         "seed-enrichment",
         help="write the connector's enrichment facets (get_client_state) and "
@@ -1331,6 +1373,17 @@ def main(argv=None) -> int:
         elif a.cmd == "replace-peers":
             print(json.dumps(replace_peers(wb, a.peer, rule=a.rule, owner=a.owner,
                                            why=a.why), indent=2, default=str))
+        elif a.cmd == "fill-cohort":
+            raw = json.loads(Path(a.cohort).read_text(encoding="utf-8"))
+            raw = raw.get("result", raw) if isinstance(raw, dict) else raw
+            if not isinstance(raw, dict) or not raw.get("categories"):
+                raise PrelimRefusal("the --cohort file holds no `categories`: save the "
+                                    "get_cohort_benchmarks reply itself")
+            md_sv = _clean(wb.metadata().get("sub_vertical")).lower()
+            if _clean(raw.get("sub_vertical")).lower() not in ("", md_sv):
+                raise PrelimRefusal(f"the cohort is for {raw.get('sub_vertical')!r}; this run "
+                                    f"is {wb.metadata().get('sub_vertical')!r}")
+            print(json.dumps(fill_cohort_peers(wb, raw), indent=2, default=str))
         elif a.cmd == "peer-median":
             print(json.dumps(peer_median(wb, category=a.category, median=a.median,
                                          p25=a.p25, p75=a.p75, basis=a.basis,
