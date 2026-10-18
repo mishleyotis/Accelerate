@@ -916,6 +916,21 @@ def critique(wb: RunWorkbook, *, pillar: str, verdict: str, actor: str,
 
 # ── rollup ───────────────────────────────────────────────────────────────
 
+def peer_overall_of(pillars: list[dict]) -> float | None:
+    """The peer overall, weighted exactly as the entity's overall is: the
+    same pillar weights, over the pillars carrying both a score and a peer
+    figure. Until 2026-10-18 it was an unweighted mean of the pillar peer
+    figures set beside a weighted overall (EPIC: 1.3965 weighted, 1.395
+    unweighted — equal at two places by luck, not by construction)."""
+    pw = [(p["peer_median"], p["weight"]) for p in pillars
+          if p.get("peer_median") is not None and p.get("score") is not None
+          and p.get("weight")]
+    if pw:
+        return round(sum(m * w for m, w in pw) / sum(w for _, w in pw), 2)
+    pmeds = [p["peer_median"] for p in pillars if p.get("peer_median") is not None]
+    return round(sum(pmeds) / len(pmeds), 2) if pmeds else None
+
+
 def _weights(wb: RunWorkbook) -> dict[str, float]:
     out = {}
     for r in wb.rows("Pillar_Weights"):
@@ -993,8 +1008,7 @@ def compute(wb: RunWorkbook) -> dict:
                         "gap": round(m - med, 2) if (m is not None and med is not None) else None,
                         "level": rubric.maturity_level(m), "subcaps_scored": len(scores)})
     overall = round(overall_num / overall_den, 2) if overall_den else None
-    pmeds = [p["peer_median"] for p in pillars if p["peer_median"] is not None]
-    peer_overall = round(sum(pmeds) / len(pmeds), 2) if pmeds else None
+    peer_overall = peer_overall_of(pillars)
     return {"categories": categories, "pillars": pillars, "overall": overall,
             "peer_overall": peer_overall,
             "gap_overall": (round(overall - peer_overall, 2)
@@ -1079,12 +1093,26 @@ def rollup(wb: RunWorkbook, *, headline: str | None = None) -> dict:
                                           else "MODERATE" if (pct(c["evidenced"], c["subcaps"]) or 0) >= 60
                                           else "THIN")} for c in got["categories"]])
         peer_names = str(wb.handoff_lock().get("locked_peer_set") or "").replace("|", ", ")
+        # Whose figure is it? A cohort-sourced Peer_Benchmarks (engine.prelim
+        # fill-cohort: "recomputed: sub-vertical cohort …") is the average of
+        # OTHER assessed entities, not the locked peer set — labelling it with
+        # the locked names attributed three unnamed brokers' average to five
+        # unscored ones (EPIC, 2026-10-18).
+        cohort_n = [int(r.get("Peer_N") or 0) for r in wb.rows("Peer_Benchmarks")
+                    if "cohort" in str(r.get("Peer_Basis") or "").lower()
+                    and str(r.get("Peer_N") or "").strip().isdigit()]
+        if cohort_n:
+            peer_label = (f"cohort average of {max(cohort_n)} other assessed "
+                          f"{md.get('sub_vertical') or ''} entities (not named); "
+                          f"locked peer set identified, not scored: {peer_names}")
+        else:
+            peer_label = f"locked peer set: {peer_names}"
         fields = [
             ("Institution", md.get("entity_name")),
             ("Sub-Vertical", md.get("sub_vertical")),
             ("Evidence Mode", md.get("evidence_mode")),
             ("Overall Maturity", f"{got['overall']} ({rubric.maturity_level(got['overall'])})"),
-            ("Peer Median (est.)", (f"{got['peer_overall']} — locked peer set: {peer_names}"
+            ("Peer Median (est.)", (f"{got['peer_overall']} — {peer_label}"
                                     if got["peer_overall"] is not None else
                                     "not established: Peer_Benchmarks carries no median")),
             ("Gap to Peer", got["gap_overall"] if got["gap_overall"] is not None
