@@ -95,6 +95,50 @@ def test_a_register_citing_a_scan_passes():
     assert "connector_tool" in conn.cur.sql
 
 
+def _resolving(monkeypatch, found):
+    import dma_mcp.validation2 as v2
+    seen = {}
+
+    def fake(conn, run_id, e_ids):
+        seen["ids"] = list(e_ids)
+        return {"found": found, "not_found": [], "foreign": []}
+    monkeypatch.setattr(v2, "get_evidence", fake)
+    return seen
+
+
+def test_a_scan_cited_by_its_workbook_id_resolves_through_the_package_map(
+        monkeypatch):
+    # iA 2026-10-21: E-024 is stored as E-IAFINANC-024; the direct match
+    # reads 0, the package-scoped resolution finds the connector reading.
+    seen = _resolving(monkeypatch, [{
+        "e_id": "E-024", "stored_id": "E-IAFINANC-024", "origin": "connector",
+        "connector": {"tool": "Explorium Vibe Prospecting technographics "
+                              "scan of ia.ca"}}])
+    assert _check_technographic_scan(_Conn(0), "run", "techstack",
+                                     _techstack(e_ids=("E-024",))) == []
+    assert seen["ids"] == ["E-024"]
+
+
+def test_a_resolved_row_that_is_not_a_scan_is_still_refused(monkeypatch):
+    _resolving(monkeypatch, [
+        {"e_id": "E-020", "origin": "public", "connector": {}},
+        {"e_id": "E-030", "origin": "connector",
+         "connector": {"tool": "Indeed employer data"}}])
+    r = _check_technographic_scan(_Conn(0), "run", "techstack",
+                                  _techstack(e_ids=("E-020", "E-030")))
+    assert _gates(r) == ["ET-12"]
+
+
+def test_an_unreadable_resolution_proves_nothing(monkeypatch):
+    import dma_mcp.validation2 as v2
+
+    def boom(*a, **k):
+        raise RuntimeError("no mapping table")
+    monkeypatch.setattr(v2, "get_evidence", boom)
+    r = _check_technographic_scan(_Conn(0), "run", "techstack", _techstack())
+    assert _gates(r) == ["ET-12"]
+
+
 def test_a_scan_that_could_not_run_is_stated_not_silent():
     probes = ["Technographic scan NOT_RUN: Clay and Vibe Prospecting are "
               "session-bound and this run was scheduled."]
