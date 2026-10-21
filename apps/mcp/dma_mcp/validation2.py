@@ -4345,6 +4345,20 @@ def _check_technographic_scan(conn, run_id, page, payload) -> list:
                 return []
         except Exception:                          # noqa: BLE001
             return []        # no store to read: promotion re-gates
+        # iA 2026-10-21: the register cited the Clay and Explorium scans by
+        # their workbook ids (E-024..E-027), stored as E-IAFINANC-024..027,
+        # so the direct match above never saw them. Resolve through the one
+        # entity-scoped resolver (evidence_package_ids, then the historic
+        # qualified shapes) that get_evidence and promote use. A resolution
+        # that cannot be read proves nothing: the gate stays closed.
+        try:
+            found = get_evidence(conn, run_id, sorted(cited)).get("found") or []
+        except Exception:                          # noqa: BLE001
+            found = []
+        for row in found:
+            tool = str((row.get("connector") or {}).get("tool") or "")
+            if row.get("origin") == "connector" and _SCAN_TOOL.search(tool):
+                return []
     probes = (body.get("r_layer") or {}).get("probes_run") \
         if isinstance(body.get("r_layer"), dict) else None
     for p in probes or []:
