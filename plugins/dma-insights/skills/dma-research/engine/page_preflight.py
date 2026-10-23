@@ -159,10 +159,17 @@ def unnamed_products(wb) -> list:
             continue
         product, vendor = _clean(r.get("Product")), _clean(r.get("Vendor"))
         toks = _distinctive_tokens(product, vendor)
-        phrases = _name_phrases(product, vendor)
+        # The connector reads phrases from the PRODUCT only, and matches on
+        # text split at non-alphanumerics (validation2._check_named_products).
+        # B1 Bank (2026-10-08): reading the vendor's phrase too refused
+        # 'Q2' / 'Q2 Software' here while the connector passed it, and with
+        # CG-20 refusing vendor == product no row for the scans' own word
+        # could clear both — the driver halted PAGES_A on a mirror.
+        phrases = _name_phrases(product)
         if not toks and not phrases:
             continue
-        text = " ".join(_clean((idx.get(e) or {}).get("Excerpt")) for e in cited).lower()
+        text = " ".join(re.split(r"[^a-z0-9]+", " ".join(
+            _clean((idx.get(e) or {}).get("Excerpt")) for e in cited).lower()))
         if any(t.lower() in text for t in toks) or any(p in text for p in phrases):
             continue
         out.append({"ts_id": _clean(r.get("TS_ID")), "product": product,
