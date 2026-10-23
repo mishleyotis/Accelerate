@@ -389,8 +389,38 @@ def readiness_multiplier(cand: Candidate) -> float:
                                     READINESS_MULTIPLIER[READINESS_DEFAULT])
 
 
+def judged_cells(cand: Candidate) -> list:
+    """The TOP_N driving cells the evidence state is judged on — and the ones
+    `top_contributors` shows, so the verdict and the cells beside it agree.
+
+    Ordered by the size of the CLAIM (gap x severity, before the evidence
+    damp), then, among equal claims, the better-evidenced cell first.
+
+    Not `core_of(cand)[:TOP_N]`. That order includes the evidence damp, and
+    the damp gives an UNEVIDENCED cell the neutral prior (0.55 -> 0.82) while
+    a real but modest citation — T3 undated is 0.56, T4 undated 0.385 —
+    scores the same or less. On a run whose cells sit at one score (every
+    public-evidence first run: AAA Western and Central New York, 2026-10-15,
+    521 of 694 cells declared absences at 1.0) every gap ties, so the five
+    "driving" cells were the alphabetically-first unevidenced ones —
+    P1C2.2.1 … P1C2.2.5 for Service Cloud — the mean read 0.0, and six of
+    eight candidates shipped INSUFFICIENT_EVIDENCE whatever their own cells
+    carried. The platform page served two cards. Which cell drives a tied
+    score is arbitrary; judging the floor on that arbitrary choice was the
+    defect. A larger claim still outranks better evidence: an unevidenced
+    cell with a bigger gap than every evidenced one keeps the card honestly
+    INSUFFICIENT_EVIDENCE.
+    """
+    def key(c):
+        claim = min(1.0, gap_of(c) * severity_weight(c))
+        es = -1.0 if c.evidence_strength is None else _clamp(float(c.evidence_strength))
+        return (-round(claim, 9), -es, c.subcap_id)
+    return sorted(core_of(cand), key=key)[:TOP_N]
+
+
 def mean_evidence_strength(cand: Candidate) -> float:
-    """Judged on the cells DRIVING the score, not on every tagged cell.
+    """Judged on the cells DRIVING the score (`judged_cells`), not on every
+    tagged cell.
 
     A platform whose top contributors carry no linked evidence is honestly
     INSUFFICIENT_EVIDENCE however many cells it nominally addresses — and an
@@ -398,7 +428,7 @@ def mean_evidence_strength(cand: Candidate) -> float:
     exists so a scored-but-unevidenced cell still contributes opportunity; it
     must not also buy the card a clean bill of grounding.
     """
-    top = core_of(cand)[:TOP_N]
+    top = judged_cells(cand)
     if not top:
         return 0.0
     return sum(0.0 if c.evidence_strength is None else _clamp(float(c.evidence_strength))
@@ -434,7 +464,7 @@ def top_contributors(cand: Candidate) -> list:
              "evidence_strength": (None if c.evidence_strength is None
                                    else round(float(c.evidence_strength), 3)),
              "contribution": round(cell_opportunity(c), 4)}
-            for c in core_of(cand)[:TOP_N]]
+            for c in judged_cells(cand)]
 
 
 def score(cand: Candidate, all_gap_cells=None) -> dict:

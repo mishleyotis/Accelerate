@@ -210,11 +210,17 @@ engine.cli techscan impact --ts TS-004 --text "…"    # or afterwards
 Not a description of the product. The question is *so what*: name the cells,
 name the direction, name what would settle it.
 
-**The peers.** Is running this normal among the peers the run already froze
-in `Peer_Benchmarks`? One row per (product, peer):
+**The peers — PEER COMPARISON, not the peer benchmark** (owner,
+2026-10-15; `${CLAUDE_PLUGIN_ROOT}/docs/PEER-BENCHMARK-VS-COMPARISON.md`). The *benchmark* is the
+sub-vertical average of already-assessed entities (the connector's cohort read)
+and names no one; you never research it. The *comparison* is the SELECTED
+peers the run locked in `Handoff_Lock`, researched **only with regard to the
+client's focus areas** (`Focus_Areas`, FA-NN). So a peer row exists only for
+a register product a focus area reaches, and names that focus area. Is
+running this normal among the selected peers? One row per (product, peer):
 
 ```
-engine.cli techscan peer-record --ts TS-004 --peer "<name>" \
+engine.cli techscan peer-record --ts TS-004 --peer "<name>" --focus FA-02 \
     --deployed --basis "one clause: what was seen, where" \
     --url https://…
 engine.cli techscan peer-record --ts TS-004 --peer "<name>" \
@@ -224,6 +230,13 @@ engine.cli techscan peer-record --ts TS-004 --peer "<name>" \
     --unknown --basis "the peer publishes no vendor list and the searches "\
                       "returned nothing either way"
 ```
+
+`peer-record` refuses a peer outside the locked set, a run with no focus
+area recorded, and a product whose cells share no category with the focus
+area (`--focus` may be omitted when the register row's cells name it). A
+platform tile outside every focus area still carries one row per selected
+peer for AG-04 — `deployed: null` with the basis "not compared: outside the
+client's focus areas (FA-01 … FA-03)".
 
 **Three answers, not two.** `--unknown` is a real one, and using
 `--not-deployed` in its place is a fabricated finding about a named

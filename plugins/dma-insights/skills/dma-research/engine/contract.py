@@ -535,8 +535,13 @@ def search_tool_of_family(family: str) -> str:
 #: because that is where the subcap evidence is. Peer deployments get their
 #: own sheet because they are one-to-many per product, and a many packed
 #: into one cell is the shape nothing can query.
+#: PEER COMPARISON rows (owner, 2026-10-15): one SELECTED peer (the locked
+#: set), one register product, one answer — and `Focus_ID`, the client focus
+#: area the comparison answers, because selected peers are researched only
+#: with regard to the entity's focus areas. Not the peer BENCHMARK, which is
+#: `Peer_Benchmarks.Peer_Median` (the sub-vertical average) and names no one.
 TECH_PEER_COLUMNS = (
-    "TS_ID", "Peer", "Deployed", "Basis", "Source_URL", "As_Of",
+    "TS_ID", "Peer", "Focus_ID", "Deployed", "Basis", "Source_URL", "As_Of",
 )
 
 #: THE ASSESSMENT STAGE'S THREE, and the column names are the APP's own —

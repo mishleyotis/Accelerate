@@ -4,13 +4,13 @@ Owner decision, 2026-10-06 (First Tech): "peer scores being an average of
 current entities in the same subvert already assessed". A named peer set is
 IDENTIFIED (the run locks it and the reports name it); it is not SCORED one
 peer at a time — nobody has assessed PenFed. What the platform HAS assessed
-is every other entity in the sub-vertical with an active promoted run, so the
-comparison figure is their mean, per category, computed here where the
-scores live.
+is every other entity in the sub-vertical with a scored run — promoted or
+not (2026-10-15, below) — so the comparison figure is their mean, per
+category, computed here where the scores live.
 
 Rules, each one a property a test holds:
-  · one figure per ENTITY (its active, promoted run), so an entity assessed
-    twice counts once;
+  · one figure per ENTITY (its active promoted run, else its latest scored
+    run — `assessed_runs`), so an entity assessed twice counts once;
   · the asking entity is excluded — a client is not its own peer;
   · a category is only figured with at least FLOOR entities behind it
     (subcap_scores.peer_n: "cohort size actually used; floor of three"),
@@ -64,42 +64,148 @@ def summarise(rows, *, exclude_entity: str | None = None, floor: int = FLOOR) ->
     return {"entities": len(entities), "floor": floor, "categories": cats}
 
 
+#: Entities whose identity is unconfirmed or retired are not peers: a
+#: PENDING_REVIEW row is the corpus's own "this may be a duplicate of another
+#: entity" flag, and counting it would count one brokerage twice.
+_PEER_STATUSES = ("ACTIVE",)
+
+
+def _code(raw) -> str | None:
+    from .subverticals import resolve_subvertical
+    return resolve_subvertical(raw)
+
+
+def assessed_runs(cur, sub_vertical: str) -> list:
+    """[(run_id, entity_key, lowered name, promoted)] — ONE run per assessed
+    entity of the sub-vertical: its active promoted run, else its latest
+    scored run.
+
+    Measured 2026-10-15 on AAA Western and Central New York's first
+    promotion: the IB cohort read 2 entities and every peer median shipped
+    null, while the store held six scored brokerages (OneDigital, TowneBank,
+    Virtuity, Alera, Alliant, IMA — 597 to 702 scored cells each). Two
+    filters hid them, and both fail every first-time client in a thin
+    sub-vertical:
+
+      · `promoted_at IS NOT NULL` — an assessed package is assessed whether
+        or not anyone has produced its pages yet (owner, 2026-10-06: "an
+        average of current entities in the same subvert already assessed").
+        Promotion writes no score; `subcap_scores` is the ingest tier for a
+        promoted and an unpromoted run alike.
+      · `lower(e.sub_vertical) = lower('IB')` — the corpus writes
+        "Insurance Brokers", "Insurance Brokerages (IB)" and NULL. The
+        sub-vertical is resolved through the one alias table
+        (`subverticals.resolve_subvertical`); a NULL one is inferred from the
+        run's own scored variant cells only when they name ONE sub-vertical.
+
+    Excluded: withdrawn runs, and every run of a request a withdrawal named
+    (a run is withdrawn because its content was wrong; its sibling ingest
+    carries the same scores); superseded runs; entities not ACTIVE."""
+    want = _code(sub_vertical) or str(sub_vertical or "").strip().upper()
+    cur.execute(
+        """
+        SELECT DISTINCT ON (r.entity_id)
+               r.id::text, COALESCE(e.display_id, e.id::text) AS ent,
+               lower(COALESCE(e.legal_name, e.trading_name, '')) AS name,
+               e.sub_vertical,
+               (r.is_active AND r.promoted_at IS NOT NULL) AS promoted
+          FROM runs r
+          JOIN entities e ON e.id = r.entity_id
+         WHERE r.withdrawn_at IS NULL
+           AND r.status::text <> 'SUPERSEDED'
+           AND COALESCE(e.status::text, 'ACTIVE') = ANY(%s)
+           AND NOT EXISTS (SELECT 1 FROM runs w
+                            WHERE w.entity_id = r.entity_id
+                              AND w.withdrawn_at IS NOT NULL
+                              AND w.request_id IS NOT DISTINCT FROM r.request_id)
+           AND EXISTS (SELECT 1 FROM subcap_scores s
+                        WHERE s.run_id = r.id AND s.score IS NOT NULL)
+         ORDER BY r.entity_id,
+                  (r.is_active AND r.promoted_at IS NOT NULL) DESC,
+                  r.completed_at DESC NULLS LAST, r.run_seq DESC
+        """,
+        (list(_PEER_STATUSES),))
+    rows = cur.fetchall()
+    out, unresolved = [], {}
+    for run_id, ent, name, sv, promoted in rows:
+        code = _code(sv)
+        if code is None and sv is None:
+            unresolved[str(run_id)] = (run_id, ent, name, promoted)
+        elif code == want:
+            out.append((str(run_id), ent, name, bool(promoted)))
+    if unresolved:
+        from .subverticals import variant_subvertical
+        cur.execute(
+            """SELECT s.run_id::text, s.subcap_id FROM subcap_scores s
+                WHERE s.run_id::text = ANY(%s) AND s.score IS NOT NULL
+                  AND s.subcap_id ~ '[.][A-Z]+[0-9]+$'""",
+            (sorted(unresolved),))
+        codes: dict = {}
+        for rid, sid in cur.fetchall():
+            c = variant_subvertical(sid)
+            if c:
+                codes.setdefault(str(rid), set()).add(c)
+        for rid, (run_id, ent, name, promoted) in unresolved.items():
+            if codes.get(rid) == {want}:
+                out.append((str(run_id), ent, name, bool(promoted)))
+    return out
+
+
+def _scores(cur, runs, ex_id: str, ex_name: str, grain: str, subcap_ids=None):
+    """(entity_key, key, value) rows for the chosen runs, the asking entity
+    dropped. `grain` 'category' averages a run's cells per category."""
+    keep = {rid: ent for rid, ent, name, _ in runs
+            if not ((ex_id and str(ent).lower() == ex_id)
+                    or (ex_name and name == ex_name))}
+    if not keep:
+        return [], 0
+    if grain == "category":
+        cur.execute(
+            """SELECT s.run_id::text, s.category_id, AVG(s.score)
+                 FROM subcap_scores s
+                WHERE s.run_id::text = ANY(%s)
+                  AND s.score IS NOT NULL AND s.category_id IS NOT NULL
+                GROUP BY s.run_id, s.category_id""",
+            (sorted(keep),))
+    else:
+        cur.execute(
+            """SELECT s.run_id::text, s.subcap_id, AVG(s.score)
+                 FROM subcap_scores s
+                WHERE s.run_id::text = ANY(%s)
+                  AND s.score IS NOT NULL AND s.subcap_id = ANY(%s)
+                GROUP BY s.run_id, s.subcap_id""",
+            (sorted(keep), list(subcap_ids)))
+    rows = [(keep[str(rid)], k, float(v) if v is not None else None)
+            for rid, k, v in cur.fetchall() if str(rid) in keep]
+    unpromoted = sum(1 for rid, _, _, p in runs if rid in keep and not p)
+    return rows, unpromoted
+
+
+def _basis(runs, unpromoted: int) -> dict:
+    """Counts only — no entity, name or run id leaves this module."""
+    return {"assessed_unpromoted": unpromoted,
+            "method": "mean of each assessed entity's category mean on its active "
+                      "promoted run, else its latest scored run; withdrawn, "
+                      "superseded and non-ACTIVE entities excluded; the asking "
+                      "entity excluded"}
+
+
 def cohort_benchmarks(conn, sub_vertical: str, exclude_display_id: str = "",
                       exclude_entity_name: str = "") -> dict:
     """Mean category score across the sub-vertical's other assessed entities.
 
     An entity's figure is the mean of its subcap scores in that category on
-    its ACTIVE, PROMOTED run. Matched on the entity's sub_vertical, case-
-    insensitively."""
+    the ONE run `assessed_runs` chooses for it (promoted first)."""
     sv = str(sub_vertical or "").strip()
     if not sv:
         return {"error": "sub_vertical_required"}
     cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT COALESCE(e.display_id, e.id::text) AS ent,
-               lower(COALESCE(e.legal_name, e.trading_name, '')) AS name,
-               s.category_id, AVG(s.score) AS cat_mean
-          FROM runs r
-          JOIN entities e ON e.id = r.entity_id
-          JOIN subcap_scores s ON s.run_id = r.id
-         WHERE r.is_active AND r.promoted_at IS NOT NULL
-           AND lower(e.sub_vertical) = lower(%s)
-           AND s.score IS NOT NULL AND s.category_id IS NOT NULL
-         GROUP BY ent, name, s.category_id
-        """,
-        (sv,))
-    ex_id = str(exclude_display_id or "").strip().lower()
-    ex_name = str(exclude_entity_name or "").strip().lower()
-    rows = []
-    for ent, name, cat, mean in cur.fetchall():
-        if (ex_id and str(ent).lower() == ex_id) or (ex_name and name == ex_name):
-            continue
-        rows.append((ent, cat, float(mean) if mean is not None else None))
+    runs = assessed_runs(cur, sv)
+    rows, unpromoted = _scores(cur, runs, str(exclude_display_id or "").strip().lower(),
+                               str(exclude_entity_name or "").strip().lower(),
+                               "category")
     out = summarise(rows)
-    out.update({"sub_vertical": sv, "basis": "recomputed",
-                "method": "mean of each assessed entity's category mean on its active "
-                          "promoted run; the asking entity excluded"})
+    out.update({"sub_vertical": sv, "basis": "recomputed", **_basis(runs, unpromoted)})
     return out
 
 
@@ -127,27 +233,10 @@ def cell_benchmarks(conn, sub_vertical: str, subcap_ids, exclude_display_id: str
     if len(ids) > CELL_LIMIT:
         return {"error": f"too_many_subcap_ids: {len(ids)} > {CELL_LIMIT}"}
     cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT COALESCE(e.display_id, e.id::text) AS ent,
-               lower(COALESCE(e.legal_name, e.trading_name, '')) AS name,
-               s.subcap_id, AVG(s.score) AS cell_score
-          FROM runs r
-          JOIN entities e ON e.id = r.entity_id
-          JOIN subcap_scores s ON s.run_id = r.id
-         WHERE r.is_active AND r.promoted_at IS NOT NULL
-           AND lower(e.sub_vertical) = lower(%s)
-           AND s.score IS NOT NULL AND s.subcap_id = ANY(%s)
-         GROUP BY ent, name, s.subcap_id
-        """,
-        (sv, ids))
-    ex_id = str(exclude_display_id or "").strip().lower()
-    ex_name = str(exclude_entity_name or "").strip().lower()
-    rows = []
-    for ent, name, sid, score in cur.fetchall():
-        if (ex_id and str(ent).lower() == ex_id) or (ex_name and name == ex_name):
-            continue
-        rows.append((ent, sid, float(score) if score is not None else None))
+    runs = assessed_runs(cur, sv)
+    rows, unpromoted = _scores(cur, runs, str(exclude_display_id or "").strip().lower(),
+                               str(exclude_entity_name or "").strip().lower(),
+                               "cell", ids)
     out = summarise(rows)
     cells = out.pop("categories")
     for v in cells.values():        # summarise speaks of categories; this is a cell
@@ -158,8 +247,8 @@ def cell_benchmarks(conn, sub_vertical: str, subcap_ids, exclude_display_id: str
                                "p75": None,
                                "reason": f"0 assessed entities in the cohort score "
                                          f"this cell; the floor is {FLOOR}"})
+    basis = _basis(runs, unpromoted)
+    basis["method"] = basis["method"].replace("category mean", "score for the cell")
     out.update({"cells": cells, "sub_vertical": sv, "basis": "recomputed",
-                "grain": "cell",
-                "method": "mean of each assessed entity's score for the cell on its "
-                          "active promoted run; the asking entity excluded"})
+                "grain": "cell", **basis})
     return out

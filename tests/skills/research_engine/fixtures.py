@@ -86,6 +86,30 @@ def new_run(tmp_path, *, n: int = 6, run_id: str = "R-TEST-1",
     return run
 
 
+def ready_for_comparison(wb) -> str:
+    """A locked peer set and one client focus area — what a PEER COMPARISON
+    row needs (owner, 2026-10-15: the selected peers are researched only
+    against the client's focus areas). Returns the focus id to cite."""
+    from engine import prelim, profile
+    if not wb.handoff_lock().get("locked_peer_set"):
+        prelim.peers(wb, ["Peer Alpha CU", "Peer Beta CU", "Peer Gamma CU"],
+                     basis="inferred",
+                     rule=("US credit unions in the 15-25bn asset band with a "
+                           "geographic field of membership and a public core "
+                           "platform decision since 2022"))
+    have = [r for r in wb.rows("Focus_Areas") if r.get("ID")]
+    if have:
+        return str(have[0]["ID"])
+    cell = wb.selected_subcaps()[0]
+    eid = bank_evidence(wb, cell, n=1)[0]
+    profile.focus(wb, fa_id="FA-01", title="Move decisioning off the core",
+                  quote=("We are moving credit decisioning off the core so that "
+                         "members get an answer in minutes rather than days."),
+                  document="2025 Annual Report", page="4", cells=[cell],
+                  evidence=eid, currency="CONFIRMED_CURRENT")
+    return "FA-01"
+
+
 def bank_evidence(wb, subcap, n=3, *, tier="T2", published="2025-06-01"):
     """Rows from TWO source identities, because the syntheses built on them
     claim 'two independent sources agree' — and since single_source_fact
@@ -457,7 +481,8 @@ def close_prelim(run, *, entity="Acme Credit Union", link_prelim=False):
     ts = next(r["TS_ID"] for r in wb.rows("Tech_Register") if r.get("TS_ID"))
     techscan.peer_record(wb, ts_id=ts, peer="Peer Alpha CU", deployed=None,
                          basis="searched the peer's careers site and vendor "
-                               "case studies; no source names the platform")
+                               "case studies; no source names the platform",
+                         focus_id="FA-01")
     for tool, q in (("tavily", f'"{entity}" consent order OR enforcement action'),
                     ("exa", f"{entity} NCUA enforcement litigation breach")):
         L.append_search(wb, subcap=[], facet="issues", query=q, tool=tool,
@@ -523,11 +548,13 @@ def make_shippable(wb):
         from engine import techscan
         tech = [r for r in wb.rows("Tech_Register") if r.get("TS_ID")]
         if tech:
+            fa = ready_for_comparison(wb)
             techscan.peer_record(
                 wb, ts_id=str(tech[0]["TS_ID"]), peer="Peer Alpha CU",
                 deployed=True,
                 basis="the peer's own newsroom names the platform live",
-                source_url="https://peer-alpha.example/news/core-live")
+                source_url="https://peer-alpha.example/news/core-live",
+                focus_id=fa)
         else:
             completeness.declare(
                 wb, "Tech_Peer_Deployments",
