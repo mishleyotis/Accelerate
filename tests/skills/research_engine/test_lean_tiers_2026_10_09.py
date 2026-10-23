@@ -466,3 +466,34 @@ def test_an_omitted_date_is_filled_from_the_fetched_page(tmp_path):
                            actor=f"research-{cell.split('.')[0].lower()}-collector")
     row2 = next(r for r in run.open().rows("Evidence_Detail") if r["E_ID"] == e2)
     assert not str(row2["Date_Published"] or "").strip() and row2["Recency"] == "UNVERIFIED"
+
+
+# ── iA Financial P4C3.4 (2026-10-20): a capability window never reopened ──
+
+def test_a_category_checkpoint_reopens_its_capabilitys_window(tmp_path):
+    from engine import ledger as L, runstate
+    run = new_run(tmp_path, n=8)
+    wb = run.open()
+    cells = wb.selected_subcaps()
+    cat = cells[0].split(".")[0]
+    cap = ".".join(cells[0].split(".")[:2])
+    mine = [c for c in cells if c.startswith(cap + ".")]
+    actor = f"research-{cat.lower()}-collector"
+    for i in range(L.SEARCH_OP_CEILING):
+        L.append_search(wb, subcap=mine[0], facet="works", query=f"lifetime query {i}",
+                        tool="web_search", hits=1, kept=0, actor=actor)
+    # the capability is walled before the checkpoint
+    with pytest.raises(L.LedgerRefusal, match="ceiling"):
+        L.append_search(wb, subcap=mine[0], facet="fails", query="before checkpoint",
+                        tool="web_search", hits=0, kept=0, actor=actor)
+    # the collector checkpoints its CATEGORY, as `cli checkpoint --category` does
+    runstate.checkpoint(wb, "fresh collector", scope=cat)
+    L.append_search(wb, subcap=mine[0], facet="fails", query="after checkpoint",
+                    tool="web_search", hits=0, kept=0, actor=actor)
+    # and the reopened window is still a wall at sixty
+    for i in range(L.SEARCH_OP_CEILING - 1):
+        L.append_search(wb, subcap=mine[0], facet="value", query=f"new window {i}",
+                        tool="web_search", hits=0, kept=0, actor=actor)
+    with pytest.raises(L.LedgerRefusal, match="ceiling"):
+        L.append_search(wb, subcap=mine[0], facet="contradicts", query="the sixty-first again",
+                        tool="web_search", hits=0, kept=0, actor=actor)

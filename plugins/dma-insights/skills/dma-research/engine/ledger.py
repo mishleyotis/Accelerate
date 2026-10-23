@@ -1167,6 +1167,15 @@ def _ops_since_checkpoint(wb: RunWorkbook, scope: str | None = None) -> int:
     marks = cp.get("marks") if isinstance(cp.get("marks"), dict) else {}
     if scope is not None and scope in marks:
         mark = int(marks.get(scope) or 0)
+    elif scope is not None and "." in scope and scope.split(".")[0] in marks:
+        # A CAPABILITY window opens from its CATEGORY's checkpoint. Measured
+        # 2026-10-20 (iA Financial P4C3.4): collectors checkpoint by category
+        # (`cli checkpoint --category`), which never writes a capability mark,
+        # so the capability window fell back to the run-wide mark of 0 and
+        # counted its whole lifetime — once P4C3.4 had fired 60 distinct
+        # searches, every later collector was walled at its first search
+        # however often it checkpointed, and 12 cells could never close.
+        mark = int(marks.get(scope.split(".")[0]) or 0)
     else:
         try:
             mark = int(cp.get("search_ops") or 0)
