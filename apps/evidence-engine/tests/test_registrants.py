@@ -150,3 +150,35 @@ def test_farm_credit_uses_the_fca_directory():
     out, _ = lookup(EntityRef(legal_name="Example Valley Farm Credit, ACA"), sub_vertical="FC", country="US")
     fca = [m for m in out["matches"] if m["registry"] == "fca_us"]
     assert [m["identifier"] for m in fca] == ["720345"]                      # Colonial is not a match
+
+
+def test_a_candidate_must_name_the_institution_not_share_its_words():
+    """Measured 2026-10-12 on the live engine: for an insurance brokerage
+    named by an acronym, NAIC papers on agreements sharing that acronym and
+    the firm's own SEC Form D came back as insurance-regulator candidates."""
+    assert REG.names_in("Example Financial Group, Inc.", "Form D — Example Financial Group, Inc. Kansas")
+    assert not REG.names_in("Example Financial Group, Inc.", "an Example of the Financial Analysis Handbook")
+
+    async def search(queries):
+        return [{"url": "https://content.naic.org/x.pdf", "title": "Investment Management Update",
+                 "snippet": "an Example agreement reviewed in the Financial Analysis Handbook"},
+                {"url": "https://www.sec.gov/Archives/edgar/data/1/primary_doc.xml", "title": "SEC FORM D",
+                 "snippet": "Example Financial Group, Inc. Jurisdiction of Incorporation"},
+                {"url": "https://insurance.example.gov/licensee/9", "title": "Licensee search",
+                 "snippet": "Example Financial Group, Inc. — resident producer agency, active"}]
+    REG.Registrants._lists = {}
+
+    async def go():
+        async with httpx.AsyncClient(transport=transport([])) as http:
+            return await REG.Registrants(http, user_agent="t").lookup(
+                EntityRef(legal_name="Example Financial Group, Inc."), sub_vertical="IB", country="US",
+                search=search)
+    out = asyncio.run(go())
+    assert [c["url"] for c in out["candidates"]] == ["https://insurance.example.gov/licensee/9"]
+
+
+def test_a_one_shared_word_namesake_is_not_reported():
+    """Measured 2026-10-12: a credit union lookup listed two EDGAR filers that
+    share one word with it ("<Person> Navy E.", "Something Navy LLC") at 0.5."""
+    assert REG.name_score("Example Federal Credit Union", "Something Example LLC") < 0.6
+    assert REG.name_score("Example Federal Credit Union", "Example Capital Fund 1, LP") >= 0.6   # kept, flagged < 1.0

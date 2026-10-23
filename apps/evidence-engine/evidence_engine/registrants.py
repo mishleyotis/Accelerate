@@ -72,7 +72,9 @@ REGISTRIES = {
     "osfi": {"name": "OSFI — federally regulated financial institutions", "country": "CA", "id": None, "direct": True},
     "us_insurance_regulators": {"name": "NAIC and state insurance departments", "country": "US", "id": None,
                                 "direct": False,
-                                "hosts": ["naic.org", "gov"]},
+                                "hosts": ["naic.org", "gov"],
+                                # an SEC page is EDGAR's record (asked directly), not an insurance regulator's
+                                "exclude_hosts": ["sec.gov"]},
     "ca_provincial_regulators": {"name": "Canadian provincial financial regulators", "country": "CA", "id": None,
                                  "direct": False,
                                  "hosts": ["fsrao.ca", "bcfsa.ca", "lautorite.qc.ca", "cudgc.sk.ca",
@@ -108,6 +110,7 @@ OSFI_PAGE = "https://www.osfi-bsif.gc.ca/en/supervision/who-we-regulate"
 
 _STOP = frozenset("the of and inc incorporated llc l.l.c corp corporation co company ltd limited plc lp llp "
                   "na n.a fsb group holdings holding".split())
+_CONNECTIVES = frozenset({"the", "of", "and"})
 #: lists that change rarely are read once per process for this long
 LIST_TTL_S = 6 * 3600
 
@@ -153,6 +156,19 @@ _SECTOR = frozenset("bank banks bancorp bancshares banking credit union federal 
                     "national community state capital investment investments advisors advisers advisory "
                     "wealth management asset partners services fund funds america american canada "
                     "canadian first".split())
+
+
+def names_in(name: str, text: str) -> bool:
+    """The name's words, in order and adjacent, somewhere in `text` — a page
+    that names the institution, not one that shares its words (measured
+    2026-10-12: NAIC papers on Investment Management Agreements came back as
+    candidates for a brokerage whose name begins with the same acronym)."""
+    def words(t: str, drop: frozenset) -> list[str]:
+        return [w for w in re.findall(r"[a-z0-9]+", normalise(t or "")) if w not in drop and len(w) > 1]
+    # connectives stay on both sides, so "of the" never glues two words together
+    want, have = words(name, _STOP - _CONNECTIVES), words(text, frozenset())
+    k = len(want)
+    return bool(k) and any(have[i:i + k] == want for i in range(len(have) - k + 1))
 
 
 def name_score(query: str, candidate: str) -> float:
@@ -224,7 +240,7 @@ class Registrants:
 
     _lists: dict = {}
 
-    def __init__(self, http: httpx.AsyncClient, *, user_agent: str, min_score: float = 0.5,
+    def __init__(self, http: httpx.AsyncClient, *, user_agent: str, min_score: float = 0.6,
                  per_registry: int = 3):
         self.http = http
         self.ua = user_agent
@@ -423,8 +439,8 @@ class Registrants:
             hits = await search(queries)
             keep = [h for h in hits
                     if any(_under_host(h.get("url"), host) for host in meta["hosts"])
-                    and name_score(names[0], f"{h.get('title', '')} {h.get('snippet', '')}") > 0
-                    and set(name_tokens(names[0])) <= set(name_tokens(f"{h.get('title', '')} {h.get('snippet', '')}"))]
+                    and not any(_under_host(h.get("url"), x) for x in meta.get("exclude_hosts", ()))
+                    and any(names_in(n, f"{h.get('title', '')} {h.get('snippet', '')}") for n in names)]
             for h in keep[: self.per_registry]:
                 candidates.append({"registry": reg, "registry_name": meta["name"], "method": "search",
                                    "url": h.get("url"), "title": h.get("title"), "snippet": h.get("snippet")})
