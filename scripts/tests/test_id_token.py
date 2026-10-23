@@ -128,3 +128,18 @@ def test_both_smokes_mint_through_the_helper():
     ci = (ROOT / ".github" / "workflows" / "ci.yml").read_text()
     step = ci[ci.index("- name: infra/deploy.sh"):][:400]
     assert "GCP_DEPLOYER_SA: ${{ vars.GCP_DEPLOYER_SA }}" in step
+
+
+def test_the_owner_grant_lets_the_deployer_mint_its_own_id_token():
+    """2019ffb release (2026-10-11): impersonating claude-deployer for an ID
+    token read IAM_PERMISSION_DENIED, so every smoke was NOT PROBED. The
+    owner's one-time grant gives exactly that permission, on the deployer
+    service account itself, never project-wide."""
+    src = (ROOT / "infra" / "grants-for-admin.sh").read_text()
+    i = src.index("roles/iam.serviceAccountOpenIdTokenCreator")
+    stmt = src[src.rindex("gcloud ", 0, i):i]
+    assert stmt.startswith("gcloud iam service-accounts add-iam-policy-binding"), stmt
+    assert '"${DEPLOYER#serviceAccount:}"' in stmt and '--member="$DEPLOYER"' in stmt
+    assert src.count("serviceAccountOpenIdTokenCreator") == 2, "one grant and its echo; no project-level copy"
+    r = subprocess.run(["bash", "-n", str(ROOT / "infra" / "grants-for-admin.sh")], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
