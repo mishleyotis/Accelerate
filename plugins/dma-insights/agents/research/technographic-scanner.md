@@ -230,8 +230,9 @@ engine.cli techscan peer-record --ts TS-004 --peer "<name>" \
 institution — the class AG-04 exists to stop. A peer recorded as DEPLOYED
 carries the source that says so; AG-04 refuses the served row without one, so
 a peer claim with no url never reaches the page anyway. `peer_coverage` is
-**computed** — deployed over ESTABLISHED, with the unknowns out of the
-denominator, and null when nothing was established — and is never typed. Run the Clay peer pass over the peers'
+**computed** — deployed ÷ NAMED peers (unknowns in the denominator), null
+when nothing was established — and is never typed (one definition, owner
+2026-10-13; `ship_page` writes it, AG-04 enforces it). Run the Clay peer pass over the peers'
 domains, not the client's: `engine.cli techscan clay-plan` prints it.
 
 `techscan status` reports `rows_with_impact` and `rows_with_peers`. On the
@@ -281,9 +282,27 @@ platform (a CONFIRMED Tech_Register row — nCino on Salesforce, say), frame
 the solution as extending that org, not standing one up. A third-party
 product the catalogue does not carry (Blend, MeridianLink) is never the
 platform; it is an alternative the card's rebuttal weighs. `engine.assessment
-solution` refuses a platform that names no Zennify solution. Then record and `Platform_Peer_Adoption` filled where a peer's deployment can
-be examined and DECLARED (`engine.cli complete declare`) where it cannot. The
-SCORING gate does not pass with either tab silently empty.
+solution` refuses a platform that names no Zennify solution.
+
+**Then the peer context — you are the agent that owns it.** For EVERY locked
+peer × EVERY `Solution_Catalogue` platform, one `Platform_Peer_Adoption` verdict
+(`engine.assessment peer-adoption`: `Y`/`N` with the source that shows it,
+`UNKNOWN` with what was searched and came back empty, `NA` for an advisory line
+with no vendor deployment); for every locked peer × every register row, one
+`Tech_Peer_Deployments` verdict (`engine.cli techscan peer-record`). "Not
+searched" is refused at the write. `engine.assessment peer-gaps` lists what is
+still owed — finish when it lists nothing. A widened peer set re-opens the
+search (`PEER_ADOPTION_OWED`), the page preflight's PEER-ADOPT refuses the
+platform page while a pair is owed, and the SCORING gate does not pass with
+either tab silently empty; what cannot be examined is DECLARED
+(`engine.cli complete declare`).
+
+**Peer SCORES are not this duty and not yours.** A peer's maturity figure is
+the sub-vertical cohort's average — the mean of the entities the platform has
+already assessed in the client's sub-vertical (the connector's cohort benchmark read, owner
+decision 2026-10-06), filled by the driver before every rollup and refill.
+Named peers are researched for CONTEXT (who runs which platform), never scored
+one at a time.
 
 ## What you never do
 

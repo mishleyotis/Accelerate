@@ -25,6 +25,29 @@ import statistics
 FLOOR = 3
 
 
+def _same_subvertical(stored, asked) -> bool:
+    """Does an entity's STORED sub_vertical name the sub-vertical ASKED for?
+
+    Both sides resolve to the catalogue code first (`subverticals.
+    resolve_subvertical`), because the column holds whatever the manifest
+    wrote: `"SV1 — Regional Banks"`, `"Retail Banking"`, `"RB"` are one
+    sub-vertical, and 61 spellings were measured across 120 manifests.
+
+    R-INTERAC-20261010 (2026-10-13): the cohort query compared the raw
+    string, `lower(e.sub_vertical) = lower('RB')`, so every RB entity stored
+    under a compound label fell out of the cohort. The cohort answered with
+    zero entities, every heatmap category was written `cannot_estimate` and
+    every platform gap row served `peer: null` — although the platform had
+    assessed RB entities whose average is exactly the figure the owner
+    decided peers are. An unresolvable value on either side falls back to
+    the literal comparison, so nothing that matched before stops matching."""
+    from .subverticals import resolve_subvertical
+    a, b = resolve_subvertical(stored), resolve_subvertical(asked)
+    if a and b:
+        return a == b
+    return str(stored or "").strip().lower() == str(asked or "").strip().lower()
+
+
 def _q(xs: list[float], q: float) -> float:
     """Linear-interpolated quantile of a sorted list (q in [0, 1])."""
     if len(xs) == 1:
@@ -69,8 +92,8 @@ def cohort_benchmarks(conn, sub_vertical: str, exclude_display_id: str = "",
     """Mean category score across the sub-vertical's other assessed entities.
 
     An entity's figure is the mean of its subcap scores in that category on
-    its ACTIVE, PROMOTED run. Matched on the entity's sub_vertical, case-
-    insensitively."""
+    its ACTIVE, PROMOTED run. Matched on the entity's sub_vertical by its
+    resolved catalogue CODE (`_same_subvertical`), never the raw spelling."""
     sv = str(sub_vertical or "").strip()
     if not sv:
         return {"error": "sub_vertical_required"}
@@ -79,20 +102,20 @@ def cohort_benchmarks(conn, sub_vertical: str, exclude_display_id: str = "",
         """
         SELECT COALESCE(e.display_id, e.id::text) AS ent,
                lower(COALESCE(e.legal_name, e.trading_name, '')) AS name,
-               s.category_id, AVG(s.score) AS cat_mean
+               e.sub_vertical, s.category_id, AVG(s.score) AS cat_mean
           FROM runs r
           JOIN entities e ON e.id = r.entity_id
           JOIN subcap_scores s ON s.run_id = r.id
          WHERE r.is_active AND r.promoted_at IS NOT NULL
-           AND lower(e.sub_vertical) = lower(%s)
            AND s.score IS NOT NULL AND s.category_id IS NOT NULL
-         GROUP BY ent, name, s.category_id
-        """,
-        (sv,))
+         GROUP BY ent, name, e.sub_vertical, s.category_id
+        """)
     ex_id = str(exclude_display_id or "").strip().lower()
     ex_name = str(exclude_entity_name or "").strip().lower()
     rows = []
-    for ent, name, cat, mean in cur.fetchall():
+    for ent, name, stored_sv, cat, mean in cur.fetchall():
+        if not _same_subvertical(stored_sv, sv):
+            continue
         if (ex_id and str(ent).lower() == ex_id) or (ex_name and name == ex_name):
             continue
         rows.append((ent, cat, float(mean) if mean is not None else None))
@@ -131,20 +154,21 @@ def cell_benchmarks(conn, sub_vertical: str, subcap_ids, exclude_display_id: str
         """
         SELECT COALESCE(e.display_id, e.id::text) AS ent,
                lower(COALESCE(e.legal_name, e.trading_name, '')) AS name,
-               s.subcap_id, AVG(s.score) AS cell_score
+               e.sub_vertical, s.subcap_id, AVG(s.score) AS cell_score
           FROM runs r
           JOIN entities e ON e.id = r.entity_id
           JOIN subcap_scores s ON s.run_id = r.id
          WHERE r.is_active AND r.promoted_at IS NOT NULL
-           AND lower(e.sub_vertical) = lower(%s)
            AND s.score IS NOT NULL AND s.subcap_id = ANY(%s)
-         GROUP BY ent, name, s.subcap_id
+         GROUP BY ent, name, e.sub_vertical, s.subcap_id
         """,
-        (sv, ids))
+        (ids,))
     ex_id = str(exclude_display_id or "").strip().lower()
     ex_name = str(exclude_entity_name or "").strip().lower()
     rows = []
-    for ent, name, sid, score in cur.fetchall():
+    for ent, name, stored_sv, sid, score in cur.fetchall():
+        if not _same_subvertical(stored_sv, sv):
+            continue
         if (ex_id and str(ent).lower() == ex_id) or (ex_name and name == ex_name):
             continue
         rows.append((ent, sid, float(score) if score is not None else None))

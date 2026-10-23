@@ -157,3 +157,14 @@ def test_other_pages_are_untouched():
 def test_an_empty_register_is_left_to_its_empty_state():
     body = {"techstack": {"items": [], "empty_state": {"reason": "x"}}}
     assert _check_technographic_scan(_Conn(0), "run", "techstack", body) == []
+
+
+def test_workbook_local_ids_resolve_through_the_package_mapping():
+    """R-INTERAC-20261010 (2026-10-12): the register cited 'E-031' while the
+    stored row was 'E-INTERACC-031'; the literal match found nothing and
+    ET-12 refused a register citing four scan readings."""
+    conn = _Conn(1)
+    assert _check_technographic_scan(conn, "run-1", "techstack",
+                                     _techstack(e_ids=("E-031",))) == []
+    assert "evidence_package_ids" in conn.cur.sql
+    assert "package_local_id" in conn.cur.sql

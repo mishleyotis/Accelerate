@@ -213,9 +213,60 @@ def _reason(gate, section, path, message):
             "message": message, "severity": "block"}
 
 
+#: A peer row whose basis says the pair was never searched. The engine
+#: refuses to WRITE one (`engine.assessment peer-adoption`); this refuses to
+#: SERVE one, for a hand-driven run that bypasses the engine.
+NOT_SEARCHED = re.compile(
+    r"\bnot (?:yet )?searched\b|\bnever searched\b|\bwas not searched\b|"
+    r"\bno search\b[^.;]{0,80}\b(?:is |was )?(?:recorded|run|made)\b|"
+    r"\bsearch (?:covered|ran for) [^.;]{0,80}\bonly\b", re.I)
+
+
+def peer_coverage(rows) -> float | None:
+    """THE definition of `peer_coverage` (owner, 2026-10-13: "align to ensure
+    the same is used"): peers DEPLOYED / NAMED peers (one row per named peer),
+    rounded to 2 places — computed only when at least one row is ESTABLISHED
+    (deployed true or false); null when every row is unknown. One formula in
+    three deployables, kept identical by tests/peer_coverage_parity:
+    apps/mcp peer_set.peer_coverage (the gate, AG-04), ship_page's
+    `_peer_coverage` (computed onto every page before it is submitted) and
+    engine techscan.peer_coverage (the workbook's figure)."""
+    rows = [r for r in (rows or []) if isinstance(r, dict)]
+    if not rows or not any(r.get("deployed") is not None for r in rows):
+        return None
+    return round(sum(1 for r in rows if r.get("deployed") is True) / len(rows), 2)
+
+
+def unsearched_register_rows(payload: dict) -> list:
+    """AG-04 on the tech register: a register row's peer row whose basis says
+    the pair was never searched is research owed, not a null
+    (R-INTERAC-20261010: 31 of 40 rows read "No search for this peer on this
+    product is recorded in this run")."""
+    body = payload.get("techstack") if isinstance(payload, dict) else None
+    items = body.get("items") if isinstance(body, dict) else None
+    out = []
+    for i, it in enumerate(items if isinstance(items, list) else []):
+        if not isinstance(it, dict):
+            continue
+        rows = it.get("peer_deployments") if isinstance(it.get("peer_deployments"), list) else []
+        bad = [str(r.get("peer")) for r in rows if isinstance(r, dict)
+               and r.get("deployed") is None
+               and NOT_SEARCHED.search(str(r.get("basis") or ""))]
+        if bad:
+            out.append(_reason(
+                "AG-04", "techstack", f"techstack.items[{i}].peer_deployments",
+                f"{it.get('product')!r}: the row(s) for {', '.join(bad)} say the "
+                "peer was never searched for this product. A null is honest only "
+                "after the search came back empty; search each peer and state "
+                "what came back"))
+    return out
+
+
 def named_peer_findings(page: str, payload: dict, peers: dict) -> list:
     """AG-04, the named-set half: every platform tile carries one
     peer_deployments row per named peer, each with a basis."""
+    if page == "techstack":
+        return unsearched_register_rows(payload)
     if page != "platform" or not peers or not isinstance(payload, dict):
         return []
     story = payload.get("platform_story")
@@ -234,11 +285,23 @@ def named_peer_findings(page: str, payload: dict, peers: dict) -> list:
         unladdered = [str(r.get("peer")) for r in rows
                       if peer_key(r.get("peer")) in peers
                       and not str(r.get("basis") or "").strip()]
+        # A null whose ladder says it never ran is not a ladder
+        # (R-INTERAC-20261010: 28 of 35 rows promoted reading "Not searched
+        # ... the platform adoption search covered Australian Payments Plus
+        # only", after the peer set was widened from one to five).
+        unsearched = [str(r.get("peer")) for r in rows
+                      if peer_key(r.get("peer")) in peers
+                      and r.get("deployed") is None
+                      and NOT_SEARCHED.search(str(r.get("basis") or ""))]
         problems = []
         if missing:
             problems.append(f"no row for {', '.join(missing)}")
         if unladdered:
             problems.append(f"no basis on the row for {', '.join(unladdered)}")
+        if unsearched:
+            problems.append(f"the row for {', '.join(unsearched)} says the peer was "
+                            f"never searched for this product — that is research "
+                            f"owed, not a null; search it and state what came back")
         if problems:
             out.append(_reason(
                 "AG-04", "platform_story",
@@ -296,6 +359,10 @@ def o1_cohort_findings(page: str, payload: dict, peers: dict) -> list:
 
 def check_named_peer_set(conn, run_id, page, payload) -> list:
     """The wrapper validation2 calls: read the set once, run both halves."""
+    if page == "techstack":
+        # needs no peer set: a row that says it was never searched is owed
+        # research whatever the set is
+        return unsearched_register_rows(payload)
     if page not in ("platform", "overview"):
         return []
     peers = run_peer_set(conn, run_id, payload, page=page)

@@ -2,9 +2,9 @@
   "name": "dma-insights",
   "displayName": "DMA Insights",
   "version": "1.27.1",
-  "description": "The six Digital Maturity Assessment skills, 76 DMA agents — 16 category researchers, a haiku evidence collector and a sonnet category orchestrator, a research challenger, a technographic scanner, report producers and validator, a five-agent scoring tier — the remote MCP connector (36 tools), the free open-source evidence engine with its SearXNG, Fetch, EDGAR, Parallel and alphaXiv connectors, and the research ENGINE: binding preflight, gating PRELIM, ERS, budget envelopes, watchdog.",
+  "description": "The six Digital Maturity Assessment skills, 77 DMA agents \u2014 16 category researchers, a haiku evidence collector and a sonnet category orchestrator, a research challenger, a technographic scanner, report producers and validator, a five-agent scoring tier \u2014 the remote MCP connector (36 tools), the free open-source evidence engine with its SearXNG, Fetch, EDGAR, Parallel and alphaXiv connectors, and the research ENGINE: binding preflight, gating PRELIM, ERS, budget envelopes, watchdog.",
   "author": {
-    "name": "Zennify — DMA Insights build"
+    "name": "Zennify \u2014 DMA Insights build"
   },
   "license": "UNLICENSED",
   "keywords": [
@@ -116,6 +116,7 @@
     "./agents/research/research-evidence-collector.md",
     "./agents/research/technographic-scanner.md",
     "./agents/scoring/scoring-critic.md",
+    "./agents/scoring/peer-cohort-mapper.md",
     "./agents/scoring/scoring-p1-producer.md",
     "./agents/scoring/scoring-p2-producer.md",
     "./agents/scoring/scoring-p3-producer.md",

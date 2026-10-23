@@ -404,6 +404,12 @@ def peer_record(wb: RunWorkbook, *, ts_id: str, peer: str,
             "a peer row states the BASIS in a clause — what was seen and "
             "where. 'Deployed: yes' with nothing behind it is the shape "
             "that makes a peer comparison unfalsifiable.")
+    from .assessment import _NOT_SEARCHED
+    if deployed is None and _NOT_SEARCHED.search(str(basis or "")):
+        raise ScanRefused(
+            "an unknown peer row records a search that came back empty; this "
+            "basis says the pair was never searched. Search the peer for the "
+            "product and record what came back (R-INTERAC-20261010)")
     if deployed and not source_url:
         raise ScanRefused(
             "a peer recorded as DEPLOYED carries the source that says so. "
@@ -422,13 +428,12 @@ def peer_record(wb: RunWorkbook, *, ts_id: str, peer: str,
 
 
 def peer_state(wb: RunWorkbook, ts_id: str | None = None) -> dict:
-    """Peer coverage, COMPUTED — deployed over ESTABLISHED, never stored.
+    """Peer coverage, COMPUTED by `peer_coverage` — never stored.
 
-    An unestablished peer stays out of the denominator. Counting it as a
-    negative would put a number on the page that reads "one of three peers
-    runs this" when the truth is "one does, one does not, and one could not
-    be settled" — and invariant 9 is that a derived value is computed or
-    null, never a default that looks like data.
+    Until 2026-10-13 this divided by the ESTABLISHED peers while the gate
+    (AG-04) divided by every NAMED peer and the contract said "the
+    established share": three definitions of one served number. The owner
+    chose one; the per-peer rows (with their unknowns) say the rest.
     """
     rows = [r for r in wb.rows("Tech_Peer_Deployments")
             if ts_id is None or str(r["TS_ID"]) == ts_id]
@@ -440,8 +445,24 @@ def peer_state(wb: RunWorkbook, ts_id: str | None = None) -> dict:
             "peers_established": len(established),
             "peers_unknown": len(states) - len(established),
             "peers_deployed": deployed,
-            "peer_coverage": (round(deployed / len(established), 3)
-                              if established else None)}
+            "peer_coverage": peer_coverage(states)}
+
+
+def peer_coverage(states) -> float | None:
+    """THE definition of `peer_coverage` (owner, 2026-10-13: "align to ensure
+    the same is used"): peers DEPLOYED / NAMED peers (one row per named peer),
+    rounded to 2 places — computed only when at least one row is ESTABLISHED
+    (deployed true or false); null when every row is unknown. One formula in
+    three deployables, kept identical by tests/peer_coverage_parity:
+    apps/mcp peer_set.peer_coverage (the gate, AG-04), ship_page's
+    `_peer_coverage` (computed onto every page before it is submitted) and
+    engine techscan.peer_coverage (the workbook's figure).
+
+    `states` are True / False / None, one per named peer."""
+    states = list(states or [])
+    if not states or all(x is None for x in states):
+        return None
+    return round(sum(1 for x in states if x is True) / len(states), 2)
 
 
 def peer_rows(wb: RunWorkbook, ts_id: str) -> list[dict]:

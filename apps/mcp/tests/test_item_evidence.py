@@ -193,14 +193,23 @@ def test_a_share_that_disagrees_with_its_own_breakdown_is_named():
     assert "1 of 3" in r[0]["message"]
 
 
-def test_one_peer_of_tolerance_so_a_scoped_share_passes():
-    # Scoping the share to the established subset is legitimate; being wrong by
-    # more than one peer is not.
-    body = _ts({"peer_coverage": 1.0, "peer_deployments": [
-        {"peer": "A", "deployed": True, "source_url": "https://x", "as_of": "2026-01-01"},
-        {"peer": "B", "deployed": None},
-    ]})
-    assert _check_peer_research("techstack", body) == []
+def test_one_definition_a_scoped_share_is_refused():
+    """Owner, 2026-10-13: one definition of peer_coverage — deployed / NAMED
+    peers, null when nothing is established. Scoping the share to the
+    established subset (1 of 1 = 1.0) was a second definition; it is refused."""
+    rows = [{"peer": "A", "deployed": True, "source_url": "https://x", "as_of": "2026-01-01"},
+            {"peer": "B", "deployed": None}]
+    out = _check_peer_research("techstack", _ts({"peer_coverage": 1.0, "peer_deployments": rows}))
+    assert [r["gate_id"] for r in out] == ["AG-04"] and "named peers" in out[0]["message"]
+    assert _check_peer_research("techstack", _ts({"peer_coverage": 0.5, "peer_deployments": rows})) == []
+
+
+def test_nothing_established_means_null_never_zero():
+    rows = [{"peer": "A", "deployed": None, "basis": "searched; nothing names it"},
+            {"peer": "B", "deployed": None, "basis": "searched; nothing names it"}]
+    assert _check_peer_research("techstack", _ts({"peer_coverage": None, "peer_deployments": rows})) == []
+    out = _check_peer_research("techstack", _ts({"peer_coverage": 0.0, "peer_deployments": rows}))
+    assert [r["gate_id"] for r in out] == ["AG-04"]
 
 
 def test_a_row_with_neither_field_is_untouched():

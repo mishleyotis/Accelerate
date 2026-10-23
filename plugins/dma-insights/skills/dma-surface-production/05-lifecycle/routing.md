@@ -377,21 +377,21 @@ sheets, so there is no second record to drift and no context to paste:
 | `engine.brief reuse --subcap X` | what the run already holds for X — read before searching, because the run has paid for it |
 | `engine.brief handback --category C` | what the category established, computed from the sheets, plus the leads its sources open for OTHER categories |
 
-Two rules follow from it, and both are enforced rather than advised: a
+Two rules follow, both enforced rather than advised: a
 producer's FIRST command is its brief (the manifests say so, and the session
 hook repeats it), and an empty cell cannot be declared absent while the
 register names it (`ledger.declare_absence` refuses; the floors gate carries
 `absence_over_evidence` blocking and `evidence_unattached` advisory). Every
-packet is measured against `BRIEF_CHAR_CEILING` — context sharing that is
-not bounded is the token bleed under another name.
+packet is measured against `BRIEF_CHAR_CEILING` — unbounded context sharing
+is the token bleed under another name.
 
 ## The scoring tier — column D, after the research and before the reports
 
 REPORTED 2026-09-03 by the engagement owner: "Report writing starts without
 scoring happening." Nothing had owned the scores — `dma-assessment` built a
-separate workbook and the report producers read whatever they found. Five
-agents now own the SCORING stage of the research workbook, and the stage is
-gated at both ends by the engine rather than by the manifest.
+separate workbook and the report producers read whatever they found. Six
+agents own the workbook's SCORING stage, gated at both ends by the engine,
+not the manifest.
 
 | what | agent | may critique? |
 |---|---|---|
@@ -399,10 +399,11 @@ gated at both ends by the engine rather than by the manifest.
 | P1's scores: one `engine.assessment score` per subcap — refuses an unchallenged row, a score above the evidence ceiling, a rationale under 150 chars or citing none of the row's own E-ids, an incomplete AI/data overlay | `scoring-p1-producer` | no |
 | P2 / P3 / P4, the same, in parallel | `scoring-p2-producer` · `scoring-p3-producer` · `scoring-p4-producer` | no |
 | the SCORING_CRITIC verdict per pillar — re-derives a sample, checks ceilings and differentiation; `engine.assessment critique` refuses a scorer as its own critic | `scoring-critic` | **only** |
+| peer scores via `cohort-fill` while PEER-COHORT blocks | `peer-cohort-mapper` | n/a |
 | the rollup (`engine.assessment rollup`: Pillar_Rollup, Category_Rollup, Coverage_Map, Executive_Summary) and the SCORING gate | `research-conductor` | n/a |
 
-The four producers run **in parallel**, one pillar each, and the critic runs
-per pillar as pillars land. `engine.assessment gate` blocks on `unscored`,
+The four producers run **in parallel**, one pillar each; the critic runs
+per pillar as each lands. `engine.assessment gate` blocks on `unscored`,
 `critic_missing`, `rollup_missing`, `score_above_ceiling`, `unchallenged_scored`,
 `overlay_incomplete`, `no_differentiation` and the rest, and records its
 verdict in `Gate_Log`. **No report section can be written until that verdict

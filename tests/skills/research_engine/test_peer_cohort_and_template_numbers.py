@@ -124,6 +124,131 @@ def test_the_driver_fills_from_the_connector_and_survives_its_absence(tmp_path):
                for r in run2.open().rows("Peer_Benchmarks"))
 
 
+def test_an_empty_cohort_is_logged_and_re_asked_until_it_answers(tmp_path):
+    """R-INTERAC-20261010 (2026-10-13): the cohort lookup answered zero RB
+    entities (it matched the raw sub-vertical spelling), sixteen
+    `cannot_estimate` rows were written with no line saying so, and — being
+    cohort-sourced — they were never asked again. Peer scores are the
+    cohort's average (owner, 2026-10-06); an empty answer is now logged
+    PEER_COHORT_EMPTY and re-asked on every refill, and the first refill that
+    has the average writes it."""
+    from engine import pipeline as P, pipeline_stub as S
+    run, wb, cells, ev = researched_run(tmp_path)
+    cats = [r["Category_ID"] for r in wb.rows("Peer_Benchmarks") if r.get("Category_ID")]
+    empty = {"sub_vertical": "RB", "entities": 0, "categories": {}}
+    got = prelim.fill_cohort_peers(wb, empty)
+    assert got["cannot_estimate"] == cats and not got["filled"]
+    logged = [r for r in wb.rows("Gate_Log") if r.get("Gate") == "PEER_COHORT_EMPTY"]
+    assert logged and "0 assessed entities" in logged[-1]["Detail"]
+    assert str(logged[-1]["Blocking"]).lower() in ("false", "0")
+    # a cohort-sourced ABSENCE is re-asked; a cohort FIGURE is final
+    rows = wb.rows("Peer_Benchmarks")
+    assert all(prelim.peer_row_wants_cohort(r, has_figure=True) for r in rows if r.get("Category_ID"))
+    calls = []
+
+    class Grown(S.StubReads):
+        def cohort_benchmarks(self, sv, **k):
+            calls.append(sv)
+            return _cohort(cats)
+    opts = P.Options(dispatcher=S.StubDispatcher(S.default_handlers()), reads=Grown(),
+                     shipper=S.StubShipper(), push=False, folder_root=tmp_path / "o",
+                     ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None)
+    P.Pipeline(run, opts)._cohort_peers()
+    assert calls, "a run whose peers are all cannot_estimate must ask the cohort again"
+    after = {r["Category_ID"]: r for r in run.open().rows("Peer_Benchmarks")}
+    assert all(float(after[c]["Peer_Median"]) == 2.37 for c in cats)
+    assert not any(prelim.peer_row_wants_cohort(r, has_figure=True)
+                   for r in after.values())
+    P.Pipeline(run, opts)._cohort_peers()
+    assert len(calls) == 1                           # filled: never re-asked
+
+
+def test_the_page_preflight_refuses_a_peer_page_whose_figures_were_never_mapped(tmp_path):
+    """PEER-COHORT (2026-10-13): the heatmap, overview and platform pages are
+    not spent while a category's peer figure was never mapped from the
+    cohort — that page would ship with peers excluded. Mapped means the
+    cohort answered: its average, or its stated absence."""
+    from engine import page_preflight as PP
+    run, wb, cells, ev = researched_run(tmp_path)
+    cats = [r["Category_ID"] for r in wb.rows("Peer_Benchmarks") if r.get("Category_ID")]
+    found = [b for b in PP.peer_cohort_blockers(wb, ("heatmap", "platform", "techstack"))]
+    assert {b["page"] for b in found} == {"heatmap", "platform"}
+    assert all(b["gate"] == "PEER-COHORT" and b["needs_connector"]
+               and b.get("severity", "block") == "block" for b in found)
+    assert PP.peer_cohort_blockers(wb, ("techstack", "insights")) == []
+    # an inferred placeholder is not a mapping either
+    prelim.peer_median(wb, category=cats[0], median=2.9, basis="inferred",
+                       source="analyst estimate, no cohort behind it")
+    prelim.fill_cohort_peers(wb, {"sub_vertical": "CU", "entities": 0, "categories": {}})
+    assert any(cats[0] in b["detail"] for b in PP.peer_cohort_blockers(wb, ("heatmap",)))
+    # the cohort's average mapped: clear
+    prelim.fill_cohort_peers(wb, _cohort(cats))
+    assert PP.peer_cohort_blockers(wb, ("heatmap", "overview", "platform")) == []
+    assert not [b for b in PP.preflight(wb, ("heatmap",)) if b["gate"] == "PEER-COHORT"]
+
+
+def test_an_empty_cohort_stops_the_peer_pages_until_the_owner_accepts_it(tmp_path):
+    """"Never excluded" (owner goal, 2026-10-13): a cohort that answered no
+    entity at all leaves every peer figure null, and the peer pages do not
+    ship on that silently — only on the engagement owner's recorded reason."""
+    import pytest
+    from engine import page_preflight as PP
+    run, wb, cells, ev = researched_run(tmp_path)
+    prelim.fill_cohort_peers(wb, {"sub_vertical": "RB", "entities": 0, "categories": {}})
+    found = PP.peer_cohort_blockers(wb, ("heatmap", "platform"))
+    assert {b["page"] for b in found} == {"heatmap", "platform"}
+    assert all(b.get("severity", "block") == "block" and not b["needs_connector"] for b in found)
+    assert "PEER_COHORT_EMPTY" in found[0]["detail"] and "cohort-accept" in found[0]["fix"]
+    with pytest.raises(ValueError, match="owner"):
+        PP.accept_cohort_empty(wb, owner="the analyst", reason="x" * 50)
+    with pytest.raises(ValueError, match="reason"):
+        PP.accept_cohort_empty(wb, owner="dma@zennify.com", reason="none")
+    PP.accept_cohort_empty(wb, owner="dma@zennify.com",
+                           reason="no RB entity has a promoted assessment yet; first in sub-vertical")
+    found = PP.peer_cohort_blockers(run.open(), ("heatmap",))
+    assert len(found) == 1 and found[0]["severity"] == "warn"
+    assert "dma@zennify.com" in found[0]["detail"]
+
+
+def test_cohort_fill_writes_what_the_mapper_fetched_and_refuses_a_non_answer(tmp_path):
+    import json as _j
+    from engine import page_preflight as PP
+    run, wb, cells, ev = researched_run(tmp_path)
+    cats = [r["Category_ID"] for r in wb.rows("Peer_Benchmarks") if r.get("Category_ID")]
+    bad = tmp_path / "bad.json"
+    bad.write_text(_j.dumps({"error": "sub_vertical_required"}))
+    assert PP.main(["cohort-fill", "--run", run.run_id, "--root", str(run.root),
+                    "--json", str(bad)]) == 2
+    good = tmp_path / "cohort.json"
+    good.write_text(_j.dumps(_cohort(cats)))
+    assert PP.main(["cohort-fill", "--run", run.run_id, "--root", str(run.root),
+                    "--json", str(good)]) == 0
+    rows = {r["Category_ID"]: r for r in run.open().rows("Peer_Benchmarks")}
+    assert all(float(rows[c]["Peer_Median"]) == 2.37 for c in cats)
+    assert all(prelim.peer_row_is_cohort_sourced(rows[c]) for c in cats)
+
+
+def test_the_scoring_handoff_dispatches_the_mapper_only_while_unmapped(tmp_path):
+    """The peer-cohort-mapper rides on the first pillar's invocation only
+    while a category's peer figure is unmapped; a mapped run starts none."""
+    from engine import pipeline as P, pipeline_stub as S
+    run, wb, cells, ev = researched_run(tmp_path)
+
+    class NoConnector(S.StubReads):
+        cohort_benchmarks = None
+    opts = P.Options(dispatcher=S.StubDispatcher(S.default_handlers()), reads=NoConnector(),
+                     shipper=S.StubShipper(), push=False, folder_root=tmp_path / "o",
+                     ingest_poll_s=0, sleep=lambda s: None, log=lambda s: None)
+    pipe = P.Pipeline(run, opts)
+    owed = pipe._peer_cohort_owed()
+    assert owed and owed["sub_vertical"] and "categor" in owed["detail"]
+    cats = [r["Category_ID"] for r in run.open().rows("Peer_Benchmarks") if r.get("Category_ID")]
+    prelim.fill_cohort_peers(run.open(), _cohort(cats))
+    assert P.Pipeline(run, opts)._peer_cohort_owed() is None
+    wf = (Path(P.PLUGIN) / P.SCORING_WORKFLOW).read_text()
+    assert "dma-insights:peer-cohort-mapper" in wf and "A.peer_cohort" in wf
+
+
 # ── peer metrics are researched on the focus areas only ─────────────────
 
 def test_peer_metric_probes_cover_each_peer_on_each_focus_area_and_nothing_else(tmp_path):

@@ -227,3 +227,46 @@ def test_the_exemption_is_per_page_not_per_section_name():
                                 {"E-CC-006": "firmographics"}) == []
     assert len(_check_cited_linkage("context", payload, [_row("E-CC-006")],
                                     {"E-CC-006": "firmographics"})) == 1
+
+
+# ── R-INTERAC-20261010 (2026-10-12): the reason stated on the CITING ITEM ──
+# insights.insights carries reasoning per card; its contract declares no
+# section-level r_layer, so the remediation "say so in this section's
+# r_layer.probes_run" named a field the shape refuses, and the reason
+# IC-006 stated for E-025 in its own r_layer was never read.
+
+def _cards(*cards):
+    ids = sorted({e for c in cards for e in c["supporting_e_ids"]})
+    return {"insights": {"cards": list(cards), "e_ids": ids}}
+
+
+def test_a_reason_stated_on_the_card_that_cites_the_id_passes():
+    payload = _cards({"ic_id": "IC-006", "supporting_e_ids": ["E-025", "E-557"],
+                      "r_layer": {"probes_run": [
+                          "E-025 is a leadership appointment record cited for "
+                          "who leads the work; it supports no capability cell."]}})
+    assert _check_cited_linkage("insights", payload, [_row("E-025")],
+                                {"E-025": "insights"}) == []
+
+
+def test_a_reason_on_a_card_that_does_not_cite_the_id_excuses_nothing():
+    payload = _cards(
+        {"ic_id": "IC-001", "supporting_e_ids": ["E-001"],
+         "r_layer": {"probes_run": ["E-025 supports no capability cell."]}},
+        {"ic_id": "IC-006", "supporting_e_ids": ["E-025"],
+         "r_layer": {"probes_run": ["E-557 excerpt read."]}})
+    out = _check_cited_linkage("insights", payload, [_row("E-025")],
+                               {"E-025": "insights"})
+    assert len(out) == 1 and out[0]["severity"] == "block"
+    assert "r_layer.probes_run of the item that cites it" in out[0]["message"]
+
+
+def test_naming_the_id_only_inside_the_r_layer_is_not_citing_it():
+    """A card whose r_layer mentions the id but whose citations do not is
+    not the citing item — the excuse must sit where the citation is."""
+    payload = _cards({"ic_id": "IC-002", "supporting_e_ids": ["E-001"],
+                      "r_layer": {"probes_run": ["E-025 supports no cell."]}})
+    payload["insights"]["e_ids"].append("E-025")
+    out = _check_cited_linkage("insights", payload, [_row("E-025")],
+                               {"E-025": "insights"})
+    assert len(out) == 1

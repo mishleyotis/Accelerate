@@ -119,10 +119,13 @@ BRIEFS_DIR = "briefs"
 #: and `url` — who published the row and where it lives — and were counted as
 #: prose until 2026-10-12 (R-INTERAC-20261010 heatmap: 9 of its 20 counted
 #: FAILs were a publisher name or a domain, e.g. sim 0.287 on "LinkedIn").
+#: `peer` is a named peer institution on a register row's peer deployment —
+#: the same label class as `candidate` and `product` (R-INTERAC-20261010
+#: techstack B, 2026-10-12: 8 of its 106 counted FAILs were peer names).
 SG_V4_VERBATIM_LEAVES = frozenset({
     "excerpt", "verbatim_quote", "quote", "source", "source_name",
     "source_title", "title", "product", "candidate", "url",
-    "publisher", "source_domain"})
+    "publisher", "source_domain", "peer"})
 
 
 def _contract_version_of(progress, page: str) -> str | None:
@@ -1457,8 +1460,17 @@ class Pipeline:
             return ok, ("all six pages PASS on version B" if ok else
                         f"pending: {', '.join(p for p in allp if not self._page_ok(p, 'B'))}")
         if stage == "PROMOTE":
-            ok = bool(str(md.get("promoted_at") or "").strip())
-            return ok, (f"promoted at {md.get('promoted_at')}" if ok else "not promoted")
+            at = str(md.get("promoted_at") or "").strip()
+            # A page re-shipped AFTER the promotion is staged, not served: the
+            # promotion is owed again (R-INTERAC-20261010, the platform page
+            # repaired after promote would otherwise never reach a reader).
+            later = sorted(p for p, rec in (self.state.get("pages") or {}).items()
+                           if isinstance(rec, dict) and rec.get("status") == "pass"
+                           and at and str(rec.get("at") or "")[:19] > at[:19])
+            ok = bool(at) and not later
+            return ok, (f"promoted at {at}" if ok else
+                        f"re-shipped after the promotion at {at}: {', '.join(later)}"
+                        if at else "not promoted")
         raise KeyError(stage)
 
     def _page_ok(self, page: str, version: str) -> bool:
@@ -3492,6 +3504,24 @@ class Pipeline:
         self.opts.log(f"  [COHORT] {sv}: {len(got['filled'])} categor(ies) from "
                       f"{got.get('entities')} assessed entit(ies); "
                       f"{len(got['cannot_estimate'])} below the floor")
+        if not got["filled"] and not int(got.get("entities") or 0):
+            self.opts.log(f"  [COHORT] WARNING {sv}: the cohort answered NO assessed "
+                          f"entity — every peer figure is null (PEER_COHORT_EMPTY)")
+
+    def _peer_cohort_owed(self) -> dict | None:
+        """What the peer-cohort-mapper is handed, or None when every
+        category's peer figure is mapped (or the owner accepted that none
+        exists)."""
+        from . import page_preflight as PP
+        found = [b for b in PP.peer_cohort_blockers(self.wb, ("heatmap",))
+                 if b.get("severity", "block") != "warn"]
+        if not found:
+            return None
+        md = self._md()
+        return {"sub_vertical": str(md.get("sub_vertical") or ""),
+                "display_id": str(md.get("entity_id") or ""),
+                "entity_name": str(md.get("entity_name") or ""),
+                "detail": found[0]["detail"][:600]}
 
     def _scoring_handoff(self) -> dict:
         """Write one scoring-workflow invocation per pillar still owed.
@@ -3568,13 +3598,29 @@ class Pipeline:
         # THE SOLUTIONS DUTY rides on the first invocation while its tabs are
         # empty — the lane path runs it beside the scorers, and the
         # assessment report's preconditions stay shut without it.
-        if not all([r for r in self.wb.rows(t) if any(v not in (None, "") for v in r.values())]
-                   for t in ("Solution_Catalogue", "Platform_Peer_Adoption")):
+        # ... and while any (product, locked peer) pair is still owed: one row
+        # used to count as done, so a peer added after the search was never
+        # searched (R-INTERAC-20261010, 28 pairs).
+        from .assessment import peer_adoption_gaps
+        if (not all([r for r in self.wb.rows(t) if any(v not in (None, "") for v in r.values())]
+                    for t in ("Solution_Catalogue", "Platform_Peer_Adoption"))
+                or peer_adoption_gaps(self.wb)):
             sb = brief.scoring_batch(self.wb, run=self.run,
                                      out_dir=self._briefs("scoring_wf_solutions"), solutions=True)
             rows = self._lane_rows(sb)
             if rows:
                 inv[0]["solutions_brief"] = rows[0]["prompt_file"]
+        # THE PEER-COHORT DUTY (owner goal, 2026-10-13: "peer parameters are
+        # never excluded"): rides on the first invocation ONLY while a
+        # category's peer figure is unmapped (the driver could not bind the
+        # connector, or the cohort answered nothing). The peer-cohort-mapper
+        # asks get_cohort_benchmarks in session and writes the average through
+        # `engine.page_preflight cohort-fill`. A mapped run hands nothing — no
+        # agent, no latency.
+        if inv:
+            pc = self._peer_cohort_owed()
+            if pc:
+                inv[0]["peer_cohort"] = pc
         doc = {"workflow": str(PLUGIN / SCORING_WORKFLOW), "invocations": inv,
                "estimate": self._scoring_price(inv, env),
                "then": self.plan()["command"],
@@ -3618,7 +3664,8 @@ class Pipeline:
                 brief_usd.append(round(rows * tier["scorer_per_row"], 2))
             i["_brief_usd"] = brief_usd
             need[i["pillar"]] = round(sum(brief_usd) + rounds * (tier["critic"] + tier["rescore"])
-                                      + (tier["solutions"] if i.get("solutions_brief") else 0.0), 2)
+                                      + (tier["solutions"] if i.get("solutions_brief") else 0.0)
+                                      + (tier.get("peer_cohort", 0.10) if i.get("peer_cohort") else 0.0), 2)
         total = round(sum(need.values()), 2)
         remaining = None if not env else env.get("remaining")
         fits = remaining is None or total <= float(remaining) + 1e-9
@@ -4421,10 +4468,13 @@ class Pipeline:
                           detail=("advisory: " + "; ".join(
                               f"[{b['gate']}] {b['detail']} — fix: {b['fix']}"
                               for b in advisory))[:900])
+            gates = ", ".join(sorted({str(b.get("gate")) for b in advisory}))
             self.opts.log(f"  [{stage}] {len(advisory)} advisory preflight finding(s) "
-                          f"(unlinked timeline or report-section citations) — the page "
-                          f"producer states them on the surface (r_layer.probes_run); "
-                          f"link the capability ones to clear this line")
+                          f"[{gates}] — not a halt; the details are in Gate_Log "
+                          f"(PAGE_PREFLIGHT). ET-07: the producer states unlinked "
+                          f"citations on the surface; PEER-ADOPT: peer searches owed "
+                          f"on register rows the page may still drop; PEER-COHORT: "
+                          f"the cohort answered no peer figure for any category")
         if not blockers:
             if todo:
                 L.append_gate(self.wb, gate="PAGE_PREFLIGHT", scope=stage, verdict="PASS",
@@ -4439,10 +4489,18 @@ class Pipeline:
                       blocking=True, detail=lines[:900])
         msg = (f"{len(blockers)} page blocker(s) found in the workbook before any page "
                f"agent ran: {lines}")
-        if any(b.get("needs_connector") for b in blockers):
-            raise NeedsConnector(msg + ". These need Clay and Vibe Prospecting; this "
+        need = [b for b in blockers if b.get("needs_connector")]
+        if need:
+            gates = {str(b.get("gate")) for b in need}
+            what = []
+            if gates - {"PEER-COHORT"}:
+                what.append("Clay and Vibe Prospecting")
+            if "PEER-COHORT" in gates:
+                what.append("the DMA connector (get_cohort_benchmarks — the peer "
+                            "average of the sub-vertical's assessed entities)")
+            raise NeedsConnector(msg + f". These need {' and '.join(what)}; this "
                                  "process cannot bind them — resume in a session that "
-                                 "holds both.")
+                                 "holds them.")
         raise StageRefused(msg)
 
     def _ship_pages(self, pages: tuple, version: str, *, produce: bool) -> list[str]:

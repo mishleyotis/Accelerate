@@ -113,3 +113,43 @@ def test_pass2_runs_the_named_set_check():
     import dma_mcp.validation2 as V2
     src = inspect.getsource(V2.validate_pass2)
     assert "check_named_peer_set(conn, run_id, page, payload)" in src
+
+
+def test_a_null_whose_ladder_says_it_never_ran_is_refused():
+    """R-INTERAC-20261010 (2026-10-12): the peer set was widened from one to
+    five after the adoption search had run; 28 of 35 rows promoted reading
+    "Not searched ... the search covered Australian Payments Plus only"."""
+    story = {"platform_story": {"platforms": [
+        tile("MuleSoft Anypoint Platform",
+             [row("Assurant"), row("Fortegra"),
+              row("TruStage", basis="Not searched for MuleSoft Anypoint in this run: "
+                                     "the platform adoption search covered Assurant only.")])]}}
+    out = PS.named_peer_findings("platform", story, PEERS)
+    assert len(out) == 1 and "never searched" in out[0]["message"]
+    assert "TruStage" in out[0]["message"]
+
+
+def test_a_searched_null_and_a_competing_product_both_pass():
+    story = {"platform_story": {"platforms": [
+        tile("MuleSoft Anypoint Platform",
+             [row("Assurant"),
+              row("Fortegra", deployed=False,
+                  basis="Fortegra's API platform is Kong Gateway, a competing product"),
+              row("TruStage", basis="Searched 2026-10-12: no source names TruStage "
+                                     "as a MuleSoft customer")])]}}
+    assert PS.named_peer_findings("platform", story, PEERS) == []
+
+
+def test_a_register_row_whose_peer_was_never_searched_is_refused():
+    """Techstack, same run: 31 of 40 rows read "No search for this peer on
+    this product is recorded in this run"."""
+    payload = {"techstack": {"items": [
+        {"ts_id": "TS-001", "product": "Dynatrace", "peer_deployments": [
+            row("Assurant", True, basis="posting names Dynatrace"),
+            row("Fortegra", basis="No search for this peer on this product is "
+                                  "recorded in this run, so deployment is not established.")]},
+        {"ts_id": "TS-002", "product": "Kafka", "peer_deployments": [row("Fortegra")]}]}}
+    out = PS.named_peer_findings("techstack", payload, PEERS)
+    assert len(out) == 1 and out[0]["path"] == "techstack.items[0].peer_deployments"
+    assert "Fortegra" in out[0]["message"]
+    assert PS.check_named_peer_set(None, "run", "techstack", payload) == out

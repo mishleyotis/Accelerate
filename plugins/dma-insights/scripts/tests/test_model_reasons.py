@@ -59,10 +59,12 @@ def test_the_reason_names_the_work_not_the_price_alone():
 def test_the_distribution_is_the_audits_with_the_reasons_stated():
     """58 sonnet / 15 opus / 1 haiku on the day of the audit, plus the two
     research-tier agents of 2026-10-09 (haiku collector, sonnet category
-    orchestrator — decided against the gold workbook); moving one is
-    a change to the table with its reason, which this test then records."""
+    orchestrator — decided against the gold workbook), plus the haiku
+    peer-cohort-mapper of 2026-10-13 (one connector read, one CLI write);
+    moving one is a change to the table with its reason, which this test
+    then records."""
     prov = _prov()
     counts = {}
     for model, _ in prov.MODEL_REASONS.values():
         counts[model] = counts.get(model, 0) + 1
-    assert counts == {"sonnet": 59, "opus": 15, "haiku": 2}, counts
+    assert counts == {"sonnet": 59, "opus": 15, "haiku": 3}, counts

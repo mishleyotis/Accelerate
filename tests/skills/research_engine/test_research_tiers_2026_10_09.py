@@ -218,7 +218,9 @@ def test_the_two_research_tier_agents_exist_with_their_models():
     manifest = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
     assert "./agents/research/research-evidence-collector.md" in manifest["agents"]
     assert "./agents/research/research-category-orchestrator.md" in manifest["agents"]
-    assert "76 DMA agents" in manifest["description"]
+    # The advertised count is the roster's own length (manifest_counts.py
+    # keeps them in step), never a literal that a new agent silently breaks.
+    assert f"{len(manifest['agents'])} DMA agents" in manifest["description"]
 
 
 def test_the_dispatch_guard_and_the_ledger_capture_know_the_new_agents():
