@@ -98,6 +98,15 @@ const ISSUES = [
       + "and mobile banking",
     severity: "MINOR", status: "Resolved",
     opened_on: "2024-07-19", resolved_on: "2024-08-15" },
+  /* UNDATED, which renders in a different list — a flex row rather than the
+     time-axis grid — and truncated its title the same way. A fixture with
+     only dated issues never reaches that branch, so the row-label fix was
+     verified on half the component. */
+  { issue_id: "I-006",
+    title: "Core banking platform contract renewal decision is unscheduled "
+      + "and the incumbent term is unstated",
+    severity: "MATERIAL", status: "Active",
+    opened_on: null, resolved_on: null },
 ].map((x) => ({
   ...x, provenance: "analyst", rationale: "", capped_subcap_ids: [],
   linked_subcap_ids: [], e_ids: ["E-CC-188"],
@@ -285,5 +294,78 @@ test("issue timeline · a title that fits is still shown", { skip }, async () =>
     const shown = (await labelled(page)).map((b) => b.text);
     assert.ok(shown.includes("Point to point"),
       `a short title on the widest bar must render; saw ${JSON.stringify(shown)}`);
+  } finally { await browser.close(); server.close(); }
+});
+
+/* ---------------------------------------------------------------------------
+ * NOTHING ON THIS ROW IS TRUNCATED — the general rule, after three specific
+ * ones each caught a different place the same defect appeared.
+ *
+ *   the bar's own label      "Integration architecture runs point to p…"
+ *   the readiness chips      "Governed member domain owed in the cat…"
+ *   the ROW LABEL            "Databricks lakehouse runs live i…"
+ *
+ * The third was reported 2026-09-03 with a screenshot in which every row
+ * title was cut. The column was `minmax(90px, 200px)` and the title clamped
+ * to ONE line, while an issue title is 8-16 words by contract.
+ *
+ * A per-element assertion would have missed it, because the row label is not
+ * a bar and not a badge. This measures every text node in the register
+ * against its own box, so the next place this appears is caught without
+ * anyone having to think of it first.
+ * ------------------------------------------------------------------------ */
+
+async function truncated(page) {
+  return page.evaluate(() => {
+    const out = [];
+    /* EVERY card, not the first. `querySelector(".card")` returned the
+       timeline card and the issue register is a later one, so the first
+       version of this scanned a card the defect was not in and reported
+       clean — a vacuous test that passed the counterfactual. */
+    const cards = Array.from(document.querySelectorAll(".card"));
+    const inside = (el) => cards.some((c) => c.contains(el));
+    for (const el of document.querySelectorAll("div,span")) {
+      if (!inside(el)) continue;
+      const text = (el.textContent || "").trim();
+      if (!text || el.children.length) continue;      // leaf text only
+      const s = getComputedStyle(el);
+      const clamped = s.webkitLineClamp && s.webkitLineClamp !== "none";
+      const overflowing = el.scrollWidth > el.clientWidth + 1
+                       || el.scrollHeight > el.clientHeight + 1;
+      if (overflowing && (clamped || s.textOverflow === "ellipsis"
+                          || s.overflow === "hidden")) {
+        out.push({ text: text.slice(0, 52),
+                   w: `${el.scrollWidth}>${el.clientWidth}`,
+                   h: `${el.scrollHeight}>${el.clientHeight}` });
+      }
+    }
+    return out;
+  });
+}
+
+for (const width of [1512, 1180, 960, 700]) {
+  test(`issue register · no text is cut off at ${width}px`, { skip }, async () => {
+    const { page, browser, server } = await renderContext(width);
+    try {
+      const cut = await truncated(page);
+      assert.deepEqual(cut, [],
+        `text truncated in its own box: ${JSON.stringify(cut, null, 1)}`);
+    } finally { await browser.close(); server.close(); }
+  });
+}
+
+test("issue register · the row stacks rather than crushing at phone width",
+     { skip }, async () => {
+  /* 700px is below the breakpoint. A 90px label beside a time axis is not a
+     compromise — it is two unreadable things instead of one. */
+  const { page, browser, server } = await renderContext(700);
+  try {
+    const cols = await page.evaluate(() => {
+      const row = document.querySelector(".issue-row");
+      return row ? getComputedStyle(row).gridTemplateColumns : null;
+    });
+    assert.ok(cols, "the issue row must carry the .issue-row class");
+    assert.equal(cols.split(" ").length, 1,
+      `expected one stacked column below 720px, got ${cols}`);
   } finally { await browser.close(); server.close(); }
 });
