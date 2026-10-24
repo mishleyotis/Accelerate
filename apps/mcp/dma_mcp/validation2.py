@@ -28,6 +28,7 @@ from .subverticals import (SUBVERTICAL_NAMES, resolve_subvertical,
 from .validation import (  # noqa: F401
     failover_delivered, ladder_of, rung_outcome, rung_text,
 )
+from .validation import _VERBATIM_FIELDS as _VERBATIM_LEAVES  # noqa: E402
 
 shared_path.ensure(__file__)
 
@@ -1665,6 +1666,25 @@ def _is_prose_citation(token: str) -> bool:
     return not _PROSE_WORD_NOT_ID.match(token)
 
 
+# A string under a VERBATIM field, or a logged query, is not prose that cites
+# (MEM-0541's second shape). CIBC – US Division, 2026-10-24: E-320's verbatim
+# OSFI excerpt names "Guideline E-23", and the alert ladders log the queries
+# that searched for it; `E-23` carries a digit, so the subtractive rule above
+# took it as an unresolvable id and blocked the heatmap. CG-27 forbids
+# rewriting the excerpt, and a query log records what ran. The verbatim set is
+# the one CG-27 already reads (packages/shared/abbreviations.py
+# EXCERPT_FIELDS); an excerpt's bytes are verified against the registered row
+# by the evidence pass, so skipping it here opens no hole. Keyed citations are
+# untouched.
+_PROSE_SKIP_LEAVES = frozenset(_VERBATIM_LEAVES) | {"queries_run", "sources_searched"}
+
+
+def _leaf_key(path: str) -> str:
+    """The dict key a walked string sits under, list indices dropped:
+    `.alerts[3].queries_run[12]` -> `queries_run`."""
+    return re.sub(r"\[\d+\]", "", path).rsplit(".", 1)[-1]
+
+
 def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
     """Evidence ids cited in PROSE, not under a citation key.
 
@@ -1681,6 +1701,8 @@ def _check_prose_citations_resolve(conn, run_id, payload, already: dict):
     reporting the same fabrication twice is noise, not rigour."""
     claimed: dict = {}
     for path, text in _walk_strings(payload, ""):
+        if _leaf_key(path) in _PROSE_SKIP_LEAVES:
+            continue
         for e in find_ids(text):
             if e in already or not _is_prose_citation(e):
                 continue
