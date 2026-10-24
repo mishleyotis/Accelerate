@@ -1,0 +1,15 @@
+# Verified on 2026-10-10 against PyPI (versions and licences in docs/DISCOVERY.md §4).
+fastmcp==4.1.0            # Apache-2.0 — MCP server (streamable HTTP) and MCP client (Parallel)
+httpx[http2]==0.28.1      # BSD-3-Clause
+trafilatura==2.3.1        # Apache-2.0 — main-content extraction
+htmldate==1.11.0          # Apache-2.0 — publish-date extraction
+pypdfium2==5.14.0         # BSD-3-Clause / Apache-2.0 — PDF text (no AGPL PyMuPDF)
+pypdf==6.*                # BSD — the connector's PDF path, for identical verification text
+rank-bm25==0.2.2          # Apache-2.0 — BM25 stage 1 (bm25s 0.3.13 ships no licence metadata; see DISCOVERY)
+datasketch==2.0.0         # MIT — MinHash near-duplicate clustering
+edgartools==5.61.1        # MIT — SEC filings in-process
+pyyaml>=6.0               # MIT — domain registry
+uvicorn[standard]>=0.35
+# Dense + cross-encoder rerank; models are baked into the image by the
+# Dockerfile (EE_MODELS_DIR) and never downloaded at request time.
+fastembed==0.9.0          # Apache-2.0

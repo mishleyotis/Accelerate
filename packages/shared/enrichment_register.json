@@ -117,7 +117,8 @@
         "clay"
       ],
       "counts": "bars",
-      "thin_below": 1,
+      "thin_below": 2,
+      "thin_below_why": "RC-05 (SWBC gold audit 2026-10-04, D-06): 1 left one bar 'not thin' while CG-40's DEPTH_FLOORS floor for the same section is 2 ('A single displayed line is not a sentiment picture'). A section the gate calls below floor must render thin; test_register_floors_match_depth_floors pins it.",
       "ran_observable": false,
       "ran_unobservable_reason": "a bar is {source, rating, scale, n, as_of, url, e_id} — an App Store lookup and an employer-review export produce the same shape, and the row names the review site, never the route that reached it.",
       "thin_reason": "no retrievable rating carrying its sample size, scale and date was established",
@@ -131,6 +132,8 @@
         "clay"
       ],
       "counts": "fields",
+      "count_rule": "stated_values",
+      "count_rule_why": "RC-04 (SWBC gold audit 2026-10-04, D-06): counting rows made 10 fields with 6 quarantined nulls read 'not thin' against this entry's own thin_reason ('fewer than nine ... carry a stated value'). stated_values counts items whose value is not null, '' or []. The API's enrichment_status reads this key.",
       "thin_below": 9,
       "ran_observable": false,
       "ran_unobservable_reason": "every field cites the filing it was read from, per the skill's own rule that the source is evidence and the tool is not. A Clay-surfaced call report and a searched one are one row.",

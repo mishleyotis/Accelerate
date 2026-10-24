@@ -91,8 +91,16 @@ def main() -> int:
         event = json.load(sys.stdin)
     except Exception:                                        # noqa: BLE001
         return 0
+    if not isinstance(event, dict):
+        # A hook that raised on a stdin shape it did not expect exits
+        # NON-ZERO with a traceback, which the harness reads as a broken
+        # hook rather than as a quiet allow. Measured 2026-09-14 by the test
+        # this file never had: a JSON list crashed it.
+        return 0
 
-    ti = event.get("tool_input") or {}
+    ti = event.get("tool_input")
+    if not isinstance(ti, dict):
+        return 0
     agent = (ti.get("subagent_type") or ti.get("agent") or "")
     if isinstance(agent, str) and ":" in agent:
         agent = agent.split(":")[-1]          # dma-insights:overview-hero-producer

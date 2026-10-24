@@ -8,7 +8,7 @@ const ROLE_LABEL = { AE: "Account executive", ANALYST: "Analyst",
 function Sidebar() {
   const { route, role, openAlerts, activeRuns, setAuthed, sidebarOpen, setSidebarOpen } = useApp();
   const path = route.path;
-  const allHrefs = ["/", "/clients", "/alerts", "/prospecting", "/admin", "/admin/import", "/admin/import/audit"];
+  const allHrefs = ["/", "/clients", "/alerts", "/prospecting", "/admin", "/admin/import", "/admin/import/audit", "/admin/usage"];
   const activeHref = (() => {
     if (path === "/") return "/";
     const matches = allHrefs.filter(h => h !== "/" && (path === h || path.startsWith(h + "/")));
@@ -58,8 +58,9 @@ function Sidebar() {
             <div className="sb-grp">
               <div className="sb-gl">Admin</div>
               <NavItem href="/admin"              icon="settings" label="Admin home" />
-              <NavItem href="/admin/import"       icon="drive"    label="Import &amp; jobs" />
-              <NavItem href="/admin/import/audit" icon="evidence" label="Import audit" />
+              {adminRouteHidden("/admin/import") ? null : <NavItem href="/admin/import"       icon="drive"    label="Import &amp; jobs" />}
+              {adminRouteHidden("/admin/import/audit") ? null : <NavItem href="/admin/import/audit" icon="evidence" label="Import audit" />}
+              <NavItem href="/admin/usage"        icon="users"    label="Usage analytics" />
             </div>
           ) : null}
         </nav>
@@ -93,7 +94,7 @@ function TopBar({ title, crumbs, right }) {
   const searchResults = useMemo(() => {
     if (!ql) return null;
     const entities = DMA.ENTITIES.filter(e => entityMatches(e, ql)).slice(0, 4)
-      .map(e => ({ kind: "entity", title: e.name, sub: DMA.SUBVERTICAL_LABEL[e.subvertical], route: `/clients/${e.id}/overview`, icon: "users" }));
+      .map(e => ({ kind: "entity", title: entityName(e), sub: DMA.SUBVERTICAL_LABEL[e.subvertical], route: `/clients/${e.id}/overview`, icon: "users" }));
     const insights = DMA.INSIGHT_CARDS.filter(c => c.title.toLowerCase().includes(ql) || c.id.toLowerCase().includes(ql)).slice(0, 3)
       .map(c => ({ kind: "insight", title: c.title, sub: `${c.id} · ${c.flag}`, route: `/clients/fce-001/insights?card=${c.id}`, icon: "insight" }));
     const evidence = DMA.EVIDENCE.filter(e => e.title.toLowerCase().includes(ql) || e.id.toLowerCase().includes(ql)).slice(0, 3)
@@ -321,15 +322,172 @@ function SettingsPopover({ onClose }) {
   );
 }
 
+/* ── Generate client link ──────────────────────────────────────────
+   Owner's rule (2026-10-07): a client link is shared TO named people, and
+   those addresses plus their organisations' domains are the link's
+   allowlist for this one DMA. The server mints (POST /api/share) and signs
+   the allowlist into the link; nothing here decides who is admitted. The
+   link travels from the sharer's own mailbox (a prefilled draft); the
+   recipient's sign-in email is sent from it too (lib/share-mailer). */
+function ShareDialog({ entity, run, onClose }) {
+  const { pushToast } = useApp();
+  const [recipients, setRecipients] = useState("");
+  const [days, setDays] = useState(30);
+  // Has the first sales call happened? Asked before every link (owner,
+  // 2026-10-09): it decides the follow-up the recipient's email offers.
+  const [stage, setStage] = useState(null);
+  // …and remembered: the dialog opens on the stage recorded on this client's
+  // most recent link (GET /api/share?entity=), which the colleague can change.
+  const [remembered, setRemembered] = useState(null);
+  useEffect(() => {
+    if (!window.DMA_LIVE) return;
+    let live = true;
+    fetch(`/api/share?entity=${encodeURIComponent(entity.id)}`, { cache: "no-store" })
+      .then(r => (r.ok ? r.json() : null))
+      .then(b => {
+        if (!live || !b || !b.stage) return;
+        setRemembered(b);
+        setStage(s => s || b.stage);
+      })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [entity.id]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const [made, setMade] = useState(null);
+
+  const submit = () => {
+    setBusy(true); setError(null);
+    fetch("/api/share", { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ entity: entity.id, run: run && (run.run_id || run.id),
+                             recipients, days, stage }) })
+      .then(r => r.json().then(b => ({ ok: r.ok, b })))
+      .then(({ ok, b }) => {
+        setBusy(false);
+        if (ok) { if (window.trackUsage) window.trackUsage("client_link"); setMade(b); }
+        else setError(b.detail || b.error || "The link could not be created.");
+      })
+      .catch(() => { setBusy(false); setError("The link could not be created."); });
+  };
+  const copy = () => {
+    const done = () => pushToast("Client link copied", "success");
+    try { navigator.clipboard.writeText(made.url).then(done, () => window.prompt("Copy the client link", made.url)); }
+    catch (e) { window.prompt("Copy the client link", made.url); }
+  };
+  // The invitation the colleague sends from their own mailbox (owner,
+  // 2026-10-09): greets the recipients, says it is their digital maturity
+  // assessment benchmarked against peers, and offers a walkthrough.
+  const PEERS = { CU: "credit unions", RB: "regional banks", CL: "commercial lenders",
+    CIB: "corporate and investment banks", FC: "Farm Credit institutions", AM: "asset and wealth managers",
+    RIA: "RIAs and broker-dealers", IC: "insurance carriers", IB: "insurance brokers" };
+  const named = recipients.split(/[,;\n]+/).map(x => (x.match(/^\s*"?([^"<]+?)"?\s*</) || [])[1]).filter(Boolean)
+    .map(n => (n.includes(",") ? n.split(",")[1] : n).trim().split(/\s+/)[0]);
+  const hi = named.length ? `Hi ${named.join(" and ")},` : `Dear ${entityName(entity)} team,`;
+  const me = (window.DMA_LIVE && window.DMA_LIVE.name) || "";
+  const peers = PEERS[String(entity.subvertical || "").toUpperCase()] || "institutions";
+  const afterCall = stage === "after_first_call";
+  const mailto = made ? `mailto:${encodeURIComponent(made.allowlist.emails.join(","))}`
+    + `?subject=${encodeURIComponent(`Your ${entityName(entity)} digital maturity assessment is ready`)}`
+    + `&body=${encodeURIComponent([
+        hi, "",
+        afterCall
+          ? `Thank you for your time on our recent call. As promised, here is ${entityName(entity)}'s digital maturity assessment.`
+          : `I am pleased to share ${entityName(entity)}'s digital maturity assessment with you.`, "",
+        `Would you like to know how ${entityName(entity)} performs against its peers? Your assessment scores your organisation across four pillars: strategy and governance, customer experience, operations and risk, and data and technology. Each pillar is benchmarked against comparable ${peers}, so you can see where you lead and where the biggest opportunities lie.`, "",
+        `View your assessment: ${made.url}`, "",
+        `When you open it, enter your work email and you will receive a secure sign-in link at that address. The link is available until ${fmtDate(made.expires_at)}.`, "",
+        afterCall
+          ? "I would welcome a follow-up call to go deeper on the priorities we discussed and agree next steps. Reply to this email and we can book a time."
+          : "I would welcome the chance to walk your team through the findings. Reply to this email and we can find a time.", "",
+        "Kind regards,", me, "Zennify",
+      ].join("\n"))}` : null;
+
+  return (
+    <div className="modal-mask" onClick={onClose}>
+      <div className="modal" role="dialog" aria-label="Generate client link" onClick={e => e.stopPropagation()} style={{ width: 560 }}>
+        <div className="modal-head">
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: "var(--z-dark)" }}>Generate client link</div>
+            <div style={{ fontSize: 12, color: "var(--z-muted)", marginTop: 2 }}>{entityName(entity)} · client dashboard only (Overview, Insights, Heatmap)</div>
+          </div>
+          <button className="icon-btn" onClick={onClose} aria-label="Close"><Icon name="x" size={18} /></button>
+        </div>
+        <div className="modal-body">
+          {!made ? (<>
+            <label htmlFor="share-recipients" style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>Recipient email(s) · added to this link's allowlist</label>
+            <textarea id="share-recipients" className="inp" rows={2} style={{ width: "100%", marginTop: 6, resize: "vertical" }}
+              placeholder="Jane Doe <jane@bcu.com>, sam@bcu.com" value={recipients} onChange={e => setRecipients(e.target.value)} />
+            <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginTop: 6, lineHeight: 1.5 }}>
+              Required before the link is generated. Add a name (Jane Doe &lt;jane@bcu.com&gt;) and the sign-in email greets them by it. Each address and its organisation's domain may open this link (sharing with jane@bcu.com admits anyone @bcu.com). Personal mailboxes such as Gmail admit the exact address only.
+            </div>
+            <fieldset style={{ border: 0, padding: 0, margin: "14px 0 0" }}>
+              <legend style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", padding: 0 }}>Has the first sales call with {entityName(entity)} happened?</legend>
+              <div className="row" style={{ gap: 16, marginTop: 6, flexWrap: "wrap" }}>
+                {[["before_first_call", "Not yet: before the first call"], ["after_first_call", "Yes: after the first call"]].map(([v, label]) => (
+                  <label key={v} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12.5, color: "var(--z-dark)", cursor: "pointer" }}>
+                    <input type="radio" name="share-stage" value={v} checked={stage === v} onChange={() => setStage(v)} />
+                    {label}
+                  </label>
+                ))}
+              </div>
+              {remembered && remembered.stage === stage ? (
+                <div data-stage-remembered style={{ fontSize: 11.5, color: "var(--z-dark)", marginTop: 6, lineHeight: 1.5 }}>
+                  Remembered from the last link for {entityName(entity)}{remembered.minted_at ? `, shared ${fmtDate(remembered.minted_at)}` : ""}{remembered.minted_by ? ` by ${remembered.minted_by}` : ""}. Change it if things have moved on.
+                </div>
+              ) : null}
+              <div style={{ fontSize: 11.5, color: "var(--z-muted)", marginTop: 4, lineHeight: 1.5 }}>
+                {stage === "after_first_call"
+                  ? "The client's sign-in email thanks them for the call and invites a follow-up call with you."
+                  : stage === "before_first_call"
+                    ? "The client's sign-in email invites them to schedule a walkthrough of the results with you."
+                    : "Required: it decides the follow-up the client's sign-in email offers."}
+              </div>
+            </fieldset>
+            <div className="row" style={{ gap: 8, marginTop: 14, alignItems: "center" }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)" }}>Link expires after</label>
+              <select className="inp" style={{ maxWidth: 140 }} value={days} onChange={e => setDays(Number(e.target.value))}>
+                {[7, 14, 30, 60, 90].map(d => <option key={d} value={d}>{d} days</option>)}
+              </select>
+            </div>
+            {error ? <div role="alert" style={{ marginTop: 12, fontSize: 12.5, color: "var(--z-below)" }}>{error}</div> : null}
+          </>) : (<>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "var(--z-dark)", marginBottom: 6 }}>Who can open it</div>
+            <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+              {made.allowlist.emails.map(e => <span key={e} className="chip">{e}</span>)}
+              {made.allowlist.domains.map(d => <span key={d} className="b b-teal">anyone @{d}</span>)}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--z-muted)", marginTop: 10 }}>Expires {fmtDate(made.expires_at)} · link {made.jti}</div>
+            <input className="inp" readOnly value={made.url} onFocus={e => e.target.select()} style={{ width: "100%", marginTop: 12, fontSize: 11.5 }} />
+          </>)}
+        </div>
+        <div className="modal-foot">
+          <span style={{ fontSize: 11, color: "var(--z-muted)" }}>{made ? "Send it from your own mailbox." : ""}</span>
+          <div className="row" style={{ gap: 8 }}>
+            {!made ? (
+              <button className="btn btn-primary" disabled={busy || !recipients.trim() || !stage} onClick={submit}>{busy ? "Generating…" : "Generate link"}</button>
+            ) : (<>
+              <button className="btn btn-tertiary" onClick={copy}><Icon name="copy" size={12} /> Copy link</button>
+              <a className="btn btn-primary" href={mailto}><Icon name="envelope" size={12} /> Email link</a>
+            </>)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Client bar (dark client-context strip + tabs) ──────────────── */
 function ClientBar({ entity, run, tab }) {
-  const { audience, setAudience, role } = useApp();
+  const { audience, setAudience, role, pushToast } = useApp();
+  const link = isClientLink();
+  const isClient = audience === "customer";
   const [runOpen, setRunOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const fresh = entity.assessment_date ? DMA.helpers.freshnessOf(entity.assessment_date) : null;
   const isSuperseded = run && run.status !== "ACTIVE" && !run.status.includes("IN_PROGRESS");
   const dsPill = run?.data_source === "DRIVE_PARSE" ? "pill-drive" : "pill-api";
 
-  const TAB = (id, label, badge, icon) => (
+  const TAB = (id, label, badge, icon) => isClient && !clientTabAllowed(id) ? null : (
     <button key={id} className={`client-tab ${tab === id ? "on" : ""}`} onClick={() => navigate(`/clients/${entity.id}/${id}`, run ? { run: run.id } : null)}>
       {icon ? <Icon name={icon} size={13} /> : null}
       <span>{label}</span>
@@ -340,15 +498,30 @@ function ClientBar({ entity, run, tab }) {
   return (
     <>
       <div className="client-bar">
+        {/* A client link has no directory to go back to: the bar opens on the
+            client's name, and the run plumbing (status, data source) stays
+            with the Zennify view. */}
+        {link ? null : (
         <button className="icon-btn" style={{ color: "rgba(255,255,255,.7)" }} onClick={() => navigate("/clients")} title="Back to directory">
           <Icon name="chevron-l" size={16} />
         </button>
+        )}
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <div className="name">{entity.name}</div>
-          {run ? <span className={`pill pill-active`}>{run.status.replace(/_/g, " ")}</span> : null}
-          {run ? <span className={`pill ${dsPill}`}>{run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface"}</span> : null}
-          {fresh ? <span className={`pill ${fresh.tone === "ok" ? "pill-fresh" : "pill-stale"}`}>● {fresh.label} · {fresh.months} mo</span> : null}
+          <div className="name">{entityName(entity)}</div>
+          {run && !link ? <span className={`pill pill-active`}>{run.status.replace(/_/g, " ")}</span> : null}
+          {run && !link ? <span className={`pill ${dsPill}`}>{run.data_source === "DRIVE_PARSE" ? "Drive parse" : "Project interface"}</span> : null}
+          {fresh && !link ? <span className={`pill ${fresh.tone === "ok" ? "pill-fresh" : "pill-stale"}`}>● {fresh.label} · {fresh.months} mo</span> : null}
         </div>
+        {link ? (
+          <div className="client-bar-r">
+            {run ? (
+              <span className="run-selector" style={{ cursor: "default" }}>
+                <Icon name="calendar" size={12} />
+                <span>Assessed {fmtDate(run.date)}</span>
+              </span>
+            ) : null}
+          </div>
+        ) : (
         <div className="client-bar-r">
           <div style={{ position: "relative" }}>
             {/* Date only. The composite score used to render beside it
@@ -379,15 +552,16 @@ function ClientBar({ entity, run, tab }) {
             ) : null}
           </div>
 
-          <div className={`audience-toggle ${audience === "customer" ? "customer" : ""}`} title="Internal view shows full team-prep data. Customer view strips fields that should not be screen-shared.">
+          <div className={`audience-toggle ${audience === "customer" ? "customer" : ""}`} title="Internal view shows full team-prep data. Client view strips fields that should not be screen-shared.">
             <button className={audience === "internal" ? "on" : ""} onClick={() => setAudience("internal")}>
               <Icon name="lock" size={11} /> Internal
             </button>
             <button className={audience === "customer" ? "on" : ""} onClick={() => setAudience("customer")}>
-              <Icon name="users" size={11} /> Customer
+              <Icon name="users" size={11} /> Client
             </button>
           </div>
         </div>
+        )}
       </div>
 
       <div className="client-tabs">
@@ -404,19 +578,28 @@ function ClientBar({ entity, run, tab }) {
         {(role === "ANALYST" || role === "ADMIN") && audience !== "customer" ? TAB("runs", "Runs", null, "refresh") : null}
       </div>
 
-      {audience === "customer" ? (
+      {isClient && !link ? (
         <div className="customer-banner">
           <Icon name="users" size={14} />
-          <span><strong>Customer view</strong> - share-safe presentation mode · evidence rationale, ERS, alert counts, and the Context tab are hidden</span>
+          <span><strong>Client Dashboard</strong></span>
           <span className="spacer" />
+          {/* A public link for named recipients, opened without a Zennify
+              login: this client, this run, the client dashboard only. */}
+          <button className="btn btn-tertiary btn-sm"
+                  style={{ color: "#7C3500", whiteSpace: "nowrap", flexShrink: 0 }}
+                  onClick={() => setShareOpen(true)}>
+            <Icon name="share" size={12} /> Generate client link
+          </button>
           {/* nowrap + no shrink: at 1024px the flex row squeezed this button to
               133px against a 150px label and the theme clips rather than
               ellipsises, so the action read as "Switch back to Inter". */}
           <button className="btn btn-tertiary btn-sm"
                   style={{ color: "#7C3500", whiteSpace: "nowrap", flexShrink: 0 }}
-                  onClick={() => setAudience("internal")}>Switch back to Internal →</button>
+                  onClick={() => setAudience("internal")}>Switch back to Zennify view →</button>
         </div>
       ) : null}
+
+      {shareOpen ? <ShareDialog entity={entity} run={run} onClose={() => setShareOpen(false)} /> : null}
 
       {isSuperseded ? (
         <div className="superseded-banner">
@@ -444,6 +627,19 @@ function PageShell({ title, crumbs, children, narrow, right }) {
 }
 
 function ClientShell({ entity, run, tab, children }) {
+  // A client link is the client dashboard alone: no sidebar (Dashboard,
+  // Clients, Alerts, Prospecting) and no top bar (search across every client,
+  // notifications, settings) — those are the Zennify app around it.
+  if (isClientLink()) {
+    return (
+      <div className="shell">
+        <div className="main">
+          <ClientBar entity={entity} run={run} tab={tab} />
+          <main className="page">{children}</main>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="shell">
       <Sidebar />
@@ -451,7 +647,7 @@ function ClientShell({ entity, run, tab, children }) {
         <TopBar
           crumbs={[
             { label: "Clients", href: "/clients" },
-            { label: entity.name },
+            { label: entityName(entity) },
             { label: tab[0].toUpperCase() + tab.slice(1).replace("stack"," stack") },
           ]}
         />
@@ -462,4 +658,4 @@ function ClientShell({ entity, run, tab, children }) {
   );
 }
 
-Object.assign(window, { Sidebar, TopBar, ClientBar, PageShell, ClientShell });
+Object.assign(window, { Sidebar, TopBar, ClientBar, ShareDialog, PageShell, ClientShell });

@@ -22,10 +22,29 @@ Run every rung. Stop at the first hit. Record all attempts either way.
 | **Technology stack** | Clay `Tech Stack` scan → the assessment's own tech rows → job postings naming platforms → vendor case studies and press releases → integration and partner directories |
 | **Recent events** | Clay `Recent News` → company newsroom → investor releases → the wire archive → trade press |
 | **Regulatory standing** | The regulator's enforcement database → the second regulator where dual-chartered → consent-order trackers → the entity's own disclosures |
-| **Financial series** | Filings and results releases → investor presentations → the regulator's call-report data → the entity's own annual report |
+| **Financial series** | Filings and results releases → investor presentations → the regulator's call-report data → for a mortgage-originating subsidiary, the HMDA data browser's lender-filtered aggregation (T1, `unit`/`basis` naming the subsidiary) → the entity's own annual report |
 | **Acquisitions** | Clay `Recent News` → company newsroom → the wire archive → the regulator's approval notices |
-| **Peer figures** | The peer table → recompute at lower cohort size → adjacency inference → proxy ceiling → stop (see `evidence.md`) |
-| **Sentiment** | App-store reviews → employer review sites → complaint databases → trade press → social listening |
+| **Peer figures** | The peer table → recompute at lower cohort size → adjacency inference → proxy ceiling → stop (see `evidence.md`). An identified peer set that is not SCORED is still a peer set: name it, and say "identified, not scored" (RC-10) |
+| **Sentiment** | App-store reviews → the Indeed connector (`get_company_data`, employer rating + counts, origin='connector', T3) → employer review sites → the CFPB complaint API (company filter + aggregations, T1) and complaint text → trade press → social listening |
+
+## A refusal hands over; it does not end the ladder
+
+**A ladder does not stop at the first refusal** (SWBC gold audit 2026-10-04, RC-07; D-22).
+On 2026-10-01 Exa, Tavily and Firecrawl ran out of credit; every rung that needed one was
+recorded `NOT_RUN` — 281 H3 alerts, the I1 contradictory probes, the techstack ABSENT
+search — and none tried the next provider. A refusal, a 403, a 402/429 or an exhausted
+credit balance moves the request to the next provider in
+`02-inputs/enrichment_sources.json` → `search_connectors._failover`:
+
+**Exa → Tavily → Firecrawl → WebSearch/WebFetch**
+
+(WebSearch/WebFetch are an accepted failover when paid credit is exhausted — owner
+default, 2026-10-04.) A rung is `NOT_RUN` only when the WHOLE chain failed, and then it
+names every provider it tried with each one's refusal, so a reader can tell "nobody
+looked" from "four doors were shut". The same rule holds for a page that 403s when a
+connector reaches the same source: the connector is the next door (Indeed, CFPB). A
+connector-bound scan the run's preflight could not bind (Clay, Explorium) is a blocked
+preflight, not a silent `NOT_RUN` on the surface.
 
 ## The ladder has rungs that only exist for some entities
 
@@ -96,7 +115,7 @@ And when you *do* write a per-item absence, **name what you looked for, not that
 you looked.** The protocol above is identical on every cell; the artefact each
 capability would have left is not, and that difference is the whole of what makes
 four hundred honest absences four hundred sentences rather than one. See
-`05-lifecycle/1-gates.md` for the worked examples and the arithmetic.
+`05-lifecycle/gates/CG-06.md` for the worked examples and the arithmetic.
 
 ## SCOPING DECISION — a subcapability with no evidence is out of scope
 
@@ -112,7 +131,7 @@ Concretely, for a cell with no linked evidence carrying a citable excerpt:
 - Do **not** write a recorded-absence ladder for it. The ladder is how you earn a
   *stated* absence; here you are not stating one, so there is nothing to earn.
 - Do **not** chase evidence to fill it. Enrichment effort goes to the cells in
-  `03-pages/1-heatmap.md`'s tiers 1 and 2 — the cells another surface cites, and
+  `03-pages/heatmap/H2.md`'s tiers 1 and 2 — the cells another surface cites, and
   the cells below threshold — and stops there.
 - **Leave the item out of the array.** The section's reach counters already carry
   the shortfall honestly: `linking_stats` reports cells served against cells
@@ -200,3 +219,17 @@ absence of a documented alternative is not evidence of a bad undocumented one. O
 Search first, write second. The ladder is not paperwork after the fact — running it is how
 you find the thing that turns an empty card into a cited one. Most ladders hit. The ones that
 do not produce a finding you can defend.
+
+## Representing absence (carried from SKILL.md, 28-09-2026)
+
+An empty surface is a value, not an omission. A missing required field fails the contract;
+an explicit empty state passes and renders correctly.
+
+| Situation | Emit |
+|---|---|
+| No leadership found after a full search | empty roster, `verified_absent`, `sources_searched` |
+| Fewer than three dated financial points | the points, `verified_sparse`, no trend |
+| No stair-step derivable | null ladder, `empty_state` with the reason |
+| A figure failed the identity gate | null value, `quarantined`, `quarantine_reason` |
+| A cell's evidence is genuinely thin | `thin`, `sources_searched`, `closure_condition` |
+| No peer figure available | `peer_basis=cannot_estimate`, median stays null |

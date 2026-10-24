@@ -256,7 +256,21 @@ def generate_queries_for_subcap(entity, subcap, domain):
     return queries
 
 
+RETIRED = """REFUSED: generate_query_plan.py is retired (2026-09-28). What to search for
+a cell is the engine's to say: `python3 -m engine.cli orient --run R --category P1C1`
+serves the work card (the ONE writer of the questions and facets a lane works) and
+`engine.cli search` logs what was searched. A query_plan.json beside the run was
+written by this script and read by nothing (QA audit F-J02-011).
+"""
+
+
 def main():
+    import sys as _sys
+    _sys.stderr.write(RETIRED)
+    return 1
+
+
+def _legacy_main():
     parser = argparse.ArgumentParser(description='Generate DMA research query plan')
     parser.add_argument('diagnostic_questions', help='Path to diagnostic_questions.json')
     parser.add_argument('--entity', required=True, help='Entity name')
@@ -319,5 +333,4 @@ def main():
 
 
 if __name__ == '__main__':
-    from datetime import datetime
-    main()
+    sys.exit(main())

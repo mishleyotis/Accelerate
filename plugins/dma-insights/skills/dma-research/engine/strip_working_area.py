@@ -52,14 +52,34 @@ def survives_elsewhere(workbook: Path, handoff: Path | None) -> list[str]:
 
     An empty list means the strip is safe. Anything else is the AUD-0065
     condition and the strip refuses."""
+    must = list(MUST_SURVIVE)
+    # A declared absence's proof (Proxy_Log, Negative_Ladder) lives in the
+    # working area too; after the strip a declared absence and an untouched
+    # seeded row read alike unless the handoff carries the ladder.
+    try:
+        x = openpyxl.load_workbook(workbook, read_only=True, data_only=True)
+        ai = C.PILLAR_COLUMNS.index("Absence_Claimed")
+        for sheet in C.PILLAR_SHEETS:
+            if sheet not in x.sheetnames:
+                continue
+            for r in x[sheet].iter_rows(min_row=2, values_only=True):
+                if r and len(r) > ai and str(r[ai] or "").strip().upper() \
+                        in ("YES", "TRUE", "1"):
+                    must += ["Proxy_Log", "Negative_Ladder"]
+                    break
+            if len(must) > len(MUST_SURVIVE):
+                break
+        x.close()
+    except Exception:
+        pass
     if handoff is None or not Path(handoff).exists():
-        return list(MUST_SURVIVE)
+        return must
     try:
         doc = json.loads(Path(handoff).read_text())
     except (ValueError, OSError):
-        return list(MUST_SURVIVE)
+        return must
     blob = json.dumps(doc).lower()
-    return [f for f in MUST_SURVIVE if f.lower() not in blob]
+    return [f for f in must if f.lower() not in blob]
 
 
 def strip(workbook, *, handoff=None, out=None, force: bool = False) -> dict:

@@ -21,7 +21,7 @@ sys.path.insert(0, str(ROOT / "apps" / "mcp"))
 
 from dma_api.pages import SERVE_RULES, etag_for                 # noqa: E402
 from dma_api.redaction import (CUSTOMER_WITHHELD, normalise_audience,  # noqa: E402
-                               page_forbidden, redact_section)
+                               page_forbidden, redact_section, strip_paths)
 from dma_api.serving_spec import assemble, page_sections, readers  # noqa: E402
 from dma_mcp.promote import _expand_h4_maps, _value               # noqa: E402
 
@@ -265,11 +265,14 @@ def test_a_path_that_matches_nothing_is_never_reported_as_stripped():
     assert set(rep["paths_stripped"]) == set(marked)
 
     # 2. Section-qualified with no index at all — Odlum's `starters.starters`.
+    # Driven through `strip_paths` directly: platform.starters itself is now
+    # withheld WHOLE from the customer (MEM-0081 / T-2), so redact_section
+    # never reaches the path walk for it — but the walker's handling of the
+    # unindexed, section-qualified form is the thing under test.
     st = {"starters": [{"rank": 1, "text": "AE call opener"}]}
-    out, rep = redact_section("platform", "starters", st, ["starters.starters"],
-                              "customer")
-    assert "starters" not in out
-    assert rep["paths_stripped"] == ["starters.starters"]
+    did, missed = strip_paths(st, ["starters.starters"], "starters")
+    assert "starters" not in st
+    assert did == ["starters.starters"] and missed == []
 
     # 3. A marking that names nothing is reported as unmatched, NOT stripped.
     out, rep = redact_section("platform", "platform_story",
@@ -361,9 +364,14 @@ def test_unmarked_vendor_copy_does_not_reach_the_client():
     ALWAYS_STRIP, and techstack is not a withheld section — so no marking
     rule could have caught it. The safety net is a net, not a substitute for
     the gate that should refuse it at submit."""
+    # `status` CONFIRMED on both: since serve-rules@12 the customer register
+    # carries CONFIRMED and ABSENT rows only (DECISIONS D4), and a row with
+    # no status is withheld rather than guessed at.
     data = {"items": [{"vendor": "Salesforce", "product": "Service Cloud",
+                       "status": "CONFIRMED",
                        "dma_impact": "Zennify's pathway is to consolidate…"},
                       {"vendor": "MuleSoft", "product": "Anypoint",
+                       "status": "CONFIRMED",
                        "dma_impact": "Bears on P4C3.1.2 at 1.95."}]}
     # The SECTION is `techstack`; `items` is the field inside it. This test
     # called it "items" — the same wrong key CUSTOMER_ALWAYS was written
@@ -473,12 +481,15 @@ def test_withheld_sections_and_pages():
     # Withheld from the customer, served to the analyst. Two of the three
     # sections this loop used to cover moved to the allowlist below, where
     # the rule is stronger: nobody gets them.
-    for section in ("sentiment", "thought_leadership"):
+    # `sentiment` left this loop on 2026-10-04: OWNER DECISION 1 serves the
+    # customer a REDUCED card (test_customer_sentiment_projection.py).
+    for section in ("thought_leadership",):
         assert ("overview", section) in CUSTOMER_WITHHELD
         out, rep = redact_section("overview", section, {"rows": [1]}, [], "customer")
         assert out is None and rep["withheld"] is True
         keep, _ = redact_section("overview", section, {"rows": [1]}, [], "internal")
         assert keep == {"rows": [1]}
+    assert ("overview", "sentiment") not in CUSTOMER_WITHHELD
     # The allowlist: no audience, not "not the default audience".
     for section in ("ceilings", "evidence_coverage"):
         for audience in ("customer", "internal"):
@@ -571,6 +582,33 @@ def test_generated_columns_are_read_back_read_only():
     built = assemble("heatmap", "evidence_age",
                      [{"e_id": "E-2", "age_months": None, "band": None}])
     assert "age_months" not in built["data"]["rows"][0]
+
+
+def test_the_raw_twin_is_written_and_never_read_back():
+    """0064, owner decision A: `composite_raw` / `score_raw` store the same
+    payload field as `composite` / `score`, unscaled, so the generated band
+    reads the raw value. Bound to the same path, the reader served whichever
+    column came last — the hero's 2dp figure would have become 1.996 under an
+    unmoved promoted_at. The served shape keeps the display value and the
+    DB's band; the raw columns and their backfill marker never serve."""
+    r = readers()[("overview", "scores")]
+    assert "composite_raw" not in r["section_cols"]
+    assert "composite_raw_backfilled" not in r["section_cols"]
+    built = assemble("overview", "scores", [{
+        "composite": 2.00, "composite_raw": 1.996,
+        "composite_raw_backfilled": False, "band": "Activating"}])
+    assert built["data"]["composite"] == 2.00
+    assert built["data"]["band"] == "Activating", "the band the DB generated from raw"
+    assert not {"composite_raw", "composite_raw_backfilled"} & set(built["data"])
+
+    h4 = readers()[("heatmap", "workbook_scores")]
+    assert "score_raw" not in h4["item_cols"]
+    built = assemble("heatmap", "workbook_scores", [{
+        "category_id": "P1C1", "pillar_id": "P1", "score": 3.00,
+        "score_raw": 2.996, "score_raw_backfilled": False, "band": "Building"}])
+    cat = built["data"]["categories"]["P1C1"]
+    assert cat["score"] == 3.00 and cat["band"] == "Building"
+    assert "score_raw" not in cat
 
 
 def test_dotted_item_field_nests_like_the_payload():

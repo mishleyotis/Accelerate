@@ -473,15 +473,34 @@ def route(wb: RunWorkbook, category: str | None = None,
     return out
 
 
+def _dq_index(wb: RunWorkbook) -> dict:
+    """DQ_Bank grouped by subcap, built once per workbook state.
+
+    Measured 2026-09-30 (SWBC): `dqs_for` re-read the whole DQ_Bank for
+    every cell. With the toolkits loaded the bank is 6,747 rows, so one
+    category brief made 794 calls = 5.4M openpyxl row reads: 95-258 s of CPU
+    per brief, eight lanes at once. Only `build` writes DQ_Bank, so the
+    index keys on the loaded openpyxl book (a reload replaces it) and the
+    sheet's row count (a rebuild changes it)."""
+    ws = wb._sheet("DQ_Bank")
+    key = (id(wb._wb), ws.max_row)
+    cached = getattr(wb, "_dq_index_cache", None)
+    if cached and cached[0] == key:
+        return cached[1]
+    idx: dict = {}
+    for r in wb.rows("DQ_Bank"):
+        idx.setdefault(str(r.get("SubCap_ID") or ""), []).append(r)
+    wb._dq_index_cache = (key, idx)
+    return idx
+
+
 def dqs_for(wb: RunWorkbook, subcap: str, mode: str | None = None) -> dict:
     """One subcap's questions, split answerable / deferred for the mode."""
     md = wb.metadata()
     mode = mode or str(md.get("evidence_mode") or "PUBLIC")
     answerable = set(C.MODE_ANSWERABLE.get(mode, ()))
     ask, defer = [], []
-    for r in wb.rows("DQ_Bank"):
-        if str(r.get("SubCap_ID") or "") != subcap:
-            continue
+    for r in _dq_index(wb).get(subcap, ()):
         row = {"facet": r.get("Facet"), "order": r.get("Order"),
                "question": r.get("Question"),
                "probe_tier": r.get("Probe_Tier"),

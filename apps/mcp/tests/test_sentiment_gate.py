@@ -113,3 +113,37 @@ def test_a_page_without_a_sentiment_section_is_untouched():
     c = _Conn()
     assert _run_s8(c, "run-1", "heatmap", {"alerts": {"alerts": []}}) == []
     assert c.rows == []
+
+
+def test_company_reported_is_self_published():
+    """RC-05 (SWBC gold audit, 2026-10-04; slice S-07). The self-published
+    test was the substring 'nps' in the source, so SWBC's "Google reviews ...
+    as reported by SWBC" — a company-reported figure relayed by a review site —
+    counted as an independent line. Self-published is classified from the
+    row: a source reading reported by / says / self-reported /
+    company-reported, a `self_reported: true` flag, or a T4/T5 tier."""
+    r, _ = _run("overview", {"bars": [
+        {"audience": "customer", "rating": 4.9,
+         "source": "Google reviews for SWBC, as reported by SWBC and relayed "
+                   "by a review site"},
+        {"audience": "customer", "rating": 4.8,
+         "source": "Client satisfaction, company-reported"}]})
+    assert r["result"] == "FAIL"
+    assert r["detail"]["self_published_only"] is True
+
+
+def test_a_self_reported_flag_or_low_tier_is_self_published():
+    r, _ = _run("overview", {"bars": [
+        {"audience": "customer", "rating": 4.9, "source": "Survey A",
+         "self_reported": True},
+        {"audience": "employee", "rating": 4.1, "source": "Award page",
+         "tier": "T5"}]})
+    assert r["result"] == "FAIL" and r["detail"]["self_published_only"] is True
+
+
+def test_one_independent_line_beside_a_self_published_one_passes():
+    r, _ = _run("overview", {"bars": [
+        {"audience": "customer", "rating": 4.9, "source": "company-reported"},
+        {"audience": "employee", "rating": 3.1, "source": "Indeed",
+         "n": 97}]})
+    assert r["result"] == "PASS"

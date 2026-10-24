@@ -1094,11 +1094,11 @@ function ClientPlatform({
     className: "eyebrow"
   }, "Platform opportunity"), /*#__PURE__*/React.createElement("h1", null, "Platform Fit Score"), /*#__PURE__*/React.createElement("div", {
     className: "sub"
-  }, "Which platform conversation should lead with ", entity.name, "?")), /*#__PURE__*/React.createElement("div", {
+  }, "Which platform conversation should lead with ", entityName(entity), "?")), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast(`Exporting ${entity.name} roadmap as PDF…`, "success")
+    onClick: () => pushToast(`Exporting ${entityName(entity)} roadmap as PDF…`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -1760,7 +1760,8 @@ function ClientPlatform({
         className: "row",
         style: {
           gap: 6,
-          marginBottom: 3
+          marginBottom: 3,
+          flexWrap: "wrap"
         }
       }, /*#__PURE__*/React.createElement("span", {
         style: {
@@ -1773,10 +1774,7 @@ function ClientPlatform({
       }, "Condition"), /*#__PURE__*/React.createElement("span", {
         className: "spacer"
       }), p.basis ? /*#__PURE__*/React.createElement("span", {
-        className: "b b-above",
-        style: {
-          flexShrink: 0
-        }
+        className: "b b-above"
       }, pfText(p.basis)) : null, /*#__PURE__*/React.createElement(Icon, {
         name: isOpen ? "chevron-u" : "chevron-d",
         size: 13,
@@ -2766,7 +2764,7 @@ function StairstepCurve({
       fontSize: 11,
       color: "var(--z-muted)"
     }
-  }, n, " rung", n === 1 ? "" : "s", " \xB7 where ", entity.name, " stands today, and what each rung requires"), selKey ? /*#__PURE__*/React.createElement("div", {
+  }, n, " rung", n === 1 ? "" : "s", " \xB7 where ", entityName(entity), " stands today, and what each rung requires"), selKey ? /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10.5,
       color: minesIdx.length ? "var(--z-mid)" : "var(--z-muted)",
@@ -3219,7 +3217,7 @@ function TransformationRoadmap({
     size: 11
   }), " Cell impact")), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary btn-sm",
-    onClick: () => pushToast(`Exporting ${entity.name} roadmap (${view} view)…`, "success")
+    onClick: () => pushToast(`Exporting ${entityName(entity)} roadmap (${view} view)…`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 11

@@ -67,11 +67,12 @@ from __future__ import annotations
 
 import re
 
-from .redaction import redact_section
+from .redaction import redact_empty_state, redact_section
 # One sub-vertical vocabulary for the whole read path: the entity->code
 # crosswalk this module needs and the cell->code derivation that keeps a
 # foreign variant off the grid are the same fact, so they live together.
-from .subverticals import resolve_subvertical, scope_to_entity  # noqa: F401
+from .subverticals import (SUBVERTICAL_DISPLAY, resolve_subvertical,  # noqa: F401
+                           scope_to_entity)
 
 # Stamped on the envelope when no promoted row supplied one — the derived
 # data is the server's work-product, and every served row is attributable.
@@ -163,12 +164,23 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
     code = resolve_subvertical(raw_sv)
 
     if version is None or code is None:
-        unknown = ("no current catalogue version" if version is None else
-                   f"sub-vertical {raw_sv!r} matches no known vocabulary "
-                   "(Surface Spec SV1-SV9, workbook VC codes, or either's labels)")
+        # The REASON is read by the client, so it is written in the client's
+        # terms: what is missing about THEIR assessment, never a table name
+        # or a Python repr ("sub-vertical None"). The searched sources stay
+        # in `sources_searched`, which only the internal audience is served.
+        reason = (
+            "The value chain view is not available yet: the capability "
+            "catalogue this assessment was scored against could not be "
+            "identified." if version is None else
+            "The value chain view needs the institution's line of business, "
+            "and none is recorded for this assessment yet."
+            if not raw_sv or not str(raw_sv).strip() else
+            "The value chain view needs the institution's line of business, "
+            "and the one recorded for this assessment could not be matched "
+            "to a known value chain.")
         return None, {
             "kind": "no_value_chain_arrangement",
-            "reason": f"the value-chain arrangement could not be resolved: {unknown}",
+            "reason": reason,
             "sources_searched": [
                 f"ccg_value_chains[version={version or '?'} "
                 f"sub_vertical={code or raw_sv or '?'}]",
@@ -232,9 +244,10 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
     if not stage_rows:
         return None, {
             "kind": "no_value_chain_arrangement",
-            "reason": (f"the catalogue has no value-chain arrangement for "
-                       f"sub-vertical {code} at version {version}, and none "
-                       "at the current version to borrow"),
+            "reason": (f"No value chain is published yet for "
+                       f"{SUBVERTICAL_DISPLAY.get(code, 'this line of business')} "
+                       "in the capability catalogue this assessment was "
+                       "scored against."),
             "sources_searched": searched + [
                 f"ccg_vc_mapping[version={version} subvertical_code={code}]",
             ]}
@@ -254,7 +267,9 @@ def read_value_chain(cur, entity: dict, run_meta: dict):
     # stage renders as an unresolvable tile, and `not_scored` would undercount.
     cur.execute("SELECT subcap_id FROM serving_subcaps WHERE run_id = %s",
                 (run_meta["run_id"],))
-    served_ids = set(scope_to_entity([r[0] for r in cur.fetchall()], raw_sv))
+    served_ids = set(scope_to_entity(
+        [r[0] for r in cur.fetchall()], raw_sv,
+        supplementary=entity.get("supplementary_sub_verticals")))
 
     data = arrange(stage_rows, mapping_rows, served_ids)
     data["sub_vertical"] = code
@@ -285,6 +300,11 @@ def serve_value_chain(cur, entity: dict, run_meta: dict, built,
 
     data, empty = read_value_chain(cur, entity, run_meta)
     if data is None:
+        # THROUGH THE WALKER, like every other empty state (MEM-0137). This
+        # was attached raw: a customer body carried `sources_searched` naming
+        # `ccg_value_chains[...]` and `ccg_vc_mapping[...]`, and a reason
+        # printing "sub-vertical None".
+        empty, _dropped = redact_empty_state(empty, audience)
         return {
             "data": None, "data_source": "empty",
             "provenance": stamps.get("provenance"),

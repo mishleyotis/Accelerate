@@ -1,0 +1,60 @@
+{
+ "version": "v1",
+ "built": "2026-10-10",
+ "inputs": {
+  "golden1": {
+   "path": "eval/golden/v1/raw/golden1.json",
+   "rows": 541,
+   "sha256": "ba1531593e430e7823a6d4654301e5439d8d5e492ea3866d19f841604a2cacaa"
+  },
+  "baxter": {
+   "path": "eval/golden/v1/raw/baxter.json",
+   "rows": 98,
+   "sha256": "669d100656ef288576005dcc429d01dd78443881f0d6db7317cd3889367b2659"
+  },
+  "logix": {
+   "path": "eval/golden/v1/raw/logix.json",
+   "rows": 16,
+   "sha256": "07e9bb799b5a3399a5a0c62d3ff23614c1c828678a0fc419389d3aa923435dde"
+  }
+ },
+ "counts": {
+  "tuning": {
+   "rows": 639,
+   "positives": 53,
+   "negatives": 586,
+   "distinct_positive_urls": 27,
+   "defects": {
+    "no_public_url": 502,
+    "not_sentence_complete": 114,
+    "undated": 55,
+    "connector_or_scan_row": 33,
+    "hard_clip": 35,
+    "internal_jargon": 7,
+    "machine_text": 5
+   },
+   "positive_tiers": {
+    "T4": 3,
+    "T5": 2,
+    "T3": 40,
+    "T1": 3,
+    "T2": 5
+   }
+  },
+  "heldout": {
+   "rows": 16,
+   "positives": 12,
+   "negatives": 4,
+   "distinct_positive_urls": 10,
+   "defects": {
+    "not_sentence_complete": 4,
+    "undated": 1
+   },
+   "positive_tiers": {
+    "T3": 5,
+    "T2": 1,
+    "T5": 6
+   }
+  }
+ }
+}

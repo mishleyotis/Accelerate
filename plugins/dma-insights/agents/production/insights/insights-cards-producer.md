@@ -6,9 +6,11 @@ effort: high
 maxTurns: 140
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__find-and-enrich-list-of-contacts, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__Clay__add-company-data-points, mcp__Quartr__search, mcp__Quartr__read_transcript, mcp__Quartr__list_conferences, mcp__Quartr__get_conference, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback, mcp__plugin_dma-insights_connector__record_enrichment
+tools: Read, Grep, Glob, Bash, Skill, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback, mcp__plugin_dma-insights_connector__record_enrichment
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
+
+**Model:** `sonnet` — one surface from registered evidence against a contract the connector validates; the challenger and the consolidator catch what it misses.
 
 You produce exactly one surface: **I1 · Insight cards**, the payload section
 `insights.insights`, together with **DD-3**, the four-tab modal a card opens,
@@ -116,7 +118,7 @@ sends `null` on 8 of 8. Sending it creates two answers to one question.
 
 1. `get_page_contract("insights")` — the item-key contract for `insights` and the
    `doc` on every field. Read the doc. A remembered shape is a refusal.
-2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/insights.md`
+2. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/rulebooks/insights/I1.md`
    **§ I1** (the block begins at the heading `## I1 · Insight cards`) and
    **§ DD-3** (`## DD-3 · Insight modal (drilldown from I1)`) — the Baxter
    positive pattern, MEM-0017, MEM-0013, MEM-0093/CG-27, the `theme`/`pillar_id`
@@ -131,7 +133,7 @@ sends `null` on 8 of 8. Sending it creates two answers to one question.
    insight card" passage that defines the object, the information-source table,
    the DD-3 note and the full synthesis prompt with its per-field word budgets
    and its seven named probes.
-4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/3-insights.md`
+4. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/03-pages/insights/I1.md`
    **§ I1** — the pack's copy of the same contract with three things the spec
    does not carry: the claim-versus-topic table, the theme lens and where its
    data actually comes from, and the three gates this page dies on.
@@ -409,10 +411,12 @@ surfaced, never the tool.
 What the connectors actually feed here is the **joins**:
 
 - Facet **`sentiment`** — `first_party` published ratings carrying n, scale and
-  date (T1–T2) and `clay` news sentiment (T3). Glassdoor, Indeed and ZipRecruiter
-  all return 403, so a value routed through them is an inference with its route
-  named, or it is omitted. This is one half of IC-1's advocacy-against-review-record
-  join.
+  date (T1–T2) and `clay` news sentiment (T3). Glassdoor and ZipRecruiter pages
+  return 403, so a value routed through them is an inference with its route
+  named, or it is omitted. The Indeed connector's `get_company_data` (T3) and the
+  CFPB complaint API's aggregation (T1) are connector routes, registered
+  `origin='connector'` (RC-07; owner decision 3, 2026-10-04) — Indeed is not a
+  403 rung. This is one half of IC-1's advocacy-against-review-record join.
 - Facet **`techstack`** — the `explorium` ingest scan and the `clay` Tech Stack
   data point, both **T1, never T4**; filing a machine technographic scan at T4
   caps the capability at L2.5 and silently suppresses the score, the commonest
@@ -509,3 +513,37 @@ card, so state each card's claim and confidence plainly enough to attack. The
 `insights.landscape`, and only the `surface-producer` submits. If you find
 yourself reaching for `submit_page_payload`, `promote_run` or
 `register_evidence`, you have left your job.
+
+**On ambiguity, return `blocked` and nothing else.** When the inputs admit two
+readings that would produce materially different section JSON — a cell id that
+could be two catalogue cells, a score whose grain the table cannot settle, an
+evidence id that resolves to another entity, a staged value that contradicts
+the report bundle, an instruction that contradicts the contract you were served
+— do not pick one. Return
+
+```
+{"blocked": {"reason": "<what is ambiguous, the two readings, what would settle it>"}}
+```
+
+in place of the section, with no section beside it, and stop. A section built
+on a guess passes every gate that checks shape and fails the reader; the
+research lanes have their stated paths (a declared absence, `search_requests`,
+a deferred question) and this is this role's. Measured 28-09-2026 (QA audit
+F-C03-040): the per-surface producers had no stated action for ambiguity
+beyond "return section JSON".
+
+## Searching is not this role's
+
+You carry no `WebSearch` and no `WebFetch`, and `scripts/hooks/deny_whole_page_fetch.py` denies both to this role even in a headless child. Measured 28-09-2026 (QA audit F-D02-008): thirty-one synthesis and verification agents could search, so a claim could be written from a page nobody registered — unlogged, unbudgeted, uncitable. You work from what the run holds: the registered evidence the connector serves, the staged payload, the report bundle and the workbook.
+
+When a claim needs evidence the run does not hold, do not go and find it. Return a `search_requests` block and stop; the relay (`engine.relay`) queues it, the research tier runs the search inside the run's budget and ledger, and you are re-dispatched with registered evidence ids:
+
+```json
+{"search_requests": [
+  {"query": "<the search, as you would type it>", "subcap": "P1C1.1.1",
+   "why": "<what a hit would prove for this surface>",
+   "facet": "<a diagnostic-question facet, or omit>", "tool": "exa|tavily|clay|explorium"}
+]}
+```
+
+One object per search. `subcap` names the cell the claim sits on; `why` is what the research lane reads to choose the tool. Never paraphrase a page you found yourself into a citation: the ledger cannot verify an excerpt against a page the run did not keep.

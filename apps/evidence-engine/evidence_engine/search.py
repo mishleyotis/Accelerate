@@ -1,0 +1,568 @@
+"""Search backends (SearXNG JSON API, Parallel Search MCP) and the fan-out.
+
+WHY. Two discovery sources, several queries each; taking one list wastes
+the rest and concatenating rewards the chattiest source. The plugin
+already fuses with Reciprocal Rank Fusion, k=60 (engine/retrieval.rrf —
+Cormack, Clarke & Buettcher 2009), so the engine fuses the same way: a URL
+ranked by both sources and several facet queries outranks a URL one list
+put first. The card then records which queries and which source found a
+page (`provenance.query_ids`, `facet_hints`, `via` — CARD-CONTRACT.md §3;
+DISCOVERY.md §4 for the two backends' contracts).
+
+THE RULE.
+  - SearxClient: GET {base}/search?q=…&format=json&categories=general&
+    language=en-US[&engines=…][&pageno=n]. A 429, a 5xx or a captcha-shaped
+    answer raises SourceError(kind) so a breaker can record it.
+  - ParallelClient: tool `web_search` {objective, search_queries[≤3],
+    session_id=run_id}; the result's results[].{url,title,excerpts[]}
+    (structured content, or JSON in a text block) -> SearchHit with the
+    first excerpt as snippet. The client object is injectable.
+  - fan_out: every query to every enabled source, concurrently under a
+    Semaphore(4); (source, query text) cached through the injected cache;
+    a source whose breaker is open is skipped and recorded as
+    `rerouted_from:<source>`; lists fused by RRF over url_key; ties broken
+    by earliest position, then lexical url_key; every origin hit kept on
+    the merged record.
+
+No model. The network is reached only through the injected httpx client /
+MCP client, so every test runs on a MockTransport and a fake client.
+"""
+from __future__ import annotations
+
+import asyncio
+import json
+import re
+import time
+from dataclasses import asdict
+from urllib.parse import urlsplit
+
+import httpx
+
+from .types import SearchHit
+
+RRF_K = 60
+#: Measured 2026-10-11 (eval v1 iteration 4): 18 queries over two backends at
+#: concurrency 4 took 20 s a brief; the backends pace themselves through
+#: their own buckets, so the fan-out may be wide.
+CONCURRENCY = 12
+PARALLEL_BATCH = 3
+
+_TRACKING_PREFIX = ("utm_",)
+_TRACKING = {"gclid", "fbclid", "mc_cid", "mc_eid"}
+
+
+class SourceError(Exception):
+    """A backend answered in a way the breaker should count: kind ∈
+    429 | 5xx | captcha | transport | bad_json."""
+
+    def __init__(self, kind: str, source: str = "", detail: str = ""):
+        super().__init__(f"{source or 'source'}: {kind}{(' — ' + detail) if detail else ''}")
+        self.kind = kind
+        self.source = source
+        self.detail = detail
+
+
+# ── URL identity ───────────────────────────────────────────────────────────
+
+def _local_url_key(url: str) -> str:
+    """lowercase host, strip www., drop fragment, drop utm_* / click ids,
+    strip trailing slash; scheme dropped so http/https are one page."""
+    try:
+        parts = urlsplit(str(url or "").strip())
+    except ValueError:
+        return str(url or "").strip().lower()
+    host = (parts.hostname or "").lower()
+    if host.startswith("www."):
+        host = host[4:]
+    query = "&".join(sorted(
+        p for p in parts.query.split("&")
+        if p and not p.split("=")[0].lower().startswith(_TRACKING_PREFIX)
+        and p.split("=")[0].lower() not in _TRACKING))
+    path = re.sub(r"/+$", "", parts.path) or ""
+    key = host + path
+    return key + ("?" + query if query else "")
+
+
+def url_key(url: str) -> str:
+    """The fetch module's canonical key when it exists, else the local one
+    with the same rules."""
+    try:
+        from .fetch import url_key as _fk  # type: ignore
+        return _fk(url)
+    except Exception:  # noqa: BLE001 — absent or not yet written
+        return _local_url_key(url)
+
+
+# ── SearXNG ────────────────────────────────────────────────────────────────
+
+_CAPTCHA = re.compile(r"captcha|access denied|unusual traffic", re.I)
+
+
+# ── per-upstream-engine pacing (2026-10-11) ────────────────────────────────
+#
+# Measured on the live instance: every SearXNG query fanned to every enabled
+# upstream engine, so each of them saw the WHOLE query stream from Cloud
+# Run's shared datacentre egress — Brave and Google CSE suspended for TOO
+# MANY REQUESTS, DuckDuckGo and Qwant on CAPTCHA, Bing alone answering with
+# 0 results about the entity. From another egress the same Google CSE
+# returned 20 on-entity results: blocked by RATE, not banned. So each query
+# goes only to the engines with budget left, each engine is held to a polite
+# rate, and an engine SearXNG reports unresponsive is rested for the cool-off
+# its reason earns. When no engine has budget the query skips SearXNG (it
+# never waits): Parallel carries it and the run keeps its pace.
+
+#: Upstream engine -> requests per second, PER EVIDENCE-ENGINE INSTANCE (two
+#: in production, so the upstream sees twice this). Order is preference: a
+#: query takes the first engines with budget. Override: EE_SEARXNG_ENGINES
+#: "google cse:0.2,bing:0.5,...".
+ENGINE_RATES: dict[str, float] = {
+    "google cse": 0.2, "bing": 0.5, "bing news": 0.3, "duckduckgo news": 0.15,
+    "mwmbl": 0.4, "brave": 0.15, "duckduckgo": 0.1, "qwant": 0.08, "wikipedia": 0.3,
+}
+#: Bing News and DuckDuckGo News answered 4/4 on-entity for an IMA query on
+#: 2026-10-11 while DuckDuckGo's WEB search was on CAPTCHA and Google News
+#: denied access — free, keyless, and an entity's press coverage is evidence.
+#: No paid engine is in the pool (owner, 2026-10-11: "avoid paid APIs").
+ENGINE_BURST = 2
+ENGINES_PER_QUERY = 3
+#: Seconds an engine rests after SearXNG reports it unresponsive, by reason.
+COOLDOWN_S = (("too many requests", 900.0), ("captcha", 1800.0), ("access denied", 3600.0),
+              ("timeout", 60.0), ("parsing error", 600.0))
+COOLDOWN_DEFAULT_S = 300.0
+
+
+def engine_rates_from(spec: str | None) -> dict[str, float]:
+    """`"google cse:0.2,bing:0.5"` -> {"google cse": 0.2, "bing": 0.5}; empty -> defaults."""
+    if not spec or not spec.strip():
+        return dict(ENGINE_RATES)
+    out: dict[str, float] = {}
+    for part in spec.split(","):
+        name, _, rate = part.rpartition(":")
+        if name.strip():
+            out[name.strip()] = float(rate)
+    return out
+
+
+class EnginePool:
+    """Token buckets per upstream engine, plus a cool-off per engine."""
+
+    def __init__(self, rates: dict[str, float] | None = None, *, per_query: int = ENGINES_PER_QUERY,
+                 burst: int = ENGINE_BURST, clock=time.monotonic):
+        self.clock = clock
+        self.per_query = max(1, per_query)
+        now = clock()
+        self.state = {name: {"rate": float(rate), "tokens": float(burst), "burst": float(burst),
+                             "at": now, "rest_until": 0.0, "sent": 0, "rested": 0, "reason": None}
+                      for name, rate in (rates or ENGINE_RATES).items() if rate > 0}
+        self.skipped = 0
+
+    def take(self) -> list[str]:
+        """The engines this query may use now (possibly none). Never waits."""
+        now = self.clock()
+        chosen = []
+        for name, st in self.state.items():
+            st["tokens"] = min(st["burst"], st["tokens"] + (now - st["at"]) * st["rate"])
+            st["at"] = now
+            if len(chosen) < self.per_query and now >= st["rest_until"] and st["tokens"] >= 1.0:
+                st["tokens"] -= 1.0
+                st["sent"] += 1
+                chosen.append(name)
+        if not chosen:
+            self.skipped += 1
+        return chosen
+
+    def observe(self, unresponsive) -> None:
+        """Rest every engine SearXNG reported unresponsive, for its reason's cool-off."""
+        now = self.clock()
+        for row in unresponsive or []:
+            try:
+                name, reason = str(row[0]), str(row[1] if len(row) > 1 else "")
+            except (TypeError, IndexError):
+                continue
+            st = self.state.get(name)
+            if st is None:
+                continue
+            low = reason.lower()
+            rest = next((s for key, s in COOLDOWN_S if key in low), COOLDOWN_DEFAULT_S)
+            st["rest_until"] = max(st["rest_until"], now + rest)
+            st["rested"] += 1
+            st["reason"] = reason
+
+    def snapshot(self) -> dict:
+        now = self.clock()
+        return {"skipped_queries": self.skipped,
+                "engines": {n: {"rate_per_s": st["rate"], "sent": st["sent"], "rested": st["rested"],
+                                "resting_s": round(max(0.0, st["rest_until"] - now), 1),
+                                "last_reason": st["reason"]} for n, st in self.state.items()}}
+
+
+class SearxClient:
+    source = "searxng"
+
+    def __init__(self, base_url: str, http: httpx.AsyncClient, *, pool: EnginePool | None = None):
+        self.base_url = base_url.rstrip("/")
+        self.http = http
+        self.pool = pool
+
+    async def search(self, q: str, *, engines: list[str] | None = None, pageno: int = 1,
+                     query_id: str = "", facet: str = "") -> list[SearchHit]:
+        params = {"q": q, "format": "json", "categories": "general", "language": "en-US"}
+        if not engines and self.pool is not None:
+            engines = self.pool.take()
+            if not engines:
+                return []           # every engine is at its rate or resting: skip, never wait
+        if engines:
+            # NOT beside `categories`: SearXNG queries the UNION of the two,
+            # so a named engine list with categories=general still fanned to
+            # every general engine (measured 2026-10-11, local trial: an
+            # engine sent once returned results from 40 queries).
+            params.pop("categories")
+            params["engines"] = ",".join(engines)
+        if pageno and pageno > 1:
+            params["pageno"] = str(pageno)
+        try:
+            r = await self.http.get(f"{self.base_url}/search", params=params)
+        except httpx.HTTPError as e:
+            raise SourceError("transport", self.source, type(e).__name__) from e
+        if r.status_code == 429:
+            raise SourceError("429", self.source)
+        ctype = r.headers.get("content-type", "")
+        # captcha-shaped: a 403, or any non-JSON body that asks for a challenge
+        # (SearXNG's own ban pages come back 503 with an HTML challenge)
+        if r.status_code == 403 or ("json" not in ctype and _CAPTCHA.search(r.text or "")):
+            raise SourceError("captcha", self.source, str(r.status_code))
+        if r.status_code >= 500:
+            raise SourceError("5xx", self.source, str(r.status_code))
+        try:
+            data = r.json()
+        except ValueError as e:
+            raise SourceError("bad_json", self.source, str(e)) from e
+        if self.pool is not None:
+            self.pool.observe(data.get("unresponsive_engines"))
+        hits: list[SearchHit] = []
+        for i, item in enumerate(data.get("results") or [], start=1):
+            url = str(item.get("url") or "").strip()
+            if not url:
+                continue
+            hits.append(SearchHit(
+                url=url, title=str(item.get("title") or ""),
+                snippet=str(item.get("content") or ""), source=self.source,
+                engine=str(item.get("engine") or ""), rank=i, query_id=query_id,
+                facet=facet, published=_date_or_none(item.get("publishedDate"))))
+        return hits
+
+
+def _date_or_none(v) -> str | None:
+    if not v:
+        return None
+    s = str(v).strip()
+    return s[:10] if re.match(r"\d{4}-\d{2}-\d{2}", s) else s or None
+
+
+# ── Parallel Search MCP ────────────────────────────────────────────────────
+
+class ParallelClient:
+    """`client_factory(url)` returns an async context manager with
+    `call_tool(name, arguments)`; the default is fastmcp.Client."""
+    source = "parallel"
+
+    def __init__(self, url: str, client_factory=None):
+        self.url = url
+        self._factory = client_factory or _fastmcp_factory
+
+    async def search(self, objective: str, queries: list[str], *, run_id: str,
+                     query_id: str = "", facet: str = "") -> list[SearchHit]:
+        args = {"objective": objective, "search_queries": list(queries)[:PARALLEL_BATCH],
+                "session_id": run_id}
+        try:
+            async with self._factory(self.url) as client:
+                result = await client.call_tool("web_search", args)
+        except SourceError:
+            raise
+        except Exception as e:  # noqa: BLE001 — transport / protocol
+            kind = "429" if "429" in str(e) or "rate" in str(e).lower() else "transport"
+            raise SourceError(kind, self.source, type(e).__name__) from e
+        payload = parse_parallel_result(result)
+        hits: list[SearchHit] = []
+        for i, item in enumerate(payload.get("results") or [], start=1):
+            url = str(item.get("url") or "").strip()
+            if not url:
+                continue
+            excerpts = item.get("excerpts") or []
+            snippet = str(excerpts[0]) if excerpts else str(item.get("snippet") or item.get("content") or "")
+            hits.append(SearchHit(url=url, title=str(item.get("title") or ""), snippet=snippet,
+                                  source=self.source, engine="parallel", rank=i,
+                                  query_id=query_id, facet=facet,
+                                  published=_date_or_none(item.get("publish_date") or item.get("published"))))
+        return hits
+
+
+def _fastmcp_factory(url: str):
+    from fastmcp import Client  # imported lazily: tests inject a fake
+    from fastmcp.client.transports import StreamableHttpTransport
+    from .tls import trust_context
+    return Client(StreamableHttpTransport(url, verify=trust_context()))
+
+
+def parse_parallel_result(result) -> dict:
+    """Structured content when the server gave it; else the first text block
+    that parses as JSON; else {results: []}."""
+    if isinstance(result, dict):
+        return result if "results" in result else {"results": result.get("results", [])}
+    sc = getattr(result, "structured_content", None)
+    if isinstance(sc, dict) and sc.get("results") is not None:
+        return sc
+    data = getattr(result, "data", None)
+    if isinstance(data, dict) and data.get("results") is not None:
+        return data
+    for block in getattr(result, "content", None) or []:
+        text = getattr(block, "text", None) if not isinstance(block, dict) else block.get("text")
+        if not text:
+            continue
+        try:
+            parsed = json.loads(text)
+        except ValueError:
+            continue
+        if isinstance(parsed, dict) and "results" in parsed:
+            return parsed
+        if isinstance(parsed, list):
+            return {"results": parsed}
+    return {"results": []}
+
+
+# ── fan-out + RRF ──────────────────────────────────────────────────────────
+
+#: SourceError kinds -> the breaker vocabulary in ratelimit.FAILURE_KINDS;
+#: a shape the breaker does not count is reported as a 5xx-class failure.
+_BREAKER_KIND = {"429": "429", "captcha": "captcha", "5xx": "5xx",
+                 "transport": "5xx", "bad_json": "5xx", "exception": "5xx"}
+
+
+def _breaker_for(breakers, source: str):
+    """A per-source breaker when `breakers` is keyed (ratelimit.PerKeyBreakers
+    or anything with .get(source)), else None."""
+    get = getattr(breakers, "get", None)
+    if callable(get) and not hasattr(breakers, "is_open"):
+        try:
+            return get(source)
+        except Exception:  # noqa: BLE001
+            return None
+    return None
+
+
+def _breaker_open(breakers, source: str) -> bool:
+    """Two shapes: a registry with is_open(source) (tests, simple stores) or
+    a keyed set of ratelimit.CircuitBreaker with allow()."""
+    if breakers is None:
+        return False
+    fn = getattr(breakers, "is_open", None)
+    if callable(fn):
+        return bool(fn(source))
+    b = _breaker_for(breakers, source)
+    if b is not None and callable(getattr(b, "allow", None)):
+        return not b.allow()
+    return False
+
+
+def _breaker_record(breakers, source: str, kind: str | None) -> None:
+    if breakers is None:
+        return
+    b = _breaker_for(breakers, source)
+    if b is not None:
+        target, args = (b, (_BREAKER_KIND.get(kind, "5xx"),)) if kind else (b, ())
+    else:
+        target, args = (breakers, (source, kind)) if kind else (breakers, (source,))
+    fn = getattr(target, "record_failure" if kind else "record_success", None)
+    if not callable(fn):
+        return
+    try:
+        fn(*args)
+    except TypeError:
+        if kind:
+            fn(args[0])
+    except ValueError:
+        pass                                   # a kind this breaker does not count
+
+
+def _hit_dicts(hits: list[SearchHit]) -> list[dict]:
+    return [asdict(h) for h in hits]
+
+
+def _hits_from(dicts: list[dict], *, query_id: str, facet: str) -> list[SearchHit]:
+    out = []
+    for d in dicts:
+        h = SearchHit(**{k: d.get(k) for k in SearchHit.__dataclass_fields__ if k in d})
+        h.query_id, h.facet = query_id, facet
+        out.append(h)
+    return out
+
+
+async def fan_out(queries: list[dict], *, searx: SearxClient | None = None,
+                  parallel: ParallelClient | None = None, run_id: str = "",
+                  bucket_wait=None, cache=None, breakers=None,
+                  question: str | None = None, concurrency: int = CONCURRENCY,
+                  budget_s: float | None = None) -> dict:
+    """-> {hits: [merged], per_source: {source: {count, calls, cached, error}},
+    rerouted: ['rerouted_from:<source>', …], lists: n}.
+
+    A merged hit: {url, url_key, title, snippet, score, lists_ranking_it,
+    best_rank, sources, query_ids, facets, published, via, hits: [SearchHit]}.
+
+    `budget_s` bounds the phase (2026-10-11: sixteen workflows briefing at
+    once queued every query behind the shared source buckets and briefs
+    outlived the caller's 60 s). At the budget, a query still waiting for a
+    bucket token or a semaphore slot is cancelled and counted in
+    `budget_cut`; one whose upstream call has STARTED is left to finish in
+    the background (its answer lands in the search cache for the next
+    brief) and never cancelled, because identical queries from other
+    briefs are coalesced onto it and a cancelled leader would cancel them."""
+    sem = asyncio.Semaphore(max(1, concurrency))
+    started: set[str] = set()
+    per_source: dict[str, dict] = {}
+    rerouted: list[str] = []
+    lists: dict[tuple[str, str], list[SearchHit]] = {}
+    tasks, keys = [], []
+
+    def ps(source: str) -> dict:
+        return per_source.setdefault(source, {"count": 0, "calls": 0, "cached": 0, "error": None})
+
+    async def run_one(source: str, list_key: str, cache_key: str, query_id: str, facet: str, call):
+        async with sem:
+            rec = ps(source)
+            if cache is not None:
+                try:
+                    cached = cache.get(cache_key)
+                except Exception:  # noqa: BLE001
+                    cached = None
+                if cached is not None:
+                    rec["cached"] += 1
+                    hits = _hits_from(list(cached), query_id=query_id, facet=facet)
+                    rec["count"] += len(hits)
+                    lists[(source, list_key)] = hits
+                    return
+            if bucket_wait is not None:
+                await bucket_wait(source)
+            started.add(list_key + "|" + source)
+            rec["calls"] += 1
+            try:
+                # Request coalescing (brief §6a): identical in-flight queries
+                # from parallel agents share ONE upstream call.
+                from . import ratelimit as _rl
+                hits = await _rl.coalescer().get((source, cache_key), call)
+            except SourceError as e:
+                rec["error"] = e.kind
+                _breaker_record(breakers, source, e.kind)
+                return
+            except Exception as e:  # noqa: BLE001
+                rec["error"] = f"exception:{type(e).__name__}"
+                _breaker_record(breakers, source, "exception")
+                return
+            _breaker_record(breakers, source, None)
+            rec["count"] += len(hits)
+            lists[(source, list_key)] = hits
+            if cache is not None:
+                try:
+                    cache.put(cache_key, _hit_dicts(hits))
+                except Exception:  # noqa: BLE001
+                    pass
+
+    enabled = [(c.source, c) for c in (searx, parallel) if c is not None]
+    for source, client in enabled:
+        if _breaker_open(breakers, source):
+            tag = f"rerouted_from:{source}"
+            if tag not in rerouted:
+                rerouted.append(tag)
+            ps(source)["error"] = "breaker_open"
+            continue
+        if source == "searxng":
+            for q in queries:
+                qid, text, facet = q.get("query_id", ""), q["text"], q.get("facet", "")
+                keys.append(qid + "|" + source)
+                tasks.append(run_one(source, qid, f"{source}|{text}", qid, facet,
+                                     lambda text=text, qid=qid, facet=facet, client=client:
+                                     client.search(text, query_id=qid, facet=facet)))
+        else:
+            # Parallel takes up to three queries per call; batch within a facet
+            # so the facet attribution of a hit stays exact.
+            by_facet: dict[str, list[dict]] = {}
+            for q in queries:
+                by_facet.setdefault(q.get("facet", ""), []).append(q)
+            for facet, qs in by_facet.items():
+                for i in range(0, len(qs), PARALLEL_BATCH):
+                    batch = qs[i:i + PARALLEL_BATCH]
+                    texts = [b["text"] for b in batch]
+                    qid = "+".join(b.get("query_id", "") for b in batch)
+                    objective = question or texts[0]
+                    keys.append(qid + "|" + source)
+                    tasks.append(run_one(source, qid, f"{source}|{' || '.join(texts)}", qid, facet,
+                                         lambda texts=texts, qid=qid, facet=facet, objective=objective, client=client:
+                                         client.search(objective, texts, run_id=run_id,
+                                                       query_id=qid, facet=facet)))
+    budget_cut = 0
+    if tasks:
+        if budget_s is None or budget_s <= 0:
+            await asyncio.gather(*tasks)
+        else:
+            keyed = [(k, asyncio.ensure_future(t)) for k, t in zip(keys, tasks)]
+            done, pending = await asyncio.wait([f for _, f in keyed], timeout=budget_s)
+            for k, f in keyed:
+                if f in pending and k not in started:
+                    f.cancel()
+                    budget_cut += 1
+    snapshot = dict(lists)
+    return {"hits": rrf_merge(snapshot), "per_source": per_source, "rerouted": rerouted,
+            "lists": len(snapshot), "budget_cut": budget_cut}
+
+
+def rrf_merge(lists: dict[tuple[str, str], list[SearchHit]], *, k: int = RRF_K) -> list[dict]:
+    """Fuse (source, list) ranked lists into one consensus list by url_key.
+    Deterministic: lists are visited in sorted key order and the kept URL
+    spelling is the shortest (then lexical), so nothing depends on arrival
+    order."""
+    scores: dict[str, float] = {}
+    recs: dict[str, dict] = {}
+    for (source, list_key) in sorted(lists):
+        for hit in lists[(source, list_key)]:
+            key = url_key(hit.url)
+            if not key:
+                continue
+            rank = hit.rank or 1
+            scores[key] = scores.get(key, 0.0) + 1.0 / (k + rank)
+            rec = recs.get(key)
+            if rec is None:
+                rec = recs[key] = {"url": hit.url, "url_key": key, "title": hit.title,
+                                   "snippet": hit.snippet, "score": 0.0, "lists_ranking_it": 0,
+                                   "best_rank": rank, "sources": [], "query_ids": [],
+                                   "facets": [], "published": hit.published, "via": [],
+                                   "hits": []}
+            rec["lists_ranking_it"] += 1
+            rec["best_rank"] = min(rec["best_rank"], rank)
+            # the fetchable spelling: shortest, then lexical — a tracking-param
+            # variant is longer by construction, so the clean URL is kept
+            # whichever list arrived first
+            if (len(hit.url), hit.url) < (len(rec["url"]), rec["url"]):
+                rec["url"] = hit.url
+            if len(hit.snippet or "") > len(rec["snippet"] or ""):
+                rec["snippet"] = hit.snippet
+            if not rec["title"] and hit.title:
+                rec["title"] = hit.title
+            if not rec["published"] and hit.published:
+                rec["published"] = hit.published
+            if hit.source and hit.source not in rec["sources"]:
+                rec["sources"].append(hit.source)
+            for qid in (hit.query_id or "").split("+"):
+                if qid and qid not in rec["query_ids"]:
+                    rec["query_ids"].append(qid)
+            if hit.facet and hit.facet not in rec["facets"]:
+                rec["facets"].append(hit.facet)
+            rec["hits"].append(hit)
+    out = []
+    for key in sorted(scores, key=lambda kk: (-scores[kk], recs[kk]["best_rank"], kk)):
+        rec = recs[key]
+        rec["score"] = round(scores[key], 6)
+        rec["sources"].sort()
+        rec["query_ids"].sort()
+        rec["facets"].sort()
+        rec["via"] = list(rec["sources"])
+        out.append(rec)
+    return out

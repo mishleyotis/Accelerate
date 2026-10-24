@@ -6,7 +6,9 @@ SKILL.md, brand_guidelines.md, and editing_contract.md are GENERATED from this f
 by scripts/utils/generate_color_docs.py — do not edit those tables directly.
 
 This module defines:
-  1. Level palettes (4-tier heatmap/Slide 10; 5-tier Slide 13)
+  1. Level palettes (the four display BANDS on Slides 10/14, owned by
+     apps/web/lib/bands.js; the 1-5 maturity SCORE scale on Slide 13, owned
+     by engine/rubric.py)
   2. Static colors (Zennify brand accents, legend strips, structural tints)
   3. Theme references (shapes that deliberately use schemeClr for theme adaptation)
   4. Per-slide role catalogues — for every edited shape on every edited slide,
@@ -33,36 +35,64 @@ Content-type taxonomy (used by per-slide role catalogues):
 # 1. LEVEL PALETTES
 # ══════════════════════════════════════════════════════════════════════════════
 
+# The four DISPLAY bands. ONE owner for the boundaries and the fills:
+#   * boundaries — strict less-than on the RAW score, <2 / <3 / <4
+#     (charter invariant 6; engine.contract.band_of; apps/web/lib/bands.js)
+#   * accent     — the app's band fill (apps/web/lib/bands.js BANDS[*].fill)
+# `card_bg` is the template's card tint and `label_text` is the level label's
+# text colour ON that tint: legibility choices, not a second band encoding.
+# plugins/dma-insights/scripts/tests/test_deck_bands_match_app.py pins this
+# table and `score_to_level_4tier` to both owners. The QA audit of 28-09-2026
+# (F-L14-041) found the deck cutting at 1.50 / 2.50 / 3.50 and painting the
+# retired fifth-band hex on Differentiating.
 LEVEL_4TIER = {
     "Activating": {
-        "score_range": (0.00, 1.49),
-        "accent":     "F97316",  # strip fill, progress bar fill/border, heatmap bar
+        "score_range": (0.00, 1.99),   # < 2.0
+        "accent":     "FFCB99",  # strip fill, progress bar fill/border, heatmap bar
         "card_bg":    "FFF3E8",  # heatmap bg_card fill/border, Slide 10 rec card bg
-        "label_text": "F97316",  # level-label text color (verified on template)
+        "label_text": "F97316",  # level-label text colour on the card tint
     },
     "Building": {
-        "score_range": (1.50, 2.49),
-        "accent":     "8094C0",
+        "score_range": (2.00, 2.99),   # < 3.0
+        "accent":     "62D7B8",
         "card_bg":    "F2F4F9",
         "label_text": "4E5E8A",
     },
     "Competing": {
-        "score_range": (2.50, 3.49),
+        "score_range": (3.00, 3.99),   # < 4.0
         "accent":     "27BBAF",
         "card_bg":    "E6F5F3",
         "label_text": "198478",
     },
     "Differentiating": {
-        "score_range": (3.50, 5.00),
-        "accent":     "185F60",
+        "score_range": (4.00, 5.00),   # >= 4.0 — there is no fifth band
+        "accent":     "139F94",
         "card_bg":    "E8F7F6",
-        "label_text": "185F60",
+        "label_text": "139F94",
     },
 }
 
+#: A Slide 14 block whose capability this run did not assess (see
+#: RETIRED_CAPABILITIES). Rendered the way the app renders a null score: no
+#: band, no fill that reads as maturity, and a label that says so. Never a
+#: default that looks like data (charter invariant 9).
+UNSCORED = {
+    "card_bg":    "FFFFFF",
+    "accent":     "E5E7EB",   # the track colour: an empty bar, not a band
+    "label_text": "6B7280",
+    "label":      "NOT ASSESSED",
+    "score_text": "—",
+}
+
+# The maturity SCORE scale (1-5) that Slide 13's pillar indicator shows:
+# engine/rubric.py's rubric, NOT the four display bands above. Level names
+# and cut-offs (1.5 / 2.5 / 3.5 / 4.5) mirror `engine.rubric.RUBRIC` and
+# `maturity_level`, so the deck agrees with the assessment's own "2.25 (M2)";
+# the fifth level is "Leading", never the banned band word. The fills are the
+# template's own indicator palette (Level_Color_Code.pptx).
 LEVEL_5TIER = {
     1: {
-        "score_range": (0.00, 0.99),
+        "score_range": (0.00, 1.49),
         "label":      "Foundational",
         "bg_rect":    "FFCB99",
         "circle":     "FE9732",
@@ -70,7 +100,7 @@ LEVEL_5TIER = {
         "label_text": "1C4A4D",
     },
     2: {
-        "score_range": (1.00, 1.99),
+        "score_range": (1.50, 2.49),
         "label":      "Developing",
         "bg_rect":    "C7D3EC",
         "circle":     "8094C0",
@@ -78,7 +108,7 @@ LEVEL_5TIER = {
         "label_text": "1C4A4D",
     },
     3: {
-        "score_range": (2.00, 2.99),
+        "score_range": (2.50, 3.49),
         "label":      "Established",
         "bg_rect":    "E6F3FA",
         "circle":     "3D81F6",
@@ -86,7 +116,7 @@ LEVEL_5TIER = {
         "label_text": "1C4A4D",
     },
     4: {
-        "score_range": (3.00, 3.99),
+        "score_range": (3.50, 4.49),
         "label":      "Advanced",
         "bg_rect":    "E8F7F6",
         "circle":     "62D7B8",
@@ -94,8 +124,8 @@ LEVEL_5TIER = {
         "label_text": "1C4A4D",
     },
     5: {
-        "score_range": (4.00, 5.00),
-        "label":      "Transformational",
+        "score_range": (4.50, 5.00),
+        "label":      "Leading",
         "bg_rect":    "B0EED3",  # brand standard; theme has B0EDD3 — explicit srgbClr wins
         "circle":     "27BBAF",
         "num_text":   "FFFFFF",
@@ -119,28 +149,28 @@ STATIC_COLORS = {
     "zennify_mint_bg":      "E8F7F6",  # metric card bgs, strengths bg
     "zennify_light_purple": "F2F4F9",  # top banners, icon chips, Building card bg (also level-4tier Building card_bg)
     "zennify_dark_teal":    "1C4A4D",  # body text, score text, capability names
-    "zennify_muted_header": "8094C0",  # eyebrows, footers (also = 4-tier Building accent)
+    "zennify_muted_header": "8094C0",  # eyebrows, footers (brand only; no longer a band fill)
     "zennify_muted_body":   "3D5A5C",  # priority descriptions, platforms, metric context
     # Slide 10 legend strip (Peer benchmarks)
     "s10_legend_act_bg":    "FFF3E8",
-    "s10_legend_act_acc":   "F97316",
-    "s10_legend_bld_bg":    "F2F4F9",
-    "s10_legend_bld_acc":   "8094C0",
+    "s10_legend_act_acc":   "FFCB99",   # = LEVEL_4TIER accents: the legend
+    "s10_legend_bld_bg":    "F2F4F9",   #   must show the band fills the bars use
+    "s10_legend_bld_acc":   "62D7B8",
     "s10_legend_cmp_bg":    "E6F5F3",
     "s10_legend_cmp_acc":   "27BBAF",
     # Slide 10 competitive strengths panel
     "s10_strengths_bg":     "E8F7F6",
-    "s10_strengths_accent": "139F94",  # legacy teal — distinct from 27BBAF; preserved
+    "s10_strengths_accent": "139F94",  # the Differentiating fill (bands.js); preserved on the panel
     # Slide 6 logo frame
     "s6_logo_frame":        "E0EEF0",
-    # Slide 14 level legend (matches 4-tier palette)
+    # Slide 14 level legend (= LEVEL_4TIER accents, written on every run)
     "s14_legend_act_bg":    "FFF3E8",
-    "s14_legend_act_acc":   "F97316",
+    "s14_legend_act_acc":   "FFCB99",
     "s14_legend_bld_bg":    "F2F4F9",
-    "s14_legend_bld_acc":   "8094C0",
+    "s14_legend_bld_acc":   "62D7B8",
     "s14_legend_cmp_bg":    "E6F5F3",
     "s14_legend_cmp_acc":   "27BBAF",
-    "s14_legend_dif_acc":   "185F60",  # Differentiating legend uses border-only (Sh11/Sh12)
+    "s14_legend_dif_acc":   "139F94",  # Differentiating legend uses border-only (Sh11/Sh12)
 }
 
 
@@ -178,31 +208,37 @@ THEME_REFS = {
 # 4. SCORE-TO-LEVEL MAPPING
 # ══════════════════════════════════════════════════════════════════════════════
 
-def score_to_level_4tier(score: float) -> str:
-    """Map a 0.0–5.0 score to the 4-tier heatmap/dashboard level."""
+def score_to_level_4tier(score):
+    """The display band for a raw score: strict less-than at 2 / 3 / 4, the
+    app's own resolver (apps/web/lib/bands.js == engine.contract.band_of).
+    None in, None out: an unscored block has no band (charter invariant 9)."""
+    if score is None:
+        return None
     if not (0.0 <= score <= 5.0):
         raise ValueError(f"score {score} out of range 0.0–5.0")
-    if score < 1.50:
+    if score < 2.0:
         return "Activating"
-    elif score < 2.50:
+    elif score < 3.0:
         return "Building"
-    elif score < 3.50:
+    elif score < 4.0:
         return "Competing"
     else:
         return "Differentiating"
 
 
 def score_to_level_5tier(score: float) -> int:
-    """Map a 0.0–5.0 score to the 5-tier Slide 13 maturity level (1–5)."""
+    """The maturity SCORE level (1-5) for Slide 13's pillar indicator:
+    engine/rubric.py's cuts 1.5 / 2.5 / 3.5 / 4.5 (`maturity_level`), so the
+    deck's indicator agrees with the assessment's own "2.25 (M2)"."""
     if not (0.0 <= score <= 5.0):
         raise ValueError(f"score {score} out of range 0.0–5.0")
-    if score < 1.00:
+    if score < 1.5:
         return 1
-    elif score < 2.00:
+    elif score < 2.5:
         return 2
-    elif score < 3.00:
+    elif score < 3.5:
         return 3
-    elif score < 4.00:
+    elif score < 4.5:
         return 4
     else:
         return 5
@@ -312,13 +348,15 @@ SLIDE_10_ROLES = {
     23: ("rec3_card_bg",    "data", "s10.rec_scores[2]", "card_bg",    T, T, F, F),
     24: ("rec3_strip",      "data", "s10.rec_scores[2]", "accent",     T, T, F, F),
     25: ("rec3_label",      "data", "s10.rec_scores[2]", "label_text", F, F, T, T),
-    # Static — peer benchmarks legend strip (Sh26-34)
+    # Static — peer benchmarks legend strip (Sh26-34). The accent swatches are
+    # WRITTEN (not only verified) so the legend shows the band fills the bars
+    # use; the templates still carry the pre-28-09-2026 accents.
     26: ("legend_act_bg",   "static", "s10_legend_act_bg",  None, F, F, F, F),
-    27: ("legend_act_acc",  "static", "s10_legend_act_acc", None, F, F, F, F),
+    27: ("legend_act_acc",  "static", "s10_legend_act_acc", None, T, T, F, F),
     29: ("legend_bld_bg",   "static", "s10_legend_bld_bg",  None, F, F, F, F),
-    30: ("legend_bld_acc",  "static", "s10_legend_bld_acc", None, F, F, F, F),
+    30: ("legend_bld_acc",  "static", "s10_legend_bld_acc", None, T, T, F, F),
     32: ("legend_cmp_bg",   "static", "s10_legend_cmp_bg",  None, F, F, F, F),
-    33: ("legend_cmp_acc",  "static", "s10_legend_cmp_acc", None, F, F, F, F),
+    33: ("legend_cmp_acc",  "static", "s10_legend_cmp_acc", None, T, T, F, F),
     # Static — competitive strengths panel
     40: ("strengths_bg",     "static", "s10_strengths_bg",     None, F, F, F, F),
     41: ("strengths_accent", "static", "s10_strengths_accent", None, F, F, F, F),
@@ -403,8 +441,20 @@ CAPABILITY_ORDER = [
     "Data Governance",                # P4
     "Analytics & AI Enablement",      # P4
     "Architecture & Integration",     # P4
-    "Platform Enablement",            # P4
+    "Platform Enablement",            # P4 — the template's label; v7.0's
+                                      #      fourth P4 category is Information
+                                      #      Security & Cybersecurity
 ]
+
+#: Template blocks whose capability the v7.0 catalogue no longer carries. The
+#: nine external templates are v5.0-shaped (17 blocks); the catalogue has 16
+#: categories (engine.contract.counts()). A run has NO score for these, so the
+#: heatmap editor accepts `null` for them and renders the block UNSCORED. It
+#: never invents a score. Re-authoring the templates to 16 blocks is the
+#: owner's open decision (QA audit F-L14-041, 28-09-2026).
+RETIRED_CAPABILITIES = {
+    "Sustainable Finance & ESG": "P1C5 — retired in catalogue v7.0 (NOT_COMPARABLE)",
+}
 
 # Per-block-offset roles (shared by all 17 blocks — used in a loop)
 SLIDE_14_BLOCK_OFFSETS = {
@@ -602,6 +652,8 @@ def get_expected_hex(role_spec, input_data, slide_num=None):
                 raise KeyError(f"LEVEL_5TIER[{level!r}] has no key {palette_key!r}")
             return LEVEL_5TIER[level][palette_key]
         elif slide_num in (10, 14):
+            if score is None:
+                return UNSCORED[palette_key]     # a retired block: no band
             level = score_to_level_4tier(score)
             if palette_key not in LEVEL_4TIER[level]:
                 raise KeyError(f"LEVEL_4TIER[{level!r}] has no key {palette_key!r}")

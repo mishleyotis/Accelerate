@@ -69,12 +69,17 @@ GULF_EMPTY = {
                   "division, and the claims reach no capability this run "
                   "scores.",
         "searched_on": "2026-08-23",
+        # Each rung states its outcome (RC-05, 2026-10-04): a list of route
+        # names with no result is not a completed ladder.
         "sources_searched": [
-            "Federal Deposit Insurance Corporation enforcement decisions",
-            "Office of the Comptroller of the Currency action database",
-            "Federal court records for the parent company",
-            "Trade press for the receivables-finance sector",
-            "The division's own news page"],
+            "Federal Deposit Insurance Corporation enforcement decisions — "
+            "VERIFIED ABSENT for the division",
+            "Office of the Comptroller of the Currency action database — "
+            "VERIFIED ABSENT",
+            "Federal court records for the parent company — RESOLVED: one "
+            "civil matter naming the parent, not the division",
+            "Trade press for the receivables-finance sector — VERIFIED ABSENT",
+            "The division's own news page — VERIFIED ABSENT"],
         "closure_condition": "A regulatory action, conduct matter or "
                              "disclosed incident naming the division itself."},
 }

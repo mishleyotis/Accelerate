@@ -217,3 +217,29 @@ def test_generation_from_an_empty_reference_refuses():
         assert "refusing to narrow" in r.stderr, r.stderr[:300]
     finally:
         fixture.write_bytes(original)
+
+
+def test_THE_CLIENT_VALUE_CHAIN_SERVES_ITS_STAGES():
+    """H9 is built by the server (value_chain.arrange + read_value_chain), so
+    its keys are in neither the contract nor the promoted reference rows. The
+    allowlist dropped every one of them: the client value chain rendered "did
+    not promote" while the internal view drew every stage (owner,
+    2026-10-07). Every key the server emits must survive a customer read."""
+    from dma_api.value_chain import arrange
+    data = arrange(
+        [{"stage_id": "VC-CU-01", "name": "Field of membership", "stage_order": 1},
+         {"stage_id": "VC-CU-02", "name": "Onboarding", "stage_order": 2}],
+        [{"subcap_id": "P1C1.1.1", "stages": ["Field of membership"]},
+         {"subcap_id": "P2C2.1.1", "stages": ["Onboarding"]},
+         {"subcap_id": "P9C9.9.9", "stages": ["Onboarding"]}],
+        {"P1C1.1.1", "P2C2.1.1"})
+    data.update({"sub_vertical": "CU", "version": "v7.0", "arrangement_version": "v7.0",
+                 "not_applicable_stages": 0, "narrative_thread": "regrouped by stage"})
+    body, report = redact_section("heatmap", "value_chain", data, None, "customer")
+    assert body is not None
+    for key in ("chains", "not_scored_cells", "sub_vertical", "version",
+                "arrangement_version", "not_applicable_stages", "narrative_thread"):
+        assert key in body, f"{key} dropped for the customer: {report.get('allowlist_dropped')}"
+    assert body["chains"] == data["chains"], "stage rows were cut down for the customer"
+    assert body["chains"][1]["subcaps"] == ["P2C2.1.1"] and body["chains"][1]["not_scored"] == 1
+    assert not report.get("allowlist_dropped"), report.get("allowlist_dropped")

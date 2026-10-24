@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 
 from . import ledger
+from .subverticals import resolve_subvertical, resolve_supplementary
 
 
 def _rows(cur, sql, args=()):
@@ -41,7 +42,8 @@ def get_report_bundle(conn, run_id) -> dict:
         """SELECT r.id, r.entity_id, r.request_id, r.run_seq,
                   r.ccg_catalog_version, r.scored_cells, r.catalogue_cells,
                   r.composite, r.completed_at,
-                  e.display_id, e.legal_name, e.sub_vertical, e.size_tier
+                  e.display_id, e.legal_name, e.sub_vertical, e.size_tier,
+                  e.trading_name, e.supplementary_sub_verticals
              FROM runs r JOIN entities e ON e.id = r.entity_id
             WHERE r.id = %s""", (run_id,))
     row = cur.fetchone()
@@ -49,7 +51,8 @@ def get_report_bundle(conn, run_id) -> dict:
         return {"error": "unknown_run", "run_id": str(run_id)}
     (rid, entity_id, request_id, run_seq, version, scored_cells,
      catalogue_cells, composite, completed_at,
-     display_id, legal_name, sub_vertical, size_tier) = row
+     display_id, legal_name, sub_vertical, size_tier,
+     trading_name, supplementary) = row
 
     scores = _rows(cur, """
         SELECT subcap_id, capability_id, category_id, pillar_id,
@@ -151,6 +154,12 @@ def get_report_bundle(conn, run_id) -> dict:
         "entity_name": legal_name, "request_id": request_id,
         "run_seq": run_seq, "ccg_catalog_version": version,
         "sub_vertical": sub_vertical, "size_tier": size_tier,
+        # 0061: the other sub-verticals whose variant cells are this
+        # entity's own. ET-05 admits citations of them; any other
+        # sub-vertical's variant is still refused.
+        "supplementary_sub_verticals": list(resolve_supplementary(
+            supplementary, resolve_subvertical(sub_vertical))),
+        "trading_name": trading_name,
         "completed_at": completed_at, "scored_cells": scored_cells,
         "catalogue_cells": catalogue_cells, "composite": composite,
         "scores": scores,
@@ -243,17 +252,74 @@ def get_capability_catalogue(conn, run_id) -> dict:
     })
 
 
+#: Below this a trigram match is noise. Same threshold `memory.py` uses
+#: against the findings corpus, for the same reason: a suggestion nobody
+#: would accept is worse than none, because it invites a second wrong guess.
+_NEAR_MIN = 0.20
+_NEAR_LIMIT = 5
+
+
+def near_display_ids(cur, display_id: str, limit: int = _NEAR_LIMIT) -> list:
+    """Entities whose id or legal name is close to what was asked for.
+
+    WHY A DEAD END WAS EXPENSIVE. Measured 2026-08-30: a session asked for
+    `goeasy`, got `unknown_entity`, read that as "this client is not in the
+    system yet" and fired the INTAKE routine — the entry point for a client
+    with no package. The real display_id is `goeasy-ltd`, and it already had
+    four ingested runs. The whole misroute rests on a lookup that knew the
+    answer was one character-class away and said nothing.
+
+    `unknown_entity` is still the answer; it is not softened into a match,
+    because guessing which client somebody meant is exactly the kind of
+    silent inference this system refuses everywhere else. What changes is
+    that the refusal now carries the near misses, so the caller can see that
+    a client LIKE this one exists before choosing a route on the assumption
+    that none does.
+
+    Matched on legal_name as well as display_id: a caller with the client's
+    real name and not its slug is the same person making the same mistake.
+    """
+    cur.execute("""
+        SELECT display_id, legal_name,
+               GREATEST(similarity(display_id, %s),
+                        similarity(COALESCE(legal_name, ''), %s)) AS sim
+          FROM entities
+         WHERE GREATEST(similarity(display_id, %s),
+                        similarity(COALESCE(legal_name, ''), %s)) > %s
+         ORDER BY sim DESC, display_id
+         LIMIT %s""",
+        (display_id, display_id, display_id, display_id, _NEAR_MIN, limit))
+    return [{"display_id": r[0], "legal_name": r[1], "similarity": float(r[2])}
+            for r in cur.fetchall()]
+
+
 def get_client_state(conn, display_id: str) -> dict:
     """What is currently served, and prior runs — so a rerun is produced
-    knowing what the last run said."""
+    knowing what the last run said.
+
+    An unknown id comes back with `did_you_mean`: near misses on display_id
+    or legal name, so a dead end cannot be read as "this client is new".
+    """
     cur = conn.cursor()
     cur.execute("""SELECT id, legal_name, sub_vertical, size_tier,
-                          enum_label(status) FROM entities
+                          enum_label(status), trading_name,
+                          supplementary_sub_verticals FROM entities
                     WHERE display_id = %s""", (display_id,))
     row = cur.fetchone()
     if row is None:
-        return {"error": "unknown_entity", "display_id": display_id}
-    entity_id, legal_name, sub_vertical, size_tier, status = row
+        near = near_display_ids(cur, display_id)
+        return {"error": "unknown_entity", "display_id": display_id,
+                "did_you_mean": near,
+                "hint": ("no entity carries this display_id. "
+                         + (f"{len(near)} near match(es) exist — check them "
+                            "before treating this client as new, because a "
+                            "client that already has a package is SYNTHESIS "
+                            "work and not an intake."
+                            if near else
+                            "Nothing resembles it either, so this client "
+                            "genuinely has no package here."))}
+    (entity_id, legal_name, sub_vertical, size_tier, status,
+     trading_name, supplementary) = row
     runs = _rows(cur, """
         SELECT id AS run_id, request_id, run_seq, enum_label(status) AS status,
                ccg_catalog_version, composite, scored_cells, completed_at
@@ -273,6 +339,9 @@ def get_client_state(conn, display_id: str) -> dict:
     out = {
         "entity_id": entity_id, "display_id": display_id,
         "entity_name": legal_name, "sub_vertical": sub_vertical,
+        "supplementary_sub_verticals": list(resolve_supplementary(
+            supplementary, resolve_subvertical(sub_vertical))),
+        "trading_name": trading_name,
         "size_tier": size_tier, "status": status,
         "runs": runs,
         "served_pages": served,

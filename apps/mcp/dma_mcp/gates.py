@@ -102,6 +102,83 @@ GATES = {
               "so a list with one member passed every gate and which members "
               "it carried was documentation rather than contract.",
               "block"),
+    "CG-18b": ("A held member is a last resort: capped, routed, never an answer",
+               None,
+               "At most 2 must-present members are held, or 25% of the set, "
+               "whichever is smaller; every held reason names the registry "
+               "route searched; a structural answer (not chartered, "
+               "regulated by line, no retail branches) is stated as a value.",
+               "RC-04, SWBC 2026-10-04: CG-18 accepted any non-blank reason "
+               "with no ceiling, so 6 of 10 firmographics promoted held and "
+               "the strip showed four facts with nothing saying six were "
+               "missing. Owner decision 2 set the cap.",
+               "block"),
+    "CG-03b": ("A shape the contract states in prose is whole", None,
+               "Shapes that lived only in the page prose are machine "
+               "contract (item_shape) and read: platform tiles carry "
+               "peer_synthesis and an estate_reach with an integer "
+               "cells_not_yet_reached, peer rows are whole; the C4 grid is "
+               "three audience tiles with a state; a tenure has its "
+               "appointed_on; a web source has no source_page.",
+               "RC-09, SWBC 2026-10-04: peer_synthesis and estate_reach "
+               "appeared 0 times in the machine contract, so the gates read "
+               "them as optional; SWBC served 2 C4 tiles, 6 tenures with no "
+               "appointment date and source_page 1 on web pages.",
+               "block"),
+    "CG-18c": ("The sub-vertical's firmographic set is present", None,
+               "overview.firmographics carries every member of the run's "
+               "primary sub-vertical set (must_present_by_subvertical), "
+               "stated or held within the ceiling; Farm Credit declares "
+               "sub_vertical_undefined.",
+               "RC-06, SWBC 2026-10-04: the SV7 set (premium placed, "
+               "commission revenue, producer count, acquisitions) lived only "
+               "in prose and a held generic revenue satisfied it, so an "
+               "insurance-broker run promoted no insurance-broker figure.",
+               "block"),
+    "CG-18d": ("A scoped figure names the entity it describes", None,
+               "On O2 (unit) and O8 (basis) alike, a figure scoped to a "
+               "subsidiary, segment or division names that part of the "
+               "group.",
+               "RC-06, SWBC 2026-10-04: O2 called subsidiary figures "
+               "contamination while O8 served a subsidiary series; owner "
+               "decision 2 admits scoped figures whose unit names the entity.",
+               "block"),
+    "CG-18e": ("The strip and the regulatory card agree", None,
+               "When context.regulatory_standing states license_type or "
+               "primary_regulator, overview.firmographics states charter and "
+               "primary_regulator too, naming the same regulators.",
+               "RC-06, SWBC 2026-10-04: O2 held charter and regulator while "
+               "C3 stated both, and the two pages named different regulator "
+               "sets; nothing compared them.",
+               "block"),
+    "CG-18f": ("A CAGR is ranked, and served only corroborated", None,
+               "A served CAGR's unit names what grew, the window, the scope "
+               "and the independent source that corroborates it. A held "
+               "CAGR beside a financial series of two or more dated points "
+               "states each computed candidate's rate and why none was "
+               "corroborated.",
+               "Owner decision 2026-10-05 (SWBC): CAGR promoted held as 'no "
+               "consolidated financials' while the page carried eight dated "
+               "points of a series and a connector headcount history existed; "
+               "no candidate had been computed or ranked.",
+               "block"),
+    "ET-05b": ("The regulatory card works its sub-vertical's regulators", None,
+               "C3's ladder carries a rung naming a regulator of the run's "
+               "primary sub-vertical family (regulator_family_by_subvertical) "
+               "whose outcome is not open.",
+               "RC-06, SWBC 2026-10-04: an insurance-broker primary run "
+               "recorded the state insurance departments as 'not searched' "
+               "and promoted.",
+               "block"),
+    "CG-40b": ("A WORKED_ABSENT alert shows the ladder that worked it", None,
+               "An H3 alert in state WORKED_ABSENT logs its queries_run and "
+               "carries no rung left open (NOT_RUN, not fetched, blocked) "
+               "without the failover that ran in its place.",
+               "RC-05, SWBC 2026-10-04: 190 WORKED_ABSENT alerts promoted, "
+               "87 with no query logged and every one with a NOT_RUN "
+               "connector tier. WORKED_ABSENT is a finding about the client; "
+               "with no query behind it, it is an assertion.",
+               "block"),
     "CG-23": ("Every page's own thread is written", None,
               "A section whose writer stores `narrative_thread` carries a "
               "non-empty one. The contract's words: a page is not a "
@@ -583,6 +660,106 @@ GATES = {
               "confusing them loses a product the client really runs.",
               "block"),
 
+    "CG-51": ("A run that holds a peer set argues the techstack against it",
+              None,
+              "When this run holds a peer set — a peer with a score recorded "
+              "for it, or a techstack row already carrying peer_deployments — "
+              "the techstack page owes two things: at least one register row "
+              "carries a non-empty peer_deployments[], and the section "
+              "narrative_thread speaks to peers (names one the run holds, or "
+              "uses the word). SILENT unless the run demonstrably holds "
+              "peers — with no recorded peer and none on any row, the estate "
+              "has nothing to compare against and the gate invents nothing. "
+              "The cascade mirrors CG-44; AG-04 is the other half, checking a "
+              "row that already carries peer_coverage rather than its "
+              "presence.",
+              "Reported on a promoted run: 'the tech stack does not enforce "
+              "peer comparison; even the narrative itself does not include "
+              "this.' Golden 1 measured it — 56 register rows, zero carrying "
+              "peer_deployments, and a narrative that never compared the "
+              "estate to a peer, yet the page passed every gate. The T3 peer "
+              "fields (dma_impact, peer_coverage, peer_deployments) are "
+              "declared optional on the row (surface-map.md:86), so an estate "
+              "with a full peer set on the workbook shipped a peer-blind "
+              "techstack page and nothing said a word — present-but-optional-"
+              "and-ungated, the shape CG-44 fixed on the overview strip and "
+              "CG-39/CG-43 elsewhere. Enforcing structured reach AND narrative "
+              "reach answers both halves of the complaint: a register that "
+              "tabulates peer figures under a story that ignores them is still "
+              "the half-told page.",
+              "block"),
+
+    "CG-52": ("Prose a customer is served names no pipeline tool", None,
+              "Every heatmap section a customer is served, and every customer-"
+              "served section's narrative_thread and empty_state, is free of "
+              "the pipeline vocabulary the serve layer deletes for that "
+              "audience (packages/shared/internal_ids.PIPELINE_TERMS: NOT_RUN "
+              "in prose, Clay, Explorium, Exa, Tavily, Firecrawl, connector "
+              "credit, RRF, k=60, engine v2, hot band). Skips sections and "
+              "pages withheld from the customer, keys no customer is served "
+              "(sources_searched, provenance, tier, r_layer, …), name keys, a "
+              "registered source's own name (source_name, publisher: the "
+              "evidence store's, not the producer's), verbatim fields "
+              "(abbreviations.EXCERPT_FIELDS: excerpts, quotes, urls, "
+              "headlines — never rewritten), "
+              "paths marked internal_only, and NOT_RUN on "
+              "heatmap.safeguard_gates, which renders it by design.",
+              "Build owner, 2026-10-07: 'It is the customer view that lacks "
+              "heatmap details for most clients … Ensure no recurrence.' "
+              "Producers wrote the search tools into customer prose and the "
+              "serve net deleted the whole field: 118 of 4,341 cell syntheses "
+              "served empty to the customer across eight promoted clients, 36 "
+              "of 216 on one. The net stays as the backstop; the repair is "
+              "the producer's sentence, refused here at submit.",
+              "block"),
+
+    # RC-02 / RC-13 (SWBC gold audit, 2026-10-04). Both run at PROMOTE, over
+    # the retained staged rows of the whole run (promote_checks.py).
+    "CG-PAR": ("No page lacks the structure every gold run serves", None,
+               "At promote, each staged page is compared with the committed "
+               "shape-only gold (surface_gold.json: keys, list lengths and "
+               "per-row null patterns of the promoted gold runs, no values). "
+               "The run's own gold record is left out, and gold of its "
+               "sub-vertical is preferred; with none, the other gold is the "
+               "reference for structure only. A gap holds only if it holds "
+               "against EVERY reference gold run that has the page. BLOCKS "
+               "(owner decision B, 2026-10-04) on structure: a section today's "
+               "contract requires, or a key it requires or allows omitting "
+               "only on a stated condition, that every gold run serves and "
+               "this run lacks or serves empty without an empty_state saying "
+               "so; a row key the contract's item_shape requires and every "
+               "gold row carries; must-present members not stated (held, "
+               "null or absent) beyond 2 or 25% of the set, whichever is "
+               "smaller. WARNS, in promote_checks.parity.warnings and never "
+               "refusing, on counts and fill ratios: a list under half the "
+               "gold's rows, a member filled on under 60% of the gold's share "
+               "(a null with its own <member>_basis is a stated absence), a "
+               "fields list's stated share under 60% of the gold's. "
+               "Never-served sections are skipped; peer-comparison nulls on a "
+               "run where no peer was scored are disclosed once.",
+               "Gate J compared top-level keys and called any non-empty list "
+               "filled, and it ran only in CI against a synthetic pair: no "
+               "parity measurement ever touched the run before it was "
+               "promoted. Its first replacement then refused on counts — "
+               "goeasy-ltd's promoted run (CL) drew 16 refusals, among them "
+               "15 tech rows against 56 — compared every gold run with "
+               "itself, and held an insurance broker to three credit unions. "
+               "Values and counts are assessment results; a missing section "
+               "or key is a production gap.",
+               "block"),
+    "CG-STALE": ("A promoted page does not say its own run is withdrawn",
+                 None,
+                 "At promote, no section's empty_state or narrative_thread "
+                 "asserts that the run being promoted is withdrawn or "
+                 "withheld pending repair.",
+                 "A section produced while its run was withdrawn was carried "
+                 "forward on a retained staging row and promoted unchanged, "
+                 "so a promoted page told its reader the run was 'withheld "
+                 "pending repair' — a sentence promotion makes false the "
+                 "moment it succeeds. Validation ran at submit; the run's "
+                 "status changed afterwards and nothing re-read the text.",
+                 "block"),
+
     "CG-48": ("A value is refused if its column cannot hold it", None,
               "Every non-jsonb field a page writes is checked against the SQL "
               "type of the column it lands in, joining writer_spec.json to "
@@ -781,7 +958,12 @@ GATES = {
               "being the scaffolding the contract itself mandates, so prose "
               "that shares only the frame is not a template; and no sentence "
               "left with two or fewer content words once those same "
-              "registers are removed. A recorded absence carrying its "
+              "registers are removed; and no synthesis that is a quote "
+              "scaffold — a source-reporting lead-in ('the cited source "
+              "states:'), a pad ('Also: \'…\''), or 50% or more of its "
+              "words inside quotation marks (2026-10-06, Arbor Bank: 129 of "
+              "166 cell syntheses stitched from excerpts; the promoted "
+              "Baxter and Susser pages carry none). A recorded absence carrying its "
               "ladder, and a section with a valid empty_state, are exempt "
               "from all of it except the placeholder rule — an ITEM's "
               "absence only on the keys its own contract shape declares, "
@@ -850,6 +1032,40 @@ GATES = {
               "Invariant 4 was fail-closed on resolution and open on "
               "content: a chip a reader can open onto nothing claims a "
               "source it does not have.",
+              "block"),
+    "ET-10": ("A FACT rests on a T1 or T2 source", None,
+              "Every cited evidence row labelled FACT carries tier T1 or T2. "
+              "A T3-T5 row may be INFERENCE, HYPOTHESIS or CEILING_ESTIMATE; "
+              "the label is derived from provenance, never typed.",
+              "Measured 28-09-2026 (QA audit F-J04-004, regression seed 2): "
+              "77 of 285 FACT rows on one staged heatmap rested on T3/T4 "
+              "reportage because the research CLI defaulted the label to "
+              "FACT and nothing compared it with the tier. A client reads "
+              "FACT as established; a trade-press paraphrase is not.",
+              "block"),
+    "ET-11": ("A machine technographic scan is a T1 source", None,
+              "Every cited evidence row whose source names a technographic "
+              "scan provider (Hubbl, BuiltWith, Wappalyzer, Explorium and "
+              "their kind) carries tier T1. Machine-generated, timestamped "
+              "deployment data is the strongest tier the ladder has; filed "
+              "lower it caps the ceilings its cells can reach.",
+              "Measured 28-09-2026 (QA audit F-J04-015): 5 of 6 "
+              "technographic rows on one staged heatmap sat at T3, which "
+              "the overview's ceiling table reads as 'up to L4' and the "
+              "evidence census reads as reportage. The research ladder has "
+              "said 'scans = T1, never T4' since v5; nothing checked it.",
+              "block"),
+    "ET-12": ("The tech register is built on a machine scan", None,
+              "The techstack page cites at least one connector-origin "
+              "technographic reading (Clay Tech Stack or Vibe Prospecting "
+              "technographics, registered with kind 'technographic', T1), "
+              "or its r_layer records the scan as NOT_RUN naming both tools "
+              "and the reason.",
+              "SWBC 2026-10-05: Clay was called for contacts only and Vibe "
+              "Prospecting never; the register promoted from postings and "
+              "pages, and an integration platform the scans name (Dell "
+              "Boomi) was never weighed against the rank-1 integration "
+              "argument.",
               "block"),
     "ET-05": ("A run cites only its own sub-vertical's cells", None,
               "No section cites a variant cell whose terminal segment names "
@@ -922,7 +1138,12 @@ GATES = {
               "block"),
     "AG-01": ("Ranked or causal claims carry r_layer", None,
               "Any ranked/causal claim records hypothesis, counter, domain "
-              "test, probes run and a verdict.",
+              "test, probes run and a verdict. The verdict is one of SHIP, "
+              "SUPPORTED, HOLDS, CONFIRMED, PASS, ACCEPT, ACCEPTED, "
+              "SHIP_LOW_CONF (published) or REJECT, REJECTED, DROP, DROPPED, "
+              "REFUTED, FAIL, FAILED, NOT_SUPPORTED, UNSUPPORTED, WITHDRAWN "
+              "(a rejected item is not published); the vocabulary is read in "
+              "pass 1, so the local precheck sees it.",
               "A verdict not written down is a step that can be skipped.",
               "block"),
     "AG-02": ("Counts are computed", None,

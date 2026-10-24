@@ -52,8 +52,22 @@
        "nullable": true
       },
       {
+       "column": "score_raw",
+       "source": "item:score",
+       "raw_of": "score",
+       "jsonb": false,
+       "nullable": true,
+       "note": "0064 (owner decision A): the same payload value as `score`, stored unscaled — `score` keeps NUMERIC(4,2) for display and `band` is generated from this. Never read back into the payload: the reader skips any column carrying raw_of"
+      },
+      {
+       "column": "score_raw_backfilled",
+       "source": "skip:0064 marker — DEFAULT FALSE, never written by promote; TRUE only on a row 0064 backfilled from the stored 2dp value (not a true raw)",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
        "column": "band",
-       "source": "skip:GENERATED ALWAYS — band_t from raw score, four-branch strict-less-than",
+       "source": "skip:GENERATED ALWAYS band_t from COALESCE(score_raw, score) — the raw value, four-branch strict-less-than resolver (0064) — never written",
        "jsonb": false,
        "nullable": true
       },
@@ -1176,6 +1190,20 @@
        "nullable": true
       },
       {
+       "column": "composite_raw",
+       "source": "section:composite",
+       "raw_of": "composite",
+       "jsonb": false,
+       "nullable": true,
+       "note": "0064 (owner decision A): the same payload value as `composite`, stored unscaled — `composite` keeps NUMERIC(4,2) for display and `band` is generated from this. Never read back into the payload: the reader skips any column carrying raw_of"
+      },
+      {
+       "column": "composite_raw_backfilled",
+       "source": "skip:0064 marker — DEFAULT FALSE, never written by promote; TRUE only on a row 0064 backfilled from the stored 2dp value (not a true raw)",
+       "jsonb": false,
+       "nullable": false
+      },
+      {
        "column": "pillars",
        "source": "section:pillars",
        "jsonb": true,
@@ -1201,7 +1229,7 @@
       },
       {
        "column": "band",
-       "source": "skip:GENERATED ALWAYS band_t from composite (four-branch strict-less-than resolver) — never written",
+       "source": "skip:GENERATED ALWAYS band_t from COALESCE(composite_raw, composite) — the raw value, four-branch strict-less-than resolver (0064) — never written",
        "jsonb": false,
        "nullable": true
       },

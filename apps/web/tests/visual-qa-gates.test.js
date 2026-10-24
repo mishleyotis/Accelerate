@@ -83,13 +83,16 @@ function overviewPayload() {
     })),
     narrative_thread: "The estate is built and the governance around it is not.",
   });
-  // Two held fields and one blank. NONE of them may produce a row: the
-  // instruction was that an empty field is removed, not explained.
+  // One HELD field and two blanks. The blanks produce no row. The held one
+  // renders as a stated absence with its reason — owner decision 2
+  // (2026-10-04), which replaced "remove the row" for held fields after the
+  // SWBC gold audit found six of ten must-present fields silently missing.
+  // `quarantined` is the contract's key (O2 per-field shape).
   sections.firmographics = sec({
     fields: [
       { field: "total_assets", value: "9.1", unit: "billion USD",
         as_of: "2026-06-30" },
-      { field: "revenue", value: null, held: true,
+      { field: "revenue", value: null, quarantined: true,
         quarantine_reason: "A credit union returns its surplus to members." },
       { field: "ebitda", value: "", held: false },
       { field: "employees", value: null, held: false },
@@ -288,11 +291,14 @@ test("visual QA gates", { skip, concurrency: false }, async (t) => {
       const { page } = await open("overview");
       const text = await page.evaluate(() => document.body.innerText || "");
 
-      // The measured one. Revenue is held, and a held field is REMOVED.
-      assert.ok(!/\bRevenue\b/i.test(text),
-        "revenue rendered a row. A credit union has no revenue figure to "
-        + "state, and the instruction was to remove the field, not to "
-        + "explain it");
+      // SUPERSEDED 2026-10-04 (owner decision 2). Revenue is held, and a
+      // held field now RENDERS: its label, "Not stated", and the producer's
+      // reason — never our workflow word for it (see PLUMBING below).
+      assert.ok(/\bRevenue\b/i.test(text),
+        "a held field disappeared from the strip; a held field renders as a "
+        + "stated absence with its reason (owner decision 2, 2026-10-04)");
+      assert.ok(text.includes("A credit union returns its surplus to members."),
+        "the held field rendered without the producer's reason");
       for (const label of ["Ebitda", "EBITDA", "Employees"]) {
         assert.ok(!text.includes(label),
           `${label} is empty and still rendered a label`);

@@ -296,10 +296,26 @@ def merge(checkpoint_dir, output_path):
     return merged
 
 
-if __name__ == '__main__':
+RETIRED = """REFUSED: merge_evidence.py is retired (2026-09-29, QA audit F-L11-042). The run's one register deduplicates at registration (content hash) and reuses a row
+with `python3 -m engine.cli attach --run R --e-id E-xxx --subcap <cell>`; cross-references
+are checked by `engine.cli validate`. This script merged JSON indexes beside the run.
+"""
+
+
+def main():
+    import sys as _sys
+    _sys.stderr.write(RETIRED)
+    return 1
+
+
+def _legacy_main():
     parser = argparse.ArgumentParser(description='Merge DMA evidence checkpoints')
     parser.add_argument('checkpoint_dir', help='Directory containing checkpoint files')
     parser.add_argument('--output', default='merged_evidence_index.json',
                         help='Output file path')
     args = parser.parse_args()
     merge(args.checkpoint_dir, args.output)
+
+
+if __name__ == '__main__':
+    sys.exit(main())

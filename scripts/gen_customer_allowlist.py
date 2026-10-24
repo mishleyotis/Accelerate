@@ -45,6 +45,25 @@ EXCLUDED = frozenset(
 EMPTY_STATE_KEYS = ("reason", "closure_condition", "closure", "kind")
 
 
+# Sections the SERVER builds at read time rather than the producer writing
+# them. Their keys are in neither the contract (H9's contract declares no
+# fields: "it renders from server-derived data") nor the promoted reference
+# rows (which hold only the envelope), so derivation alone dropped every one
+# of them for the customer audience: the client value chain rendered "did not
+# promote" while the internal view drew every stage (owner, 2026-10-07). The
+# keys are catalogue joins — stage names, cell ids, counts — never producer
+# prose. Kept equal to what apps/api/dma_api/value_chain.py emits by
+# apps/api/tests/test_customer_allowlist.py.
+SERVER_DERIVED = {
+    "heatmap.value_chain": {
+        "keys": ["chains", "not_scored_cells", "sub_vertical", "version",
+                 "arrangement_version", "not_applicable_stages"],
+        "items": {"chains": ["id", "name", "not_scored", "stage_id",
+                             "stage_order", "subcaps"]},
+    },
+}
+
+
 def build() -> dict:
     contracts = (ROOT / "apps" / "mcp" / "dma_mcp" / "contracts_data.json")
     # The contract's item grammar is narrower than the promoted reality
@@ -104,6 +123,10 @@ def build() -> dict:
                 ks |= set(ref.get("items", {}).get(field, ()))
                 if ks:
                     items[field] = sorted(ks - EXCLUDED)
+            derived = SERVER_DERIVED.get(f"{page}.{name}", {})
+            allowed = sorted(set(allowed) | (set(derived.get("keys", ())) - EXCLUDED))
+            for field, ks in (derived.get("items") or {}).items():
+                items[field] = sorted((set(items.get(field, ())) | set(ks)) - EXCLUDED)
             out["sections"][f"{page}.{name}"] = {
                 "keys": allowed, **({"items": items} if items else {})}
     return out

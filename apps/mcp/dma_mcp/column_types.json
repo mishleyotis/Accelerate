@@ -57,6 +57,15 @@
  "ccg_products": {
   "l3_platform_area": "TEXT"
  },
+ "connector_responses": {
+  "body": "TEXT",
+  "entity_id": "UUID",
+  "query": "TEXT",
+  "retrieved_at": "TIMESTAMPTZ",
+  "sha256": "TEXT",
+  "stored_at": "TIMESTAMPTZ",
+  "tool": "TEXT"
+ },
  "context_acquisitions": {
   "affected_subcap_ids": "TEXT[]",
   "closed_on": "DATE",
@@ -243,8 +252,14 @@
  "evidence_index": {
   "age_months": "INTEGER",
   "claim_type": "CLAIM_T",
+  "connector_query": "TEXT",
+  "connector_response_sha256": "TEXT",
+  "connector_retrieved_at": "TIMESTAMPTZ",
+  "connector_tool": "TEXT",
   "content_hash": "TEXT",
   "corroboration": "SMALLINT",
+  "customer_attribution": "TEXT",
+  "customer_attribution_at": "TIMESTAMPTZ",
   "e_id": "TEXT",
   "entity_id": "UUID",
   "ers": "NUMERIC(3,2)",
@@ -259,6 +274,7 @@
   "source_name": "TEXT",
   "source_url": "TEXT",
   "specificity": "SMALLINT",
+  "split_of": "TEXT",
   "tier": "TIER_T"
  },
  "evidence_package_ids": {
@@ -504,6 +520,8 @@
   "r_layer": "JSONB",
   "run_id": "UUID",
   "score": "NUMERIC(4,2)",
+  "score_raw": "NUMERIC",
+  "score_raw_backfilled": "BOOLEAN",
   "source_cell": "TEXT",
   "subcap_id": "TEXT"
  },
@@ -885,6 +903,8 @@
   "band": "BAND_T",
   "claim_label": "CLAIM_T",
   "composite": "NUMERIC(4,2)",
+  "composite_raw": "NUMERIC",
+  "composite_raw_backfilled": "BOOLEAN",
   "confidence": "CONFIDENCE_T",
   "e_ids": "TEXT[]",
   "empty_state": "JSONB",
@@ -1166,6 +1186,8 @@
   "ccg_catalog_version": "TEXT",
   "completed_at": "TIMESTAMPTZ",
   "composite": "NUMERIC(4,2)",
+  "composite_raw": "NUMERIC",
+  "composite_raw_backfilled": "BOOLEAN",
   "entity_id": "UUID",
   "id": "UUID",
   "is_active": "BOOLEAN",
