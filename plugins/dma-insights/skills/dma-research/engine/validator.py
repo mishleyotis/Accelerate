@@ -311,7 +311,14 @@ def _rule8_absence_declared(wb, expect_scores: bool) -> list[Failure]:
     the Provenance row Step == 'absence'; a flag without its row was written
     around the command (a notebook consolidation, a synthesis record, a hand
     edit — all measured 2026-09-03). At the assessment stage an undeclared
-    NO_EVIDENCE row is a cell nobody searched, and it must not be scored."""
+    NO_EVIDENCE row is a cell nobody searched, and it must not be scored.
+
+    The flag closes a cell only on a row with no evidence. On an EVIDENCED
+    row it labels the claim (the source itself documents an absence): the
+    ledger requires it whenever Dominant_Claim asserts an absence, and
+    `declare_absence` refuses a row that carries evidence, so no Provenance
+    'absence' row can ever exist for one. Counting it as forged refused 61
+    synthesised, challenged cells at My Benefits' HANDOFF (2026-10-23)."""
     out = []
     prov = wb["Provenance"] if "Provenance" in wb.sheetnames else None
     declared: set[str] = set()
@@ -331,7 +338,8 @@ def _rule8_absence_declared(wb, expect_scores: bool) -> list[Failure]:
             flag = str(ws.cell(row=r, column=ai).value or "").strip().upper() \
                 if ws.max_column >= ai else ""
             eids = str(ws.cell(row=r, column=fi).value or "").strip()
-            if flag in ("YES", "TRUE", "1") and sub not in declared:
+            empty = eids in ("", C.NO_EVIDENCE)
+            if flag in ("YES", "TRUE", "1") and empty and sub not in declared:
                 forged.append(sub)
             if expect_scores and eids == C.NO_EVIDENCE and sub not in declared:
                 undeclared.append(sub)

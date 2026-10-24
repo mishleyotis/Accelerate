@@ -220,6 +220,40 @@ def test_rule5_fires_on_cited_evidence_with_no_url(tmp_path):
                for f in validator.validate(wb.path))
 
 
+def _flag_absence(wb, *, empty: bool):
+    """Set Absence_Claimed=YES on the first row by hand, with no Provenance
+    'absence' row — the shape a synthesis record leaves on an evidenced row,
+    and the shape a forged closure leaves on an empty one."""
+    book = openpyxl.load_workbook(wb.path)
+    ws = book["P1_Subcap_Scoring"]
+    ws.cell(row=2, column=C.PILLAR_COLUMNS.index("Absence_Claimed") + 1,
+            value="YES")
+    if empty:
+        ws.cell(row=2, column=C.PILLAR_COLUMNS.index("Evidence_IDs") + 1,
+                value=C.NO_EVIDENCE)
+    book.save(wb.path)
+    return str(ws.cell(row=2, column=1).value)
+
+
+def test_rule8_reads_the_flag_on_an_evidenced_row_as_a_claim_label(tmp_path):
+    """The ledger requires Absence_Claimed=YES on any evidenced absence claim
+    and `declare_absence` refuses an evidenced row, so no Provenance row can
+    exist for one. My Benefits (2026-10-23) reached HANDOFF with 61 such
+    synthesised, challenged cells refused as forged."""
+    run, wb = _good_run(tmp_path, n=2)
+    _flag_absence(wb, empty=False)
+    assert not [f for f in validator.validate(wb.path)
+                if f["rule"] == 8 and "written around" in f["detail"]]
+
+
+def test_rule8_still_refuses_a_flag_written_onto_an_empty_row(tmp_path):
+    run, wb = _good_run(tmp_path, n=2)
+    sub = _flag_absence(wb, empty=True)
+    fails = [f for f in validator.validate(wb.path)
+             if f["rule"] == 8 and "written around" in f["detail"]]
+    assert fails and sub in fails[0]["detail"], fails
+
+
 def test_rule5_accepts_the_literal_no_evidence(tmp_path):
     run, wb = _good_run(tmp_path, n=2)
     cell = wb.selected_subcaps()[0]
