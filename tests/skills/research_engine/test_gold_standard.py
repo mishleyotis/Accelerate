@@ -8,6 +8,7 @@ fixtures with openpyxl / python-docx so CI needs no external Drive files.
 See plugins/dma-insights/docs/goeasy-findings-register.md and
 plugins/dma-insights/docs/GOLD-STANDARD.md.
 """
+import json
 import zipfile
 
 import openpyxl
@@ -298,6 +299,51 @@ def test_financial_trends_sheet_with_too_few_years_is_caught(tmp_path):
         ws.cell(1, col).value = None
     w.save(wb)
     assert "GS-WB-FINANCIALS" in {f["code"] for f in GS.workbook_findings(wb)}
+
+
+_NON_FILER = ("My Benefits, LLC is a privately held LLC that publishes no financial "
+              "statements: SEC EDGAR, SEC IAPD and FINRA BrokerCheck were searched "
+              "2026-10-23 with no record, and broker revenue estimates disagree.")
+
+
+def _empty_financials(path, reason=None):
+    wb = _gold_workbook(path)
+    w = openpyxl.load_workbook(wb)
+    del w["Financial_Trends"]
+    w.create_sheet("Financial_Trends").append(
+        ["Metric", "Fiscal_Year", "Value", "Unit", "Evidence_IDs", "Source_URL", "Basis"])
+    if reason is not None:
+        md = w["Run_Metadata"] if "Run_Metadata" in w.sheetnames else w.create_sheet("Run_Metadata")
+        if md.max_row == 1 and md.cell(1, 1).value is None:
+            md.append(["Key", "Value"])
+        md.append(["empty_sheet_reasons", json.dumps({"Financial_Trends": reason})])
+    w.save(wb)
+    return wb
+
+
+def test_private_non_filer_discloses_the_missing_trajectory(tmp_path):
+    # owner, 2026-10-24: a recorded, searched absence is a WARN, not a refusal
+    wb = _empty_financials(tmp_path / "wb.xlsx", _NON_FILER)
+    fin = [f for f in GS.workbook_findings(wb) if f["code"] == "GS-WB-FINANCIALS"]
+    assert fin and all(f.get("blocking") is False for f in fin)
+    assert not [f for f in GS.blocking(fin)]
+    assert "disclosed absence" in str(fin[0])
+
+
+@pytest.mark.parametrize("reason", [None, "", "no financials", "x" * 120])
+def test_an_unrecorded_or_unsearched_absence_still_blocks(tmp_path, reason):
+    wb = _empty_financials(tmp_path / "wb.xlsx", reason)
+    fin = [f for f in GS.workbook_findings(wb) if f["code"] == "GS-WB-FINANCIALS"]
+    assert fin and GS.blocking(fin) == fin
+
+
+def test_a_partial_series_is_not_disclosed_away(tmp_path):
+    wb = _empty_financials(tmp_path / "wb.xlsx", _NON_FILER)
+    w = openpyxl.load_workbook(wb)
+    w["Financial_Trends"].append(["Revenue", "FY2025", 1.0, "USD m", "E-1", "", "stated"])
+    w.save(wb)
+    fin = [f for f in GS.workbook_findings(wb) if f["code"] == "GS-WB-FINANCIALS"]
+    assert fin and GS.blocking(fin) == fin
 
 
 def test_report_without_financial_trajectory_is_caught(tmp_path):

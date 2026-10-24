@@ -85,7 +85,14 @@ class Finding(dict):
 
     def __str__(self):
         p = f" [{self['prevents']}]" if self.get("prevents") else ""
-        return f"{self['code']}: {self['detail']}{p}"
+        w = "" if self.get("blocking", True) else " (WARN, disclosed)"
+        return f"{self['code']}: {self['detail']}{p}{w}"
+
+
+def blocking(findings) -> list[Finding]:
+    """The findings that stop a package. A finding marked `blocking=False`
+    is a disclosed absence: it is still reported, and never refuses."""
+    return [f for f in findings if f.get("blocking", True)]
 
 
 # The literals a client-facing deliverable must never ship — every one appeared in a
@@ -384,7 +391,42 @@ def workbook_findings(path) -> list[Finding]:
             if not has_trend:
                 out.append(Finding("GS-WB-FINANCIALS",
                     f"{fin_sheet}: no CAGR/growth/trend column", "GSY-18"))
+
+    # A PRIVATE NON-FILER DISCLOSES, IT DOES NOT FAIL (owner, 2026-10-24, My
+    # Benefits LLC: no filed statements, broker revenue estimates 10x apart).
+    # When Financial_Trends holds no row and Run_Metadata.empty_sheet_reasons
+    # records why, with the searches that came back empty, the 5-year
+    # trajectory is a stated absence (the 2026-10-04 rule for held fields),
+    # so GS-WB-FINANCIALS is reported as a WARN and never refuses the package.
+    # A partial series is still a FAIL: only a recorded, searched absence is
+    # disclosed rather than repaired.
+    reason = _financials_absence(wb, fin_sheet)
+    if reason:
+        for f in out:
+            if f["code"] == "GS-WB-FINANCIALS":
+                f["blocking"] = False
+                f["detail"] += f" — disclosed absence: {reason[:160]}"
     return out
+
+
+def _financials_absence(wb, fin_sheet) -> str:
+    """The recorded reason a run holds no financial series, or ''. Needs an
+    empty Financial_Trends and an empty_sheet_reasons entry that names the
+    searches run (>= 80 chars, saying what was searched)."""
+    if not fin_sheet or "Run_Metadata" not in wb.sheetnames:
+        return ""
+    data = [r for r in list(wb[fin_sheet].iter_rows(values_only=True))[1:]
+            if r and any(_norm(c) for c in r)]
+    if data:
+        return ""
+    md = {_norm(r[0]): r[1] for r in wb["Run_Metadata"].iter_rows(values_only=True)
+          if r and r[0]}
+    try:
+        reasons = json.loads(_norm(md.get("empty_sheet_reasons")) or "{}")
+    except ValueError:
+        return ""
+    why = _norm(reasons.get(fin_sheet)) if isinstance(reasons, dict) else ""
+    return why if len(why) >= 80 and re.search(r"search", why, re.I) else ""
 
 
 # ── REPORT gate ──────────────────────────────────────────────────────────
@@ -744,13 +786,16 @@ def package_findings(folder) -> list[Finding]:
 def _print(findings, as_json):
     if as_json:
         print(json.dumps([dict(f) for f in findings], indent=1))
-    elif not findings:
-        print("GOLD STANDARD: PASS — 0 findings")
+    elif not blocking(findings):
+        print(f"GOLD STANDARD: PASS — 0 blocking findings"
+              + (f", {len(findings)} disclosed" if findings else ""))
+        for f in findings:
+            print("  -", f)
     else:
         print(f"GOLD STANDARD: {len(findings)} finding(s)")
         for f in findings:
             print("  -", f)
-    return 0 if not findings else 1
+    return 0 if not blocking(findings) else 1
 
 
 def main(argv=None):
