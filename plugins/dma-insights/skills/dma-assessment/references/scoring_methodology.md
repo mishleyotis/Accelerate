@@ -142,8 +142,10 @@ Check all dependency constraints. These caps are non-negotiable:
 ### Step 8: Calculate Final Score
 
 ```
-FINAL = min(Raw_Score, Evidence_Ceiling, All_Applicable_Caps)
+FINAL = min(Raw_Score + Σ ADJ_ deltas, Evidence_Ceiling, All_Applicable_Caps), to the quarter-point (down, never up)
 ```
+
+Computed by the engine, never by hand: `python3 -m engine.assessment apply --run <R> --subcap <cell> --raw <M> --adj <LABEL:-DELTA> --cap <LABEL:VALUE>` returns the final, the band and the arithmetic string, and `score --raw --adj --cap` records that string in `Caps_Applied` (QA audit F-F14-029).
 
 Document completely:
 - Raw Score: [X.XX] (from Step 4)

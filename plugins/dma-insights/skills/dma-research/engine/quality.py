@@ -89,7 +89,8 @@ def is_fluent_but_empty(text, *, must_name: list[str] | None = None) -> str | No
     anchors = 0
     anchors += len(re.findall(r"\b\d{4}\b", s))                    # a year
     anchors += len(re.findall(r"\b\d+(?:\.\d+)?\s*(?:%|percent)", s))
-    anchors += len(re.findall(r"\[E-\d+(?::F\d+)?\]", s))          # a citation
+    anchors += len(re.findall(r"\bE-\d+(?::F\d+)?\b", s))          # a citation, bracketed or bare
+    anchors += len(re.findall(r"\b[\w-]+\.(?:com|org|net|gov|io|co|us)\b", s))  # a named domain
     anchors += len(re.findall(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b", s))
     if anchors == 0:
         return ("names no figure, date, proper noun or cited id — nothing in "
@@ -228,8 +229,18 @@ def ladder_report(ladder, searches) -> dict:
     }
 
 
-def _norm_q(q) -> str:
-    return re.sub(r"\s+", " ", str(q or "")).strip().lower()
+def norm_query(q) -> str:
+    """The identity of a query: case, whitespace and outer quoting removed.
+
+    ONE owner (QA audit F-D05-033, 28-09-2026). The relay queue, the ladder
+    report and the Search_Log's duplicate refusal all decide "the same
+    query" here, so two lanes asking one thing in two casings owe one
+    search, and a query the log already holds is the query the log holds."""
+    q = " ".join(str(q or "").split()).strip().strip("\"'`“”‘’").strip()
+    return q.lower()
+
+
+_norm_q = norm_query
 
 
 # ── evidence smearing across siblings (R22 / SG-09) ──────────────────────
@@ -324,7 +335,12 @@ def claim_label_supported(row) -> str | None:
 # to the subcap has no provenance at all, and the refusal can name it.
 
 _NUM_TOKEN = re.compile(r"\d[\d,]*(?:\.\d+)?")
-_CITATION = re.compile(r"\[[^\]]*\]")   # [E-0001:F2] — ids are not figures
+#: [E-0001:F2] and a bare E-066 or E-066:F1 — ids are not figures. Measured
+#: 2026-10-09 (R-IMA-20261009 P3C2): six syntheses citing "E-066" in prose
+#: were refused for the ungrounded figure '066'; the writer re-wrote them in
+#: brackets, which is the form, but a refusal that reads an id as a number
+#: is the rule's defect, not the writer's.
+_CITATION = re.compile(r"\[[^\]]*\]|\bE-\d+(?::F\d+)?\b")
 
 #: Prose fields whose numbers must be grounded — the fields that CLAIM what
 #: sources say. NOT_RUN values are skipped whole ("no hits across four
@@ -414,6 +430,219 @@ def accusatory(text: str, *, impact_field: bool = False) -> str | None:
                         f"opportunity it opens: what becomes possible when "
                         f"closed, grounded in the cited evidence")
     return None
+
+
+# ── claim verification: a sentence must be in its own excerpts ───────────
+#
+# Measured 28-09-2026 (QA audit F-D04-005) on a promoted run's cell
+# syntheses: 30 cells, 67 claims, 20 cells verifiable from the excerpts
+# cited under them (67%); 12 claims (18%) NOT_SUPPORTED — a named CEO
+# attribution no excerpt names, a committee structure no excerpt describes,
+# an after-state ("hours to minutes") no excerpt states. Every one of those
+# is a sentence whose CONTENT is absent from the verbatim material it cites,
+# and that is checkable without a model: the excerpt is verbatim source
+# text, so a name, a figure or a content word the claim rests on either
+# appears in it or has no provenance at all.
+#
+# This is a lexical judge — deterministic, offline (invariant 1) — and it
+# says so. It measures whether the words a sentence asserts WITH are in the
+# excerpts, not whether the excerpt logically entails the sentence. Its
+# recall on the audit's three unsupported shapes is total and measured in
+# tests/skills/research_engine/test_verify_claim.py. Its known limits, also
+# measured there: a faithful paraphrase sharing few words with its source
+# grades `partial`, never `not_supported`, unless a name or a figure is
+# missing; and a sentence whose every word is in the excerpt but whose
+# RELATION is wrong ("the Supervisory Committee is chaired by Paul Martin"
+# when the excerpt chairs the Technology Committee) passes — the challenger
+# reads relations, this reads words.
+
+VERIFY_VERDICTS = ("entailed", "partial", "not_supported", "frame")
+#: Content-word coverage lines, measured on the battery in test_verify_claim:
+#: every supported probe clears 0.70, the paraphrase probe sits at 0.44, the
+#: committee-structure probe at 0.33. 0.70 / 0.40 separate the three.
+ENTAILED_FLOOR = 0.70
+PARTIAL_FLOOR = 0.40
+
+#: Words a sentence does not assert WITH: function words, plus the H2 frame
+#: the contract mandates on every synthesis (the score, the median, the
+#: band, the inventory of items). A figure or a word in the frame register
+#: is derived from the score table, not from a source, and is not verified
+#: against one — a synthesis that says "sits at 2.5 against a peer median
+#: of 3.0" is obeying its contract, not citing a document.
+_CLAIM_STOP = frozenset("""
+a an and are as at be by for from has have how in is it its of on or that
+the this to was what when where which who with does do did their they also
+than into over under within across both each more most not no but so if
+then one two own per via about after before since while would could should
+may might can will been being were had having there these those such some
+any all only just very up out new now here where already still yet rather
+whether because though although between through during without against
+""".split())
+_FRAME = frozenset("""
+score scores scored scoring sits sitting sit median medians peer peers
+band bands cohort grain rounded activating building competing
+differentiating threshold thin evidence item items cited cites citation
+citations source sources grounded rests speaks position inches rendered
+above below at
+""".split())
+_LABELS = frozenset("""
+fact inference hypothesis ceiling_estimate not_run no_finding unverified
+current aging stale archival t1 t2 t3 t4
+""".split())
+_SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[\"\u201c(\[A-Z0-9])")
+_WORDTOK = re.compile(r"[A-Za-z][A-Za-z0-9'\u2019&-]*|[$\u00a3\u20ac]?\d[\d,]*(?:\.\d+)?%?")
+_NUMTOK = re.compile(r"^[$\u00a3\u20ac]?\d[\d,]*(?:\.\d+)?%?$")
+_SCORE_SHAPED = re.compile(r"^\d\.\d{1,2}$")
+_QUOTED = re.compile(r"[\"\u201c]([^\"\u201d]{3,})[\"\u201d]")
+
+
+def _stem(w: str) -> str:
+    """A light suffix strip, so 'reached' meets 'reach' and 'members'
+    meets 'member'. Not a stemmer — enough for containment, never for
+    meaning."""
+    w = w.lower().strip("'\u2019-&")
+    if len(w) > 5 and w.endswith("ies"):
+        return w[:-3] + "y"
+    if len(w) > 5 and w.endswith("ing"):
+        return w[:-3]
+    if len(w) > 4 and w.endswith("ed"):
+        return w[:-2]
+    if len(w) > 4 and w.endswith("es"):
+        return w[:-2]
+    if len(w) > 3 and w.endswith("s") and not w.endswith("ss"):
+        return w[:-1]
+    return w
+
+
+def _plain_number(tok: str) -> str:
+    return tok.replace(",", "").strip("$\u00a3\u20ac").rstrip("%")
+
+
+def claim_tokens(sentence: str, *, entity: str | None = None) -> dict:
+    """What ONE sentence asserts with: `content` (stemmed content words and
+    figures) and `hard` (the subset a source must carry verbatim — figures,
+    names, quoted phrases). The entity's own name is exempt: it is the
+    subject of every sentence and need not be in every excerpt."""
+    text = _CITATION.sub(" ", sentence or "")
+    ent = {_stem(t) for t in _WORDTOK.findall(entity or "") if len(t) > 2}
+    words = _WORDTOK.findall(text)
+    lows = [w.lower() for w in words]
+    frame_hit = any(w in _FRAME for w in lows)
+    content, hard, score_numbers = set(), set(), set()
+    for i, tok in enumerate(words):
+        low = lows[i]
+        if _NUMTOK.match(tok):
+            plain = _plain_number(tok)
+            if (frame_hit and _SCORE_SHAPED.match(plain)
+                    and not tok.startswith(("$", "\u00a3", "\u20ac"))
+                    and not tok.endswith("%") and float(plain) <= 5.0):
+                score_numbers.add(plain)    # the rendered score, not a claim
+                continue
+            content.add(plain)
+            hard.add(plain)
+            continue
+        if low in _FRAME or low in _LABELS or low in _CLAIM_STOP:
+            continue
+        st = _stem(low)
+        if len(st) < 3 or st in ent:
+            continue
+        content.add(st)
+        # A capitalised token past the sentence's first word is a name (an
+        # acronym anywhere is one too). A name at sentence start is missed
+        # as a NAME and still counted as a content word — a stated limit.
+        if tok[0].isupper() and (i > 0 or tok.isupper()):
+            hard.add(st)
+    for m in _QUOTED.finditer(text):
+        for w in _WORDTOK.findall(m.group(1)):
+            st = _stem(w)
+            if len(st) >= 3 and w.lower() not in _CLAIM_STOP and st not in ent:
+                content.add(st)
+                hard.add(st)
+    return {"content": content, "hard": hard, "frame": frame_hit,
+            "score_numbers": score_numbers}
+
+
+def _ground(excerpts) -> tuple[set, list[str]]:
+    """The stemmed vocabulary of every excerpt, and the excerpts' sentences
+    (for the span report)."""
+    vocab: set = set()
+    sentences: list[str] = []
+    for ex in excerpts or []:
+        s = str(ex or "")
+        if not s.strip():
+            continue
+        for tok in _WORDTOK.findall(s):
+            if _NUMTOK.match(tok):
+                vocab.add(_plain_number(tok))
+            else:
+                vocab.add(_stem(tok))
+        sentences.extend(p.strip() for p in _SENT_SPLIT.split(s) if p.strip())
+    return vocab, sentences
+
+
+def verify_sentence(sentence: str, excerpts, *, entity: str | None = None) -> dict:
+    """One sentence against the excerpts it is cited on."""
+    ct = claim_tokens(sentence, entity=entity)
+    vocab, sents = _ground(excerpts)
+    content, hard = ct["content"], ct["hard"]
+    if not content and not hard:
+        return {"text": sentence, "verdict": "frame", "coverage": None,
+                "missing": [], "missing_hard": [], "span": None,
+                "note": "no checkable content — the score frame or a connective"}
+    missing = sorted(w for w in content if w not in vocab)
+    missing_hard = sorted(w for w in hard if w not in vocab)
+    coverage = round(1.0 - len(missing) / len(content), 3) if content else 1.0
+    if missing_hard or coverage < PARTIAL_FLOOR:
+        verdict = "not_supported"
+    elif coverage >= ENTAILED_FLOOR:
+        verdict = "entailed"
+    else:
+        verdict = "partial"
+    span, best = None, 0
+    for s in sents:
+        hit = len(content & {_stem(t) if not _NUMTOK.match(t) else _plain_number(t)
+                             for t in _WORDTOK.findall(s)})
+        if hit > best:
+            best, span = hit, s[:240]
+    return {"text": sentence, "verdict": verdict, "coverage": coverage,
+            "missing": missing, "missing_hard": missing_hard, "span": span}
+
+
+_WORST = {"not_supported": 3, "partial": 2, "entailed": 1, "frame": 0}
+
+
+def verify_claim(text: str, excerpts, *, entity: str | None = None) -> dict:
+    """Every sentence of `text` against `excerpts`; the verdict is the worst
+    sentence's. A `frame`-only text (nothing checkable) reports `frame`."""
+    sentences = [s.strip() for s in _SENT_SPLIT.split(str(text or "").strip())
+                 if s.strip()]
+    rows = [verify_sentence(s, excerpts, entity=entity) for s in sentences]
+    counts = {v: sum(1 for r in rows if r["verdict"] == v) for v in VERIFY_VERDICTS}
+    verdict = max((r["verdict"] for r in rows), key=lambda v: _WORST[v], default="frame")
+    return {"verdict": verdict, "sentences": rows, "counts": counts,
+            "floors": {"entailed": ENTAILED_FLOOR, "partial": PARTIAL_FLOOR}}
+
+
+def verify_cell(cell: dict, *, entity: str | None = None) -> dict:
+    """An H2 `cells[]` row against its own `items[].excerpt`. A cell with no
+    items and a synthesis that asserts content is `not_supported` by
+    construction — unless it is a declared absence (thin + sources_searched +
+    closure_condition), which asserts what was NOT found and is not
+    verified against excerpts it does not have."""
+    items = cell.get("items") or []
+    excerpts = [str(i.get("excerpt") or "") for i in items if isinstance(i, dict)]
+    excerpts += [str(i.get("anchor_quote") or "") for i in items
+                 if isinstance(i, dict) and i.get("anchor_quote")]
+    declared = (cell.get("thin") is True and bool(cell.get("sources_searched"))
+                and bool(str(cell.get("closure_condition") or "").strip()))
+    if declared and not excerpts:
+        return {"subcap_id": cell.get("subcap_id"), "verdict": "frame",
+                "grade": "declared", "sentences": [], "counts": {},
+                "note": "a declared absence is verified by its ladder, not by excerpts"}
+    out = verify_claim(str(cell.get("synthesis") or ""), excerpts, entity=entity)
+    out["subcap_id"] = cell.get("subcap_id")
+    out["grade"] = "cited" if excerpts else "uncited"
+    return out
 
 
 if __name__ == "__main__":  # a library, but it must answer --help

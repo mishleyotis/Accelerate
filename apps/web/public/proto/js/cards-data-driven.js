@@ -137,13 +137,32 @@ function EvidenceTierCard({
   }, k.replace("_", " ").toLowerCase(), " \xB7 ", v)))));
 }
 
-/* ── Multi-source sentiment scorecard ──────────────────────────────────
-   SOURCE: 08_appendices/A6_sentiment_data.csv  (INTERNAL-only) */
+/* ── Multi-source sentiment scorecard (O9) ─────────────────────────────
+   SOURCE: overview.sentiment :: bars[], themes[], gap_analysis, narrative_thread
+
+   TWO VARIANTS, by owner decision 1 (2026-10-04), which supersedes the
+   "withheld from customer" rule of TRD §11 for this section only:
+
+     internal   bars, themes with their cap statements and the cells they
+                bear on, the B2B/B2C gap and its analysis, the narrative
+     customer   REDUCED — bars and themes. No cell codes, no cap statements
+                (cap vocabulary), no internal sources, no reasoning trace.
+
+   The server's default-deny walker decides what reaches each audience; the
+   card ALSO refuses to draw the internal half for a customer, so a payload
+   that arrived unredacted still cannot put a cell code on a client's page.
+
+   RC-03 / D-01: this card read `bars[]` and nothing else. Six promoted
+   themes, a narrative thread and every cap statement reached no screen, and
+   an employee group with three themes read "Not established for this run."
+   The "Industry avg" header and the gap chip read `industry_avg` and
+   `b2b_b2c_gap`, which no contract declares; the chip is now computed from
+   `gap_analysis.b2b_b2c` and the header figure is gone. */
 function SentimentCard({
   entity,
   audience
 }) {
-  if (audience === "customer") return null; // internal-only strip
+  const isCust = audience === "customer";
   const s = DMA.sentimentFor(entity.id);
   if (!s) return /*#__PURE__*/React.createElement(CardAbsent, {
     icon: "users",
@@ -182,7 +201,9 @@ function SentimentCard({
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11,
-        color: "var(--z-body)"
+        color: "var(--z-body)",
+        minWidth: 0,
+        overflowWrap: "anywhere"
       }
     }, r.source, /*#__PURE__*/React.createElement("span", {
       style: {
@@ -217,9 +238,79 @@ function SentimentCard({
       compact: true
     }) : fx(r.score, 1)));
   };
+  /* One theme. The THEME is the reviewers' own recurring pattern and both
+     audiences read it. The cap statement — which cell it caps, at what level
+     and why — and the cell chips are the assessment's working: internal. */
+  const cellName = id => {
+    const L = typeof window !== "undefined" && window.DMA_ENTITY || entity;
+    const c = DMA.getSubcap(L, id);
+    return c && c.name && c.name !== id ? c.name : null;
+  };
+  const Theme = ({
+    t
+  }) => /*#__PURE__*/React.createElement("div", {
+    "data-sentiment-theme": t.audience || "unstated",
+    style: {
+      padding: "6px 0",
+      borderTop: "1px solid var(--z-sep)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      fontWeight: 600,
+      color: "var(--z-dark)",
+      lineHeight: 1.45
+    }
+  }, t.theme), !isCust && t.cap_statement ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: "var(--z-body)",
+      lineHeight: 1.55,
+      marginTop: 3
+    }
+  }, t.cap_statement) : null, !isCust && t.mapped_subcap_ids.length ? /*#__PURE__*/React.createElement("div", {
+    className: "row",
+    style: {
+      gap: 4,
+      flexWrap: "wrap",
+      marginTop: 4
+    }
+  }, t.mapped_subcap_ids.map(id => /*#__PURE__*/React.createElement("span", {
+    key: id,
+    className: "chip f-mono",
+    style: {
+      fontSize: 10
+    },
+    title: cellName(id) ? `${id} · ${cellName(id)}` : id
+  }, id))) : null);
+  const themesFor = a => (s.themes || []).filter(t => (t.audience || "unstated") === a);
+  const groups = [{
+    key: "employee",
+    label: "Employee",
+    bars: s.employee || []
+  }, {
+    key: "customer",
+    label: "Customer",
+    bars: s.customer || []
+  }, {
+    key: "industry",
+    label: "Industry",
+    bars: s.industry || []
+  }];
+  // Employee and customer always show — the contract's two core audiences —
+  // and an empty one says what the PAYLOAD holds for it, which is the only
+  // thing this card knows. Industry shows only when the run says something.
+  const shown = groups.filter(g => g.key !== "industry" || g.bars.length || themesFor("industry").length);
+  const head = {
+    fontSize: 10,
+    color: "var(--z-muted)",
+    textTransform: "uppercase",
+    letterSpacing: ".06em",
+    margin: "10px 0 2px"
+  };
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
-    "data-source": "A6_sentiment_data.csv :: employee[],customer[]"
+    "data-source": "overview.sentiment :: bars[],themes[],gap_analysis"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
   }, /*#__PURE__*/React.createElement("div", {
@@ -227,62 +318,68 @@ function SentimentCard({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "users",
     size: 14
-  }), /*#__PURE__*/React.createElement("h3", null, "Sentiment"), s.b2b_b2c_gap ? /*#__PURE__*/React.createElement("span", {
+  }), /*#__PURE__*/React.createElement("h3", null, "Sentiment"), !isCust && s.b2b_b2c_gap ? /*#__PURE__*/React.createElement("span", {
     className: "b b-org"
-  }, "B2B/B2C gap") : null), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)"
-    }
-  }, s.industry_avg == null ? "" : `Industry avg ${fx(s.industry_avg, 1)}`)), /*#__PURE__*/React.createElement("div", {
+  }, "B2B/B2C gap") : null)), /*#__PURE__*/React.createElement("div", {
     className: "card-body"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)",
-      textTransform: "uppercase",
-      letterSpacing: ".06em",
-      marginBottom: 2
-    }
-  }, "Employee"), (s.employee || []).length ? s.employee.map((r, i) => /*#__PURE__*/React.createElement(Row, {
-    key: "e" + i,
-    r: r
-  })) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)"
-    }
-  }, "Not established for this run."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)",
-      textTransform: "uppercase",
-      letterSpacing: ".06em",
-      margin: "10px 0 2px"
-    }
-  }, "Customer"), (s.customer || []).length ? s.customer.map((r, i) => /*#__PURE__*/React.createElement(Row, {
-    key: "c" + i,
-    r: r
-  })) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)"
-    }
-  }, "Not established for this run."), /*#__PURE__*/React.createElement(SectionEmptyFoot, {
-    section: "overview.sentiment",
-    title: "What this section could not establish"
-  }), (s.ungrouped || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)",
-      textTransform: "uppercase",
-      letterSpacing: ".06em",
-      margin: "10px 0 2px"
-    }
-  }, "Audience not stated"), s.ungrouped.map((r, i) => /*#__PURE__*/React.createElement(Row, {
+  }, shown.map((g, gi) => {
+    const th = themesFor(g.key);
+    return /*#__PURE__*/React.createElement(React.Fragment, {
+      key: g.key
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        ...head,
+        marginTop: gi === 0 ? 0 : 10
+      }
+    }, g.label), g.bars.map((r, i) => /*#__PURE__*/React.createElement(Row, {
+      key: g.key + i,
+      r: r
+    })), th.map((t, i) => /*#__PURE__*/React.createElement(Theme, {
+      key: `${g.key}-t${i}`,
+      t: t
+    })), !g.bars.length && !th.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "var(--z-muted)"
+      }
+    }, "No rating or theme for this audience in this run.") : !g.bars.length ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10.5,
+        color: "var(--z-muted)",
+        marginTop: 2
+      }
+    }, "No rated line for this audience; the themes above are read from review and complaint text.") : null);
+  }), (s.ungrouped || []).length || themesFor("unstated").length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: head
+  }, "Audience not stated"), (s.ungrouped || []).map((r, i) => /*#__PURE__*/React.createElement(Row, {
     key: "u" + i,
     r: r
-  }))) : null, /*#__PURE__*/React.createElement(EnrichmentFlag, {
+  })), themesFor("unstated").map((t, i) => /*#__PURE__*/React.createElement(Theme, {
+    key: "ut" + i,
+    t: t
+  }))) : null, !isCust && s.gap_analysis ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      padding: "8px 10px",
+      background: "var(--z-lav)",
+      borderRadius: 6,
+      fontSize: 11,
+      lineHeight: 1.55,
+      color: "var(--z-body)"
+    }
+  }, s.gap_analysis.b2b_b2c ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("strong", null, "B2B/B2C gap \xB7 "), s.gap_analysis.b2b_b2c) : null, s.gap_analysis.internal_external ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 4
+    }
+  }, /*#__PURE__*/React.createElement("strong", null, "Internal/external gap \xB7 "), s.gap_analysis.internal_external) : null) : null, !isCust && s.narrative_thread ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontSize: 11.5,
+      color: "var(--z-body)",
+      lineHeight: 1.55,
+      fontStyle: "italic"
+    }
+  }, s.narrative_thread) : null, /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).sentiment,
     what: "rows",
     audience: audience
@@ -319,7 +416,7 @@ function FinancialTrajectoryCard({
     note: "No financial series promoted for this run.",
     section: "overview.financial_series"
   });
-  const values = (f.total_assets || []).filter(v => v != null);
+  const values = (f.series_values || []).filter(v => v != null);
   const maxA = values.length ? Math.max(...values) : 1;
   /* A TRAJECTORY needs at least two points. With one, `value / max * 80px`
      is 80px by construction — a single full-height, full-width bar that reads
@@ -331,7 +428,7 @@ function FinancialTrajectoryCard({
     const only = f.fy[0];
     return /*#__PURE__*/React.createElement("div", {
       className: "card flush",
-      "data-source": "financial_baseline.json :: total_assets[]"
+      "data-source": "overview.financial_series :: series[]"
     }, /*#__PURE__*/React.createElement("div", {
       className: "card-head"
     }, /*#__PURE__*/React.createElement("div", {
@@ -349,7 +446,7 @@ function FinancialTrajectoryCard({
         fontWeight: 700,
         color: "var(--z-dark)"
       }
-    }, fmtAssets(f.total_assets[0], f.unit)), /*#__PURE__*/React.createElement("div", {
+    }, fmtAssets(f.series_values[0], f.unit)), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 11.5,
         color: "var(--z-muted)",
@@ -379,7 +476,7 @@ function FinancialTrajectoryCard({
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "card flush",
-    "data-source": "financial_baseline.json :: total_assets[],net_income_m[],nim_pct[]"
+    "data-source": "overview.financial_series :: series[],net_income_m[],nim_pct[]"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card-head"
   }, /*#__PURE__*/React.createElement("div", {
@@ -402,7 +499,7 @@ function FinancialTrajectoryCard({
       height: 120
     }
   }, f.fy.map((y, i) => {
-    const money = fmtMoney(f.total_assets[i], f.unit);
+    const money = fmtMoney(f.series_values[i], f.unit);
     return /*#__PURE__*/React.createElement("div", {
       key: y,
       style: {
@@ -422,7 +519,7 @@ function FinancialTrajectoryCard({
     }, money), /*#__PURE__*/React.createElement("div", {
       style: {
         width: "100%",
-        height: `${(f.total_assets[i] || 0) / maxA * 80}px`,
+        height: `${(f.series_values[i] || 0) / maxA * 80}px`,
         background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))",
         borderRadius: "4px 4px 0 0",
         transition: "height var(--motion-slow) var(--ease)"

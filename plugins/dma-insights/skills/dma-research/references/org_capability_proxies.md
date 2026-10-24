@@ -1,7 +1,7 @@
 # Organizational Capability Proxies
 
-Read this file during Batch 1 Step 10 (organizational capability analysis) and when
-writing A9 (Organizational Capability Assessment) in Batch 4.
+Read this file when you climb the org-talent proxy rung for a cell, and when the
+assessment report's organizational-capability section is written.
 
 ---
 

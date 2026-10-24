@@ -134,7 +134,7 @@ def test_the_step_is_reachable_from_the_skill_index():
 # ── the fit score the producer must READ, not author ───────────────────
 
 PLATFORM_PAGE = (ROOT / "plugins" / "dma-insights" / "skills"
-                 / "dma-surface-production" / "03-pages" / "4-platform.md")
+                 / "dma-surface-production" / "03-pages" / "platform" / "P1.md")
 
 
 def test_the_platform_page_sends_the_producer_to_the_engine():

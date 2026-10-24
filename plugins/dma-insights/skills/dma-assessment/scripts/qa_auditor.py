@@ -24,6 +24,15 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
+
+# The version these outputs carry is the plugin's, read from the one place it
+# is stated (.claude-plugin/plugin.json) through the engine's contract.
+# Measured 28-09-2026 (QA audit F-A03-020): this script carried its own
+# "governance_skill_version" literal beside a SKILL.md that said otherwise.
+_ENGINE_ROOT = Path(__file__).resolve().parents[2] / "dma-research"
+if str(_ENGINE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ENGINE_ROOT))
+from engine import contract as _contract  # noqa: E402
 from typing import Dict, List, Tuple
 
 import pandas as pd
@@ -496,8 +505,8 @@ class QAAuditor:
             "$schema": "qa_verdict_v1",
             "institution_name": self.institution_name,
             "assessment_date": self.assessment_date,
-            "rubric_version": "5.0",
-            "governance_skill_version": "2.2",
+            "rubric_version": _contract.ENGINE_VERSION,
+            "governance_skill_version": _contract.plugin_version() or "unknown",
             "audit_date": datetime.now().strftime("%Y-%m-%d"),
             "verdict": verdict_str,
             "verdict_rationale": rationale,

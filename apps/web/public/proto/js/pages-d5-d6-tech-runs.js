@@ -1,3 +1,117 @@
+/* One bar on the issue-register timeline, which shows its label only when the
+   label FITS.
+ *
+ * Two earlier attempts guessed, and both shipped a truncated title.
+ *
+ *   1 · no guard at all — an 85-character title in a 2%-wide bar rendered as
+ *       the single letter "D".
+ *   2 · `width >= 12` — a PERCENTAGE threshold, which has no relationship to
+ *       whether text fits. Reported 2026-09-03 from the promoted page: a
+ *       432px bar carrying a 71-character title rendered "Integration
+ *       architecture runs point to p…", cut mid-word.
+ *
+ * A percentage cannot answer this question. The lane's pixel width depends on
+ * the viewport, the label's on the string, and the only thing that knows both
+ * is the browser. So the bar asks it: render the label, compare `scrollWidth`
+ * to `clientWidth`, and drop the label when it overflows — re-checked on
+ * every resize, because a bar that fits at 1512px need not at 960px.
+ *
+ * Dropping it loses nothing. The row's own label column carries `I-003`, the
+ * severity chip, the full title and the status, and this bar's `title`
+ * attribute carries the dates and the rationale. A truncated title is not a
+ * shorter title — it is a claim the reader cannot finish, next to a row that
+ * already states it in full. */
+function IssueBar({
+  left,
+  width,
+  color,
+  label,
+  title
+}) {
+  const ref = React.useRef(null);
+  const [fits, setFits] = React.useState(false);
+  React.useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    /* Measure with the label PRESENT — `scrollWidth` of an empty box is its
+       client width, so a hidden label would always report "fits" and the
+       first render would latch it on forever. */
+    const measure = () => {
+      /* Measure in the state the label will RENDER in, which means with the
+         horizontal padding applied.
+          The padding is only present when a label is shown, and `fits` starts
+         false — so measuring as-is compares the text against the FULL box
+         and a label needing every pixel "fits", then clips the moment the
+         6px each side arrives. That is a second, quieter version of the
+         mistake this component replaced: deciding from a proxy instead of
+         from what the reader sees. */
+      const prevText = el.textContent;
+      const prevPad = el.style.padding;
+      el.style.padding = "0 6px";
+      el.textContent = label || "";
+      const ok = el.scrollWidth <= el.clientWidth;
+      el.textContent = prevText;
+      el.style.padding = prevPad;
+      setFits(ok);
+    };
+    measure();
+
+    /* Re-measure when the WEB FONT arrives. `useLayoutEffect` runs before
+       a late font swap, so the first measurement can be taken in a narrower
+       fallback face: the label "fits", the real face loads, and the label
+       clips — with no resize to notice it. That is exactly how this test
+       passed locally (font cached) and failed on a cold CI runner at
+       1512px, showing the full title with `clipped: true`.
+        `document.fonts.ready` settles once, after which the measurement is
+       against the face the reader actually sees. Guarded, because jsdom and
+       older engines have no font-loading API. */
+    let live = true;
+    const remeasure = () => {
+      if (live) measure();
+    };
+    if (typeof document !== "undefined" && document.fonts && document.fonts.ready && document.fonts.ready.then) {
+      document.fonts.ready.then(remeasure).catch(() => {});
+    }
+    if (typeof ResizeObserver === "undefined") return () => {
+      live = false;
+    };
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => {
+      live = false;
+      ro.disconnect();
+    };
+  }, [label, width, left]);
+  return /*#__PURE__*/React.createElement("div", {
+    ref: ref,
+    title: title
+    /* The horizontal padding insets the LABEL, so a bar with no label
+       must not carry it: 6px each side is a 12px floor on the rendered
+       box that a 2% width cannot go under, and at 960px that floor put
+       the stub 3px past the lane even with the percentage clamped.
+       Padding on an empty bar is pure overflow. */,
+    style: {
+      position: "absolute",
+      left: `${left}%`,
+      width: `${width}%`,
+      height: 18,
+      top: 5,
+      background: color,
+      borderRadius: 4,
+      opacity: .85,
+      display: "flex",
+      alignItems: "center",
+      boxSizing: "border-box",
+      padding: fits ? "0 6px" : 0,
+      color: "#fff",
+      fontSize: 10,
+      fontWeight: 500,
+      overflow: "hidden",
+      whiteSpace: "nowrap"
+    }
+  }, fits ? label : "");
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    DMA INSIGHTS · Client pages - D5 Context, D6 Health, Tech stack, Runs
    ═══════════════════════════════════════════════════════════════════════ */
@@ -35,7 +149,7 @@ function ClientContext({
     }, /*#__PURE__*/React.createElement(Icon, {
       name: "lock",
       size: 20
-    })), /*#__PURE__*/React.createElement("h3", null, "Context & timeline is internal-only"), /*#__PURE__*/React.createElement("p", null, "This dashboard contains internal team-preparation data. Switch back to Internal mode to view."));
+    })), /*#__PURE__*/React.createElement("h3", null, "Context & timeline is internal-only"), /*#__PURE__*/React.createElement("p", null, "This dashboard contains internal team-preparation data. Switch back to the Zennify view to read it."));
   }
   const allEvents = DMA.TIMELINE_EVENTS;
   const issues = DMA.ISSUES;
@@ -1219,9 +1333,20 @@ function InteractiveGantt({
       // not stated rather than inventing either endpoint.
       const TERMINAL = /^(REMEDIATED|RESOLVED|CLOSED|RETIRED|EXPIRED|S\d\s+EXPIRED)/i.test(String(iss.status || "").trim());
       const b = iss.end ? at(iss.end) ?? now : TERMINAL ? Math.min((a ?? now) + (now - (a ?? now)) * 0.12 + 1, now) : now;
-      const left = Math.max(0, Math.min(100, pct(a)));
+      const left0 = Math.max(0, Math.min(100, pct(a)));
       const right = Math.max(0, Math.min(100, pct(Math.max(b, a))));
-      const width = Math.max(2, right - left);
+      // The minimum width is what keeps a same-day matter visible, but it
+      // was applied WITHOUT re-checking the right edge, so a bar pinned
+      // near the end of the axis ran off the lane. Measured on Golden 1,
+      // 2026-09-02: I-001 and I-002 opened 2026-08-25, eight days before
+      // the axis end, giving left 99.55% and a floored width of 2% — a bar
+      // ending at 101.55%, hanging over the card edge with its label
+      // clipped to a single letter. Clamp the stub back inside the track:
+      // the bar keeps its width and gives up its exact position, which is
+      // the honest trade at this scale (two days is a sub-pixel distinction
+      // on this axis, and the row states the date).
+      const width = Math.min(100, Math.max(2, right - left0));
+      const left = Math.min(left0, 100 - width);
       const tone = severityTone(iss.severity);
       const color = tone === "b-below" ? "var(--z-below)" : tone === "b-org" ? "var(--z-org)" : "var(--z-muted)";
       const isOpen = issueOpen === iss.id;
@@ -1288,28 +1413,13 @@ function InteractiveGantt({
           position: "relative",
           height: 28
         }
-      }, /*#__PURE__*/React.createElement("div", {
-        title: `${iss.start}${iss.end ? ` → ${iss.end}` : TERMINAL ? ` → ${String(iss.status).toLowerCase()} · resolution date not stated` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`,
-        style: {
-          position: "absolute",
-          left: `${left}%`,
-          width: `${width}%`,
-          height: 18,
-          top: 5,
-          background: color,
-          borderRadius: 4,
-          opacity: .85,
-          display: "flex",
-          alignItems: "center",
-          padding: "0 6px",
-          color: "#fff",
-          fontSize: 10,
-          fontWeight: 500,
-          overflow: "hidden",
-          whiteSpace: "nowrap",
-          textOverflow: "ellipsis"
-        }
-      }, iss.title || iss.type || iss.id)));
+      }, /*#__PURE__*/React.createElement(IssueBar, {
+        left: left,
+        width: width,
+        color: color,
+        label: iss.title || iss.type || iss.id,
+        title: `${iss.start}${iss.end ? ` → ${iss.end}` : TERMINAL ? ` → ${String(iss.status).toLowerCase()} · resolution date not stated` : " → open"}${iss.desc ? ` · ${iss.desc}` : ""}`
+      })));
     }), undated.length ? /*#__PURE__*/React.createElement("div", {
       style: {
         borderTop: "1px solid var(--z-sep)",
@@ -1809,7 +1919,7 @@ function FinChartInteractive({
   const f = DMA.financialsFor(entity.id);
   const pts = (f && f.fy || []).map((label, i) => ({
     label,
-    val: (f.total_assets || [])[i]
+    val: (f.series_values || [])[i]
   })).filter(p => p.val != null);
   if (!pts.length) {
     return /*#__PURE__*/React.createElement("div", {
@@ -1952,6 +2062,14 @@ function SentimentGridInteractive({
     });
     byAudience.get(k).absent = a;
   }
+  // The tile's OWN note and citations, for a tile that has rows. RC-03/D-02:
+  // on the audited run this note carried the complaint-record analysis and
+  // was read by no renderer, because only row notes were drawn.
+  const notes = sent && sent.notes || {};
+  for (const [g, n] of Object.entries(notes)) {
+    const k = String(g || "unstated").toLowerCase();
+    if (byAudience.has(k)) byAudience.get(k).tileNote = n;
+  }
   const tiles = [...byAudience.values()].sort((x, y) => {
     const i = AUDIENCE_ORDER.indexOf(x.key),
       j = AUDIENCE_ORDER.indexOf(y.key);
@@ -2025,13 +2143,18 @@ function SentimentGridInteractive({
         color: "var(--z-muted)",
         fontWeight: 400
       }
-    }, scaleToken(lead.scale)) : null) : /*#__PURE__*/React.createElement("span", {
+    }, scaleToken(lead.scale)) : null) :
+    /*#__PURE__*/
+    /* What the PAYLOAD says, nothing more: this tile promoted no
+       rated row. "Searched, not established" asserted a search
+       on tiles whose ladder the customer read does not carry. */
+    React.createElement("span", {
       style: {
         fontSize: 12,
         color: "var(--z-muted)",
         fontStyle: "italic"
       }
-    }, "Searched, not established"), /*#__PURE__*/React.createElement("span", {
+    }, "No rated line"), /*#__PURE__*/React.createElement("span", {
       className: "spacer"
     }), /*#__PURE__*/React.createElement(Icon, {
       name: isOpen ? "chevron-u" : "chevron-d",
@@ -2047,7 +2170,13 @@ function SentimentGridInteractive({
       },
       className: "txt-fit-1",
       title: lead ? `${lead.label}${lead.n != null ? ` · n=${lead.n}` : ""}` : t.absent && t.absent.note || ""
-    }, lead ? `${lead.label}${lead.n != null ? ` · n=${Number(lead.n).toLocaleString()}` : ""}${more ? ` · +${more} more` : ""}` : `${t.absent && (t.absent.sources_searched || []).length || 0} source${(t.absent && (t.absent.sources_searched || []).length || 0) === 1 ? "" : "s"} searched`)), isOpen ? /*#__PURE__*/React.createElement("div", {
+    }, lead ? `${lead.label}${lead.n != null ? ` · n=${Number(lead.n).toLocaleString()}` : ""}${more ? ` · +${more} more` : ""}` : (() => {
+      const ns = (t.absent && t.absent.sources_searched || []).length;
+      const ni = (t.absent && t.absent.e_ids || []).length;
+      if (ns) return `${ns} source${ns === 1 ? "" : "s"} searched`;
+      if (ni) return `${ni} cited item${ni === 1 ? "" : "s"} · context, not a rating`;
+      return "context, not a rating";
+    })())), isOpen ? /*#__PURE__*/React.createElement("div", {
       style: {
         marginTop: 6,
         padding: "10px 12px",
@@ -2092,7 +2221,41 @@ function SentimentGridInteractive({
         border: 0
       },
       onClick: () => openEvidence(eid)
-    }, eid))) : null)), t.absent ? /*#__PURE__*/React.createElement("div", null, t.absent.note || "Searched and not established.", (t.absent.sources_searched || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", t.absent.sources_searched.join(" · "), ".") : null) : null) : null);
+    }, eid))) : null)), t.tileNote && t.tileNote.note ? /*#__PURE__*/React.createElement("div", {
+      style: {
+        marginTop: t.rows.length ? 4 : 0
+      }
+    }, t.tileNote.note) : null, t.tileNote && (t.tileNote.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 5,
+        flexWrap: "wrap",
+        marginTop: 5
+      }
+    }, t.tileNote.e_ids.map(eid => /*#__PURE__*/React.createElement("button", {
+      key: eid,
+      className: "chip",
+      style: {
+        cursor: "pointer",
+        border: 0
+      },
+      onClick: () => openEvidence(eid)
+    }, eid))) : null, t.absent ? /*#__PURE__*/React.createElement("div", null, t.absent.note || "This tile promoted no rated line.", (t.absent.sources_searched || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, " Searched: ", t.absent.sources_searched.join(" · "), ".") : null, (t.absent.e_ids || []).length ? /*#__PURE__*/React.createElement("div", {
+      className: "row",
+      style: {
+        gap: 5,
+        flexWrap: "wrap",
+        marginTop: 5
+      }
+    }, t.absent.e_ids.map(eid => /*#__PURE__*/React.createElement("button", {
+      key: eid,
+      className: "chip",
+      style: {
+        cursor: "pointer",
+        border: 0
+      },
+      onClick: () => openEvidence(eid)
+    }, eid))) : null) : null) : null);
   }));
 }
 function Timeline({
@@ -2162,7 +2325,7 @@ function Timeline({
       color: TONE[e.signal],
       fontWeight: hover === i ? 600 : 400
     }
-  }, e.title.split(" ").slice(0, 4).join(" "), e.title.split(" ").length > 4 ? "…" : "")))), hover != null ? /*#__PURE__*/React.createElement("div", {
+  }, String(e.title || "").split(" ").slice(0, 4).join(" "), String(e.title || "").split(" ").length > 4 ? "…" : "")))), hover != null ? /*#__PURE__*/React.createElement("div", {
     className: "card-tile",
     style: {
       marginTop: 16,
@@ -2291,125 +2454,13 @@ function Gantt({
     }, iss.desc.slice(0, 60), iss.desc.length > 60 ? "…" : "")));
   }));
 }
-function FinChart({
-  entity
-}) {
-  const years = [2022, 2023, 2024, 2025, 2026];
-  const baseAssets = entity.assets || 11e9;
-  const cagr = entity.cagr || 0.06;
-  const data = years.map((y, i) => ({
-    year: y,
-    val: baseAssets * Math.pow(1 + cagr, i - 4)
-  }));
-  const max = Math.max(...data.map(d => d.val));
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "flex-end",
-      gap: 14,
-      height: 140,
-      padding: "0 8px"
-    }
-  }, data.map(d => /*#__PURE__*/React.createElement("div", {
-    key: d.year,
-    style: {
-      flex: 1,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 4
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)"
-    }
-  }, "$", fx(d.val / 1e9, 1), "B"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: "100%",
-      height: `${d.val / max * 120}px`,
-      background: "linear-gradient(180deg, var(--z-teal), var(--z-mid))",
-      borderRadius: "4px 4px 0 0"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)"
-    }
-  }, d.year)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 10,
-      padding: 8,
-      background: "var(--z-lav)",
-      borderRadius: 6,
-      fontSize: 11,
-      color: "var(--z-body)"
-    }
-  }, "Total asset CAGR ", /*#__PURE__*/React.createElement("strong", {
-    style: {
-      color: "var(--z-mid)"
-    }
-  }, fx(cagr * 100, 1), "%"), " \xB7 trend classified ", /*#__PURE__*/React.createElement("strong", null, entity.trend)));
-}
-function SentimentGrid() {
-  const sentiments = [{
-    label: "Glassdoor",
-    value: 3.8,
-    max: 5,
-    n: 412,
-    label2: "Employee"
-  }, {
-    label: "App Store",
-    value: 3.4,
-    max: 5,
-    n: 8200,
-    label2: "Mobile"
-  }, {
-    label: "CFPB complaints",
-    value: 24,
-    max: 100,
-    n: 24,
-    label2: "Index (lower better)"
-  }];
-  return /*#__PURE__*/React.createElement("div", {
-    className: "g3",
-    style: {
-      gap: 10
-    }
-  }, sentiments.map(s => /*#__PURE__*/React.createElement("div", {
-    key: s.label,
-    className: "card-tile",
-    style: {
-      padding: 10,
-      border: "none",
-      background: "var(--z-lav)"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)",
-      textTransform: "uppercase",
-      letterSpacing: ".08em"
-    }
-  }, s.label2), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 18,
-      fontWeight: 600,
-      marginTop: 4
-    }
-  }, s.value, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: "var(--z-muted)",
-      fontWeight: 400
-    }
-  }, "/", s.max)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "var(--z-muted)"
-    }
-  }, s.label, " \xB7 n=", s.n.toLocaleString()))));
-}
+
+/* FinChart and SentimentGrid were DELETED 2026-10-04 (RC-11). Neither was
+   mounted anywhere, and both were renderer constants asserting what no
+   payload said: FinChart compounded `entity.assets || 11e9` at
+   `entity.cagr || 0.06` into a five-year "Total asset CAGR 6.0%" trend, and
+   SentimentGrid hard-coded Glassdoor 3.8 (n=412), App Store 3.4 and a CFPB
+   index of 24. Dead code that fabricates is one import away from a page. */
 
 /* ── The evidence-age panel's rows ────────────────────────────────────
    The tracker aged `DMA.EVIDENCE[].recency`, and the adapter sets `recency`
@@ -2545,7 +2596,7 @@ function ClientHealth({
     size: 13
   }), " Re-run feedback file"), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast(`Exporting ${entity.name} health report as CSV…`, "success")
+    onClick: () => pushToast(`Exporting ${entityName(entity)} health report as CSV…`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -3241,10 +3292,11 @@ function ClientTechStack({
   const byLayer = {};
   LAYERS.forEach(L => byLayer[L] = list.filter(t => t.layer === L));
 
-  // Layer keys are OPS · CUST · DATA · INFRA (charter correction); the
-  // customer-engagement and data layers are the ones whose absence gates
-  // downstream AI/decisioning work.
-  const absentCount = allTech.filter(t => t.status === "ABSENT" && (t.layer === "CUST" || t.layer === "DATA")).length;
+  // The register's own ABSENT rows, every layer. The footer used to count
+  // only CUST and DATA and call the result "the primary Zennify engagement
+  // opportunity" — seller voice on the client's page, asserted by a
+  // constant no payload check could see (RC-11 / D-14).
+  const absentCount = allTech.filter(t => t.status === "ABSENT").length;
 
   /* Narrow to the gap rows, and land on them. Enabling releases every other
      filter — they would otherwise intersect and the register could come out
@@ -3279,7 +3331,7 @@ function ClientTechStack({
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Technology intelligence"), /*#__PURE__*/React.createElement("h1", null, "Technology stack - ", entity.name), /*#__PURE__*/React.createElement("div", {
+  }, "Technology intelligence"), /*#__PURE__*/React.createElement("h1", null, "Technology stack - ", entityName(entity)), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, allTech.length, " product", allTech.length === 1 ? "" : "s", " across four layers \xB7 detection level per row, from the run's own evidence"), /*#__PURE__*/React.createElement(EnrichmentFlag, {
     s: (DMA.LIVE_ENRICHMENT || {}).techstack,
@@ -3289,7 +3341,7 @@ function ClientTechStack({
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-tertiary",
-    onClick: () => pushToast(`Exporting ${entity.name} tech stack as CSV…`, "success")
+    onClick: () => pushToast(`Exporting ${entityName(entity)} tech stack as CSV…`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "download",
     size: 13
@@ -3553,13 +3605,15 @@ function ClientTechStack({
     const techList = byLayer[L];
     if (!techList || techList.length === 0) return null;
     // The promoted rollup decides this, and it carries its own detected /
-    // expected counts. Fall back to counting the rows on screen so the
-    // card still states a real ratio when the run promoted no rollup —
-    // never to a constant.
+    // expected counts. `detected` may fall back to counting the rows on
+    // screen — that is a count of the register. `expected` may NOT
+    // (RC-11 / D-16): the rows cannot be their own denominator, and
+    // "5 of 5" over `expected: null` is the circular rollup. An unstated
+    // denominator renders as unstated, with the run's own basis on hover.
     const roll = (layerRollup || []).find(x => x && x.layer === L) || null;
     const isPrimaryGap = !!(roll && roll.is_primary_gap);
     const detected = roll && roll.detected != null ? roll.detected : techList.filter(t => t.status !== "ABSENT").length;
-    const expected = roll && roll.expected != null ? roll.expected : techList.length;
+    const expected = roll && roll.expected != null ? roll.expected : null;
     return /*#__PURE__*/React.createElement("div", {
       key: L,
       id: `ts-layer-${L}`,
@@ -3598,8 +3652,9 @@ function ClientTechStack({
       style: {
         fontSize: 11,
         color: "var(--z-muted)"
-      }
-    }, detected, " of ", expected, " detected")), /*#__PURE__*/React.createElement("div", {
+      },
+      title: roll && roll.expected_basis || undefined
+    }, expected != null ? `${detected} of ${expected} detected` : `${detected} detected · expected not stated`)), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         flexDirection: "column",
@@ -3645,13 +3700,13 @@ function ClientTechStack({
       fontWeight: 700,
       color: "var(--z-dark)"
     }
-  }, absentCount, " technologies absent across customer + data layers - the primary Zennify engagement opportunity"), /*#__PURE__*/React.createElement("div", {
+  }, absentCount === 0 ? "No product is recorded absent in this register" : `${absentCount} product${absentCount === 1 ? "" : "s"} recorded absent in this register`), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: "var(--z-body)",
       marginTop: 3
     }
-  }, "All absent-technology rows link directly to platform recommendations.")), /*#__PURE__*/React.createElement("button", {
+  }, "The platform page sets out the recommendations this assessment makes.")), /*#__PURE__*/React.createElement("button", {
     className: "btn btn-primary btn-sm",
     onClick: () => navigate(`/clients/${entity.id}/platform`, {
       run: run.id
@@ -3943,9 +3998,12 @@ function ClientTechStackDetail({
       color: "#7C3500",
       label: "Claimed - stated, not corroborated"
     },
+    // Not "searched and not found": an ABSENT row may rest on the
+    // institution's own statement with no search run (RC-11 / D-15). How it
+    // was established is the row's detection_basis, printed below.
     ABSENT: {
       color: "var(--z-below)",
-      label: "Absent - searched and not found"
+      label: "Absent - not in the estate"
     }
   };
   // A status is REQUIRED on every register row, so a row without one is a
@@ -4149,7 +4207,14 @@ function ClientTechStackDetail({
       lineHeight: 1.65,
       maxWidth: 860
     }
-  }, t.dma_impact)) : /*#__PURE__*/React.createElement("div", {
+  }, t.dma_impact)) :
+  /*#__PURE__*/
+  /* AUDIENCE-AWARE (RC-11 / D-13). The server strips items[*].dma_impact
+     from every customer read (redaction CUSTOMER_ALWAYS), so on the
+     customer view an absent field is a WITHHELD field. This said "the
+     reasoning that connects them was not written" to the client over
+     a run where 36 of 36 were written. */
+  React.createElement("div", {
     className: "card",
     style: {
       marginBottom: 14
@@ -4166,7 +4231,7 @@ function ClientTechStackDetail({
       color: "var(--z-muted)",
       lineHeight: 1.6
     }
-  }, "The run states no assessment impact for this row. The linked cells and their served scores are below; the reasoning that connects them was not written.")), /*#__PURE__*/React.createElement("div", {
+  }, audience === "customer" ? "The reasoning for this row is withheld from this view. The linked cells and their served scores are below." : "The run states no assessment impact for this row. The linked cells and their served scores are below.")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))",
@@ -4472,9 +4537,12 @@ function ClientTechStackDetail({
     className: "b b-teal"
   }, fmtPct(t.peer_coverage), " adopted") : (t.peer_deployments || []).length ? /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
-  }, "no share stated") : /*#__PURE__*/React.createElement("span", {
+  }, "no share stated")
+  /* "not researched" was our workflow word on a client page
+     (RC-11 / D-37). The payload states no peer row; that is
+     all the badge may say. */ : /*#__PURE__*/React.createElement("span", {
     className: "b b-muted"
-  }, "not researched")), (t.peer_deployments || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, (() => {
+  }, "no peer row stated")), (t.peer_deployments || []).length ? /*#__PURE__*/React.createElement(React.Fragment, null, (() => {
     const rows = t.peer_deployments || [];
     const yes = rows.filter(d => d.deployed === true).length;
     const no = rows.filter(d => d.deployed === false).length;
@@ -4577,7 +4645,7 @@ function ClientTechStackDetail({
     style: {
       marginBottom: 8
     }
-  }, "No peer technographic research is attached to this product for this run, so no adoption figure is shown."), peers.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, "This run states no peer deployment of this product, so no adoption figure is shown."), peers.length ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 10,
       fontWeight: 700,
@@ -4586,7 +4654,7 @@ function ClientTechStackDetail({
       textTransform: "uppercase",
       marginBottom: 6
     }
-  }, "Peer set that would be searched"), /*#__PURE__*/React.createElement("div", {
+  }, "Peers identified for this engagement \xB7 not scored"), /*#__PURE__*/React.createElement("div", {
     className: "row",
     style: {
       gap: 5,
@@ -4599,7 +4667,7 @@ function ClientTechStackDetail({
     style: {
       color: "var(--z-muted)"
     }
-  }, "This run states no peer set, so there is no cohort to search against either.")))), (() => {
+  }, "This run states no peer set either.")))), (() => {
     if (t.status !== "ABSENT") return null;
     const seen = new Set();
     const linked = [];
@@ -4668,7 +4736,7 @@ function ClientTechStackDetail({
         color: "#3B0764",
         lineHeight: 1.65
       }
-    }, "No promoted recommendation names a cell this row is linked to. The pathway stated above is the argument for the work; the roadmap has not yet sequenced it."));
+    }, "No promoted recommendation names a cell this row is linked to."));
   })());
 }
 
@@ -4683,13 +4751,13 @@ function ClientRuns({
     className: "page-head"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "eyebrow"
-  }, "Run history"), /*#__PURE__*/React.createElement("h1", null, "Runs - ", entity.name), /*#__PURE__*/React.createElement("div", {
+  }, "Run history"), /*#__PURE__*/React.createElement("h1", null, "Runs - ", entityName(entity)), /*#__PURE__*/React.createElement("div", {
     className: "sub"
   }, entity.runs.length, " immutable run records \xB7 sortable by date")), /*#__PURE__*/React.createElement("div", {
     className: "actions"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn btn-secondary",
-    onClick: () => pushToast(`Rerun queued for ${entity.name} — first batch in ~3 min`, "success")
+    onClick: () => pushToast(`Rerun queued for ${entityName(entity)} — first batch in ~3 min`, "success")
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "refresh",
     size: 13
@@ -4763,5 +4831,7 @@ Object.assign(window, {
   ClientTechStackDetail,
   ClientRuns,
   evidenceAgeRows,
-  calendarValue
+  calendarValue,
+  SentimentGridInteractive,
+  FinChartInteractive
 });

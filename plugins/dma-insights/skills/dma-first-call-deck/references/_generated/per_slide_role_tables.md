@@ -111,11 +111,11 @@ _No editable roles. Slide 9 is **static** — template content ships ready._
 | 24 | `rec3_strip` | `data` | `s10.rec_scores[2]` | `accent` | ✓ | ✓ | · | · |
 | 25 | `rec3_label` | `data` | `s10.rec_scores[2]` | `label_text` | · | · | ✓ | ✓ |
 | 26 | `legend_act_bg` | `static` | `s10_legend_act_bg` | — | · | · | · | · |
-| 27 | `legend_act_acc` | `static` | `s10_legend_act_acc` | — | · | · | · | · |
+| 27 | `legend_act_acc` | `static` | `s10_legend_act_acc` | — | ✓ | ✓ | · | · |
 | 29 | `legend_bld_bg` | `static` | `s10_legend_bld_bg` | — | · | · | · | · |
-| 30 | `legend_bld_acc` | `static` | `s10_legend_bld_acc` | — | · | · | · | · |
+| 30 | `legend_bld_acc` | `static` | `s10_legend_bld_acc` | — | ✓ | ✓ | · | · |
 | 32 | `legend_cmp_bg` | `static` | `s10_legend_cmp_bg` | — | · | · | · | · |
-| 33 | `legend_cmp_acc` | `static` | `s10_legend_cmp_acc` | — | · | · | · | · |
+| 33 | `legend_cmp_acc` | `static` | `s10_legend_cmp_acc` | — | ✓ | ✓ | · | · |
 | 36 | `rec1_name` | `text` | `recs[0].name + ' | Maturity: ' + cur + ' → Target: ' + tgt` | — | · | · | ✓ | · |
 | 37 | `rec2_name` | `text` | `recs[1].name + ' | Maturity: ' + cur + ' → Target: ' + tgt` | — | · | · | ✓ | · |
 | 38 | `rec3_name` | `text` | `recs[2].name + ' | Maturity: ' + cur + ' → Target: ' + tgt` | — | · | · | ✓ | · |

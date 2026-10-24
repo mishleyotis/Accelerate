@@ -77,7 +77,7 @@ def test_no_gate_id_is_defined_twice():
     from pathlib import Path
 
     src = Path(__file__).resolve().parents[1] / "dma_mcp" / "gates.py"
-    ids = re.findall(r'^\s*"([A-Z]{2}-\d+)":', src.read_text(), re.M)
+    ids = re.findall(r'^\s*"([A-Z]{2}-\d+[a-z]?)":', src.read_text(), re.M)
     dupes = sorted(k for k, n in Counter(ids).items() if n > 1)
     assert not dupes, f"gate ids defined more than once: {dupes}"
 
@@ -92,7 +92,7 @@ def test_every_gate_the_validator_emits_is_in_the_registry():
     root = Path(__file__).resolve().parents[1] / "dma_mcp"
     emitted = set()
     for mod in ("validation.py", "validation2.py", "transport.py"):
-        emitted |= set(re.findall(r'_reason\(\s*"([A-Z]{2}-\d+)"',
+        emitted |= set(re.findall(r'_reason\(\s*"([A-Z]{2}-\d+[a-z]?)"',
                                   (root / mod).read_text()))
     missing = sorted(emitted - set(GATES))
     assert not missing, f"emitted but unregistered: {missing}"

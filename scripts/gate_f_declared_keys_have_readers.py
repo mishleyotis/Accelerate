@@ -153,11 +153,22 @@ def main(argv) -> int:
               file=sys.stderr)
         return 1
 
-    msg = f"Gate F passed: {len(found)} unread key(s), baseline {len(base)}."
     if fixed:
-        msg += (f" {len(fixed)} now read ({', '.join(fixed[:6])}"
-                f"{'…' if len(fixed) > 6 else ''}) — re-pin with --update.")
-    print(msg)
+        # A STALE baseline is a hole in the ratchet, not a courtesy note
+        # (RC-03, gold audit 2026-10-04). A key that is read today but still
+        # listed here can lose its reader tomorrow and this gate will not
+        # notice: that is how `themes[].cap_statement` and `gap_analysis` sat
+        # in the baseline as accepted debt while the card that should read
+        # them did not. Wiring a reader and shrinking the baseline happen in
+        # the same commit, so a key that becomes unread AGAIN fails as new.
+        print(f"Gate F FAILED: the baseline lists {len(fixed)} key(s) that now "
+              f"have a reader: {', '.join(fixed)}.", file=sys.stderr)
+        print("Re-pin with --update in the same commit that wired the reader, "
+              "so the ratchet catches the key if it ever loses it again.",
+              file=sys.stderr)
+        return 1
+
+    print(f"Gate F passed: {len(found)} unread key(s), baseline {len(base)}.")
     return 0
 
 

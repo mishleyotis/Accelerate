@@ -91,15 +91,16 @@ def test_a_prose_citation_is_collected_from_a_plain_string():
 # ── AUD-0045 · a self-REJECTED item is not a recommendation ─────────────
 
 def test_ag01_reads_the_verdict_it_used_to_only_count():
-    from dma_mcp import validation2 as V
-    src = Path(V.__file__).read_text()
-    assert "_REJECTING_VERDICTS" in src and "_ACCEPTING_VERDICTS" in src
+    from dma_mcp import validation as V1, validation2 as V
     assert "REJECT" in V._REJECTING_VERDICTS
     assert "SHIP" in V._ACCEPTING_VERDICTS
-    # and the verdict is READ, not merely present
-    blk = src[src.index("# ── AG-01"):src.index("# ── AG-03")]
-    assert "_REJECTING_VERDICTS" in blk
-    assert "rl.get(\"verdict\")" in blk
+    # and the verdict is READ, not merely present — in pass 1 since
+    # 2026-10-07, so the local precheck sees it before the server does
+    body = {"recommendations": {"items": [{"rec_id": "R1", "r_layer": {"verdict": "REJECT"}}]}}
+    got = V1.check_r_layer_verdicts("platform", body)
+    assert got and got[0]["gate_id"] == "AG-01" and "REJECT" in got[0]["message"]
+    assert any(r["gate_id"] == "AG-01" and "REJECT" in r["message"]
+               for r in V1.validate_pass1("platform", body))
 
 
 def test_the_two_vocabularies_do_not_overlap():

@@ -101,10 +101,10 @@ Slide 14 capability names are fitted to Calibri metrics. When viewed in Google S
 | Name | Hex | Role |
 |---|---|---|
 | Dark green | #1C4A4D | Headers, primary body text, chart labels |
-| Dark teal | #185F60 | Pillar headers, Differentiating heatmap level |
+| Deep teal | #139F94 | Differentiating band fill + label text (the app's hex, `apps/web/lib/bands.js`); the retired dark-teal fifth-band hex must not appear anywhere |
 | Teal | #27BBAF | Primary brand accent, above-benchmark |
-| Light teal | #62D7B8 | Secondary accent, Advanced level |
-| Light green | #B0EED3 | Solution text, at-benchmark, Established level |
+| Light teal | #62D7B8 | Building band fill; Slide 13 level-4 circle |
+| Light green | #B0EED3 | Solution text, at-benchmark; Slide 13 level-5 (Leading) bg |
 | White green | #E8F7F6 | Light backgrounds, Differentiating cards |
 
 ### Blues & Purples
@@ -120,8 +120,8 @@ Slide 14 capability names are fitted to Calibri metrics. When viewed in Google S
 ### Oranges (AUTHORITATIVE)
 | Name | Hex | Role |
 |---|---|---|
-| Light orange | #FFCB99 | Below-benchmark, Foundational level |
-| **Orange** | **#FE9732** | **Activating level, warning** |
+| Light orange | #FFCB99 | Activating band fill; Slide 13 level-1 bg |
+| **Orange** | **#FE9732** | **Slide 13 level-1 circle, warning** |
 
 ### Heatmap-specific
 | Name | Hex | Role |
@@ -143,11 +143,11 @@ Slide 14 capability names are fitted to Calibri metrics. When viewed in Google S
 ### Template-Derived Colors (from actual PPTX XML, verified across all 9 sub-vertical templates)
 | Name | Hex | Role |
 |------|-----|------|
-| Activating fill | #F97316 | Heatmap accent strips + progress bars (Activating level); Slide 10 pillar/rec accent (Activating) |
+| Activating fill | #FFCB99 | Heatmap accent strips + progress bars (Activating band); Slide 10 pillar/rec accent (Activating) — the app's fill; #F97316 survives only as the Activating label text |
 | Activating text dark | #C25008 | Heatmap legend text (Activating); Slide 10 rec card label text (Activating) |
-| Building fill | #8094C0 | Heatmap accent strips + progress bars (Building level); Slide 10 pillar/rec accent (Building) |
+| Building fill | #62D7B8 | Heatmap accent strips + progress bars (Building band); Slide 10 pillar/rec accent (Building) — the app's fill; #8094C0 is brand header text only |
 | Building label text | #4E5E8A | Slide 10 rec card label text (Building); Slide 14 Building label text |
-| Competing light teal | #139F94 | Slide 10 legacy teal (appears alongside #27BBAF in some templates — if editing, prefer #27BBAF for new shapes; retain #139F94 only if preserving a template shape's original fill) |
+| Differentiating fill | #139F94 | Differentiating band fill on Slides 10/14 (the app's fill) and the Slide 10 strengths accent |
 | Indicator bg light | #E6F3FA | Slide 13 level indicator background rectangles |
 | Well below benchmark | #058DC7 | 4th-tier benchmark color (score < peer − 0.5) |
 | Label text dark | #333333 | Slide 13 level label text |
@@ -158,10 +158,10 @@ Slide 14 capability names are fitted to Calibri metrics. When viewed in Google S
 
 | Element | Shape(s) | Driver | Palette |
 |---|---|---|---|
-| Pillar accent strips (×4) | Sh16, Sh15, Sh14, Sh2 | Per-pillar maturity level | Activating `#F97316` / Building `#8094C0` / Competing `#27BBAF` / Differentiating `#185F60` |
+| Pillar accent strips (×4) | Sh16, Sh15, Sh14, Sh2 | Per-pillar maturity level | Activating `#FFCB99` / Building `#62D7B8` / Competing `#27BBAF` / Differentiating `#139F94` |
 | Rec card backgrounds (×3) | Sh17, Sh20, Sh23 | Per-rec maturity level | Activating `#FFF3E8` / Building `#F2F4F9` / Competing `#E6F5F3` / Differentiating `#E8F7F6` |
 | Rec card accent strips (×3) | Sh18, Sh21, Sh24 | Per-rec maturity level | Same as pillar strip palette above |
-| Rec card label text (×3) | Sh19, Sh22, Sh25 | Per-rec maturity level | Activating `#C25008` / Building `#4E5E8A` / Competing `#198478` / Differentiating `#185F60` |
+| Rec card label text (×3) | Sh19, Sh22, Sh25 | Per-rec maturity level | Activating `#C25008` / Building `#4E5E8A` / Competing `#198478` / Differentiating `#139F94` |
 
 ### Slide 6 Color System (Organizational Profile — 40 shapes, text-only)
 
@@ -185,7 +185,7 @@ Slide 14 capability names are fitted to Calibri metrics. When viewed in Google S
 
 **Authorized border width:** 0.75pt (9525 EMU). Template also uses 1.5pt on median markers — preserved.
 
-**Unauthorized colors seen in template borders:** `#FF9900` (appears on Sh87). This is NOT in the brand palette — corrected to `#F97316` (Activating) by `heatmap_editor.py` on first run.
+**Unauthorized colors seen in template borders:** `#FF9900` (appears on Sh87). This is NOT in the brand palette — corrected to the block's band accent (e.g. `#FFCB99` Activating) by `heatmap_editor.py` on first run.
 
 **Enforcement:** `heatmap_editor.py` `set_shape_border()` writes explicit `<a:srgbClr>` (not schemeClr) on every fill-changing edit. `cross_slide_checker.py --check-borders` flags any mismatch as CRITICAL. This QA is **on by default** — no flag required.
 
@@ -217,19 +217,22 @@ for level label text. Verified from actual PPTX XML across all 9 sub-vertical te
 
 | Level | Label | Accent/Bar Fill | Label Text Color | Card Background |
 |---|---|---|---|---|
-| Activating | "ACTIVATING" | **#F97316** | #F97316 | #FFF3E8 |
-| Building | "BUILDING" | **#8094C0** | #4E5E8A | #F2F4F9 |
+| Activating | "ACTIVATING" | **#FFCB99** | #F97316 | #FFF3E8 |
+| Building | "BUILDING" | **#62D7B8** | #4E5E8A | #F2F4F9 |
 | Competing | "COMPETING" | **#27BBAF** | #198478 | #E6F5F3 |
-| Differentiating | "DIFFERENTIATING" | **#185F60** | #185F60 | #E8F7F6 |
+| Differentiating | "DIFFERENTIATING" | **#139F94** | #139F94 | #E8F7F6 |
 
-Levels from DMA assessment data. Score ranges: 0.00–1.49 Activating, 1.50–2.49 Building,
-2.50–3.49 Competing, 3.50–5.00 Differentiating.
+Bands from DMA assessment data. Score → band is strict less-than on the raw score:
+< 2.00 Activating, < 3.00 Building, < 4.00 Competing, ≥ 4.00 Differentiating
+(`apps/web/lib/bands.js` == `engine.contract.band_of`). There is no fifth band.
+Accent fills are the app's own; label text colours are legibility choices on the
+card tint.
 
 > **Note:** Benchmark fill colors (#27BBAF/#B0EED3/#FFCB99/#058DC7) apply to 73-shape
 > score cells only. In the 158-shape design, the level color system (accent/bar/label)
 > is the primary visual indicator — score cells have NO background fill.
 
-### Maturity Level Indicators (Slide 13 — 5-tier, TWO-COLOR per level)
+### Maturity Level Indicators (Slide 13 — the 1–5 maturity SCORE scale from `skills/dma-research/engine/rubric.py`, cuts 1.5 / 2.5 / 3.5 / 4.5; not the four display bands. TWO-COLOR per level)
 
 Fill edits go to BG Rect + Circle shapes (Sh19+20, Sh23+24, Sh27+28, Sh31+32).
 Text edits go to Number + Label shapes (Sh21+22, Sh25+26, Sh29+30, Sh33+34).
@@ -241,7 +244,7 @@ BG rect and circle use DIFFERENT colors — verified from Level_Color_Code.pptx 
 | 2 | Developing | #C7D3EC | #8094C0 | #F2F4F9 | #1C4A4D |
 | 3 | Established | #E6F3FA | #3D81F6 | #F2F4F9 | #1C4A4D |
 | 4 | Advanced | #E8F7F6 | #62D7B8 | #F2F4F9 | #1C4A4D |
-| 5 | Transformational | #B0EED3 | #27BBAF | #FFFFFF | #1C4A4D |
+| 5 | Leading | #B0EED3 | #27BBAF | #FFFFFF | #1C4A4D |
 
 ---
 

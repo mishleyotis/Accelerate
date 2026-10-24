@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { COOKIE, maxAge, sign } from "../../../lib/session";
 import { iapIdentity } from "../../../lib/iap";
 import { displayName, domainOk, grantedRole } from "../../../lib/identity";
+import { shareMode } from "../../../lib/share";
+import { resolveAccess } from "../../../lib/roles";
 
 // Sign-in mints the app session from the ONLY identity this app trusts:
 // the Google account IAP verified in front of this service. The request
@@ -9,6 +11,8 @@ import { displayName, domainOk, grantedRole } from "../../../lib/identity";
 // ALLOW_DEV_LOGIN=1 (local compose only, never set in prod) restores a
 // typed-email gate so the prototype can be exercised without IAP.
 export async function POST(req) {
+  // Not on the public share service: it serves client links only (lib/share).
+  if (shareMode()) return new Response("Not found", { status: 404 });
   let email = null;
   const iap = await iapIdentity(req);
   if (iap) {
@@ -29,7 +33,17 @@ export async function POST(req) {
       { status: 403 });
   }
 
-  const role = grantedRole(email);
+  // The grant is the users table's (lib/roles.js); a deactivated account is
+  // refused here exactly as the document route refuses it.
+  const access = iap
+    ? await resolveAccess(email, req.headers.get("x-goog-iap-jwt-assertion"))
+    : { role: grantedRole(email), active: true };
+  if (!access.active) {
+    return NextResponse.json(
+      { error: "This account's access has been deactivated. Ask an Admin to reactivate it." },
+      { status: 403 });
+  }
+  const role = access.role;
   const name = displayName(email);
   const res = NextResponse.json({ ok: true, role, email, name });
   res.cookies.set(COOKIE, sign(email, role, name), {

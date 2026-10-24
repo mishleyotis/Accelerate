@@ -13,6 +13,8 @@ alone would only have turned a six-hour hang into a twelve-minute one.
 """
 from __future__ import annotations
 
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -210,3 +212,54 @@ def test_the_ceiling_step_reports_skips_as_well_as_failures():
         assert "f" in flags, (
             f"the report step greps for FAILED and this invocation does not "
             f"ask pytest for failure lines: {ln}")
+
+
+#: Every skip-ceiling assignment in the workflow, as written.
+SKIP_COUNT = re.compile(r"^\s*(n=\$\(grep -oE '\[0-9\]\+ skipped'.*)$", re.M)
+
+
+def _skip_count_lines() -> list:
+    return SKIP_COUNT.findall(CI.read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("summary", [
+    "82 passed in 528.40s (0:08:48)",       # the measured failure
+    "1001 passed, 6 skipped in 790.06s",    # skips present
+    "3 failed, 79 passed in 120.00s",       # a red run still reaches the check
+])
+def test_the_skip_ceiling_survives_a_run_with_nothing_to_count(summary, tmp_path):
+    """RUN the assignment, do not read it.
+
+    Measured 2026-09-14, run 34866563499: the acceptance job printed
+    "82 passed in 528.40s (0:08:48)" and then "Process completed with exit
+    code 1". Every test passed. The step runs under `bash -e` with pipefail,
+    pytest prints no "N skipped" when nothing skipped, so grep exited 1, the
+    pipeline exited 1, and the shell died ON THE ASSIGNMENT — before the
+    ceiling it exists to compare was ever compared.
+
+    A clean result is the one input a ceiling check must survive, and it was
+    the only one never exercised: the older jobs pass only because their
+    suites happen always to skip something. Asserting `|| true` is in the
+    text would pass against a subtly different shape, so this executes each
+    assignment the workflow actually contains against a summary with no skip
+    line and requires exit 0 and a usable count.
+    """
+    lines = _skip_count_lines()
+    assert lines, ("no skip-ceiling assignment found in the workflow — either "
+                   "the ceilings are gone or this pattern has drifted; either "
+                   "way this test is no longer guarding anything")
+    out = tmp_path / "pytest.txt"
+    out.write_text(summary + "\n", encoding="utf-8")
+    for raw in lines:
+        stmt = re.sub(r"/tmp/[a-z-]*pytest\.txt", str(out), raw)
+        r = subprocess.run(
+            ["bash", "-e", "-c",
+             f'set -o pipefail\n{stmt}\necho "COUNT=${{n:-0}}"'],
+            capture_output=True, text=True, timeout=30)
+        assert r.returncode == 0, (
+            f"the skip-ceiling assignment dies on {summary!r}, so a run this "
+            f"shape fails its check with every test passing: {stmt}\n"
+            f"{r.stderr.strip()}")
+        assert "COUNT=" in r.stdout, (
+            f"the assignment ran but the step never reached the line after "
+            f"it: {stmt}")

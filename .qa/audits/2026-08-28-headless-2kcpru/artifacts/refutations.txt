@@ -1,0 +1,65 @@
+======================================================================
+REASONING: The underlying string defect reproduces, but all three load-bearing assertions of the claim fail, and the numbers are wrong.
+
+(1) COUNTS WRONG. `grep -c 'rulebooks/' surface-map.md` = 50 is a LINE count, not a row count: one of the 50 is prose (line 28, the column legend `- **Rulebook anchor** — ... rulebooks/<page>.md § <ID>`). `grep -c '^| '` = 55 includes 2 markdown HEADER rows; the file's own prose says "53 rows in all". Tallying the anchor column per row: 48 bare `rulebooks/<page>.md`, 3 rows `—`, 1 row `04-craft/4-card-anatomy.md`, 1 row `03-pages/2-overview.md`. So the true figure is 48 of 53 data rows, not 50 of 55. The claim's "Every one of its rows writes the anchor as `rulebooks/<page>.md § <ID>`" is flatly false — row C6 already uses the correct `03-pages/` prefix, and 3 rows carry no anchor at all.
+
+(2) "INVISIBLE TO CI" IS FALSE — this is the claim's central mischaracteriza
+
+CORRECTION: CORRECTED CLAIM (severity: LOW / doc hygiene, already tracked — not BLOCKER): "48 of the 53 census rows in 05-lifecycle/surface-map.md, plus one reference in 05-lifecycle/client-memory.md line 69, write the rulebook path as bare `rulebooks/<page>.md`, a directory-relative form that resolves from neither 05-lifecycle/ nor the skill root — the six rulebooks live at 03-pages/rulebooks/."
+
+Corrected measurements: anchor column by row = 48 bare `rulebooks/` + 3 `—` + 1 `04-craft/4-card-anatomy.md` + 1 correct `03-pages/2-overview.md` = 53 data rows (grep -c '^| ' = 55 counts 2 header rows; grep -c 'rulebooks/' = 50 counts 1 prose line at line 28). 05-lifecycle/rulebooks/$p.md MISSING 6/6; 03-pages/rulebooks/ PRESENT 6/6.
+
+Corrections to the claim's characterization:
+- NOT invisible to CI. audit_skills.py lines 55-71 enumerate these eight refs by name and state the fix. MAX_BROKEN = 8 is a del
+======================================================================
+REASONING: The three raw greps reproduce exactly (69 / 32 / 0 CG-30 / 0 in routing.md), but every inference drawn from them fails.
+
+DENOMINATOR IS WRONG — 67, NOT 69. The authoritative catalogue is the GATES dict in /home/user/Accelerate/apps/mcp/dma_mcp/gates.py: exactly 67 entries. `comm` of the claimant's grep set against the catalogue returns {SG-01, SG-06} in the grep-only direction and EMPTY in the other. SG-01/SG-06 are not emitted gates — they occur only inside prose strings: gates.py:541 is a narrative describing payload content ("heatmap.safeguard_gates naming SG-01 and SG-06") and validation2.py:2638 is a docstring. Neither has a quoted-id emission site, unlike every real gate. The skill's own 02-inputs/6-verification-discipline.md:68-73 warns about exactly this error class: "Several documents in this repository define SG--shaped ids of their own... Finding one is not evidence that a gat
+
+CORRECTION: Corrected claim (severity MINOR, documentation completeness — not a repair-routability defect): 1-gates.md documents 32 of the connector's 67 gate ids, and 11 of the 67 are absent from all dma-surface-production skill prose — AG-09, CG-18, CG-32, CG-33, CG-34, CG-35, CG-36, CG-37, CG-38, CG-39, CG-40.
+
+Measurement: authoritative catalogue = 67 entries in the GATES dict at apps/mcp/dma_mcp/gates.py (`grep -cE '^    "(CG|AG|SG|ET)-[0-9]+":'`). The claim's 69 over-counts by sweeping two prose-only tokens (SG-01, SG-06, occurring solely in a gates.py:541 narrative and a validation2.py:2638 docstring) into the census. Union of gate ids across all skill .md/.json = 56 of 67; `comm -23` of catalogue against that union = 11.
+
+Not defects: (a) CG-30 is documented at 03-pages/4-platform.md:32,89 and 03-pages/rulebooks/platform.md:186,202 — the page docs a verdict on path platform.platform_story ro
+======================================================================
+REASONING: All three of the claimant's numbers reproduce exactly, and they searched the LIVE tree correctly (plugins/dma-insights; the legacy apps/dma-insights snapshot has no agents/ or scripts/ and is irrelevant here). agent_run.py is the only DISPATCH MODE site in the whole repo, PREAMBLE spans lines 45-59 exactly so the 15-line denominator is right and complete, grep count is 0, routing.md = 1/47 (orchestration/surface-producer.md), get_memory_digest = 47/47, and only `prompt = PREAMBLE + prompt` (line 128) is prepended so the docstring genuinely never reaches the child.
+
+The measurement is sound; the inference from it is not, on three counts.
+
+(1) "The agent manifests do not compensate: 1 of 47 names routing.md" is a category error. Grepping for the literal string routing.md measures whether a CHILD cites the ORCHESTRATOR'S dispatch table. routing.md is the table used to pick which agent to di
+
+CORRECTION: The dispatch preamble does omit routing, but routing is not thereby lost, and the claim's supporting metric measures the wrong thing. Corrected, MINOR: `SKILL.md` for dma-surface-production never mentions routing at all (`grep -ci routing` = 0 of 587 lines); its "Where everything lives" block renders 05-lifecycle/ as "gates, versioning, reruns" and its "Reference files" table lists `05-lifecycle/1-gates.md` and `2-versioning.md` while omitting `05-lifecycle/routing.md`. Only one file in the whole skill tree (`05-lifecycle/surface-map.md:18`) points at routing.md, so the 42 of 47 agents declaring `skills: dma-surface-production` are never directed to the routing table by the skill's own index. Fix: add a `05-lifecycle/routing.md` row to SKILL.md's Reference files table.
+
+The routing CONTENT, by contrast, is carried to children on both paths by the agent manifest itself, which is what `cla
+======================================================================
+REASONING: I re-ran the whole measurement against /tmp/dmar/dma-research (v4.2, 94 real files + 10 .pyc = 104; kg/ present — the correct tree; brief item 3 clears the claimant).
+
+WHAT REPRODUCES (claimant is right on these):
+- Emitted the skeleton via `orient.py --run RUN --skeleton P1C1.1.2`. The six top-level minLength numbers are exact: dominant_claim 50>=20, triangulation 41>=40, ceiling_reasoning 40>=20, why_it_matters 32>=30, dma_impact 46>=30, what_we_found 149<300.
+- `what_we_found` is genuinely absent from the schema's `required` list.
+- `jsonschema` appears only in /tmp/dmar/dma-research/tests/golden/integration_smoke.py (3 hits archive-wide). No runtime script imports it; `grep -rn "synthesis_record\|schemas/" scripts/` = 0 hits.
+- `ledger.append(RUN,"synthesis",skel)` accepted the unmodified skeleton and returned the record. No validation.
+- kg_reader closes a subcap on the mere presenc
+
+CORRECTION: The claim is refuted, but a much narrower real defect survives and should replace it, at LOW severity, scoped to the supplied v4.2 archive only (the repo-installed dma-research at plugins/dma-insights/skills/dma-research has 26 files, no kg/, no orient.py — orient.py --skeleton does not exist in the live tree).
+
+Corrected finding: floors_gate.py:137 branches on `if not rec or rec.get("claim_label") != "FACT": continue` without validating claim_label against the schema enum, so a synthesis record carrying a MALFORMED claim_label silently skips all four FACT-only content gates (evidence_analysis_missing, shallow_reading, no_deep_dive, no_fetched_anchor).
+
+Measurement: unmodified skeleton appended to the ledger and run through `floors_gate --require-synthesis` on a floor-PASS subcap -> dq_gaps: []. Identical record with only claim_label corrected to "FACT" -> dq_gaps: ["P1C1.1.1:no_deep_div
+======================================================================
+REASONING: I re-fetched all three pinned Drive artefacts and re-ran every measurement. The spine reproduces; three of the four offered measurements do not, and they are the ones the finding's consequence rests on.
+
+WHAT REPRODUCES EXACTLY
+- Pinned workbook 18IoJD5jn9... exists, owned by mishley.otiende@zennify.com, export is 189,980 raw chars (188,081 after '\_' normalisation). The claim's per-name counts reproduce to the digit: Cap_Triggers/Solution_Catalogue/Handoff_Lock/Platform_Peer_Adoption/Focus_Areas/Firmographics/Gate_Log/Catalogue_Meta/Issue_Register/Caps_Applied_Log/Subcap_Scores/Pillar_Weights/Maturity_Rubric all 0; Evidence_Detail 18, Subcap_Synthesis 12, Negative_Findings 9, Entity_Timeline 6, DQ_Bank 5, Run_Metadata 4.
+- Seven validator checks, verbatim (required sheets / header equality / row count / assessment columns empty / URL present / banned placeholder / run_id equality). None
+
+CORRECTION: Twenty-four workbook tabs named by the two pinned v8 templates — not thirteen — are absent from the pinned contract-v3 workbook, and nothing in the repo binds to the pinned template ids at all. Measured: the Assessment Report names 18 distinct tabs across its INPUTS blocks (Cap_Triggers, Caps_Applied_Log, Catalogue_Meta, Category_Rollup, Coverage_Map, Evidence_Register, Handoff_Lock, Issue_Register, Maturity_Rubric, Negative_Searches, Peer_Benchmarks, Pillar_Rollup, Pillar_Weights, Platform_Peer_Adoption, Solution_Catalogue, Subcap_Scores, Tech_Landscape, Technographic_Scan); the Client Profile names 14 (those 8 shared, plus Gate_Log, Evidence_Request, Search_Log, Audit_Trail, Firmographics, Focus_Areas); union 24, and all 24 have zero occurrences in the 189,980-char export of 18IoJD5jn9... . 21 of the 24 are also absent from plugins/dma-insights/skills/dma-assessment/references/workbook
+======================================================================
+REASONING: The load-bearing premise is false. The live corpus is NOT empty of served pages, and the template's measurement IS falsifiable against it.
+
+1. TWO CLIENTS SERVE ALL SIX PAGES RIGHT NOW.
+- get_client_state('baxter-credit-union-bcu'): served_pages = platform, context, insights, overview, heatmap, techstack, all promoted_at 2026-08-19T14:53:37Z; run c1351d25-a612-4dbe-b498-127bccaf6810 status PROMOTED, composite 2.71, 765 scored cells (and a second run at SUPERSEDED).
+- get_client_state('gulf-coast-business-credit'): all six pages promoted_at 2026-08-24T03:22:44Z; run 60082d6f-c3b3-4507-9e03-4e36872a9ed1 status PROMOTED, v7.0, composite 2.22; enrichment counts {'current': 7, 'never_enriched': 0}, done: true.
+The claimant generalised "the live corpus has zero served pages" from ONE client (cathay-bank). cathay-bank's served_pages [] and 7x never_enriched reproduce exactly — but they are a fa
+
+CORRECTION: The residual real issue, stated correctly: a fabricated corpus statistic ("57 of 138 clients had none", "53 clients shipped machine scoring text") is still embedded in the LIVE producer path — plugins/dma-insights/skills/dma-surface-production/03-pages/1-heatmap.md:119, .../rulebooks/heatmap.md:134,142, and plugins/dma-insights/agents/production/heatmap/heatmap-focus-producer.md:32,40 — even though apps/web/tests/acceptance/ACCEPTANCE.md §7.1 already adjudicated it as fabricated and struck it, carrying the rule forward as HM-10. The defect is that the strike was applied to the acceptance register only and never propagated to the skill and agent files that actually instruct the synthesiser; the same fabrication is also carried by the authority-ranked Surface Specification (docs/text/... :588,598), which ACCEPTANCE.md flags upward for the parallel "32 clients" case but not this one. Severi

@@ -1,6 +1,6 @@
 # Subvertical Profiles & Classification
 
-Read this file during Batch 1 Step 3 (regulatory search / classification) and Batch 2
+Read this file during the binding preflight (regulatory search / classification) and PRELIM
 Step 2 (classification decision tree).
 
 ---

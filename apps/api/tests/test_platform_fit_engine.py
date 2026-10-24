@@ -410,3 +410,74 @@ def test_severity_still_separates_two_equally_evidenced_gaps():
 def test_a_closed_cell_short_circuits_to_zero():
     assert pf.cell_opportunity(cell("a", pf.TARGET_BAND_SCORE)) == 0.0
     assert pf.cell_opportunity(cell("a", 4.9)) == 0.0
+
+
+def test_a_card_that_moved_names_the_card_that_moved_it():
+    """MEM-0564 (SWBC 2026-10-05): every moved card without a prerequisite
+    of its own was told "another card on this page waits on it" — Shield
+    was, and nothing depended on it. A displaced card names the card held
+    back; a pulled-up prerequisite names the card that needs it."""
+    top = pf.Candidate("Top", "A", [cell("P1C1.1.1")], readiness="green",
+                       alignment=0.9, depends_on=("Low",))
+    mid = cand("Mid", [cell("P1C1.1.2")], readiness="green", alignment=0.6)
+    low = cand("Low", [cell("P1C1.1.3")], readiness="red", alignment=0.1)
+    rows = {r["platform"]: r for r in pf.rank([top, mid, low])}
+    assert [r["platform"] for r in pf.rank([top, mid, low])] == \
+        ["Mid", "Low", "Top"]
+    assert rows["Top"]["rank_basis"] == "sequenced: it is held behind Low"
+    assert rows["Low"]["rank_basis"] == "sequenced: Top waits on it"
+    assert rows["Mid"]["rank_basis"] == \
+        "sequenced: moved up while Top is held behind its prerequisite"
+    for r in rows.values():
+        assert "another card on this page" not in r["rank_basis"]
+
+
+# ── an unevidenced card never outranks an evidenced one (2026-10-07) ────
+#
+# Arbor Bank: MuleSoft scored 65.2 at evidence strength 0.0 across all 85 of
+# its cells and ranked first above READY Financial Services Cloud (56.0); every
+# other card also named it as a prerequisite, so sequencing pulled it to the
+# top whatever it scored. The owner reported it ranking first on every run.
+
+def _hub(**kw):
+    return cand("Hub", [cell(f"P4C3.1.{i}", 1.0, "P4C3", ("high",), 0.0)
+                        for i in range(1, 7)], **kw)
+
+
+def _crm(**kw):
+    kw.setdefault("readiness", "red")
+    return cand("CRM", [cell(f"P2C1.1.{i}", 2.5, "P2C1", ("low",), 0.6)
+                        for i in range(1, 5)], **kw)
+
+
+def test_an_unevidenced_card_never_outranks_a_ready_one():
+    rows = pf.rank([_hub(), _crm()], RUN_GAPS)
+    by = {r["platform"]: r for r in rows}
+    assert by["Hub"]["state"] == pf.STATE_INSUFFICIENT
+    assert by["CRM"]["state"] == pf.STATE_READY
+    assert by["Hub"]["fit_score"] > by["CRM"]["fit_score"]   # the trap
+    assert [r["platform"] for r in rows] == ["CRM", "Hub"]
+
+
+def test_an_unevidenced_prerequisite_is_not_pulled_ahead_of_its_dependent():
+    rows = pf.rank([_hub(), _crm(depends_on=("Hub",))], RUN_GAPS)
+    assert [r["platform"] for r in rows] == ["CRM", "Hub"]
+    crm = next(r for r in rows if r["platform"] == "CRM")
+    assert "Hub" in crm.get("sequence_note", "")
+
+
+def test_an_evidenced_prerequisite_still_precedes_its_dependent():
+    hub = cand("Hub", [cell(f"P4C3.1.{i}", 1.0, "P4C3", ("low",), 0.6)
+                       for i in range(1, 4)], readiness="red")
+    rows = pf.rank([hub, _crm(depends_on=("Hub",))], RUN_GAPS)
+    assert all(r["state"] == pf.STATE_READY for r in rows)
+    assert [r["platform"] for r in rows] == ["Hub", "CRM"]
+
+
+def test_fusion_never_lifts_an_unevidenced_card_over_a_ready_one():
+    # Within the near-tie band, so fusion alone could swap them.
+    hub = _hub(readiness="amber")
+    crm = _crm(readiness="green")
+    for _ in range(3):
+        rows = pf.rank([hub, crm], RUN_GAPS)
+        assert rows[0]["state"] == pf.STATE_READY

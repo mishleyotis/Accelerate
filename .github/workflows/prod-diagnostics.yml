@@ -1,0 +1,36 @@
+name: Production diagnostics
+
+# Read-only evidence from production on demand (infra/diagnose_usage.sh):
+# the usage sink, the events it carried, the dataset grants and the refusals
+# on the admin read paths. Runs as claude-deployer through the same Workload
+# Identity trust as the deploy job, which honours only the default branch —
+# so dispatch it from there. It changes nothing but the deployer's own
+# roles/logging.viewer (needed to read log entries).
+on:
+  workflow_dispatch:
+    inputs:
+      freshness:
+        description: Look-back window for log reads (e.g. 6h, 24h, 3d)
+        required: false
+        default: 24h
+
+jobs:
+  diagnose:
+    name: Usage telemetry diagnostics
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOYER_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: infra/diagnose_usage.sh
+        env:
+          FRESHNESS: ${{ inputs.freshness }}
+        run: bash infra/diagnose_usage.sh

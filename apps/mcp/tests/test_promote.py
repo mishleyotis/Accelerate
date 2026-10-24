@@ -37,8 +37,15 @@ STAMPS = {"run_id": "11111111-1111-1111-1111-111111111111",
           "entity_id": "22222222-2222-2222-2222-222222222222",
           "promoted_at": "2026-08-08T00:00:00+00:00",
           "producer_version": "test@1", "provenance": "producer"}
+# Each rung states its outcome, and one rung works every sentiment family
+# (RC-05, 2026-10-04: CG-40 passes a section below its floor only on a
+# completed ladder covering the contract's mandatory_families).
 EMPTY = {"reason": "Walking-skeleton empty state",
-         "sources_searched": ["package", "research", "enrichment"]}
+         "sources_searched": [
+             "package — VERIFIED ABSENT", "research — VERIFIED ABSENT",
+             "enrichment: App Store, Google Play, Glassdoor, Indeed, "
+             "Consumer Financial Protection Bureau, Better Business Bureau, "
+             "Trustpilot — VERIFIED ABSENT"]}
 
 
 def _connect(user):
@@ -601,3 +608,34 @@ def test_one_facet_of_seven_still_promotes(seeded):
     out = promote_run(mcp, rid)
     assert out["promoted"] is True, \
         "one of seven is a thin client, and refusing it strands the one"
+
+
+def test_promote_writes_the_raw_composite_beside_the_2dp_display(seeded):
+    """0064, owner decision A: `composite` stays NUMERIC(4,2) for display and
+    `composite_raw` keeps the payload's value unrounded, so the generated band
+    reads the raw score (invariant 6). 1.996 displays as 2.00 — and bands
+    Activating, not the Building its 2dp copy would have given it."""
+    mcp, admin, rid = seeded
+    cur = admin.cursor()
+    # the run's stated grain carries the same raw figure the hero quotes
+    cur.execute("""UPDATE run_manifest SET payload = jsonb_set(payload,
+                     '{workbook_grains,pillars,0,score}', '1.996')
+                    WHERE run_id = %s""", (rid,))
+    admin.commit()
+    hero = _hero_page()
+    hero["scores"]["composite"] = 1.996
+    hero["scores"]["pillars"][0]["score"] = 1.996
+    hero["scores"]["pillars"][0]["delta"] = -1.104
+    hero["scores"]["framing"] = ("Early digital maturity, with strategy work "
+                                 "starting and wide peer gaps across the group.")
+    _submit_all(mcp, rid, overview=hero)
+    assert promote_run(mcp, rid)["promoted"] is True
+    cur.execute("""SELECT composite, composite_raw, composite_raw_backfilled,
+                          enum_label(band)
+                     FROM overview_scores WHERE run_id = %s""", (rid,))
+    composite, raw, backfilled, band = cur.fetchone()
+    assert str(composite) == "2.00", "the display column keeps NUMERIC(4,2)"
+    assert str(raw) == "1.996", "the raw value is written as the payload states it"
+    assert backfilled is False
+    assert band == "Activating", (
+        f"band {band}: generated from the 2dp copy, not the raw composite")

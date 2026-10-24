@@ -1,0 +1,64 @@
+{"id":1,"utterance":"Run a DMA for Golden 1 Credit Union, credit union sub-vertical, public evidence only","expected":"dma-insights:dma-research","alt":["dma-insights:run-assessment"],"class":"research-start"}
+{"id":2,"utterance":"Kick off research on Frost Bank for a digital maturity assessment","expected":"dma-insights:dma-research","alt":["dma-insights:run-assessment"],"class":"research-start"}
+{"id":3,"utterance":"Gather public evidence for Fisher Investments before we score them","expected":"dma-insights:dma-research","alt":[],"class":"research-start"}
+{"id":4,"utterance":"Score the P2 subcapabilities for Logix from the research handoff","expected":"dma-insights:dma-assessment","alt":[],"class":"assessment"}
+{"id":5,"utterance":"Apply cap enforcement and produce the scoring workbook for SWBC","expected":"dma-insights:dma-assessment","alt":[],"class":"assessment"}
+{"id":6,"utterance":"Audit the completed goeasy workbook for calibration drift","expected":"dma-insights:dma-governance","alt":[],"class":"governance"}
+{"id":7,"utterance":"Here is the finished DMA xlsx for Baxter, check it","expected":"dma-insights:dma-governance","alt":[],"class":"governance"}
+{"id":8,"utterance":"Turn the Golden 1 - DMA folder into the app and promote the run","expected":"dma-insights:dma-surface-production","alt":[],"class":"production"}
+{"id":9,"utterance":"The heatmap page failed CG-01 on cell_evidence, fix it and resubmit","expected":"dma-insights:dma-surface-production","alt":[],"class":"repair"}
+{"id":10,"utterance":"overview.why_now got refused on ET-09, repair that section","expected":"dma-insights:dma-surface-production","alt":[],"class":"repair"}
+{"id":11,"utterance":"Build the first-call pitch deck for a credit union prospect we have not assessed yet","expected":"dma-insights:dma-first-call-deck","alt":[],"class":"first-call"}
+{"id":12,"utterance":"Intro deck for a farm credit prospect, first meeting next week","expected":"dma-insights:dma-first-call-deck","alt":[],"class":"first-call"}
+{"id":13,"utterance":"Deck from the Golden 1 scores","expected":"anthropic-skills:zennify-narrative","alt":[],"class":"post-assessment-deck"}
+{"id":14,"utterance":"Make the readout presentation from the completed Frost Bank DMA report","expected":"anthropic-skills:zennify-narrative","alt":[],"class":"post-assessment-deck"}
+{"id":15,"utterance":"Turn the Hubbl scan CSV for Acme CU into a readout deck","expected":"anthropic-skills:hubbl-proposal","alt":["anthropic-skills:hubbl-readout-pptx"],"class":"hubbl"}
+{"id":16,"utterance":"Org health score export from Hubbl attached, build the proposal","expected":"anthropic-skills:hubbl-proposal","alt":["anthropic-skills:hubbl-readout-pptx"],"class":"hubbl"}
+{"id":17,"utterance":"Run the AI readiness overlay on the SWBC assessment and pick the stack","expected":"anthropic-skills:dma-ai-overlay","alt":[],"class":"ai-overlay"}
+{"id":18,"utterance":"Where does goeasy sit on the v7.1 AI maturity ladder?","expected":"anthropic-skills:dma-ai-overlay","alt":[],"class":"ai-overlay"}
+{"id":19,"utterance":"P1 research for Logix Federal Credit Union","expected":"dma-insights:dma-research","alt":[],"class":"retired-phrase"}
+{"id":20,"utterance":"Produce the research handoff for Baxter","expected":"dma-insights:dma-research","alt":[],"class":"retired-phrase"}
+{"id":21,"utterance":"Run the DMA engagement for Frost, Pillar 1 only, hybrid mode","expected":"dma-insights:dma-research","alt":["dma-insights:run-assessment"],"class":"retired-phrase"}
+{"id":22,"utterance":"Inspect the CCG and RSG state for the current run","expected":"dma-insights:dma-research","alt":["NONE"],"class":"retired-phrase"}
+{"id":23,"utterance":"ESG research for an FSI, P1C5","expected":"dma-insights:dma-research","alt":[],"class":"retired-phrase"}
+{"id":24,"utterance":"Do the Phase A onboarding and SIB assembly for a new credit union","expected":"dma-insights:dma-research","alt":[],"class":"retired-phrase"}
+{"id":25,"utterance":"continue","expected":"NONE","alt":["dma-insights:run-assessment"],"class":"ambiguous"}
+{"id":26,"utterance":"the deck","expected":"NONE","alt":[],"class":"ambiguous"}
+{"id":27,"utterance":"run the next pillar","expected":"NONE","alt":["dma-insights:dma-research","dma-insights:run-assessment"],"class":"ambiguous"}
+{"id":28,"utterance":"resume where we left off","expected":"NONE","alt":["dma-insights:run-assessment"],"class":"ambiguous"}
+{"id":29,"utterance":"Why does the CG-15 refusal keep coming back on every heatmap we ship?","expected":"dma-insights:dma-rectifier","alt":[],"class":"rectifier"}
+{"id":30,"utterance":"Close out the QA issue register from last week and make the fix stick","expected":"dma-insights:dma-rectifier","alt":[],"class":"rectifier"}
+{"id":31,"utterance":"Can this install reach the DMA connector?","expected":"dma-insights:doctor","alt":[],"class":"ops"}
+{"id":32,"utterance":"Reconcile the scheduled routines against the manifest","expected":"dma-insights:setup-routines","alt":[],"class":"ops"}
+{"id":33,"utterance":"Research this company: Temenos","expected":"anthropic-skills:deep-research","alt":["NONE"],"class":"out-of-scope-research"}
+{"id":34,"utterance":"Write me a literature review on open banking adoption in Europe","expected":"anthropic-skills:deep-research","alt":[],"class":"out-of-scope-research"}
+{"id":35,"utterance":"Convert this Word document to PDF","expected":"anthropic-skills:pdf","alt":["anthropic-skills:docx"],"class":"out-of-scope"}
+{"id":36,"utterance":"Help me write a new skill for expense reports","expected":"anthropic-skills:skill-creator","alt":[],"class":"out-of-scope"}
+{"id":37,"utterance":"What is the weather in Austin?","expected":"NONE","alt":[],"class":"out-of-scope"}
+{"id":38,"utterance":"Fix the failing unit test in apps/api","expected":"NONE","alt":[],"class":"out-of-scope"}
+{"id":39,"utterance":"Benchmark Fisher Investments' digital capabilities against RIA peers","expected":"dma-insights:dma-assessment","alt":["dma-insights:dma-research"],"class":"assessment"}
+{"id":40,"utterance":"We need leadership contacts and thought-leadership signals for Frost Bank","expected":"dma-insights:dma-surface-production","alt":["dma-insights:dma-research"],"class":"production"}
+{"id":41,"utterance":"Run a Clay enrichment and technographic scan for goeasy","expected":"dma-insights:dma-surface-production","alt":["dma-insights:dma-research"],"class":"production"}
+{"id":42,"utterance":"Is the pre-assessment tech stack discovery done for Baxter?","expected":"dma-insights:dma-research","alt":[],"class":"research"}
+{"id":43,"utterance":"Classify SWBC's sub-vertical before we start","expected":"dma-insights:dma-research","alt":[],"class":"research"}
+{"id":44,"utterance":"Regression test the Logix assessment against the v5.4 rubric","expected":"dma-insights:dma-governance","alt":[],"class":"governance"}
+{"id":45,"utterance":"Generate a patch block for the goeasy QA verdict","expected":"dma-insights:dma-governance","alt":[],"class":"governance"}
+{"id":46,"utterance":"Make the Zennify branded slides from this brief","expected":"anthropic-skills:zennify-narrative","alt":["anthropic-skills:zennify-design-system"],"class":"deck"}
+{"id":47,"utterance":"QA this Zennify deck for brand compliance","expected":"anthropic-skills:zennify-design-system","alt":["anthropic-skills:zennify-narrative"],"class":"deck"}
+{"id":48,"utterance":"Pre-assessment deck for a wealth RIA prospect","expected":"dma-insights:dma-first-call-deck","alt":[],"class":"first-call"}
+{"id":49,"utterance":"Post-assessment deliverable deck for the Baxter engagement","expected":"anthropic-skills:zennify-narrative","alt":[],"class":"post-assessment-deck"}
+{"id":50,"utterance":"Sales deck introducing our DMA offering to Frost Bank","expected":"dma-insights:dma-first-call-deck","alt":[],"class":"first-call"}
+{"id":51,"utterance":"Slides summarising the maturity scores we just finished for Frost Bank","expected":"anthropic-skills:zennify-narrative","alt":[],"class":"post-assessment-deck"}
+{"id":52,"utterance":"Submit the platform page payload for run 21e3ed62","expected":"dma-insights:dma-surface-production","alt":[],"class":"production"}
+{"id":53,"utterance":"Re-run the client goeasy, the insights page is stale","expected":"dma-insights:dma-surface-production","alt":[],"class":"production"}
+{"id":54,"utterance":"How is the Salesforce recommendation on the platform page justified?","expected":"dma-insights:dma-surface-production","alt":[],"class":"production"}
+{"id":55,"utterance":"Score P1C1.1.1 to P1C1.4.3 using the maturity rubric","expected":"dma-insights:dma-assessment","alt":[],"class":"assessment"}
+{"id":56,"utterance":"Which subcaps got M5 last run?","expected":"dma-insights:dma-governance","alt":["dma-insights:dma-assessment"],"class":"trap-m5"}
+{"id":57,"utterance":"Start a DMA for a private credit union with almost no public footprint","expected":"dma-insights:dma-research","alt":["dma-insights:run-assessment"],"class":"thin-evidence"}
+{"id":58,"utterance":"Uploaded internal documents for the assessment of a mutual insurer, use them","expected":"dma-insights:dma-assessment","alt":["dma-insights:dma-research"],"class":"assessment"}
+{"id":59,"utterance":"Insurance carrier pitch deck, first call Thursday","expected":"dma-insights:dma-first-call-deck","alt":[],"class":"first-call"}
+{"id":60,"utterance":"What past findings say about empty excerpts on evidence chips?","expected":"dma-insights:dma-rectifier","alt":[],"class":"rectifier"}
+{"id":61,"utterance":"Review assessment quality across the last three credit union engagements","expected":"dma-insights:dma-governance","alt":[],"class":"governance"}
+{"id":62,"utterance":"Monitor the Slack channel for Hubbl scan requests","expected":"anthropic-skills:hubbl-proposal","alt":[],"class":"hubbl"}
+{"id":63,"utterance":"Digital maturity for a commercial lender, end to end from any session","expected":"dma-insights:run-assessment","alt":["dma-insights:dma-research"],"class":"research-start"}
+{"id":64,"utterance":"Produce the Digital Maturity Assessment scoring workbook for a CIB bank using the M1-M5 levels","expected":"dma-insights:dma-assessment","alt":[],"class":"trap-m5"}

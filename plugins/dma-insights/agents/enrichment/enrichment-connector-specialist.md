@@ -1,14 +1,16 @@
 ---
 name: enrichment-connector-specialist
-description: Owns the connector half of enrichment for one run — the Clay call plan and the machine technographic scan. Invoke it when a producer needs a facet enriched before it can write, when a contact pass or a technographic scan must be run or re-run, when a peer-deployment claim needs AG-04's shape, or when a section's `enrichment_status` disagrees with the rows underneath it. It returns candidate sources for registration plus the ledger state it recorded, and it never submits, promotes or mints an evidence id.
+description: Owns the connector half of enrichment for one run — the Clay call plan and the machine technographic scan. Invoke it FIRST inside a research run's PRELIM phase, before any category is dispatched — the contact pass that names the leaders and the four-layer technographic scan are the background all sixteen category researchers read, and bought later each of them pays for a piece of it alone. Invoke it again when a producer needs a facet enriched before it can write, when a contact pass or a technographic scan must be re-run, when a peer-deployment claim needs AG-04's shape, or when a section's `enrichment_status` disagrees with the rows underneath it. It returns candidate sources for registration plus the ledger state it recorded, and it never submits, promotes or mints an evidence id.
 model: sonnet
 effort: high
 maxTurns: 90
 skills:
   - dma-surface-production
-tools: Read, Grep, Glob, Bash, TodoWrite, Skill, WebFetch, WebSearch, mcp__Exa__web_search_exa, mcp__Exa__web_fetch_exa, mcp__Tavily__tavily_search, mcp__Tavily__tavily_extract, mcp__Tavily__tavily_crawl, mcp__Tavily__tavily_map, mcp__Clay__find-and-enrich-contacts-at-company, mcp__Clay__find-and-enrich-list-of-contacts, mcp__Clay__find-and-enrich-company, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__Clay__add-company-data-points, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Indeed__search_jobs, mcp__Indeed__get_job_details, mcp__Indeed__get_company_data, mcp__Quartr__search, mcp__Quartr__read_transcript, mcp__Quartr__list_conferences, mcp__Quartr__get_conference, mcp__Google_Drive__search_files, mcp__Google_Drive__read_file_content, mcp__Google_Drive__download_file_content, mcp__Google_Drive__get_file_metadata, mcp__plugin_dma-insights_connector__get_report_bundle, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_platform_fit, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__list_open_rejections, mcp__plugin_dma-insights_connector__list_pending_runs, mcp__plugin_dma-insights_connector__list_withdrawn_runs, mcp__plugin_dma-insights_connector__get_validation_verdict, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_open_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_finding, mcp__plugin_dma-insights_connector__list_defect_classes, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__list_reviewer_feedback, mcp__plugin_dma-insights_connector__record_enrichment
+tools: Read, Grep, Glob, Bash, Skill, mcp__Clay__search-contacts, mcp__Clay__search-companies, mcp__Clay__get-task-context, mcp__Clay__add-contact-data-points, mcp__Clay__add-company-data-points, mcp__Vibe_Prospecting__match-business, mcp__Vibe_Prospecting__enrich-business, mcp__Vibe_Prospecting__fetch-entities, mcp__Indeed__get_company_data, mcp__plugin_dma-insights_connector__get_capability_catalogue, mcp__plugin_dma-insights_connector__get_page_contract, mcp__plugin_dma-insights_connector__get_evidence, mcp__plugin_dma-insights_connector__get_run_progress, mcp__plugin_dma-insights_connector__get_staged_payload, mcp__plugin_dma-insights_connector__get_client_state, mcp__plugin_dma-insights_connector__explain_gate, mcp__plugin_dma-insights_connector__search_findings, mcp__plugin_dma-insights_connector__list_enrichment_gaps, mcp__plugin_dma-insights_connector__get_memory_digest, mcp__plugin_dma-insights_connector__record_enrichment
 disallowedTools: Write, Edit, NotebookEdit, mcp__plugin_dma-insights_connector__claim_run, mcp__plugin_dma-insights_connector__register_evidence, mcp__plugin_dma-insights_connector__open_payload, mcp__plugin_dma-insights_connector__append_payload_part, mcp__plugin_dma-insights_connector__submit_page_payload, mcp__plugin_dma-insights_connector__promote_run, mcp__plugin_dma-insights_connector__withdraw_run, mcp__plugin_dma-insights_connector__record_finding, mcp__plugin_dma-insights_connector__record_refinement, mcp__plugin_dma-insights_connector__resolve_finding, mcp__plugin_dma-insights_connector__report_recurrence, mcp__plugin_dma-insights_connector__ingest_reviewer_feedback
 ---
+
+**Model:** `sonnet` — services connector batches and records each result with its tool; the ledger bounds it.
 
 You run the **connector** pathway of enrichment and nothing else: the Clay call
 plan against the entity's own domain, and the machine technographic scan that
@@ -142,12 +144,12 @@ pointed at it.
    **Enrichment pathways** subsection names the facet, the sources in precedence
    order and the gap-to-pathway mapping), and `.../rulebooks/platform.md` (§ P1
    — facet `platform_readiness`, whose `serving_surface` *is* that section).
-6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/1-gates.md`
+6. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/AG-04.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-09.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/CG-12.md`, `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/05-lifecycle/gates/ET-04.md`
    — **AG-04** in full (it fires on any list item anywhere in a payload carrying
    `peer_coverage` or `peer_deployments`, not only on the register), **CG-09** on
    closed vocabularies, **CG-12** on face fields, and **ET-04**.
 7. `${CLAUDE_PLUGIN_ROOT}/skills/dma-surface-production/02-inputs/3-mcp-tools.md`
-   — the 33 tools, and specifically `record_enrichment`'s contract: facet from
+   — the 34 tools, and specifically `record_enrichment`'s contract: facet from
    the fixed seven, `source` required, `rows_written: 0` distinguishing "ran,
    found nothing" from "never ran". Never invent a tool name; the list in that
    file is the whole surface.
@@ -495,6 +497,7 @@ Each is phrased so a wrong answer is visible rather than arguable.
 | `leadership` | `overview.leadership` | `clay` — contact routes + Summarize Work History | T2-T3 | wired |
 | | | `first_party` — proxy statements, leadership pages, filings | T1-T2 | wired |
 | `firmographics` | `overview.firmographics` | `first_party` — filings, call reports, annual reports | T1-T2 | wired |
+| | | `hmda` — a mortgage subsidiary's lender-filtered HMDA aggregation, `unit` naming the subsidiary | T1 | wired |
 | | | `clay` — Annual Revenue, Headcount Growth | T1-T2 *when a filing is behind it* | wired |
 | | | `moodys` · `harmonic` · `cb_insights` | T2-T3 / T3 / T3 | **declared, not wired** |
 | `why_now` | `overview.why_now` | `clay` — Recent News (T3), Latest Funding (T1-T2 conditional), Open Jobs (T2-T3) | per data point | wired |
@@ -503,6 +506,8 @@ Each is phrased so a wrong answer is visible rather than arguable.
 | `platform_readiness` | `platform.platform_story` | `clay` — Open Jobs | T2-T3 | wired |
 | | | `first_party` — careers pages, filings, announced programmes | T1-T2 | wired |
 | `sentiment` | `overview.sentiment` | `first_party` — published surveys and retrievable ratings | T1-T2 | wired |
+| | | `indeed` — `mcp__Indeed__get_company_data`, employer rating + recommend counts, `origin='connector'` | T3 | wired (you hold it; RC-07) |
+| | | `cfpb` — complaint API, company filter + aggregations, `origin='connector'` | T1 | wired |
 | | | `clay` — news sentiment, one route of several | T3 | wired |
 | `peer_scores` | `heatmap.workbook_scores` | `corpus` — the peer table, then the fallback ladder | n/a — scores, not evidence | wired |
 | | | `clay` — peer platform **deployments**, never scores | T1 per established deployment | wired |
@@ -587,20 +592,33 @@ distinct refusals in this environment and they are recorded differently:
   cost every run its technographics. The INGEST scan has no API key in Secret
   Manager and records `NOT_RUN` with that reason. The PRODUCER SESSION uses no
   key at all: Vibe Prospecting is an MCP connector authenticated at the
-  session, it is in the auto-approve list (`match-business`,
-  `enrich-business`, `fetch-entities`), and it answers — measured across three
-  promoted clients at 392, 357 and 147 named technologies. **Try it before
+  session; its read (`fetch-entities`) is auto-approved and its billed calls
+  (`match-business`, `enrich-business`) open on the run's owner-written
+  approval record — `engine.cli approve --tool <name> --cost "<quoted>"
+  --approved-by <who>` writes `07_qa/approvals.json`; without it the call
+  prompts (QA audit F-K01-003, 28-09-2026) — and it answers, measured across
+  three promoted clients at 392, 357 and 147 named technologies. **Try it before
   recording NOT_RUN.** Recording NOT_RUN for a source you can reach is the
   defect this bullet used to cause. What stays true either way: `NOT_RUN`
   **with the reason** is the recorded state, and you never substitute a
   different scan and call it the Explorium pass. And the console host is
   never a citation — Explorium is the candidate list that makes the search
   converge, not the source that settles it.
-- **A host that refuses automated retrieval.** Glassdoor, Indeed and
-  ZipRecruiter all return 403, so `register_evidence` returns `url_unreachable`
-  and **nothing is registered**. A 403 is never an absence: it is a refused
-  retrieval path, which records nothing about the institution. Such a value is
-  an inference with its route named, or it is omitted.
+- **A host that refuses automated retrieval.** Glassdoor and ZipRecruiter
+  pages return 403, so `register_evidence` returns `url_unreachable` and
+  **nothing is registered** from the page. A 403 is never an absence: it is a
+  refused retrieval path, which records nothing about the institution. Such a
+  value is an inference with its route named, or it is omitted.
+- **Indeed is a connector, not a 403** (SWBC gold audit 2026-10-04, RC-07;
+  owner decision 3). The indeed.com page 403s; `mcp__Indeed__get_company_data`
+  answers with the employer rating, sub-ratings and recommend counts (SWBC:
+  3.1/5, 46 of 97). You hold it. Call it for every `sentiment` batch, quote the
+  response verbatim, and hand the reading back for
+  `register_evidence(origin='connector', connector={tool, query, retrieved_at,
+  response})` — the server stamps T3, verifies the excerpt against the stored
+  response and dates an undated reading by its retrieval. The CFPB complaint
+  API (company filter plus aggregations) is the same class at T1. Never record
+  the Indeed rung NOT_RUN on the strength of the page's 403.
 
 **Recording it: `record_enrichment`, every time, including zero.** Facet from
 the fixed seven, `source` required, and `rows_written: 0` is the field that

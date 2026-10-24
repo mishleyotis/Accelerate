@@ -227,3 +227,70 @@ def test_it_runs_inside_pass_two():
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))
+
+
+# ── the empty bar ─────────────────────────────────────────────────────
+#
+# Golden 1, run 40971653, promoted 2026-09-02T14:35:12Z. The overview hero
+# rendered P1-P4 as four blank tracks with only a peer-median tick, because
+# `score` was null on all four. This gate had the row in its hands and let
+# it through: `if score is None or peer is None: continue` skipped every
+# check below, so a strip could serve four empty bars and pass.
+#
+# It was never a missing input. The workbook stated the figures twice
+# (Pillar_Summary.Weighted_Score and Pillar_Rollup.score), the heatmap
+# already served exactly those figures with their source cells, and the
+# composite on this very section was their mean. The delta beside each null
+# was computed FROM the number the row declined to state.
+#
+# The rule is the mirror of the delta branch: a derived value with its
+# operands in hand is computed, never left null. score = peer + delta.
+
+# verbatim from that promoted payload, before the repair
+GOLDEN1_P1_EMPTY = {"pillar_id": "P1", "score": None, "peer_median": 3.1,
+                    "delta": -0.7, "direction": "below", "peer_n": 4}
+GOLDEN1_P1_FIXED = {**GOLDEN1_P1_EMPTY, "score": 2.4}
+
+
+def test_the_promoted_empty_bar_is_refused(monkeypatch):
+    out = run(monkeypatch, strip(GOLDEN1_P1_EMPTY))
+    assert ids(out) == ["CG-44"]
+    r = out[0]
+    assert r["path"] == "overview.scores.pillars[0].score"
+    # the verdict hands back the recoverable figure, 3.1 + (-0.7)
+    assert "2.4" in r["message"]
+    assert "EMPTY BAR" in r["message"]
+
+
+def test_serving_the_figure_clears_it(monkeypatch):
+    assert run(monkeypatch, strip(GOLDEN1_P1_FIXED)) == []
+
+
+def test_all_four_golden1_pillars_are_reported_not_just_the_first(monkeypatch):
+    """The promoted defect was four bars, not one."""
+    rows = [
+        {"pillar_id": "P1", "score": None, "peer_median": 3.1, "delta": -0.7},
+        {"pillar_id": "P2", "score": None, "peer_median": 3.0, "delta": -0.89},
+        {"pillar_id": "P3", "score": None, "peer_median": 3.0, "delta": -0.75},
+        {"pillar_id": "P4", "score": None, "peer_median": 3.1, "delta": -0.85},
+    ]
+    out = run(monkeypatch, strip(*rows))
+    assert ids(out) == ["CG-44"] * 4
+    # each names its own recoverable score: 2.4, 2.11, 2.25, 2.25
+    for want, r in zip(("2.4", "2.11", "2.25", "2.25"), out):
+        assert want in r["message"]
+
+
+def test_a_row_with_no_peer_median_is_still_not_this_gates_business(monkeypatch):
+    """Only a row whose operands are BOTH present can have its score
+    recovered. A genuinely peerless row is another gate's concern, and this
+    one must not invent a figure for it."""
+    assert run(monkeypatch, strip({"pillar_id": "P1", "score": None,
+                                   "peer_median": None, "delta": None})) == []
+
+
+def test_a_null_score_beside_a_peer_but_no_delta_is_not_recoverable(monkeypatch):
+    """Two operands or nothing. With only the peer median in hand the score
+    is not arithmetic, and this gate refuses to guess it."""
+    assert run(monkeypatch, strip({"pillar_id": "P1", "score": None,
+                                   "peer_median": 3.1, "delta": None})) == []

@@ -1,6 +1,6 @@
 # Source Catalogue & Search Query Templates
 
-Read this file at the START of Batch 1, before executing any searches. Use these queries
+Read this file at PRELIM, before executing any searches. Use these queries
 as starting points — adapt with entity name and subvertical context.
 
 ---

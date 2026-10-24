@@ -19,11 +19,13 @@ import os
 import re
 import sys
 
+# The refusal must not depend on the environment (2026-09-04): a retired
+# writer that dies on a missing import reads as a crash rather than as the
+# refusal it is. The legacy body below is unreachable, so None is enough.
 try:
     import openpyxl
-except ImportError:
-    print("ERROR: openpyxl not installed. Run: pip install openpyxl --break-system-packages")
-    sys.exit(1)
+except ImportError:                                  # pragma: no cover
+    openpyxl = None
 
 
 # Default quality thresholds
@@ -284,7 +286,27 @@ def validate_workbook(workbook_path, schema_path=None, thresholds=None):
     return results
 
 
-if __name__ == '__main__':
+RETIRED = """REFUSED: validate_workbook.py is retired (2026-09-03). It validated the
+22-column, P#_Scoring_Detail workbook the research engine replaced, so on the run's real
+workbook (engine/contract.py: 41 sheets, P#_Subcap_Scoring with 33 columns) it fails every
+structural check and on the retired populate_workbook.py's output it passes — the wrong
+answer both ways. The run's ONE workbook is validated by:
+
+    python3 -m engine.cli validate --run <RUN_ID> --root <ROOT>     # shape, vocabularies, rule 8
+    python3 -m engine.cli complete check --run <RUN_ID> --root <ROOT>
+    python3 -m engine.gold_standard workbook <workbook.xlsx>       # against the Golden 1 reference
+
+This file stays so an old reference fails LOUD, naming the engine, rather than silently.
+"""
+
+
+def main():
+    import sys as _sys
+    _sys.stderr.write(RETIRED)
+    return 1
+
+
+def _legacy_main():           # kept for reference; unreachable
     parser = argparse.ArgumentParser(description='Validate DMA Research Workbook')
     parser.add_argument('workbook', help='Path to workbook XLSX file')
     parser.add_argument('--schema', help='Path to quality schema JSON', default=None)
@@ -296,3 +318,7 @@ if __name__ == '__main__':
         with open(args.report, 'w') as f:
             json.dump({'summary': results.summary(), 'checks': results.checks}, f, indent=2)
         print(f"\nReport saved to: {args.report}")
+
+
+if __name__ == '__main__':
+    sys.exit(main())
