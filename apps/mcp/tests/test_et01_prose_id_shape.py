@@ -139,3 +139,47 @@ def test_the_recogniser_finds_every_stored_shape_whole():
     from dma_mcp.identifiers import find_ids
     for e in STORED_SHAPES:
         assert find_ids(f"see {e}.") == [e], e
+
+
+# ── MEM-0541, second shape (CIBC – US Division, 2026-10-24) ───────────────
+#
+# A verbatim excerpt named "OSFI Guideline E-23" and the alert ladders logged
+# the queries that searched for it. `E-23` carries a digit, so the subtractive
+# rule took it as an id; CG-27 forbids rewriting the excerpt and a query log
+# records what ran. Verbatim leaves and query logs are not prose that cites.
+
+def _run_at(monkeypatch, payload, found=()):
+    def fake(conn, run_id, ids):
+        return {"found": [{"e_id": e} for e in ids if e in found],
+                "not_found": [e for e in ids if e not in found],
+                "foreign": []}
+    monkeypatch.setattr(validation2, "get_evidence", fake)
+    return validation2._check_prose_citations_resolve(None, "run", payload, {})
+
+
+def test_a_guideline_name_inside_a_verbatim_excerpt_is_not_a_citation(monkeypatch):
+    payload = {"evidence": {"evidence": [{
+        "e_id": "E-320",
+        "excerpt": "OSFI Guideline E-23 sets expectations for model risk "
+                   "management at federally regulated institutions."}]}}
+    assert _run_at(monkeypatch, payload, found={"E-320"}) == []
+
+
+def test_a_logged_query_naming_e_23_is_not_a_citation(monkeypatch):
+    payload = {"alerts": {"alerts": [{"queries_run": [
+        "CIBC OSFI Guideline E-23 model risk", "CIBC model inventory"]}]}}
+    assert _run_at(monkeypatch, payload) == []
+
+
+def test_the_same_token_in_prose_still_blocks(monkeypatch):
+    payload = {"alerts": {"alerts": [{"detail": "as E-23 shows, the inventory "
+                                                "is incomplete"}]}}
+    out = _run_at(monkeypatch, payload)
+    assert [r["gate_id"] for r in out] == ["ET-01"]
+
+
+def test_a_fabricated_id_in_a_non_verbatim_note_still_blocks(monkeypatch):
+    payload = {"cards": {"cards": [{"r_layer": {"probes_run": [
+        "per [E-999] the policy is current"]}}]}}
+    out = _run_at(monkeypatch, payload)
+    assert [r["gate_id"] for r in out] == ["ET-01"]
