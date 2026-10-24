@@ -235,6 +235,19 @@ def test_rule8_fires_on_an_undeclared_empty_row_at_the_assessment_stage(tmp_path
     assert any(f["rule"] == 8 and "undeclared" in f["detail"] for f in fails), fails
 
 
+def test_rule8_reads_the_flag_on_an_evidenced_row_as_a_label(tmp_path):
+    """An evidenced row may carry the flag (its source documents an absence);
+    only an EMPTY row's flag is forged (CIBC US, 2026-10-23)."""
+    run, wb, cells, ev = researched_run(tmp_path, n=4)
+    evidenced = next(c for c in cells
+                     if str(wb.scoring_row(c).get("Evidence_IDs") or "").strip()
+                     not in ("", C.NO_EVIDENCE))
+    wb.set_scoring(evidenced, {"Absence_Claimed": "YES"})
+    fails = validator.validate(wb.path, run_id="R-TEST-1")
+    assert not any(f["rule"] == 8 and evidenced in f["detail"] for f in fails), fails
+    assert L.is_declared_absent(wb.scoring_row(evidenced), wb) is False
+
+
 # ── the ladder outlives the strip ────────────────────────────────────────
 
 def test_the_handoff_carries_the_absence_ladder(tmp_path):

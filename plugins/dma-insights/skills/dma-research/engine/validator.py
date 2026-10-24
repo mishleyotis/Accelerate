@@ -331,7 +331,14 @@ def _rule8_absence_declared(wb, expect_scores: bool) -> list[Failure]:
             flag = str(ws.cell(row=r, column=ai).value or "").strip().upper() \
                 if ws.max_column >= ai else ""
             eids = str(ws.cell(row=r, column=fi).value or "").strip()
-            if flag in ("YES", "TRUE", "1") and sub not in declared:
+            # On an evidenced row the flag labels the claim (the source
+            # itself documents an absence); the ledger permits it there and
+            # `is_declared_absent` never reads it as a closed cell. Only an
+            # empty row can carry a forged flag (CIBC US, 2026-10-23: 42
+            # evidenced, challenged rows refused at HANDOFF).
+            evidenced = bool(eids) and eids != C.NO_EVIDENCE
+            if flag in ("YES", "TRUE", "1") and not evidenced \
+                    and sub not in declared:
                 forged.append(sub)
             if expect_scores and eids == C.NO_EVIDENCE and sub not in declared:
                 undeclared.append(sub)
