@@ -536,6 +536,14 @@ section), context sentiment, run/version diff — contracts in Surface Spec.
   prompt names the run are priced into the ledger (the IMA PRELIM relay,
   $8.85, had never been: the run is at $27.26 of $25). MEM-0637..0640.
 
+- **A private non-filer's missing 5-year financials disclose, they do not
+  block** (user, 2026-10-24, My Benefits LLC: no filed statements, broker
+  revenue estimates 10x apart): when `Financial_Trends` holds no row and
+  `Run_Metadata.empty_sheet_reasons` records why with the searches run,
+  gold-standard GS-WB-FINANCIALS is a WARN (`blocking=False`, disclosed in
+  the PACKAGE check), never a refusal. A partial series, or an absence with
+  no searched reason, still blocks. Tests: `test_gold_standard.py`.
+
 ## Open decisions — leave open, do not resolve silently
 
 - Retention policy for superseded runs (default: retain).

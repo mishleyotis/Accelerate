@@ -107,7 +107,10 @@ def run_gates(run) -> list[dict]:
     results = []
 
     def record(scope: str, findings, *, gate: str = GATE_GS, fix: str = ""):
-        verdict = "PASS" if not findings else "FAIL"
+        # a disclosed absence (blocking=False) is reported but never fails
+        stops = [f for f in findings
+                 if not isinstance(f, dict) or f.get("blocking", True)]
+        verdict = "PASS" if not stops else "FAIL"
         detail = ("PASS — 0 findings" if not findings else
                   f"{len(findings)} finding(s): " + "; ".join(str(f) for f in findings[:4])
                   + (f"; fix: {fix}" if fix else ""))

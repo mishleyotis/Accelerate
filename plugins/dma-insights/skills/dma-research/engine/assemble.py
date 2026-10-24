@@ -768,17 +768,20 @@ def verify(folder) -> dict:
     # finding is repaired at its source (the workbook or the section), never
     # in the rendered file.
     from . import gold_standard as GS
-    gold = [str(f) for f in GS.package_findings(folder)] if all(
-        c["ok"] for c in checks if c["check"].startswith("deliverable:")) else [
-        "gold gate not run: a deliverable is missing"]
+    found = GS.package_findings(folder) if all(
+        c["ok"] for c in checks if c["check"].startswith("deliverable:")) else None
+    gold = ([str(f) for f in GS.blocking(found)] if found is not None
+            else ["gold gate not run: a deliverable is missing"])
+    disclosed = [str(f) for f in found or [] if not f.get("blocking", True)]
     check("gold_standard", not gold,
-          "PASS — 0 findings" if not gold else
+          ("PASS — 0 findings" + (f"; disclosed: " + "; ".join(disclosed[:4])
+                                  if disclosed else "")) if not gold else
           f"{len(gold)} finding(s); run `python3 -m engine.gold_standard package "
           f"<folder>` and repair each at its source: " + "; ".join(gold[:4]))
 
     complete = all(c["ok"] for c in checks)
     return {"folder": str(folder), "complete": complete, "checks": checks,
-            "gold_findings": gold}
+            "gold_findings": gold, "gold_disclosed": disclosed}
 
 
 def main(argv=None) -> int:
